@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises:
-Create Date: 2026-10-02 15:45:18.632527
+Create Date: 2026-10-02 15:56:34.156110
 
 """
 
@@ -28,6 +28,12 @@ def upgrade() -> None:
                 "checking",
                 "savings",
                 "brokerage",
+                "credit_card",
+                "cash",
+                "loan",
+                "retirement",
+                "hsa",
+                "other",
                 name="account_kind",
                 native_enum=False,
                 create_constraint=True,
@@ -63,6 +69,7 @@ def upgrade() -> None:
                 "wants",
                 "savings",
                 "income",
+                "transfer",
                 name="category_group",
                 native_enum=False,
                 create_constraint=True,
@@ -142,6 +149,29 @@ def upgrade() -> None:
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
+        sa.CheckConstraint(
+            "federal_tax_cents >= 0", name=op.f("ck_paychecks_federal_tax_cents_not_negative")
+        ),
+        sa.CheckConstraint("gross_cents >= 0", name=op.f("ck_paychecks_gross_cents_not_negative")),
+        sa.CheckConstraint("hsa_cents >= 0", name=op.f("ck_paychecks_hsa_cents_not_negative")),
+        sa.CheckConstraint(
+            "medicare_cents >= 0", name=op.f("ck_paychecks_medicare_cents_not_negative")
+        ),
+        sa.CheckConstraint("net_cents >= 0", name=op.f("ck_paychecks_net_cents_not_negative")),
+        sa.CheckConstraint(
+            "other_deductions_cents >= 0",
+            name=op.f("ck_paychecks_other_deductions_cents_not_negative"),
+        ),
+        sa.CheckConstraint(
+            "retirement_cents >= 0", name=op.f("ck_paychecks_retirement_cents_not_negative")
+        ),
+        sa.CheckConstraint(
+            "social_security_cents >= 0",
+            name=op.f("ck_paychecks_social_security_cents_not_negative"),
+        ),
+        sa.CheckConstraint(
+            "state_tax_cents >= 0", name=op.f("ck_paychecks_state_tax_cents_not_negative")
+        ),
         sa.ForeignKeyConstraint(
             ["account_id"],
             ["accounts.id"],
@@ -173,6 +203,10 @@ def upgrade() -> None:
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
+        sa.CheckConstraint(
+            "cost_basis_cents >= 0", name=op.f("ck_stock_lots_cost_basis_not_negative")
+        ),
+        sa.CheckConstraint("shares_micro > 0", name=op.f("ck_stock_lots_shares_positive")),
         sa.ForeignKeyConstraint(
             ["account_id"],
             ["accounts.id"],
@@ -205,6 +239,22 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
+        sa.Column(
+            "kind",
+            sa.Enum(
+                "normal",
+                "transfer",
+                "refund",
+                "adjustment",
+                name="transaction_kind",
+                native_enum=False,
+                create_constraint=True,
+                length=32,
+            ),
+            server_default="normal",
+            nullable=False,
+        ),
+        sa.Column("transfer_pair_id", sa.Integer(), nullable=True),
         sa.Column("notes", sa.Text(), nullable=True),
         sa.Column(
             "created_at",
@@ -225,6 +275,12 @@ def upgrade() -> None:
             ["category_id"],
             ["categories.id"],
             name=op.f("fk_transactions_category_id_categories"),
+            ondelete="SET NULL",
+        ),
+        sa.ForeignKeyConstraint(
+            ["transfer_pair_id"],
+            ["transactions.id"],
+            name=op.f("fk_transactions_transfer_pair_id_transactions"),
             ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_transactions")),
@@ -297,6 +353,10 @@ def upgrade() -> None:
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
+        sa.CheckConstraint(
+            "proceeds_cents >= 0", name=op.f("ck_stock_sales_proceeds_not_negative")
+        ),
+        sa.CheckConstraint("shares_micro > 0", name=op.f("ck_stock_sales_shares_positive")),
         sa.ForeignKeyConstraint(
             ["lot_id"], ["stock_lots.id"], name=op.f("fk_stock_sales_lot_id_stock_lots")
         ),
@@ -346,6 +406,10 @@ def upgrade() -> None:
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
+        sa.CheckConstraint("amount_cents >= 0", name=op.f("ck_deductions_amount_not_negative")),
+        sa.CheckConstraint(
+            "tax_year BETWEEN 2000 AND 2100", name=op.f("ck_deductions_tax_year_range")
+        ),
         sa.ForeignKeyConstraint(
             ["receipt_id"],
             ["receipts.id"],
@@ -389,6 +453,7 @@ def upgrade() -> None:
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
+        sa.CheckConstraint("amount_cents >= 0", name=op.f("ck_donations_amount_not_negative")),
         sa.ForeignKeyConstraint(
             ["receipt_id"],
             ["receipts.id"],

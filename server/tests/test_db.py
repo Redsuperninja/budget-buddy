@@ -28,6 +28,7 @@ from app.models import (
     StockLot,
     StockSale,
     Transaction,
+    TransactionKind,
     TransactionSource,
 )
 
@@ -78,7 +79,7 @@ def test_migrations_are_idempotent(data_dir, engine):
     run_migrations(engine)  # second run on the same database is a no-op
     create_app()  # and so is starting the app again
     with SessionLocal(bind=engine) as session:
-        assert session.scalar(select(func.count()).select_from(Category)) == 17
+        assert session.scalar(select(func.count()).select_from(Category)) == 18
 
 
 def test_default_categories_seeded(session):
@@ -98,6 +99,7 @@ def test_default_categories_seeded(session):
         CategoryGroup.WANTS: {"Dining Out", "Entertainment", "Shopping", "Subscriptions", "Travel"},
         CategoryGroup.SAVINGS: {"Emergency Fund", "Retirement", "Investments"},
         CategoryGroup.INCOME: {"Paycheck", "Interest", "Other Income"},
+        CategoryGroup.TRANSFER: {"Transfer"},
     }
     assert all(c.budget_cents == 0 for c in session.scalars(select(Category)))
 
@@ -106,6 +108,7 @@ def test_sqlite_pragmas(engine):
     with engine.connect() as conn:
         assert conn.execute(text("PRAGMA foreign_keys")).scalar() == 1
         assert conn.execute(text("PRAGMA journal_mode")).scalar() == "wal"
+        assert conn.execute(text("PRAGMA busy_timeout")).scalar() == 5000
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits only")
@@ -120,6 +123,43 @@ def test_existing_database_file_is_tightened_on_posix(tmp_path):
     os.chmod(path, 0o644)
     create_db_engine(tmp_path).dispose()
     assert stat.S_IMODE(path.stat().st_mode) == 0o600
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits only")
+def test_existing_wal_sidecars_are_tightened_on_posix(tmp_path):
+    path = database_path(tmp_path)
+    path.touch()
+    sidecars = [tmp_path / "budget.db-wal", tmp_path / "budget.db-shm"]
+    for sidecar in sidecars:
+        sidecar.touch()
+        os.chmod(sidecar, 0o644)
+    create_db_engine(tmp_path).dispose()
+    for sidecar in sidecars:
+        assert stat.S_IMODE(sidecar.stat().st_mode) == 0o600, sidecar.name
+
+
+@pytest.mark.parametrize(
+    "folder",
+    [
+        "with%20percent",
+        pytest.param(
+            "with?question",
+            marks=pytest.mark.skipif(sys.platform == "win32", reason="? not allowed on Windows"),
+        ),
+    ],
+)
+def test_data_folder_with_url_special_characters(tmp_path, folder):
+    data_dir = tmp_path / folder
+    data_dir.mkdir()
+    engine = create_db_engine(data_dir)
+    try:
+        run_migrations(engine)
+        assert engine.url.database == str(database_path(data_dir))
+        assert "categories" in inspect(engine).get_table_names()
+    finally:
+        engine.dispose()
+    assert database_path(data_dir).is_file()
+    assert sorted(p.name for p in tmp_path.iterdir()) == [folder]  # nothing created elsewhere
 
 
 def test_round_trip_every_table(session):
@@ -256,4 +296,121 @@ def test_get_session_dependency(client):
     def count_categories(session: Annotated[Session, Depends(get_session)]) -> dict[str, int]:
         return {"count": len(session.scalars(select(Category)).all())}
 
-    assert client.get("/_test/categories").json() == {"count": 17}
+    assert client.get("/_test/categories").json() == {"count": 18}
+
+
+def _account(session, kind=AccountKind.CHECKING):
+    account = Account(name="Acct", kind=kind)
+    session.add(account)
+    session.flush()
+    return account
+
+
+def test_all_account_kinds_accepted(session):
+    for kind in AccountKind:
+        _account(session, kind)
+    session.commit()
+    assert {a.kind for a in session.scalars(select(Account))} == set(AccountKind)
+
+
+def test_transfer_pair_round_trip_and_unlink(session):
+    checking = _account(session)
+    savings = _account(session, AccountKind.SAVINGS)
+    out = Transaction(
+        account_id=checking.id,
+        date=dt.date(2026, 2, 1),
+        amount_cents=-10000,
+        description="To savings",
+        source=TransactionSource.MANUAL,
+        kind=TransactionKind.TRANSFER,
+    )
+    session.add(out)
+    session.flush()
+    back = Transaction(
+        account_id=savings.id,
+        date=dt.date(2026, 2, 1),
+        amount_cents=10000,
+        description="From checking",
+        source=TransactionSource.MANUAL,
+        kind=TransactionKind.TRANSFER,
+        transfer_pair_id=out.id,
+    )
+    session.add(back)
+    session.flush()
+    out.transfer_pair_id = back.id
+    session.commit()
+    session.expire_all()
+    assert session.get(Transaction, out.id).transfer_pair_id == back.id
+    assert session.get(Transaction, back.id).kind is TransactionKind.TRANSFER
+
+    session.delete(session.get(Transaction, back.id))
+    session.commit()
+    session.expire_all()
+    assert session.get(Transaction, out.id).transfer_pair_id is None
+
+
+def test_transaction_kind_defaults_to_normal(engine):
+    with engine.begin() as conn:
+        conn.execute(text("INSERT INTO accounts (name, kind) VALUES ('A', 'checking')"))
+        conn.execute(
+            text(
+                "INSERT INTO transactions (account_id, date, amount_cents, description, source) "
+                "VALUES (1, '2026-01-01', -5, 'x', 'manual')"
+            )
+        )
+        assert conn.execute(text("SELECT kind FROM transactions")).scalar() == "normal"
+    with engine.connect() as conn, pytest.raises(IntegrityError):
+        conn.execute(text("UPDATE transactions SET kind = 'gift'"))
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "INSERT INTO stock_lots (symbol, shares_micro, acquired_on, cost_basis_cents) "
+        "VALUES ('VTI', 0, '2026-01-01', 100)",
+        "INSERT INTO stock_lots (symbol, shares_micro, acquired_on, cost_basis_cents) "
+        "VALUES ('VTI', 1, '2026-01-01', -1)",
+        "INSERT INTO paychecks (pay_date, employer, gross_cents, net_cents) "
+        "VALUES ('2026-01-01', 'Acme', -1, 0)",
+        "INSERT INTO paychecks (pay_date, employer, gross_cents, net_cents, medicare_cents) "
+        "VALUES ('2026-01-01', 'Acme', 100, 90, -10)",
+        "INSERT INTO paychecks (pay_date, employer, gross_cents, net_cents) "
+        "VALUES ('2026-01-01', 'Acme', 100, -1)",
+        "INSERT INTO donations (date, organization, amount_cents, kind) "
+        "VALUES ('2026-01-01', 'Org', -1, 'cash')",
+        "INSERT INTO deductions (tax_year, kind, amount_cents) VALUES (2026, 'medical', -1)",
+        "INSERT INTO deductions (tax_year, kind, amount_cents) VALUES (1999, 'medical', 1)",
+        "INSERT INTO deductions (tax_year, kind, amount_cents) VALUES (2101, 'medical', 1)",
+    ],
+)
+def test_check_constraints(engine, sql):
+    with engine.connect() as conn, pytest.raises(IntegrityError):
+        conn.execute(text(sql))
+
+
+def test_stock_sale_shares_must_be_positive(session):
+    lot = StockLot(
+        symbol="VTI", shares_micro=1, acquired_on=dt.date(2026, 1, 1), cost_basis_cents=1
+    )
+    session.add(lot)
+    session.flush()
+    session.add(
+        StockSale(lot_id=lot.id, sold_on=dt.date(2026, 2, 1), shares_micro=0, proceeds_cents=0)
+    )
+    with pytest.raises(IntegrityError):
+        session.commit()
+
+
+def test_transactions_stay_signed(session):
+    account = _account(session)
+    session.add(
+        Transaction(
+            account_id=account.id,
+            date=dt.date(2026, 1, 1),
+            amount_cents=-123,
+            description="Coffee",
+            source=TransactionSource.MANUAL,
+        )
+    )
+    session.commit()
+    assert session.scalars(select(Transaction.amount_cents)).one() == -123

@@ -2,11 +2,11 @@
 
 import datetime as dt
 
-from sqlalchemy import Date, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin, str_enum
-from app.models.enums import AccountKind, CategoryGroup, TransactionSource
+from app.models.enums import AccountKind, CategoryGroup, TransactionKind, TransactionSource
 
 
 class Account(TimestampMixin, Base):
@@ -45,11 +45,34 @@ class Transaction(TimestampMixin, Base):
     source: Mapped[TransactionSource] = mapped_column(
         str_enum(TransactionSource, "transaction_source")
     )
+    kind: Mapped[TransactionKind] = mapped_column(
+        str_enum(TransactionKind, "transaction_kind"),
+        default=TransactionKind.NORMAL,
+        server_default=TransactionKind.NORMAL.value,
+    )
+    # For a transfer: the matching transaction on the other account.
+    transfer_pair_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transactions.id", ondelete="SET NULL")
+    )
     notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
 
 
 class Paycheck(TimestampMixin, Base):
     __tablename__ = "paychecks"
+    __table_args__ = tuple(
+        CheckConstraint(f"{column} >= 0", name=f"{column}_not_negative")
+        for column in (
+            "gross_cents",
+            "federal_tax_cents",
+            "state_tax_cents",
+            "social_security_cents",
+            "medicare_cents",
+            "retirement_cents",
+            "hsa_cents",
+            "other_deductions_cents",
+            "net_cents",
+        )
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     pay_date: Mapped[dt.date] = mapped_column(Date, index=True)

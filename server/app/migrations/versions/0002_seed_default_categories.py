@@ -36,6 +36,7 @@ DEFAULT_CATEGORIES = {
     "wants": ["Dining Out", "Entertainment", "Shopping", "Subscriptions", "Travel"],
     "savings": ["Emergency Fund", "Retirement", "Investments"],
     "income": ["Paycheck", "Interest", "Other Income"],
+    "transfer": ["Transfer"],
 }
 
 

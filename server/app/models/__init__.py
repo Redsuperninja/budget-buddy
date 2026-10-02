@@ -7,6 +7,7 @@ from app.models.enums import (
     CategoryGroup,
     DeductionKind,
     DonationKind,
+    TransactionKind,
     TransactionSource,
 )
 from app.models.ledger import Account, Category, Paycheck, Receipt, Transaction
@@ -28,5 +29,6 @@ __all__ = [
     "StockLot",
     "StockSale",
     "Transaction",
+    "TransactionKind",
     "TransactionSource",
 ]

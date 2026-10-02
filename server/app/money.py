@@ -1,30 +1,42 @@
 """Money helpers. Budget Buddy stores every amount as whole cents (``int``), never floats."""
 
-from decimal import Decimal, InvalidOperation
+import re
+from decimal import Decimal
+
+# Plain ASCII digits with an optional sign and decimal part. No exponents, underscores,
+# thousands separators, currency symbols, or non-ASCII digits.
+_AMOUNT_RE = re.compile(r"[+-]?[0-9]+(\.[0-9]+)?")
+_CENT = Decimal("0.01")
+MAX_ABS_CENTS = 10**13  # $100 billion: far beyond any personal amount, well inside int64
 
 
 def dollars_to_cents(value: str | Decimal) -> int:
     """Turn a dollar amount like ``"12.34"`` or ``Decimal("-5.5")`` into cents (1234, -550).
 
-    Exact: uses ``Decimal``, so there is no rounding. Rejects floats (they can't hold most cent
-    values exactly), more than 2 decimal places, and anything that isn't a plain number.
-    Thousands separators and currency symbols are not accepted; strip them first.
+    Exact: uses ``Decimal``, so there is no rounding. Extra trailing zeros are fine (``"1.500"``),
+    but fractions of a cent (``"1.005"``) are rejected. Floats are rejected because they can't
+    hold most cent values exactly. Bad input always raises ``ValueError`` (or ``TypeError`` for
+    the wrong type), never another arithmetic error.
     """
     if isinstance(value, str):
-        try:
-            amount = Decimal(value.strip())
-        except InvalidOperation:
-            raise ValueError(f"Not a dollar amount: {value!r}") from None
+        text = value.strip()
     elif isinstance(value, Decimal):
-        amount = value
+        if not value.is_finite():
+            raise ValueError(f"Not a dollar amount: {value!r}")
+        if value.adjusted() > 20:  # don't spell out an enormous number just to reject it
+            raise ValueError(f"Dollar amount is too large: {value!r}")
+        text = format(value, "f")
     else:
         raise TypeError(f"Expected a string or Decimal, got {type(value).__name__}")
 
-    if not amount.is_finite():
+    if not _AMOUNT_RE.fullmatch(text):
         raise ValueError(f"Not a dollar amount: {value!r}")
-    exponent = amount.as_tuple().exponent
-    if not isinstance(exponent, int) or exponent < -2:
-        raise ValueError(f"More than 2 decimal places: {value!r}")
+    amount = Decimal(text)
+    # Check the size before quantize(), which would raise InvalidOperation on huge numbers.
+    if abs(amount) >= Decimal(MAX_ABS_CENTS) / 100:
+        raise ValueError(f"Dollar amount is too large: {value!r}")
+    if amount != amount.quantize(_CENT):
+        raise ValueError(f"Amount has fractions of a cent (more than 2 decimal places): {value!r}")
     return int(amount.scaleb(2))
 
 

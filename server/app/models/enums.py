@@ -5,6 +5,12 @@ class AccountKind(StrEnum):
     CHECKING = "checking"
     SAVINGS = "savings"
     BROKERAGE = "brokerage"
+    CREDIT_CARD = "credit_card"
+    CASH = "cash"
+    LOAN = "loan"
+    RETIREMENT = "retirement"
+    HSA = "hsa"
+    OTHER = "other"
 
 
 class CategoryGroup(StrEnum):
@@ -12,6 +18,14 @@ class CategoryGroup(StrEnum):
     WANTS = "wants"
     SAVINGS = "savings"
     INCOME = "income"
+    TRANSFER = "transfer"  # money moving between your own accounts
+
+
+class TransactionKind(StrEnum):
+    NORMAL = "normal"
+    TRANSFER = "transfer"  # between your own accounts: not spending or income
+    REFUND = "refund"
+    ADJUSTMENT = "adjustment"
 
 
 class TransactionSource(StrEnum):

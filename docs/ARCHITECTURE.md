@@ -63,15 +63,17 @@ words ("Make sure your computer is on and Budget Buddy is running").
 
 | Table | Key fields |
 | --- | --- |
-| `accounts` | id, name, kind (checking/savings/brokerage), institution, last4 (enc) |
-| `transactions` | id, account_id, date, amount_cents, description, category_id, source (csv/manual/receipt) |
-| `categories` | id, name, group (needs/wants/savings/income), budget_cents |
-| `paychecks` | id, pay_date, employer, account_id?, gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, other_deductions_cents, net_cents |
+| `accounts` | id, name, kind (checking/savings/brokerage/credit_card/cash/loan/retirement/hsa/other), institution, last4 (enc), notes (enc) |
+| `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc) |
+| `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
+| `paychecks` | id, pay_date, employer, account_id?, gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, other_deductions_cents, net_cents (all ≥ 0) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
-| `donations` | id, date, organization, amount_cents, kind (cash/goods), receipt_id? |
-| `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share), acquired_on, cost_basis_cents · sale: lot_id, sold_on, shares_micro, proceeds_cents → gain and term are calculated, not stored |
-| `deductions` | id, tax_year, kind (medical, education, home office, HSA, etc.), amount_cents, receipt_id? |
+| `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
+| `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
+| `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, paired_at, last_sync_at, revoked |
 
 Money is always stored as **integer cents**, never floats. Every table also has `created_at` / `updated_at`.
-The schema is managed by Alembic (`server/migrations/`) and upgraded automatically when the Home Base starts.
+The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
+under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
+`budget.db.bak-<revision>` is saved next to it.

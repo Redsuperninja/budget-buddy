@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from sqlalchemy import Date, ForeignKey, String, Text
+from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin, str_enum
@@ -15,6 +15,7 @@ SHARES_SCALE = 1_000_000
 
 class Donation(TimestampMixin, Base):
     __tablename__ = "donations"
+    __table_args__ = (CheckConstraint("amount_cents >= 0", name="amount_not_negative"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[dt.date] = mapped_column(Date, index=True)
@@ -29,6 +30,10 @@ class StockLot(TimestampMixin, Base):
     """Shares bought in one purchase."""
 
     __tablename__ = "stock_lots"
+    __table_args__ = (
+        CheckConstraint("shares_micro > 0", name="shares_positive"),
+        CheckConstraint("cost_basis_cents >= 0", name="cost_basis_not_negative"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     account_id: Mapped[int | None] = mapped_column(ForeignKey("accounts.id", ondelete="SET NULL"))
@@ -42,6 +47,10 @@ class StockSale(TimestampMixin, Base):
     """Shares sold out of one lot."""
 
     __tablename__ = "stock_sales"
+    __table_args__ = (
+        CheckConstraint("shares_micro > 0", name="shares_positive"),
+        CheckConstraint("proceeds_cents >= 0", name="proceeds_not_negative"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     lot_id: Mapped[int] = mapped_column(ForeignKey("stock_lots.id"), index=True)
@@ -52,6 +61,10 @@ class StockSale(TimestampMixin, Base):
 
 class Deduction(TimestampMixin, Base):
     __tablename__ = "deductions"
+    __table_args__ = (
+        CheckConstraint("amount_cents >= 0", name="amount_not_negative"),
+        CheckConstraint("tax_year BETWEEN 2000 AND 2100", name="tax_year_range"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     tax_year: Mapped[int] = mapped_column(index=True)
