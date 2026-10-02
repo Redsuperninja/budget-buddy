@@ -2,8 +2,8 @@
 
 import ipaddress
 
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(net)
@@ -19,6 +19,12 @@ ALLOWED_NETWORKS = tuple(
     )
 )
 
+FORBIDDEN_DETAIL = "Budget Buddy only answers devices on your home network."
+
+# WebSocket close code 1008 = "policy violation". Closing before accepting makes the server
+# answer the WebSocket handshake with HTTP 403.
+WS_POLICY_VIOLATION = 1008
+
 
 def is_private_address(host: str | None) -> bool:
     """True if ``host`` is a loopback, private (RFC1918/ULA) or link-local IP address."""
@@ -33,12 +39,29 @@ def is_private_address(host: str | None) -> bool:
     return any(ip in net for net in ALLOWED_NETWORKS if net.version == ip.version)
 
 
-async def private_network_only(request: Request, call_next) -> Response:
-    """HTTP middleware: reject anyone outside the home network with 403."""
-    client_host = request.client.host if request.client else None
-    if not is_private_address(client_host):
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "Budget Buddy only answers devices on your home network."},
-        )
-    return await call_next(request)
+class PrivateNetworkOnlyMiddleware:
+    """ASGI middleware: reject anyone outside the home network.
+
+    HTTP requests get a 403 response; WebSocket connections are closed with code 1008
+    before they are accepted. Other scope types (such as ``lifespan``) pass straight through.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+
+        client = scope.get("client")
+        if is_private_address(client[0] if client else None):
+            await self.app(scope, receive, send)
+            return
+
+        if scope["type"] == "websocket":
+            await send({"type": "websocket.close", "code": WS_POLICY_VIOLATION})
+            return
+
+        response = JSONResponse(status_code=403, content={"detail": FORBIDDEN_DETAIL})
+        await response(scope, receive, send)
