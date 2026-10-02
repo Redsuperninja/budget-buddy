@@ -66,11 +66,12 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `accounts` | id, name, kind (checking/savings/brokerage), institution, last4 (enc) |
 | `transactions` | id, account_id, date, amount_cents, description, category_id, source (csv/manual/receipt) |
 | `categories` | id, name, group (needs/wants/savings/income), budget_cents |
-| `paychecks` | id, pay_date, employer, gross_cents, fed_tax, state_tax, fica, retirement, hsa, other, net_cents |
+| `paychecks` | id, pay_date, employer, account_id?, gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, other_deductions_cents, net_cents |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
 | `donations` | id, date, organization, amount_cents, kind (cash/goods), receipt_id? |
-| `stock_lots` / `stock_sales` | symbol, shares, buy date/price, sell date/price → gain, term |
+| `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share), acquired_on, cost_basis_cents · sale: lot_id, sold_on, shares_micro, proceeds_cents → gain and term are calculated, not stored |
 | `deductions` | id, tax_year, kind (medical, education, home office, HSA, etc.), amount_cents, receipt_id? |
 | `devices` | id, name, token_hash, paired_at, last_sync_at, revoked |
 
-Money is always stored as **integer cents**, never floats.
+Money is always stored as **integer cents**, never floats. Every table also has `created_at` / `updated_at`.
+The schema is managed by Alembic (`server/migrations/`) and upgraded automatically when the Home Base starts.
