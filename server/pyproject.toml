@@ -14,6 +14,8 @@ dependencies = [
     "uvicorn[standard]>=0.32",
     "pydantic>=2.12",
     "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0",
+    "alembic>=1.16",
 ]
 
 [project.optional-dependencies]
@@ -31,6 +33,7 @@ include = ["app*"]
 
 [tool.setuptools.package-data]
 "app.tax_data" = ["*.json"]
+"app.migrations" = ["script.py.mako"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

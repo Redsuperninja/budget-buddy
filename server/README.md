@@ -26,6 +26,21 @@ Then open <http://127.0.0.1:8765/api/health>. You should see `{"status": "ok", .
 .venv\Scripts\pytest
 ```
 
+## Database
+
+Your data is kept in one file, `budget.db`, inside the data folder. The Home Base creates it and
+brings it up to date every time it starts, so there's nothing to set up. On macOS/Linux the file
+is readable only by your user account.
+
+Before an update changes an existing database, a copy is saved next to it as
+`budget.db.bak-<number>`. You can delete old copies once Budget Buddy is working.
+
+Developers changing the tables: edit `app/models/`, then generate a migration and check it by hand:
+
+```powershell
+.venv\Scripts\alembic revision --autogenerate -m "describe the change"
+```
+
 ## Settings
 
 All optional, set as environment variables:

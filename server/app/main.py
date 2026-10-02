@@ -1,11 +1,14 @@
 import os
 import sys
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 
 from app import __version__
 from app.config import Settings
+from app.db import create_db_engine, run_migrations
 from app.network import PrivateNetworkOnlyMiddleware
 from app.routers import health
 
@@ -23,14 +26,26 @@ def ensure_data_dir(path: Path) -> None:
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    """Build the FastAPI app. Creates the data folder if it doesn't exist yet."""
+    """Build the FastAPI app.
+
+    Creates the data folder and database if needed and brings the database up to date, so
+    nobody ever has to run migrations by hand.
+    """
     settings = settings or Settings()
     ensure_data_dir(settings.data_dir)
+    engine = create_db_engine(settings.data_dir)
+    run_migrations(engine)
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        yield
+        engine.dispose()
 
     # The API explorer pages list every endpoint, so they're only on in dev mode.
     docs = {} if settings.dev_mode else {"docs_url": None, "redoc_url": None, "openapi_url": None}
-    app = FastAPI(title="Budget Buddy Home Base", version=__version__, **docs)
+    app = FastAPI(title="Budget Buddy Home Base", version=__version__, lifespan=lifespan, **docs)
     app.state.settings = settings
+    app.state.engine = engine
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     app.include_router(health.router)
     return app
