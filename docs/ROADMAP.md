@@ -32,7 +32,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 ## Phase 5: Phone app
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
 - [ ] 18. Pair screen (QR scan, secure key storage) — *mobile-engineer*
-- [ ] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
+- [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
 - [ ] 20. Receipt capture with offline queue — *mobile-engineer*
 - [ ] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
 
