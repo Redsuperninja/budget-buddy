@@ -39,6 +39,19 @@ def is_private_address(host: str | None) -> bool:
     return any(ip in net for net in ALLOWED_NETWORKS if net.version == ip.version)
 
 
+def is_loopback_address(host: str | None) -> bool:
+    """True only for this computer: ``127.0.0.0/8`` or ``::1`` (including IPv4-mapped forms)."""
+    if not host:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    if ip.version == 6 and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return ip.is_loopback
+
+
 class PrivateNetworkOnlyMiddleware:
     """ASGI middleware: reject anyone outside the home network.
 

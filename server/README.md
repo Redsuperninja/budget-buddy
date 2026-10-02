@@ -41,6 +41,21 @@ Developers changing the tables: edit `app/models/`, then generate a migration an
 .venv\Scripts\alembic revision --autogenerate -m "describe the change"
 ```
 
+## Local API (for the computer-side dashboard)
+
+Routes under `/api/local/` answer this computer only (anything else gets 403
+`not_this_computer`). Money goes in and out as whole cents (`amount_cents`); when creating or
+editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead. Errors look like
+`{"error": {"code": "...", "message": "..."}}`. With dev mode on, `/docs` lists every route.
+
+- Accounts: `GET/POST /api/local/accounts`, `GET/PATCH/DELETE /api/local/accounts/{id}`.
+  `balance_cents` is the sum of the account's transactions (record a starting balance as an
+  `adjustment`). An account with transactions can't be deleted.
+- Transactions: `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`,
+  `date_from`, `date_to`, `kind`, `q`, `limit`, `offset`; newest first),
+  `GET/PATCH/DELETE /api/local/transactions/{id}`, and `POST/DELETE
+  /api/local/transactions/{id}/transfer` to link or unlink a transfer between two of your accounts.
+
 ## Settings
 
 All optional, set as environment variables:

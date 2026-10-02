@@ -18,3 +18,30 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def client(data_dir: Path) -> TestClient:
     """Test client that looks like it's connecting from this computer."""
     return TestClient(create_app(), client=("127.0.0.1", 50000))
+
+
+@pytest.fixture
+def make_account(client: TestClient):
+    """Create a fake account through the API and return its JSON."""
+
+    def make(**overrides) -> dict:
+        body = {"name": "Test Checking", "kind": "checking", **overrides}
+        response = client.post("/api/local/accounts", json=body)
+        assert response.status_code == 201, response.text
+        return response.json()
+
+    return make
+
+
+@pytest.fixture
+def add_txn(client: TestClient):
+    """Create a fake transaction through the API and return its JSON."""
+
+    def add(account_id: int, amount_cents: int | None, **overrides) -> dict:
+        body = {"account_id": account_id, "date": "2026-01-15", "description": "Fake"}
+        body |= {"amount_cents": amount_cents, **overrides}
+        response = client.post("/api/local/transactions", json=body)
+        assert response.status_code == 201, response.text
+        return response.json()
+
+    return add

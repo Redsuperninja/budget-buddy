@@ -9,8 +9,9 @@ from fastapi import FastAPI
 from app import __version__
 from app.config import Settings
 from app.db import create_db_engine, run_migrations
+from app.errors import install_error_handlers
 from app.network import PrivateNetworkOnlyMiddleware
-from app.routers import health
+from app.routers import accounts, health, transactions
 
 
 def ensure_data_dir(path: Path) -> None:
@@ -47,5 +48,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine
     app.add_middleware(PrivateNetworkOnlyMiddleware)
+    install_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(accounts.router)
+    app.include_router(transactions.router)
     return app
