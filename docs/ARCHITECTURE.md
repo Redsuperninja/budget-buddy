@@ -40,15 +40,21 @@
 
 ## Sync design (summary, see ADR-0002)
 
+The exact wire format (QR payload, endpoints, encryption envelope, snapshot and receipt schemas, error
+codes, reminder rules, test vectors) is in **[api/sync-contract.md](api/sync-contract.md)** (ADR-0004).
+
 1. **Pairing (once):** the Home Base dashboard shows a QR code containing its LAN address,
-   a one-time pairing code, and a fresh random **encryption key**. The phone scans it, stores the key in
-   the phone's secure storage, and receives a device token.
+   a one-time pairing code, and a short-lived **public** key. There's no secret in the QR. The phone sends its
+   own fresh public key, both sides derive a shared key, and the Home Base answers, encrypted with it, with a
+   device token and a new **sync key**. The phone keeps both in secure storage. The dashboard immediately shows
+   "New phone paired" with a Remove button.
 2. **Sync (every 1–3 days):** on home Wi-Fi the user taps **Sync**. The phone:
    - uploads queued receipts (photo + details),
    - downloads a fresh **snapshot** (budget breakdown, recent transactions, tax summary).
-3. All sync payloads are **encrypted end-to-end with the paired key** (NaCl secretbox), so even plain
+3. All sync payloads are **encrypted end-to-end with the sync key** (NaCl secretbox), so even plain
    HTTP on the home network can't be snooped. Requests also need the device token.
-4. The server only answers requests from private-network addresses. Devices can be revoked from the dashboard.
+4. Only health, pairing and sync endpoints answer the home network; the dashboard answers this computer only.
+   Devices can be revoked from the dashboard.
 
 Non-technical flow: *"Be home, open app, tap Sync."* If the phone can't reach the Home Base, it says so in plain
 words ("Make sure your computer is on and Budget Buddy is running").
@@ -71,7 +77,9 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
-| `devices` | id, name, token_hash, paired_at, last_sync_at, revoked |
+| `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), nonce_watermark, revoked, paired_at, last_sync_at |
+| `pairing_sessions` | id, code_hash, pair_pub, pair_sk (deleted when the session ends), exp, used_at, wrong_code_count |
+| `seen_nonces` | device_id, nonce (bytes), ts; UNIQUE(device_id, nonce); replay cache pruned below the device's watermark |
 
 Money is always stored as **integer cents**, never floats. Every table also has `created_at` / `updated_at`.
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
