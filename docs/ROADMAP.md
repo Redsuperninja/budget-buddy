@@ -28,7 +28,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [ ] 16. Local web dashboard (computer side) — *backend-engineer*
 
 ## Phase 5: Phone app
-- [ ] 17. Expo scaffold, navigation, theme — *mobile-engineer*
+- [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
 - [ ] 18. Pair screen (QR scan, secure key storage) — *mobile-engineer*
 - [ ] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
 - [ ] 20. Receipt capture with offline queue — *mobile-engineer*
