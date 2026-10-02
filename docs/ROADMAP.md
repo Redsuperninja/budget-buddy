@@ -24,6 +24,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [ ] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 
 ## Phase 4: Sync
+- [x] 13b. Sync API contract v1 — *architect*
 - [ ] 14. Pairing: QR code, one-time code, device tokens, revoke — *backend-engineer* + *security-reviewer*
 - [ ] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
 - [ ] 16. Local web dashboard (computer side) — *backend-engineer*
