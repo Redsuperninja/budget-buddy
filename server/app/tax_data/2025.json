@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "tax_year": 2025,
+  "last_reviewed": "2026-10-02",
+  "sources": [
+    {
+      "id": "rp-2024-40",
+      "title": "Rev. Proc. 2024-40 (2025 inflation-adjusted items)",
+      "url": "https://www.irs.gov/pub/irs-drop/rp-24-40.pdf"
+    },
+    {
+      "id": "rp-2025-32",
+      "title": "Rev. Proc. 2025-32, section 3 (2025 standard deduction as amended by the One, Big, Beautiful Bill Act)",
+      "url": "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf"
+    },
+    {
+      "id": "rp-2024-25",
+      "title": "Rev. Proc. 2024-25 (2025 HSA limits)",
+      "url": "https://www.irs.gov/pub/irs-drop/rp-24-25.pdf"
+    },
+    {
+      "id": "pub-969-2025",
+      "title": "Publication 969 (2025), Health Savings Accounts and Other Tax-Favored Health Plans",
+      "url": "https://www.irs.gov/publications/p969"
+    },
+    {
+      "id": "notice-2024-80",
+      "title": "Notice 2024-80 (2025 retirement plan limits)",
+      "url": "https://www.irs.gov/pub/irs-drop/n-24-80.pdf"
+    },
+    {
+      "id": "i1040sca-2025",
+      "title": "Instructions for Schedule A (Form 1040) (2025)",
+      "url": "https://www.irs.gov/instructions/i1040sca"
+    },
+    {
+      "id": "pub-526-2025",
+      "title": "Publication 526 (2025), Charitable Contributions",
+      "url": "https://www.irs.gov/publications/p526"
+    },
+    {
+      "id": "pub-15-2025",
+      "title": "Publication 15 (Circular E), Employer's Tax Guide, for use in 2025",
+      "url": "https://www.irs.gov/pub/irs-prior/p15--2025.pdf"
+    },
+    {
+      "id": "tc-409",
+      "title": "Topic no. 409, Capital gains and losses",
+      "url": "https://www.irs.gov/taxtopics/tc409"
+    },
+    {
+      "id": "tc-502",
+      "title": "Topic no. 502, Medical and dental expenses",
+      "url": "https://www.irs.gov/taxtopics/tc502"
+    },
+    {
+      "id": "tc-559",
+      "title": "Topic no. 559, Net investment income tax",
+      "url": "https://www.irs.gov/taxtopics/tc559"
+    },
+    {
+      "id": "tc-560",
+      "title": "Topic no. 560, Additional Medicare tax",
+      "url": "https://www.irs.gov/taxtopics/tc560"
+    },
+    {
+      "id": "irs-obbba-seniors",
+      "title": "IRS: Tax deductions for working Americans and seniors (One, Big, Beautiful Bill Act)",
+      "url": "https://www.irs.gov/newsroom/one-big-beautiful-bill-act-tax-deductions-for-working-americans-and-seniors"
+    }
+  ],
+  "standard_deduction": {
+    "source_ids": ["rp-2025-32", "rp-2024-40"],
+    "note": "Basic amounts are the OBBBA-amended figures (Rev. Proc. 2025-32 sec. 3.01), replacing Rev. Proc. 2024-40 sec. 2.15(1). The age-65+/blind additions are unchanged from Rev. Proc. 2024-40 sec. 2.15(3).",
+    "basic_cents": {
+      "single": 1575000,
+      "married_filing_jointly": 3150000,
+      "married_filing_separately": 1575000,
+      "head_of_household": 2362500
+    },
+    "additional_age_65_or_blind_cents": {
+      "married": 160000,
+      "unmarried": 200000
+    }
+  },
+  "senior_deduction": {
+    "source_ids": ["irs-obbba-seniors"],
+    "note": "New for 2025 through 2028. Per qualifying person age 65+ ($12,000 if both spouses qualify). Married couples must file jointly to claim it. phaseout_rate is null because the IRS pages reviewed state where the phase-out starts but not the reduction rate.",
+    "per_person_cents": 600000,
+    "magi_phaseout_start_joint_cents": 15000000,
+    "magi_phaseout_start_other_cents": 7500000,
+    "phaseout_rate": null
+  },
+  "ordinary_brackets": {
+    "source_ids": ["rp-2024-40"],
+    "note": "Rev. Proc. 2024-40 sec. 3.01, Tables 1-4. Each bracket applies to taxable income up to and including up_to_cents; null means no upper limit.",
+    "by_filing_status": {
+      "single": [
+        {"rate": 0.10, "up_to_cents": 1192500},
+        {"rate": 0.12, "up_to_cents": 4847500},
+        {"rate": 0.22, "up_to_cents": 10335000},
+        {"rate": 0.24, "up_to_cents": 19730000},
+        {"rate": 0.32, "up_to_cents": 25052500},
+        {"rate": 0.35, "up_to_cents": 62635000},
+        {"rate": 0.37, "up_to_cents": null}
+      ],
+      "married_filing_jointly": [
+        {"rate": 0.10, "up_to_cents": 2385000},
+        {"rate": 0.12, "up_to_cents": 9695000},
+        {"rate": 0.22, "up_to_cents": 20670000},
+        {"rate": 0.24, "up_to_cents": 39460000},
+        {"rate": 0.32, "up_to_cents": 50105000},
+        {"rate": 0.35, "up_to_cents": 75160000},
+        {"rate": 0.37, "up_to_cents": null}
+      ],
+      "married_filing_separately": [
+        {"rate": 0.10, "up_to_cents": 1192500},
+        {"rate": 0.12, "up_to_cents": 4847500},
+        {"rate": 0.22, "up_to_cents": 10335000},
+        {"rate": 0.24, "up_to_cents": 19730000},
+        {"rate": 0.32, "up_to_cents": 25052500},
+        {"rate": 0.35, "up_to_cents": 37580000},
+        {"rate": 0.37, "up_to_cents": null}
+      ],
+      "head_of_household": [
+        {"rate": 0.10, "up_to_cents": 1700000},
+        {"rate": 0.12, "up_to_cents": 6485000},
+        {"rate": 0.22, "up_to_cents": 10335000},
+        {"rate": 0.24, "up_to_cents": 19730000},
+        {"rate": 0.32, "up_to_cents": 25050000},
+        {"rate": 0.35, "up_to_cents": 62635000},
+        {"rate": 0.37, "up_to_cents": null}
+      ]
+    }
+  },
+  "capital_gains_brackets": {
+    "source_ids": ["rp-2024-40"],
+    "note": "Long-term capital gains and qualified dividends. Rev. Proc. 2024-40 sec. 3.03 (maximum zero-rate and 15%-rate amounts, measured on taxable income).",
+    "by_filing_status": {
+      "single": [
+        {"rate": 0.00, "up_to_cents": 4835000},
+        {"rate": 0.15, "up_to_cents": 53340000},
+        {"rate": 0.20, "up_to_cents": null}
+      ],
+      "married_filing_jointly": [
+        {"rate": 0.00, "up_to_cents": 9670000},
+        {"rate": 0.15, "up_to_cents": 60005000},
+        {"rate": 0.20, "up_to_cents": null}
+      ],
+      "married_filing_separately": [
+        {"rate": 0.00, "up_to_cents": 4835000},
+        {"rate": 0.15, "up_to_cents": 30000000},
+        {"rate": 0.20, "up_to_cents": null}
+      ],
+      "head_of_household": [
+        {"rate": 0.00, "up_to_cents": 6475000},
+        {"rate": 0.15, "up_to_cents": 56670000},
+        {"rate": 0.20, "up_to_cents": null}
+      ]
+    }
+  },
+  "net_investment_income_tax": {
+    "source_ids": ["tc-559"],
+    "note": "Thresholds are set in the law and are not adjusted for inflation. Measured on modified AGI.",
+    "rate": 0.038,
+    "magi_threshold_cents": {
+      "single": 20000000,
+      "married_filing_jointly": 25000000,
+      "married_filing_separately": 12500000,
+      "head_of_household": 20000000
+    }
+  },
+  "capital_loss_deduction_limit": {
+    "source_ids": ["tc-409"],
+    "note": "Net capital loss that can offset other income each year; the rest carries forward.",
+    "limit_cents": 300000,
+    "married_filing_separately_limit_cents": 150000
+  },
+  "charitable": {
+    "source_ids": ["pub-526-2025", "i1040sca-2025"],
+    "note": "Itemized deduction only for 2025. AGI limits per Pub. 526 'Limits on Deductions'. non_itemizer_deduction_cents and itemized_agi_floor_rate are null because neither exists in 2025; both start in tax year 2026.",
+    "agi_limits": {
+      "cash_to_50_percent_orgs": 0.60,
+      "cash_to_other_orgs": 0.30,
+      "capital_gain_property_to_50_percent_orgs": 0.30,
+      "capital_gain_property_to_other_orgs": 0.20
+    },
+    "written_acknowledgment_threshold_cents": 25000,
+    "form_8283_noncash_threshold_cents": 50000,
+    "qualified_appraisal_threshold_cents": 500000,
+    "non_itemizer_deduction_cents": null,
+    "itemized_agi_floor_rate": null
+  },
+  "hsa": {
+    "source_ids": ["rp-2024-25", "pub-969-2025"],
+    "self_only_cents": 430000,
+    "family_cents": 855000,
+    "catch_up_55_plus_cents": 100000
+  },
+  "retirement": {
+    "source_ids": ["notice-2024-80"],
+    "elective_deferral_401k_cents": 2350000,
+    "catch_up_50_plus_cents": 750000,
+    "catch_up_age_60_to_63_cents": 1125000,
+    "ira_cents": 700000,
+    "ira_catch_up_50_plus_cents": 100000
+  },
+  "salt_cap": {
+    "source_ids": ["i1040sca-2025"],
+    "note": "Combined state/local income (or sales) and property tax deduction cap, as raised by the One, Big, Beautiful Bill Act. The cap shrinks by 30% of modified AGI over the threshold but never below the floor.",
+    "cap_cents": 4000000,
+    "married_filing_separately_cap_cents": 2000000,
+    "magi_phaseout_start_cents": 50000000,
+    "married_filing_separately_magi_phaseout_start_cents": 25000000,
+    "phaseout_rate": 0.30,
+    "floor_cents": 1000000,
+    "married_filing_separately_floor_cents": 500000
+  },
+  "student_loan_interest": {
+    "source_ids": ["rp-2024-40"],
+    "note": "Rev. Proc. 2024-40 sec. 3.30.",
+    "max_deduction_cents": 250000,
+    "magi_phaseout_start_joint_cents": 17000000,
+    "magi_phaseout_end_joint_cents": 20000000,
+    "magi_phaseout_start_other_cents": 8500000,
+    "magi_phaseout_end_other_cents": 10000000
+  },
+  "medical_expense": {
+    "source_ids": ["tc-502", "i1040sca-2025"],
+    "agi_floor_rate": 0.075
+  },
+  "fica": {
+    "source_ids": ["pub-15-2025", "tc-560"],
+    "note": "Employee share. Employers withhold Additional Medicare Tax on wages over $200,000 regardless of filing status; the filing-status thresholds below apply on the tax return.",
+    "social_security_rate": 0.062,
+    "social_security_wage_base_cents": 17610000,
+    "medicare_rate": 0.0145,
+    "additional_medicare_rate": 0.009,
+    "additional_medicare_threshold_cents": {
+      "single": 20000000,
+      "married_filing_jointly": 25000000,
+      "married_filing_separately": 12500000,
+      "head_of_household": 20000000
+    }
+  }
+}
