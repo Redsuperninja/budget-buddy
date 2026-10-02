@@ -17,6 +17,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [ ] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 
 ## Phase 3: Budget & taxes
+- [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
 - [ ] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
 - [ ] 11. Charitable donations tracking — *finance-tax-expert*
 - [ ] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*

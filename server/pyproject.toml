@@ -29,6 +29,9 @@ version = { attr = "app.__version__" }
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.setuptools.package-data]
+"app.tax_data" = ["*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
