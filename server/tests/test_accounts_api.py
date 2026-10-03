@@ -156,3 +156,20 @@ def test_unknown_route_uses_error_format(client):
     response = client.get("/api/local/nope")
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "not_found"
+
+
+def test_account_number_and_notes_are_encrypted_on_disk(client, make_account, data_dir):
+    """The API still works with encrypted columns (ADR-0003), and the file holds no plain text."""
+    import sqlite3
+
+    created = make_account(last4="9876", notes="FAKE-NOTE-xyz")
+    assert client.get(f"{URL}/{created['id']}").json()["last4"] == "9876"
+    connection = sqlite3.connect(data_dir / "budget.db")
+    try:
+        last4, notes = connection.execute(
+            "SELECT last4, notes FROM accounts WHERE id = ?", (created["id"],)
+        ).fetchone()
+    finally:
+        connection.close()
+    assert isinstance(last4, bytes) and b"9876" not in last4
+    assert isinstance(notes, bytes) and b"FAKE-NOTE" not in notes

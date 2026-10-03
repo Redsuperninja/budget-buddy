@@ -2,9 +2,10 @@
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Date, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.crypto.fields import EncryptedString
 from app.models.base import Base, TimestampMixin, str_enum
 from app.models.enums import AccountKind, CategoryGroup, TransactionKind, TransactionSource
 
@@ -16,8 +17,8 @@ class Account(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(100))
     kind: Mapped[AccountKind] = mapped_column(str_enum(AccountKind, "account_kind"))
     institution: Mapped[str | None] = mapped_column(String(100))
-    last4: Mapped[str | None] = mapped_column(String)  # encrypted in roadmap #4
-    notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
+    last4: Mapped[str | None] = mapped_column(EncryptedString("accounts.last4"))
+    notes: Mapped[str | None] = mapped_column(EncryptedString("accounts.notes"))
 
 
 class Category(TimestampMixin, Base):
@@ -54,7 +55,7 @@ class Transaction(TimestampMixin, Base):
     transfer_pair_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL")
     )
-    notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
+    notes: Mapped[str | None] = mapped_column(EncryptedString("transactions.notes"))
 
 
 class Paycheck(TimestampMixin, Base):
@@ -89,7 +90,7 @@ class Paycheck(TimestampMixin, Base):
     hsa_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     other_deductions_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     net_cents: Mapped[int]
-    notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
+    notes: Mapped[str | None] = mapped_column(EncryptedString("paychecks.notes"))
 
 
 class Receipt(TimestampMixin, Base):
@@ -105,6 +106,6 @@ class Receipt(TimestampMixin, Base):
     transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL")
     )
-    image_path: Mapped[str | None] = mapped_column(String)  # encrypted in roadmap #4
+    image_path: Mapped[str | None] = mapped_column(EncryptedString("receipts.image_path"))
     tax_deductible: Mapped[bool] = mapped_column(default=False, server_default="0")
-    notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
+    notes: Mapped[str | None] = mapped_column(EncryptedString("receipts.notes"))

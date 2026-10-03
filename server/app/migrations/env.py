@@ -5,6 +5,8 @@ from logging.config import fileConfig
 from alembic import context
 
 from app.config import Settings
+from app.crypto import FieldCipher, load_keys
+from app.crypto.fields import alembic_compare_type
 from app.db import create_db_engine
 from app.main import ensure_data_dir
 from app.models import Base
@@ -25,6 +27,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         render_as_batch=True,
+        compare_type=alembic_compare_type,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -38,7 +41,9 @@ def run_migrations_online() -> None:
 
     settings = Settings()
     ensure_data_dir(settings.data_dir)
-    engine = create_db_engine(settings.data_dir)
+    # Some migrations encrypt or decrypt columns, so they need the data folder's key.
+    field_cipher = FieldCipher(load_keys(settings).db_fields)
+    engine = create_db_engine(settings.data_dir, field_cipher=field_cipher)
     try:
         with engine.begin() as connection:
             _run(connection)
@@ -48,7 +53,12 @@ def run_migrations_online() -> None:
 
 def _run(connection) -> None:
     # render_as_batch: SQLite can't ALTER most things, so Alembic rebuilds tables instead.
-    context.configure(connection=connection, target_metadata=target_metadata, render_as_batch=True)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        render_as_batch=True,
+        compare_type=alembic_compare_type,
+    )
     with context.begin_transaction():
         context.run_migrations()
 
