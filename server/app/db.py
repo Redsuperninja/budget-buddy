@@ -1,5 +1,6 @@
 """Database connection: one SQLite file (``budget.db``) inside the data folder."""
 
+import logging
 import os
 import sqlite3
 import sys
@@ -16,9 +17,15 @@ from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.crypto.fields import FieldCipher, set_field_cipher
+
+logger = logging.getLogger(__name__)
+
 DB_FILENAME = "budget.db"
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 BUSY_TIMEOUT_MS = 5000
+# Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
+FIRST_ENCRYPTED_REVISION = "0003"
 
 # Not bound to an engine here: each app passes its own engine (see ``get_session``), so tests
 # with different data folders never share a database.
@@ -59,8 +66,12 @@ def _set_sqlite_pragmas(dbapi_connection, _connection_record) -> None:
     cursor.close()
 
 
-def create_db_engine(data_dir: Path) -> Engine:
-    """Engine for ``<data_dir>/budget.db`` with foreign keys enforced and WAL journaling."""
+def create_db_engine(data_dir: Path, field_cipher: FieldCipher | None = None) -> Engine:
+    """Engine for ``<data_dir>/budget.db`` with foreign keys enforced and WAL journaling.
+
+    ``field_cipher`` encrypts and decrypts the sensitive columns (ADR-0003). Without it, reading
+    or writing those columns raises an error.
+    """
     path = database_path(data_dir)
     _create_private_file(path)
     # URL.create, not an f-string: a "?" or "%" in the folder name must not be parsed as URL syntax.
@@ -68,6 +79,8 @@ def create_db_engine(data_dir: Path) -> Engine:
     # hide_parameters: never put amounts or descriptions into error messages or logs.
     engine = create_engine(url, hide_parameters=True)
     event.listen(engine, "connect", _set_sqlite_pragmas)
+    if field_cipher is not None:
+        set_field_cipher(engine, field_cipher)
     return engine
 
 
@@ -152,6 +165,43 @@ def run_migrations(engine: Engine) -> None:
                 message += f" A copy of your data from before the update is saved at {backup_path}."
             message += " Please close Budget Buddy and try again, or ask for help."
             raise DatabaseUpgradeError(message) from exc
+
+        if (
+            current is not None
+            and current.isdigit()
+            and int(current) < int(FIRST_ENCRYPTED_REVISION)
+        ):
+            _after_first_encryption(engine, db_path)
+
+
+def unencrypted_backups(db_path: Path) -> list[Path]:
+    """Backup copies made before sensitive columns were encrypted (they hold plain text)."""
+    found = []
+    for backup in sorted(db_path.parent.glob(f"{db_path.name}.bak-*")):
+        revision = backup.name.rsplit("-", 1)[-1]
+        if revision.isdigit() and int(revision) < int(FIRST_ENCRYPTED_REVISION):
+            found.append(backup)
+    return found
+
+
+def _after_first_encryption(engine: Engine, db_path: Path) -> None:
+    """Clean up plain text left behind when sensitive columns were first encrypted.
+
+    Rewrites the database file (VACUUM) and empties the write-ahead log, so the old text isn't
+    left in unused pages. Backup copies are never deleted automatically; the user is told about
+    them instead.
+    """
+    with engine.connect() as connection:
+        connection.exec_driver_sql("VACUUM")
+        connection.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+    backups = unencrypted_backups(db_path)
+    if backups:
+        logger.warning(
+            "Budget Buddy now encrypts account numbers, notes, and receipt file names. These "
+            "older backup copies were made before that and are NOT encrypted: %s. Once you've "
+            "checked Budget Buddy is working, delete them (or keep them somewhere safe).",
+            ", ".join(str(b) for b in backups),
+        )
 
 
 def get_session(request: Request) -> Iterator[Session]:

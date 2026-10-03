@@ -2,9 +2,10 @@
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text
+from sqlalchemy import CheckConstraint, Date, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.crypto.fields import EncryptedString
 from app.models.base import Base, TimestampMixin, str_enum
 from app.models.enums import DeductionKind, DonationKind
 
@@ -23,7 +24,7 @@ class Donation(TimestampMixin, Base):
     amount_cents: Mapped[int]  # for goods: fair market value
     kind: Mapped[DonationKind] = mapped_column(str_enum(DonationKind, "donation_kind"))
     receipt_id: Mapped[int | None] = mapped_column(ForeignKey("receipts.id", ondelete="SET NULL"))
-    notes: Mapped[str | None] = mapped_column(Text)  # encrypted in roadmap #4
+    notes: Mapped[str | None] = mapped_column(EncryptedString("donations.notes"))
 
 
 class StockLot(TimestampMixin, Base):

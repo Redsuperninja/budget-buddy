@@ -7,7 +7,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [x] 1. Repo scaffold, docs, agent definitions — *architect*
 - [x] 2. Home Base skeleton: FastAPI app, config, data folder, health check, tests, CI — *backend-engineer*
 - [x] 3. Database layer: SQLAlchemy models + Alembic migrations, money-in-cents helpers — *backend-engineer*
-- [ ] 4. Encryption at rest: keyring master key, encrypted file storage — *backend-engineer* + *security-reviewer*
+- [x] 4. Encryption at rest: keyring master key, encrypted file storage — *backend-engineer* + *security-reviewer*
 
 ## Phase 2: Getting data in
 - [ ] 5. Accounts + transactions API (manual entry) — *backend-engineer*

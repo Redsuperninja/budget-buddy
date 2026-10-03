@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 from app import __version__
 from app.config import Settings
+from app.crypto import FieldCipher, load_keys
 from app.db import create_db_engine, run_migrations
 from app.network import PrivateNetworkOnlyMiddleware
 from app.routers import health
@@ -29,11 +30,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the FastAPI app.
 
     Creates the data folder and database if needed and brings the database up to date, so
-    nobody ever has to run migrations by hand.
+    nobody ever has to run migrations by hand. Loads the encryption key (creating it on first
+    run) before touching the database.
     """
     settings = settings or Settings()
     ensure_data_dir(settings.data_dir)
-    engine = create_db_engine(settings.data_dir)
+    keys = load_keys(settings)
+    engine = create_db_engine(settings.data_dir, field_cipher=FieldCipher(keys.db_fields))
     run_migrations(engine)
 
     @asynccontextmanager
@@ -46,6 +49,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="Budget Buddy Home Base", version=__version__, lifespan=lifespan, **docs)
     app.state.settings = settings
     app.state.engine = engine
+    app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     app.include_router(health.router)
     return app

@@ -715,7 +715,7 @@ Receipt photos travel **base64url-encoded inside the encrypted envelope**, not a
   `FF D8 FF`; pixel size read from the header (e.g. Pillow `Image.open` without `.load()`, plus
   `Image.MAX_IMAGE_PIXELS`) ≤ 4096 × 4096 and ≤ 16 megapixels. Only then decode. Failures make the item
   `rejected` (`image_too_large` / `image_invalid`).
-- The server re-encrypts the image at rest with Fernet (ADR-0003) and never writes the plain image to disk.
+- The server re-encrypts the image at rest with AES-256-GCM (`EncryptedFileStore`, ADR-0003) and never writes the plain image to disk.
 
 ### 6.2 `ReceiptUpload`
 

@@ -41,6 +41,29 @@ Developers changing the tables: edit `app/models/`, then generate a migration an
 .venv\Scripts\alembic revision --autogenerate -m "describe the change"
 ```
 
+## Encryption and your recovery phrase
+
+Account numbers, notes, and receipt photos are encrypted. The key is kept in your computer's
+password vault (Windows Credential Manager, the macOS Keychain, or a Linux Secret Service), never
+in the data folder, so a copy of the folder alone can't be read.
+
+The first time Budget Buddy starts it makes the key. **Save your recovery phrase right away**:
+
+```powershell
+.venv\Scripts\python -m app recovery-phrase show
+```
+
+Write it on paper or keep it in a password manager. If the password vault is ever lost (for
+example after reinstalling Windows or moving to a new computer), put the key back with:
+
+```powershell
+.venv\Scripts\python -m app recovery-phrase restore
+```
+
+Without the phrase, a lost key means the encrypted data can't be recovered. Backup copies named
+`budget.db.bak-0001` or `-0002` were made before encryption existed and are not encrypted; Budget
+Buddy tells you about them so you can delete them.
+
 ## Settings
 
 All optional, set as environment variables:
@@ -51,6 +74,7 @@ All optional, set as environment variables:
 | `BUDGET_BUDDY_HOST` | `127.0.0.1` | Network address to listen on. The default means "this computer only". |
 | `BUDGET_BUDDY_PORT` | `8765` | Port to listen on. |
 | `BUDGET_BUDDY_DEV_MODE` | `false` | Set to `true` to turn on the API explorer at `/docs` (for developers). |
+| `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. `memory` is for automated tests only: anything saved can't be read after a restart. |
 
 On macOS/Linux the data folder is made readable only by your user account.
 

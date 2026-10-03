@@ -62,7 +62,7 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
     try:
         assert errors == []
         assert len(calls) == 1
-        assert _revision(engines[0]) == "0002"
+        assert _revision(engines[0]) == "0003"
         assert _category_count(engines[0]) == 18  # seed not duplicated
     finally:
         for engine in engines:
@@ -96,7 +96,7 @@ def test_backup_made_before_upgrading_existing_database(tmp_path):
             assert conn.execute("SELECT count(*) FROM categories").fetchone() == (0,)
         if sys.platform != "win32":
             assert stat.S_IMODE(backup.stat().st_mode) == 0o600
-        assert _revision(engine) == "0002"
+        assert _revision(engine) == "0003"
     finally:
         engine.dispose()
 

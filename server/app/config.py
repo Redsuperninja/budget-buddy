@@ -3,6 +3,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,7 +22,7 @@ class Settings(BaseSettings):
     """Runtime settings.
 
     Override with env vars: ``BUDGET_BUDDY_DATA_DIR``, ``BUDGET_BUDDY_HOST``, ``BUDGET_BUDDY_PORT``,
-    ``BUDGET_BUDDY_DEV_MODE``.
+    ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``.
     """
 
     model_config = SettingsConfigDict(env_prefix="BUDGET_BUDDY_")
@@ -32,3 +33,6 @@ class Settings(BaseSettings):
     port: int = Field(default=8765, ge=1, le=65535)
     # Developer extras such as the /docs API explorer. Off for normal use.
     dev_mode: bool = False
+    # Where the encryption key is kept: the OS password vault ("keyring"), or "memory" for
+    # automated tests and CI only (the key is lost when the process ends).
+    key_store: Literal["keyring", "memory"] = "keyring"

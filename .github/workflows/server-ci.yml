@@ -38,5 +38,10 @@ jobs:
           pip install -e ".[dev]"
       - name: Lint
         run: ruff check .
+      - name: Format check
+        run: ruff format --check .
       - name: Test
+        # CI runners have no OS password vault, so keep the encryption key in memory.
+        env:
+          BUDGET_BUDDY_KEY_STORE: memory
         run: pytest
