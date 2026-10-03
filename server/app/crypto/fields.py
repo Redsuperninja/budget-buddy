@@ -8,6 +8,11 @@ The "associated data" is the version byte plus the column's ``table.column`` nam
 copied from one column into another (say a note pasted into ``accounts.last4``) fails to decrypt
 instead of being shown in the wrong place. Any change to the bytes also fails to decrypt.
 
+Accepted limitation (ADR-0003): a value is tied to its table and column, not its row. Swapping
+two rows' values in the same column (say two accounts' ``last4``) still decrypts, with the values
+swapped. Binding the row's primary key would need row context, which a ``TypeDecorator`` doesn't
+get; and doing the swap needs write access to the database anyway.
+
 Encrypted columns can't be searched, sorted, or compared in SQL (the same text encrypts
 differently every time). Keep anything you need to query in a plain column.
 """

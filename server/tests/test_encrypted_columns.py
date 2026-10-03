@@ -474,3 +474,28 @@ def test_secure_delete_is_on(tmp_path):
             assert conn.exec_driver_sql("PRAGMA secure_delete").scalar() == 1
     finally:
         engine.dispose()
+
+
+def test_value_swapped_between_rows_of_one_column_still_decrypts(app):
+    """Documents the accepted limitation in ADR-0003 (security review L4).
+
+    Values are bound to ``table.column``, not to their row, so swapping two rows' ciphertexts in
+    the same column decrypts, with the values swapped. If this ever starts failing, row binding
+    was added: update ADR-0003 and the ``fields.py`` docstring.
+    """
+    engine = app.state.engine
+    with SessionLocal(bind=engine) as session:
+        session.add_all(
+            [
+                Account(id=1, name="A", kind=AccountKind.CHECKING, last4="1111"),
+                Account(id=2, name="B", kind=AccountKind.CHECKING, last4="2222"),
+            ]
+        )
+        session.commit()
+    with engine.begin() as conn:
+        first, second = conn.execute(text("SELECT last4 FROM accounts ORDER BY id")).scalars()
+        conn.execute(text("UPDATE accounts SET last4 = :v WHERE id = 1"), {"v": second})
+        conn.execute(text("UPDATE accounts SET last4 = :v WHERE id = 2"), {"v": first})
+    with SessionLocal(bind=engine) as session:
+        rows = session.scalars(select(Account).order_by(Account.id)).all()
+        assert [a.last4 for a in rows] == ["2222", "1111"]

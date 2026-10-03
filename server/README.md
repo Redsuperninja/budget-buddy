@@ -45,13 +45,33 @@ Developers changing the tables: edit `app/models/`, then generate a migration an
 
 Account numbers, notes, and receipt photos are encrypted. The key is kept in your computer's
 password vault (Windows Credential Manager, the macOS Keychain, or a Linux Secret Service), never
-in the data folder, so a copy of the folder alone can't be read.
+in the data folder.
+
+**Not everything is encrypted yet.** Amounts, dates, descriptions, shop, employer and charity
+names are **not** encrypted, so anyone with a copy of the data folder can still read your
+spending, pay and giving history. Keep the data folder out of cloud-synced folders (OneDrive,
+Dropbox, iCloud and similar) and protect your Windows account with a password. What stays plain
+text today, in `budget.db`:
+
+- every amount and date, and each transaction's description
+- shop names on receipts (`receipts.merchant`)
+- employer names and gross/net pay on paychecks (`paychecks.employer`)
+- account names and banks (`accounts.name`, `accounts.institution`)
+- charity names on donations (`donations.organization`)
+- stock symbols and lots
+
+These stay readable so Budget Buddy can search, sort and add them up. Encrypting more of them,
+or the whole database, is tracked in
+[issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28).
 
 The first time Budget Buddy starts it makes the key. **Save your recovery phrase right away**:
 
 ```powershell
 .venv\Scripts\python -m app recovery-phrase show
 ```
+
+It asks you to type `SHOW` first, and only prints the phrase in a terminal window (not into a
+file), after checking it really is the key for your data folder.
 
 Write it on paper or keep it in a password manager. If the password vault is ever lost (for
 example after reinstalling Windows or moving to a new computer), put the key back with:
