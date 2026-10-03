@@ -155,13 +155,23 @@ def test_link_transfer(client, add_txn, accounts):
     assert client.delete(f"{URL}/{out['id']}/transfer").status_code == 409
 
 
-def test_deleting_half_a_transfer_unlinks_the_other(client, add_txn, accounts):
+def test_deleting_half_a_transfer_is_blocked(client, add_txn, accounts):
     out = add_txn(accounts[0], -100)
     into = add_txn(accounts[1], 100)
     client.post(f"{URL}/{out['id']}/transfer", json={"other_id": into["id"]})
+    for side in (out, into):
+        response = client.delete(f"{URL}/{side['id']}")
+        assert response.status_code == 409
+        assert response.json()["error"]["code"] == "part_of_transfer"
+        assert "Remove the transfer link" in response.json()["error"]["message"]
+    # Both halves are untouched.
+    for side, partner in ((out, into), (into, out)):
+        kept = client.get(f"{URL}/{side['id']}").json()
+        assert (kept["kind"], kept["transfer_pair_id"]) == ("transfer", partner["id"])
+
+    # Unlinking on purpose first makes deleting possible.
+    assert client.delete(f"{URL}/{out['id']}/transfer").status_code == 200
     assert client.delete(f"{URL}/{out['id']}").status_code == 204
-    other = client.get(f"{URL}/{into['id']}").json()
-    assert (other["kind"], other["transfer_pair_id"]) == ("normal", None)
 
 
 @pytest.mark.parametrize(

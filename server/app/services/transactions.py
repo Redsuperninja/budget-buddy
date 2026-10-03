@@ -111,11 +111,18 @@ def _unlink(transaction: Transaction, partner: Transaction | None) -> None:
 
 
 def delete_transaction(session: Session, transaction_id: int) -> None:
-    """Delete it. If it was half of a transfer, the other half becomes a normal transaction."""
+    """Delete it. Half of a transfer can't be deleted until the link is removed.
+
+    Otherwise the other half would quietly turn into spending or income.
+    """
     transaction = get_transaction(session, transaction_id)
     if transaction.transfer_pair_id is not None:
-        _unlink(transaction, session.get(Transaction, transaction.transfer_pair_id))
-        session.flush()
+        raise ApiError(
+            409,
+            "part_of_transfer",
+            "This transaction is part of a transfer. Remove the transfer link before deleting "
+            "this transaction.",
+        )
     session.delete(transaction)
     session.commit()
 
