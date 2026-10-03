@@ -259,6 +259,51 @@ def test_transfer_validation(
     assert client.get(f"{URL}/{first['id']}").json()["kind"] == "normal"
 
 
+@pytest.mark.parametrize(
+    ("first_kind", "second_kind"),
+    [
+        ("refund", "normal"),
+        ("normal", "refund"),
+        ("adjustment", "normal"),
+        ("normal", "adjustment"),
+    ],
+)
+def test_only_regular_transactions_can_be_linked(
+    client, add_txn, accounts, first_kind, second_kind
+):
+    # A refund is positive, so it sits on the receiving side.
+    first = add_txn(accounts[0], -100 if first_kind != "refund" else 100, kind=first_kind)
+    second = add_txn(accounts[1], 100 if first_kind != "refund" else -100, kind=second_kind)
+    response = client.post(f"{URL}/{first['id']}/transfer", json={"other_id": second["id"]})
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "invalid_transfer"
+    assert "Only regular transactions" in response.json()["error"]["message"]
+    for side, kind in ((first, first_kind), (second, second_kind)):
+        assert client.get(f"{URL}/{side['id']}").json()["kind"] == kind
+
+
+def test_linked_transfer_moves_to_the_transfer_category(client, add_txn, accounts):
+    groceries, transfer = category_id(client), category_id(client, "Transfer")
+    out = add_txn(accounts[0], -50_000, category_id=groceries)
+    into = add_txn(accounts[1], 50_000)
+    assert client.post(f"{URL}/{out['id']}/transfer", json={"other_id": into["id"]}).is_success
+    for side in (out, into):
+        assert client.get(f"{URL}/{side['id']}").json()["category_id"] == transfer
+    assert client.get(URL, params={"category_id": groceries}).json()["items"] == []
+
+    # While linked, the category can't move out of the transfer group.
+    for new_category in (groceries, None):
+        locked = client.patch(f"{URL}/{out['id']}", json={"category_id": new_category})
+        assert locked.status_code == 409
+        assert locked.json()["error"]["code"] == "part_of_transfer"
+    assert client.patch(f"{URL}/{out['id']}", json={"category_id": transfer}).status_code == 200
+
+    # Unlinking keeps the Transfer category, so it still isn't spending until recategorized.
+    unlinked = client.delete(f"{URL}/{out['id']}/transfer").json()
+    assert (unlinked["kind"], unlinked["category_id"]) == ("normal", transfer)
+    assert client.patch(f"{URL}/{out['id']}", json={"category_id": groceries}).status_code == 200
+
+
 def test_transfer_needs_two_existing_transactions(client, add_txn, accounts):
     first = add_txn(accounts[0], -100)
     same = client.post(f"{URL}/{first['id']}/transfer", json={"other_id": first["id"]})

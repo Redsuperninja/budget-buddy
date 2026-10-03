@@ -60,6 +60,9 @@ editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead.
   `date_from`, `date_to`, `kind`, `q`, `limit`, `offset`; newest first),
   `GET/PATCH/DELETE /api/local/transactions/{id}`, and `POST/DELETE
   /api/local/transactions/{id}/transfer` to link or unlink a transfer between two of your accounts.
+  Only two regular (`normal`) transactions can be linked; both move to the Transfer category. While
+  linked, a transaction's account, amount, kind and category are locked and it can't be deleted:
+  remove the link first.
 
 ## Settings
 

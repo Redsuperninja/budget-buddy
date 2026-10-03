@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Category, Transaction, TransactionKind, TransactionSource
+from app.models import Category, CategoryGroup, Transaction, TransactionKind, TransactionSource
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
 
@@ -110,12 +110,15 @@ def update_transaction(
     transaction = get_transaction(session, transaction_id)
     changes = data.changes()
     changes.pop("amount", None)
-    if transaction.transfer_pair_id is not None and _TRANSFER_LOCKED_FIELDS & changes.keys():
+    if transaction.transfer_pair_id is not None and (
+        _TRANSFER_LOCKED_FIELDS & changes.keys()
+        or ("category_id" in changes and not _is_transfer_category(session, changes["category_id"]))
+    ):
         raise ApiError(
             409,
             "part_of_transfer",
             "This transaction is part of a transfer. Remove the transfer link before changing "
-            "its account, amount, or kind.",
+            "its account, amount, kind, or category.",
         )
     _check_kind_rules(
         changes.get("kind", transaction.kind),
@@ -127,6 +130,21 @@ def update_transaction(
         setattr(transaction, field, value)
     session.commit()
     return transaction
+
+
+def _is_transfer_category(session: Session, category_id: int | None) -> bool:
+    category = session.get(Category, category_id) if category_id is not None else None
+    return category is not None and category.group == CategoryGroup.TRANSFER
+
+
+def _transfer_category_id(session: Session) -> int | None:
+    """The starter "Transfer" category (or another in the transfer group), if there is one."""
+    return session.scalar(
+        select(Category.id)
+        .where(Category.group == CategoryGroup.TRANSFER)
+        .order_by((Category.name == "Transfer").desc(), Category.id)
+        .limit(1)
+    )
 
 
 def _unlink(transaction: Transaction, partner: Transaction | None) -> None:
@@ -156,8 +174,9 @@ def delete_transaction(session: Session, transaction_id: int) -> None:
 def link_transfer(session: Session, transaction_id: int, other_id: int) -> Transaction:
     """Mark two transactions as one transfer between your own accounts.
 
-    They must be on different accounts, with opposite signs and the same size, e.g. -$500.00 out
-    of checking and +$500.00 into savings. Both become kind "transfer" and point at each other.
+    They must be regular (kind "normal") transactions on different accounts, with opposite signs
+    and the same size, e.g. -$500.00 out of checking and +$500.00 into savings. Both become kind
+    "transfer", move to the Transfer category, and point at each other.
     """
     first = get_transaction(session, transaction_id)
     second = get_transaction(session, other_id)
@@ -172,6 +191,12 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
             "One of these transactions is already part of another transfer. "
             "Remove that link first.",
         )
+    if first.kind != TransactionKind.NORMAL or second.kind != TransactionKind.NORMAL:
+        # Linking would hide what a refund or an opening-balance adjustment was, and unlinking
+        # couldn't bring it back.
+        raise ApiError(
+            422, "invalid_transfer", "Only regular transactions can be linked as a transfer."
+        )
     if first.account_id == second.account_id:
         raise ApiError(
             422, "invalid_transfer", "A transfer has to be between two different accounts."
@@ -184,12 +209,18 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
         )
     first.transfer_pair_id, second.transfer_pair_id = second.id, first.id
     first.kind = second.kind = TransactionKind.TRANSFER
+    # So a category filter (e.g. Groceries) doesn't list money you only moved.
+    first.category_id = second.category_id = _transfer_category_id(session)
     session.commit()
     return first
 
 
 def unlink_transfer(session: Session, transaction_id: int) -> Transaction:
-    """Undo a transfer link. Both sides go back to being normal transactions."""
+    """Undo a transfer link. Both sides go back to being normal transactions.
+
+    They keep the Transfer category, so they still don't count as spending or income until the
+    user picks another category.
+    """
     transaction = get_transaction(session, transaction_id)
     if transaction.transfer_pair_id is None:
         raise ApiError(409, "not_a_transfer", "This transaction isn't linked as a transfer.")
