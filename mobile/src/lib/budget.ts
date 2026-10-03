@@ -71,6 +71,13 @@ export function statusText(
   currency = 'USD',
 ): string {
   const fmt = (c: number) => formatCents(c, currency);
+  // A negative actual is a refund-heavy month (spending) or a withdrawal (savings).
+  // Say so plainly instead of claiming more is "left" than the whole target.
+  if (actualCents < 0) {
+    return group === 'savings'
+      ? `Took out ${fmt(-actualCents)}`
+      : `Refunds were more than spending by ${fmt(-actualCents)}`;
+  }
   const status = lineStatus(group, actualCents, targetCents);
   switch (status) {
     case 'over':
@@ -90,6 +97,23 @@ export function statusText(
   }
 }
 
+/**
+ * "Spent $1,580.00 of $2,600.00 (60%)" or "Saved ...". A negative actual is shown as $0.00 / 0%;
+ * statusText explains why (refunds, or money taken out of savings).
+ */
+export function amountsText(
+  group: GroupKey,
+  actualCents: number,
+  targetCents: number,
+  currency = 'USD',
+): string {
+  const verb = group === 'savings' ? 'Saved' : 'Spent';
+  const actual = formatCents(Math.max(0, actualCents), currency);
+  if (targetCents <= 0) return `${verb} ${actual}`;
+  const pct = percentUsed(actualCents, targetCents);
+  return `${verb} ${actual} of ${formatCents(targetCents, currency)} (${pct}%)`;
+}
+
 export type MonthHeadline = {
   /** Take-home received so far this month. */
   incomeReceivedCents: number;
@@ -104,7 +128,10 @@ export type MonthHeadline = {
   isOverBudget: boolean;
   /** Savings group actual. */
   savedCents: number;
-  /** Whole-number percent of received income saved, or null if nothing received yet. */
+  /**
+   * Whole-number percent of received income saved, or null if nothing received yet or if more
+   * was taken out of savings than put in (savedCents < 0).
+   */
   savingsRatePercent: number | null;
 };
 
@@ -130,8 +157,35 @@ export function monthHeadline(snapshot: Snapshot): MonthHeadline {
     leftToSpendCents,
     isOverBudget: leftToSpendCents < 0,
     savedCents,
-    savingsRatePercent: received > 0 ? Math.round((savedCents * 100) / received) : null,
+    savingsRatePercent:
+      received > 0 && savedCents >= 0 ? Math.round((savedCents * 100) / received) : null,
   };
+}
+
+export type StatText = { value: string; note: string };
+
+/** "Spent" stat on the Home headline. Refunds bigger than spending show $0.00 with a note. */
+export function spentStat(h: MonthHeadline, currency = 'USD'): StatText {
+  const fmt = (c: number) => formatCents(c, currency);
+  if (h.spentCents < 0) {
+    return {
+      value: fmt(0),
+      note: `Refunds were more than spending by ${fmt(-h.spentCents)}`,
+    };
+  }
+  return { value: fmt(h.spentCents), note: `of ${fmt(h.spendingTargetCents)} planned` };
+}
+
+/** "Savings rate" stat on the Home headline. */
+export function savingsStat(h: MonthHeadline, currency = 'USD'): StatText {
+  const fmt = (c: number) => formatCents(c, currency);
+  if (h.savedCents < 0) {
+    return { value: `Took out ${fmt(-h.savedCents)}`, note: 'More came out of savings than went in' };
+  }
+  if (h.savingsRatePercent === null) {
+    return { value: 'Not yet', note: `${fmt(h.savedCents)} saved` };
+  }
+  return { value: `${h.savingsRatePercent}%`, note: `of take-home pay (${fmt(h.savedCents)} saved)` };
 }
 
 /** Groups in the standard order (Needs, Wants, Savings), whatever order they arrived in. */

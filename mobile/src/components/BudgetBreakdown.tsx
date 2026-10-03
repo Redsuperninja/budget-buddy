@@ -2,9 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { barPercent, lineStatus, percentUsed, statusText } from '@/lib/budget';
+import { amountsText as amountsFor, barPercent, lineStatus, statusText } from '@/lib/budget';
 import type { LineStatus } from '@/lib/budget';
-import { formatCents } from '@/lib/money';
 import type { BudgetGroup, GroupKey } from '@/sync/snapshot';
 import { useTheme } from '@/theme';
 import type { Theme } from '@/theme';
@@ -54,13 +53,8 @@ type LineProps = {
   currency: string;
 };
 
-/** "Spent $1,580.00 of $2,600.00 (60%)" or "Saved ..." */
 function amountsText({ group, actualCents, targetCents, currency }: LineProps): string {
-  const verb = group === 'savings' ? 'Saved' : 'Spent';
-  const actual = formatCents(actualCents, currency);
-  if (targetCents <= 0) return `${verb} ${actual}`;
-  const pct = percentUsed(actualCents, targetCents);
-  return `${verb} ${actual} of ${formatCents(targetCents, currency)} (${pct}%)`;
+  return amountsFor(group, actualCents, targetCents, currency);
 }
 
 function CategoryLine(props: LineProps) {

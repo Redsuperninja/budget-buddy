@@ -1,6 +1,7 @@
 import { SAMPLE_SNAPSHOT } from '../../sync/sampleSnapshot';
 import type { Snapshot } from '../../sync/snapshot';
 import {
+  amountsText,
   barPercent,
   categoriesById,
   CLOSE_THRESHOLD_PERCENT,
@@ -8,8 +9,10 @@ import {
   orderedGroups,
   percentUsed,
   recentTransactions,
+  savingsStat,
   savingsStatus,
   spendingStatus,
+  spentStat,
   statusText,
 } from '../budget';
 
@@ -107,6 +110,63 @@ describe('statusText', () => {
   it('handles no target', () => {
     expect(statusText('wants', 100, 0)).toBe('No limit set');
     expect(statusText('savings', 100, 0)).toBe('No goal set');
+  });
+});
+
+describe('negative actuals (refunds bigger than spending, money out of savings)', () => {
+  it.each([
+    // [group, actual, target, status words, amounts]
+    ['wants', -500, 10000, 'Refunds were more than spending by $5.00', 'Spent $0.00 of $100.00 (0%)'],
+    ['needs', -1, 10000, 'Refunds were more than spending by $0.01', 'Spent $0.00 of $100.00 (0%)'],
+    ['wants', -500, 0, 'Refunds were more than spending by $5.00', 'Spent $0.00'],
+    ['savings', -10000, 104000, 'Took out $100.00', 'Saved $0.00 of $1,040.00 (0%)'],
+    ['savings', -10000, 0, 'Took out $100.00', 'Saved $0.00'],
+  ] as const)('%s %i of %i', (group, actual, target, words, amounts) => {
+    expect(statusText(group, actual, target)).toBe(words);
+    expect(amountsText(group, actual, target)).toBe(amounts);
+  });
+
+  it('never says more is left than the whole target', () => {
+    expect(statusText('wants', -500, 10000)).not.toMatch(/left/);
+  });
+
+  it('headline: savings withdrawal shows "Took out", not a negative rate', () => {
+    const s: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    s.budget.groups[2].actual_cents = -10000;
+    const h = monthHeadline(s);
+    expect(h.savedCents).toBe(-10000);
+    expect(h.savingsRatePercent).toBeNull();
+    expect(savingsStat(h)).toEqual({ value: 'Took out $100.00', note: 'More came out of savings than went in' });
+  });
+
+  it('headline: refunds bigger than all spending show $0.00 spent with a note', () => {
+    const s: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    s.budget.groups[0].actual_cents = 0;
+    s.budget.groups[1].actual_cents = -500;
+    const h = monthHeadline(s);
+    expect(spentStat(h)).toEqual({ value: '$0.00', note: 'Refunds were more than spending by $5.00' });
+  });
+});
+
+describe('amountsText', () => {
+  it('shows spent or saved against the target', () => {
+    expect(amountsText('needs', 158000, 260000)).toBe('Spent $1,580.00 of $2,600.00 (60%)');
+    expect(amountsText('savings', 60000, 104000)).toBe('Saved $600.00 of $1,040.00 (57%)');
+    expect(amountsText('wants', 100, 0)).toBe('Spent $1.00');
+  });
+});
+
+describe('headline stats', () => {
+  it('words the sample month', () => {
+    const h = monthHeadline(SAMPLE_SNAPSHOT);
+    expect(spentStat(h)).toEqual({ value: '$2,960.27', note: 'of $4,160.00 planned' });
+    expect(savingsStat(h)).toEqual({ value: '12%', note: 'of take-home pay ($600.00 saved)' });
+  });
+
+  it('says "Not yet" before any pay arrives', () => {
+    const s: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    s.income.received_cents = 0;
+    expect(savingsStat(monthHeadline(s))).toEqual({ value: 'Not yet', note: '$600.00 saved' });
   });
 });
 

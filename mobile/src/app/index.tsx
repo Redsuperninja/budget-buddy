@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { GroupCard } from '@/components/BudgetBreakdown';
 import { Card, Screen } from '@/components/Screen';
 import { LastSynced, SnapshotNotices } from '@/components/SnapshotNotices';
-import { categoriesById, monthHeadline, orderedGroups, recentTransactions } from '@/lib/budget';
+import { categoriesById, monthHeadline, orderedGroups, recentTransactions, savingsStat, spentStat } from '@/lib/budget';
 import { formatDay, formatMonth } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import type { Snapshot, SnapshotTransaction } from '@/sync/snapshot';
@@ -49,12 +49,8 @@ function Headline({ snapshot }: { snapshot: Snapshot }) {
           value={fmt(h.incomeReceivedCents)}
           note={`of ${fmt(h.incomeExpectedCents)} expected`}
         />
-        <Stat label="Spent" value={fmt(h.spentCents)} note={`of ${fmt(h.spendingTargetCents)} planned`} />
-        <Stat
-          label="Savings rate"
-          value={h.savingsRatePercent === null ? 'Not yet' : `${h.savingsRatePercent}%`}
-          note={`${fmt(h.savedCents)} saved`}
-        />
+        <Stat label="Spent" {...spentStat(h, snapshot.currency)} />
+        <Stat label="Savings rate" {...savingsStat(h, snapshot.currency)} />
       </View>
     </Card>
   );
