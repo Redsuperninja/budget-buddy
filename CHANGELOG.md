@@ -8,3 +8,4 @@
 - Tax-year reference data for 2025 and 2026 (brackets, standard deduction, charitable, HSA, retirement, SALT, FICA limits) with IRS sources and a validating loader. See `docs/tax-data.md`.
 - Database layer: SQLite database in the data folder with tables for accounts, transactions, categories, paychecks, receipts, donations, stocks, deductions, and devices; it sets itself up and updates automatically on start, comes with a starter set of budget categories, and stores all money as whole cents.
 - Sync API contract v1: the exact rules for how the phone and the computer pair and sync, with test examples both sides can check (ADR-0004).
+- Phone Home dashboard: this month's income, spending, what's left, and savings rate; Needs / Wants / Savings bars you can tap to see categories; recent activity; and a Taxes summary. Shows clearly labeled sample data until the phone is connected.

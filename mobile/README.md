@@ -4,8 +4,8 @@ The phone side of Budget Buddy, built with [Expo](https://expo.dev) (React Nativ
 [expo-router](https://docs.expo.dev/router/introduction/). It runs inside the free **Expo Go** app on
 iPhone and Android, so there's nothing to publish to an app store.
 
-> Right now this is the app's starting shell: four tabs (Home, Add Receipt, Taxes, Settings) with
-> placeholder screens. Connecting to your computer, taking receipt photos, and syncing come in later updates.
+> Right now Home and Taxes show a made-up **sample** budget (with a banner saying so). Connecting to your
+> computer, taking receipt photos, and syncing come in later updates; then these screens show your real budget.
 
 ## Run it on your phone
 
@@ -40,6 +40,11 @@ npm test            # Jest unit tests (jest-expo preset)
 | `src/components/` | Shared building blocks (screen wrapper, big button, card). |
 | `src/theme.ts` | Colors (light + dark), spacing, font sizes. |
 | `src/lib/money.ts` | `formatCents()`: turns integer cents into text like `$1,234.56`. |
+| `src/lib/budget.ts` | Budget math for Home: percent used, left to spend, savings rate, on track / close / over. |
+| `src/lib/dates.ts` | Plain-English dates ("October 2026", "2 days ago"). |
+| `src/sync/snapshot.ts` | Snapshot types (sync contract §5) and `parseSnapshot()`, which checks a snapshot before use. |
+| `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
+| `src/sync/store.tsx` | `SnapshotProvider` / `useSnapshot()`: loads the saved snapshot, falls back to the sample. |
 
 ## Rules of the road
 

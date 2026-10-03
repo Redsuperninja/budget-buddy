@@ -634,9 +634,27 @@ Rules:
 - `accounts`: never includes account numbers or `last4`.
 - `deductions[].kind` is a stable key (`medical`, `education`, `home_office`, `hsa`, `business`, `other`, …);
   `label` is the display text. The phone shows unknown kinds using `label`.
+- `deductions[].amount_cents` is the **amount recorded** (what the user spent or imported in that kind),
+  not the amount the tax rules allow. Floors, limits, itemizing vs. the standard deduction, and
+  employee vs. self-employed rules are not applied. The phone labels this section "Possibly deductible
+  expenses" and must not present it as tax saved.
 - `is_estimate: true` means "the Home Base is missing something" (e.g. a sale without a cost basis); the
-  phone shows a small "estimate" tag.
+  phone shows a small "missing info" tag.
 - An empty database still produces a valid snapshot (zeros, empty arrays, three empty groups).
+
+Money rules (how the server fills the totals; the phone trusts them and never re-derives them from
+`transactions`):
+- `income.received_cents` (and `expected_cents`) count **take-home pay only**. Refunds, transfers between
+  the user's own accounts, and balance adjustments are never income.
+- Needs and wants `actual_cents` (group and category) are **net of refunds** in the same category, so a
+  refund-heavy month can make them negative. They exclude transfers between the user's own accounts and
+  balance adjustments.
+- The savings `actual_cents` is money moved into savings this month **minus withdrawals**, so it can be
+  negative when more came out than went in.
+- `transactions` still lists transfers, refunds and adjustments as they happened (sign = direction of
+  money); they are for display only.
+- `accounts[].balance_cents` is the account balance. **Negative means money owed** (e.g. overdrawn
+  checking). Any future debt kind (credit card, loan) follows the same rule: an amount owed is negative.
 
 ### 5.2 Example
 
