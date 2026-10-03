@@ -41,8 +41,8 @@ describe('Home screen', () => {
     expect(screen.getByText('12%')).toBeTruthy();
 
     // Groups with text status, not colour alone.
-    expect(screen.getByText('Spent $2,256.80 of $2,600.00 (87%)')).toBeTruthy();
-    expect(screen.getByText('Saved $600.00 of $1,040.00 (58%)')).toBeTruthy();
+    expect(screen.getByText('Spent $2,256.80 of $2,600.00 (86%)')).toBeTruthy();
+    expect(screen.getByText('Saved $600.00 of $1,040.00 (57%)')).toBeTruthy();
     expect(screen.getByText('$440.00 to go')).toBeTruthy();
 
     // Recent activity, money formatted.

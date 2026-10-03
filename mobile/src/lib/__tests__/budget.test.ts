@@ -14,10 +14,32 @@ import {
 } from '../budget';
 
 describe('percentUsed', () => {
-  it('rounds to a whole percent', () => {
-    expect(percentUsed(158000, 260000)).toBe(61);
+  it('rounds down to a whole percent', () => {
+    expect(percentUsed(158000, 260000)).toBe(60); // 60.77%
     expect(percentUsed(1, 3)).toBe(33);
-    expect(percentUsed(2, 3)).toBe(67);
+    expect(percentUsed(2, 3)).toBe(66);
+  });
+
+  it.each([
+    // [actual, target, percent, status]
+    [8960, 10000, 89, 'on_track'],
+    [8999, 10000, 89, 'on_track'],
+    [9000, 10000, 90, 'close'],
+    [9960, 10000, 99, 'close'],
+    [10000, 10000, 100, 'close'],
+    [10001, 10000, 101, 'over'],
+    [10040, 10000, 101, 'over'],
+    [10100, 10000, 101, 'over'],
+    [10199, 10000, 101, 'over'],
+    [10250, 10000, 102, 'over'],
+  ])('%i of %i shows %i%% and agrees with the status (%s)', (actual, target, pct, status) => {
+    expect(percentUsed(actual, target)).toBe(pct);
+    expect(spendingStatus(actual, target)).toBe(status);
+  });
+
+  it('never goes below 0', () => {
+    expect(percentUsed(-500, 10000)).toBe(0);
+    expect(percentUsed(0, 10000)).toBe(0);
   });
 
   it('can go over 100', () => {

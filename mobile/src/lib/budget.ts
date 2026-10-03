@@ -5,6 +5,12 @@
  * - "Spent" = actual of the spending groups (Needs + Wants). Savings is money kept, not spent.
  * - "Left to spend" = spending targets (Needs + Wants) minus spent. Negative means over budget.
  * - "Savings rate" = saved this month ÷ take-home received this month.
+ *
+ * Rounding: "percent used" is rounded DOWN to a whole number (Math.floor), never up, so the number
+ * stays on the same side of each threshold as the status words (89.6% shows 89%, "On track";
+ * 99.6% shows 99%, "Close to the limit"). Anything over the target shows at least 101%, so
+ * "Over by $0.40" never sits next to "(100%)". Negative actuals (refunds bigger than spending, or
+ * money taken out of savings) show 0%.
  */
 import { formatCents } from './money';
 import type { BudgetCategory, BudgetGroup, GroupKey, Snapshot, SnapshotTransaction } from '../sync/snapshot';
@@ -17,12 +23,15 @@ export type SavingsStatus = 'goal_met' | 'in_progress' | 'no_target';
 export type LineStatus = SpendingStatus | SavingsStatus;
 
 /**
- * Whole-number percent of target used, rounded (e.g. 61). Can exceed 100.
- * Returns null when there's no target (target <= 0), since a percent would be meaningless.
+ * Whole-number percent of target used, rounded down (e.g. 61). Can exceed 100; anything over the
+ * target is at least 101. Never below 0. Returns null when there's no target (target <= 0),
+ * since a percent would be meaningless.
  */
 export function percentUsed(actualCents: number, targetCents: number): number | null {
   if (targetCents <= 0) return null;
-  return Math.round((actualCents * 100) / targetCents);
+  if (actualCents <= 0) return 0;
+  const pct = Math.floor((actualCents * 100) / targetCents);
+  return actualCents > targetCents && pct <= 100 ? 101 : pct;
 }
 
 /** Width for a progress bar, 0–100 (overspending fills the bar, it doesn't overflow). */

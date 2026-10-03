@@ -54,7 +54,7 @@ type LineProps = {
   currency: string;
 };
 
-/** "Spent $1,580.00 of $2,600.00 (61%)" or "Saved ..." */
+/** "Spent $1,580.00 of $2,600.00 (60%)" or "Saved ..." */
 function amountsText({ group, actualCents, targetCents, currency }: LineProps): string {
   const verb = group === 'savings' ? 'Saved' : 'Spent';
   const actual = formatCents(actualCents, currency);
