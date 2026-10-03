@@ -28,17 +28,20 @@ def _run(argv, answers):
 def test_show_prints_phrase_after_warning(data_dir, store):
     create_app().state.engine.dispose()
     key = store.get(key_name_for(data_dir))
-    code, out = _run(["recovery-phrase", "show"], [""])
+    code, out = _run(["recovery-phrase", "show"], ["SHOW"])
     assert code == 0
     assert "Keep it private" in out
     assert master_key_to_phrase(key) in out
 
 
-def test_show_can_be_cancelled(data_dir, store):
+@pytest.mark.parametrize("answer", ["", "q", "yes", "no", "y", "show", "Show", "SHOW please"])
+def test_show_needs_exactly_show(data_dir, store, answer):
+    """Security review M2: only typing SHOW displays the phrase; "yes" must not."""
     create_app().state.engine.dispose()
     key = store.get(key_name_for(data_dir))
-    code, out = _run(["recovery-phrase", "show"], ["q"])
+    code, out = _run(["recovery-phrase", "show"], [answer])
     assert code == 1
+    assert "Cancelled" in out
     assert master_key_to_phrase(key) not in out
 
 

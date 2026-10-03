@@ -54,9 +54,10 @@ def show_phrase(settings: Settings, output: Output = print, ask: Input = input) 
         return 1
     output(SHOW_WARNING)
     answer = ask(
-        "Is anyone else looking at your screen? Press Enter to show the phrase, or type Q to quit: "
+        "Make sure nobody else can see your screen. Type SHOW to display your recovery phrase, "
+        "or press Enter to cancel: "
     )
-    if answer.strip().lower() in {"q", "quit", "n", "no"}:
+    if answer.strip() != "SHOW":  # only an exact SHOW; anything else (even "yes") cancels
         output("Cancelled. Nothing was shown.")
         return 1
     output("")
