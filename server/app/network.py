@@ -89,6 +89,25 @@ def allowed_hosts(port: int) -> frozenset[str]:
     return frozenset({f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"})
 
 
+def allowed_origins(port: int) -> frozenset[str]:
+    """The ``Origin`` values a dashboard page on this computer sends (sync contract §3.1)."""
+    return frozenset(f"http://{host}" for host in allowed_hosts(port))
+
+
+# The only routes the phone needs over Wi-Fi (sync contract §3.1). Everything else is for this
+# computer only.
+LAN_ROUTES = ("/api/health", "/api/pair")
+LAN_ROUTE_PREFIXES = ("/api/sync/",)
+
+# Reading is safe to allow without an Origin; anything else changes data.
+SAFE_METHODS = frozenset({"GET", "HEAD"})
+
+
+def is_lan_route(path: str) -> bool:
+    """True for the few routes a paired phone may call from the home network."""
+    return path in LAN_ROUTES or path.startswith(LAN_ROUTE_PREFIXES)
+
+
 def _header(scope: Scope, name: bytes) -> str | None:
     """The value of a request header, or None if it's missing or sent more than once."""
     values = [v for k, v in scope.get("headers", []) if k.lower() == name]
@@ -101,11 +120,15 @@ class LocalAccessMiddleware:
     """ASGI middleware for the sync contract §3.1 rules that apply on top of the network check.
 
     - Every request must name this computer in its ``Host`` header, else 403 ``bad_host``.
+    - Requests that change data on a dashboard route (anything but GET/HEAD) must come from a
+      page on this computer: ``Origin`` must be present and match, else 403 ``bad_origin``. This
+      stops other websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
     """
 
     def __init__(self, app: ASGIApp, port: int) -> None:
         self.app = app
         self.hosts = allowed_hosts(port)
+        self.origins = allowed_origins(port)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in ("http", "websocket"):
@@ -117,6 +140,12 @@ class LocalAccessMiddleware:
             await _refuse(scope, receive, send, "bad_host", BAD_HOST_MESSAGE)
             return
 
+        if not is_lan_route(scope["path"]) and scope.get("method", "GET") not in SAFE_METHODS:
+            origin = _header(scope, b"origin")
+            if origin is None or origin.lower() not in self.origins:
+                await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
+                return
+
         await self.app(scope, receive, send)
 
 
@@ -124,6 +153,9 @@ BAD_HOST_MESSAGE = (
     "Budget Buddy only answers when it's opened as http://127.0.0.1 or http://localhost "
     "on this computer."
 )
+
+
+BAD_ORIGIN_MESSAGE = "Changes can only be made from the Budget Buddy page on this computer."
 
 
 async def _refuse(scope: Scope, receive: Receive, send: Send, code: str, message: str) -> None:

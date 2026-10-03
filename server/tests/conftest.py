@@ -25,6 +25,8 @@ def make_client(data_dir: Path):
 
     def make(peer: str = "127.0.0.1", **kwargs) -> TestClient:
         kwargs.setdefault("base_url", BASE_URL)
+        # Like the dashboard page: browsers send Origin on every POST/PATCH/DELETE.
+        kwargs.setdefault("headers", {"Origin": kwargs["base_url"]})
         return TestClient(create_app(), client=(peer, 50000), **kwargs)
 
     return make

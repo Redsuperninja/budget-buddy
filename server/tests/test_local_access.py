@@ -1,4 +1,4 @@
-"""Sync contract §3.1 access rules: Host allowlist. Fake data only."""
+"""Sync contract §3.1 access rules: Host allowlist, Origin on writes. Fake data only."""
 
 import asyncio
 
@@ -105,3 +105,75 @@ def test_websocket_with_foreign_host_is_closed(client):
         with client.websocket_connect("ws://attacker.example:8765/api/health"):
             pass
     assert excinfo.value.code == 1008
+
+
+# --- M1: Origin check on anything that changes data (stops cross-site requests) ---
+
+
+def _writes(account_id: int) -> list[tuple[str, str, dict | None]]:
+    return [
+        ("post", ACCOUNTS, {"name": "X", "kind": "checking"}),
+        ("patch", f"{ACCOUNTS}/{account_id}", {"name": "Y"}),
+        ("delete", f"{ACCOUNTS}/{account_id}", None),
+        ("post", "/api/local/transactions", {"account_id": account_id, "amount_cents": 1}),
+    ]
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        None,
+        "http://attacker.example",
+        "http://attacker.example:8765",
+        "http://127.0.0.1:9999",
+        "https://127.0.0.1:8765",
+        "http://127.0.0.1:8765.attacker.example",
+        "null",  # sandboxed iframes and some redirects
+        "",
+    ],
+)
+def test_write_without_matching_origin_is_refused(make_client, make_account, origin):
+    account_id = make_account()["id"]
+    headers = {} if origin is None else {"Origin": origin}
+    client = make_client(headers=headers)
+    for method, path, body in _writes(account_id):
+        response = client.request(method, path, json=body)
+        assert response.status_code == 403, (method, path)
+        assert _error_code(response) == "bad_origin"
+    assert client.get(f"{ACCOUNTS}/{account_id}").json()["name"] == "Test Checking"
+
+
+@pytest.mark.parametrize(
+    "origin", ["http://127.0.0.1:8765", "http://localhost:8765", "http://[::1]:8765"]
+)
+def test_write_from_this_computer_is_allowed(make_client, origin):
+    client = make_client(headers={"Origin": origin})
+    response = client.post(ACCOUNTS, json={"name": "X", "kind": "checking"})
+    assert response.status_code == 201, response.text
+
+
+def test_reads_do_not_need_an_origin(make_client):
+    client = make_client(headers={})
+    assert client.get(ACCOUNTS).status_code == 200
+    assert client.head("/api/health").status_code != 403
+
+
+def test_cross_site_form_post_does_not_succeed(make_client):
+    # What an HTML form on another site can send: text/plain, no matching Origin.
+    form = {"Content-Type": "text/plain"}
+    body = '{"name": "X", "kind": "checking"}'
+    no_origin = make_client(headers={})
+    assert no_origin.post(ACCOUNTS, content=body, headers=form).status_code == 403
+    foreign = make_client(headers={"Origin": "http://attacker.example"})
+    assert foreign.post(ACCOUNTS, content=body, headers=form).status_code == 403
+    # Even from this computer, a non-JSON body is not accepted.
+    assert make_client().post(ACCOUNTS, content=body, headers=form).status_code == 422
+    assert make_client().get(ACCOUNTS).json() == []
+
+
+@pytest.mark.parametrize("path", ["/api/pair", "/api/sync/ack"])
+def test_phone_routes_do_not_need_an_origin(make_client, path):
+    # The phone app isn't a browser and sends no Origin. These routes don't exist yet (#14/#15),
+    # so a 404 shows the request got past the Origin check.
+    response = make_client(headers={}).post(path, json={})
+    assert response.status_code == 404
