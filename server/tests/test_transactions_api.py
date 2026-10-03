@@ -34,16 +34,57 @@ def test_transaction_crud(client, add_txn, accounts):
 
     response = client.patch(
         f"{URL}/{txn_id}",
-        json={"amount": "-50.10", "account_id": savings, "category_id": None, "kind": "refund"},
+        json={"amount": "50.10", "account_id": savings, "category_id": None, "kind": "refund"},
     )
     assert response.status_code == 200, response.text
     updated = response.json()
-    assert (updated["amount_cents"], updated["account_id"]) == (-5_010, savings)
+    assert (updated["amount_cents"], updated["account_id"]) == (5_010, savings)
     assert (updated["category_id"], updated["kind"]) == (None, "refund")
     assert updated["description"] == "Fake"
 
     assert client.delete(f"{URL}/{txn_id}").status_code == 204
     assert client.get(f"{URL}/{txn_id}").status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("start", "patch", "ok"),
+    [
+        # Creating a refund: only a positive amount makes sense.
+        (None, {"kind": "refund", "amount_cents": 1_000}, True),
+        (None, {"kind": "refund", "amount_cents": -1_000}, False),
+        (None, {"kind": "refund", "amount": "-10.00"}, False),
+        # PATCH the kind only: the amount already stored decides.
+        ({"amount_cents": -1_000}, {"kind": "refund"}, False),
+        ({"amount_cents": 1_000}, {"kind": "refund"}, True),
+        # PATCH the amount only, on an existing refund.
+        ({"amount_cents": 1_000, "kind": "refund"}, {"amount_cents": -1_000}, False),
+        ({"amount_cents": 1_000, "kind": "refund"}, {"amount": "-0.01"}, False),
+        ({"amount_cents": 1_000, "kind": "refund"}, {"amount_cents": 2_500}, True),
+        # Both at once, and turning a negative refund back into a normal purchase.
+        ({"amount_cents": -1_000}, {"kind": "refund", "amount_cents": 1_000}, True),
+        ({"amount_cents": 1_000, "kind": "refund"}, {"kind": "normal", "amount_cents": -1}, True),
+    ],
+)
+def test_refund_must_be_positive(client, add_txn, accounts, start, patch, ok):
+    if start is None:
+        body = {"account_id": accounts[0], "date": "2026-01-15", "description": "Fake", **patch}
+        response = client.post(URL, json=body)
+        expected_status = 201
+    else:
+        txn = add_txn(accounts[0], start.pop("amount_cents"), **start)
+        response = client.patch(f"{URL}/{txn['id']}", json=patch)
+        expected_status = 200
+    if ok:
+        assert response.status_code == expected_status, response.text
+    else:
+        assert response.status_code == 422
+        error = response.json()["error"]
+        assert error["code"] == "invalid_refund"
+        assert error["message"] == (
+            "A refund is money coming back, so its amount must be positive."
+        )
+        if start is not None:  # nothing changed
+            assert client.get(f"{URL}/{txn['id']}").json() == txn
 
 
 def test_create_with_dollar_amount(client, add_txn, accounts):

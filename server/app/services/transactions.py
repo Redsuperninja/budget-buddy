@@ -41,6 +41,17 @@ def _check_references(session: Session, data: dict) -> None:
         raise not_found("category")
 
 
+def _check_kind_rules(kind: TransactionKind, amount_cents: int) -> None:
+    """Rules that depend on several fields together. Run on the final values after an edit,
+    since a PATCH can change the kind and the amount separately."""
+    if kind == TransactionKind.REFUND and amount_cents <= 0:
+        raise ApiError(
+            422,
+            "invalid_refund",
+            "A refund is money coming back, so its amount must be positive.",
+        )
+
+
 def _escape_like(text: str) -> str:
     return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
@@ -76,6 +87,7 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
 
 def create_transaction(session: Session, data: TransactionCreate) -> Transaction:
     values = data.model_dump(exclude={"amount"})
+    _check_kind_rules(values["kind"], values["amount_cents"])
     _check_references(session, values)
     transaction = Transaction(**values, source=TransactionSource.MANUAL)
     session.add(transaction)
@@ -96,6 +108,10 @@ def update_transaction(
             "This transaction is part of a transfer. Remove the transfer link before changing "
             "its account, amount, or kind.",
         )
+    _check_kind_rules(
+        changes.get("kind", transaction.kind),
+        changes.get("amount_cents", transaction.amount_cents),
+    )
     _check_references(session, changes)
     for field, value in changes.items():
         setattr(transaction, field, value)
