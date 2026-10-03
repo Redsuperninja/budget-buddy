@@ -6,7 +6,7 @@ from app import cli
 from app.config import Settings
 from app.crypto import EncryptionError, MemoryKeyStore, key_name_for, master_key_to_phrase
 from app.crypto import keystore as keystore_module
-from app.crypto.keys import load_or_create_master_key, read_fingerprint
+from app.crypto.keys import fingerprint_path, load_or_create_master_key, read_fingerprint
 from app.main import create_app
 
 
@@ -18,10 +18,20 @@ def store(monkeypatch):
     return fresh
 
 
+@pytest.fixture(autouse=True)
+def terminal(monkeypatch):
+    """Pretend output goes to a terminal window (pytest captures it, so it normally doesn't)."""
+    monkeypatch.setattr(cli, "_stdout_is_terminal", lambda: True)
+
+
 def _run(argv, answers):
     output: list[str] = []
     answers = iter(answers)
-    code = cli.main(argv, output=output.append, ask=lambda _prompt: next(answers))
+
+    def answer(_prompt):
+        return next(answers)
+
+    code = cli.main(argv, output=output.append, ask=answer, ask_secret=answer)
     return code, "\n".join(output)
 
 
@@ -115,3 +125,50 @@ def test_no_arguments_starts_server(monkeypatch):
     monkeypatch.setattr("app.__main__.serve", lambda: called.append(True))
     assert cli.main([]) == 0
     assert called == [True]
+
+
+# --- keeping the phrase out of files and scrollback (security review L2) ---------------------
+
+
+def test_show_refuses_when_output_is_not_a_terminal(data_dir, store, monkeypatch):
+    create_app().state.engine.dispose()
+    key = store.get(key_name_for(data_dir))
+    monkeypatch.setattr(cli, "_stdout_is_terminal", lambda: False)
+    code, out = _run(["recovery-phrase", "show"], ["SHOW"])
+    assert code == 1
+    assert "only shown in a terminal" in out
+    assert master_key_to_phrase(key) not in out
+
+    code, out = _run(["recovery-phrase", "show", "--force"], ["SHOW"])
+    assert code == 0
+    assert master_key_to_phrase(key) in out
+
+
+def test_show_refuses_key_that_does_not_match_the_folder(data_dir, store):
+    create_app().state.engine.dispose()
+    key = store.get(key_name_for(data_dir))
+    fingerprint_path(data_dir).write_text("0" * 32 + "\n", encoding="ascii")
+    code, out = _run(["recovery-phrase", "show"], ["SHOW"])
+    assert code == 1
+    assert "doesn't match your data folder" in out
+    assert master_key_to_phrase(key) not in out
+
+
+def test_restore_reads_phrase_without_echo(data_dir, store, monkeypatch):
+    phrase = master_key_to_phrase(bytes(32))
+    prompts = []
+
+    def fake_getpass(prompt):
+        prompts.append(prompt)
+        return phrase
+
+    def no_visible_input(_prompt):
+        raise AssertionError("the phrase must not be read with input()")
+
+    monkeypatch.setattr(cli.getpass, "getpass", fake_getpass)
+    output: list[str] = []
+    code = cli.restore_phrase(Settings(), output.append, ask=no_visible_input)
+    assert code == 0
+    assert prompts == ["Recovery phrase: "]
+    assert phrase not in "\n".join(output)
+    assert store.get(key_name_for(data_dir)) == bytes(32)

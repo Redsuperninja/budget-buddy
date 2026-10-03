@@ -1,6 +1,8 @@
 """Command-line tools: ``python -m app recovery-phrase show|restore``."""
 
 import argparse
+import getpass
+import sys
 from collections.abc import Callable
 
 from app.config import Settings
@@ -12,7 +14,14 @@ from app.crypto import (
     master_key_to_phrase,
     phrase_to_master_key,
 )
-from app.crypto.keys import fingerprint, load_master_key, read_fingerprint, write_fingerprint
+from app.crypto.keys import (
+    WRONG_KEY_MESSAGE,
+    fingerprint,
+    load_master_key,
+    matches_fingerprint,
+    read_fingerprint,
+    write_fingerprint,
+)
 from app.db import DatabaseUpgradeError
 
 Output = Callable[[str], None]
@@ -39,11 +48,34 @@ can read your data folder again:
   {data_dir}
 
 Type the phrase exactly as you saved it (16 groups of 4 letters and numbers). Dashes, spaces,
-and lowercase are fine.
+and lowercase are fine. For privacy, what you type won't appear on the screen.
 """
 
+NOT_A_TERMINAL_MESSAGE = (
+    "The recovery phrase is only shown in a terminal window, so it doesn't end up saved in a "
+    "file or a log. Run this command directly in a terminal, without redirecting its output. "
+    "(If you really want it written to a file, add --force.)"
+)
 
-def show_phrase(settings: Settings, output: Output = print, ask: Input = input) -> int:
+
+def _stdout_is_terminal() -> bool:
+    try:
+        return sys.stdout.isatty()
+    except (AttributeError, ValueError):  # replaced or closed stdout
+        return False
+
+
+def _read_hidden(prompt: str) -> str:
+    """Read the phrase without echoing it, so it doesn't stay in the terminal's scrollback."""
+    return getpass.getpass(prompt)
+
+
+def show_phrase(
+    settings: Settings, output: Output = print, ask: Input = input, force: bool = False
+) -> int:
+    if not force and not _stdout_is_terminal():
+        output(NOT_A_TERMINAL_MESSAGE)
+        return 1
     store = get_key_store(settings.key_store)
     key = load_master_key(store, settings.data_dir)
     if key is None:
@@ -51,6 +83,10 @@ def show_phrase(settings: Settings, output: Output = print, ask: Input = input) 
             f"There's no encryption key yet for {settings.data_dir}. Start Budget Buddy once "
             "(python -m app) and then run this again."
         )
+        return 1
+    if matches_fingerprint(settings.data_dir, key) is False:
+        # Don't let anyone write down a phrase that won't open their data.
+        output(WRONG_KEY_MESSAGE.format(data_dir=settings.data_dir))
         return 1
     output(SHOW_WARNING)
     answer = ask(
@@ -67,11 +103,17 @@ def show_phrase(settings: Settings, output: Output = print, ask: Input = input) 
     return 0
 
 
-def restore_phrase(settings: Settings, output: Output = print, ask: Input = input) -> int:
+def restore_phrase(
+    settings: Settings,
+    output: Output = print,
+    ask: Input = input,
+    ask_secret: Input | None = None,
+) -> int:
     data_dir = settings.data_dir
     output(RESTORE_INTRO.format(data_dir=data_dir))
+    ask_secret = ask_secret or _read_hidden
     try:
-        key = phrase_to_master_key(ask("Recovery phrase: "))
+        key = phrase_to_master_key(ask_secret("Recovery phrase: "))
     except RecoveryPhraseError as exc:
         output(str(exc))
         return 1
@@ -109,13 +151,23 @@ def restore_phrase(settings: Settings, output: Output = print, ask: Input = inpu
     return 0
 
 
-def main(argv: list[str] | None = None, output: Output = print, ask: Input = input) -> int:
+def main(
+    argv: list[str] | None = None,
+    output: Output = print,
+    ask: Input = input,
+    ask_secret: Input | None = None,
+) -> int:
     parser = argparse.ArgumentParser(prog="python -m app", description="Budget Buddy Home Base")
     commands = parser.add_subparsers(dest="command")
     recovery = commands.add_parser(
         "recovery-phrase", help="Show or restore the recovery phrase for your encryption key."
     )
     recovery.add_argument("action", choices=["show", "restore"])
+    recovery.add_argument(
+        "--force",
+        action="store_true",
+        help="show: print the phrase even when the output isn't a terminal (e.g. into a file).",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -126,8 +178,8 @@ def main(argv: list[str] | None = None, output: Output = print, ask: Input = inp
             return 0
         settings = Settings()
         if args.action == "show":
-            return show_phrase(settings, output, ask)
-        return restore_phrase(settings, output, ask)
+            return show_phrase(settings, output, ask, force=args.force)
+        return restore_phrase(settings, output, ask, ask_secret)
     except (EncryptionError, DatabaseUpgradeError) as exc:
         output(str(exc))
         return 1

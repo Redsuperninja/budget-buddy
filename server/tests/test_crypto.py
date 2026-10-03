@@ -455,3 +455,12 @@ def test_recovery_phrase_wrong_length_and_bad_characters():
         phrase_to_master_key(phrase[:-5])
     with pytest.raises(RecoveryPhraseError, match="can't be in"):
         phrase_to_master_key("U" + phrase[1:])
+
+
+def test_recovery_phrase_error_does_not_echo_the_character():
+    """Security review L2: report only where the bad character is, never the character."""
+    phrase = master_key_to_phrase(KEY).replace("-", "")
+    bad = phrase[:4] + "#" + phrase[5:]
+    with pytest.raises(RecoveryPhraseError, match="Character 5 can't be in") as raised:
+        phrase_to_master_key(bad)
+    assert "#" not in str(raised.value)

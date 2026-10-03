@@ -60,7 +60,8 @@ def phrase_to_master_key(phrase: str) -> bytes:
     for position, ch in enumerate(cleaned, start=1):
         if ch not in _DECODE:
             raise RecoveryPhraseError(
-                f"Character {position} ({ch!r}) can't be in a recovery phrase. "
+                # Only the position: echoing the character would put part of the phrase on screen.
+                f"Character {position} can't be in a recovery phrase. "
                 "Please check it and try again."
             )
         number = (number << 5) | _DECODE[ch]
