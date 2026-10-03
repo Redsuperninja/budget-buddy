@@ -12,6 +12,8 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 ## Phase 2: Getting data in
 - [x] 5. Accounts + transactions API (manual entry) — *backend-engineer*
 - [ ] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
+  - Adjustments (including opening balances) change balances but are never counted as income or spending.
+    Transfers are excluded too (see "Transaction kinds" in ARCHITECTURE.md).
 - [ ] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
 - [ ] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [ ] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*

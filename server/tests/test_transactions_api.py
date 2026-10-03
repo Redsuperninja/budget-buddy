@@ -87,6 +87,29 @@ def test_refund_must_be_positive(client, add_txn, accounts, start, patch, ok):
             assert client.get(f"{URL}/{txn['id']}").json() == txn
 
 
+def test_adjustment_has_no_category(client, add_txn, accounts):
+    groceries = category_id(client)
+    body = {"account_id": accounts[0], "date": "2026-01-01", "description": "Opening balance"}
+    body |= {"amount_cents": 1_000_000, "kind": "adjustment"}
+    refused = client.post(URL, json={**body, "category_id": groceries})
+    assert refused.status_code == 422
+    assert refused.json()["error"]["code"] == "invalid_category"
+
+    opening = add_txn(**body)
+    assert opening["category_id"] is None
+    # Giving an adjustment a category, or making a categorized transaction an adjustment.
+    patched = client.patch(f"{URL}/{opening['id']}", json={"category_id": groceries})
+    assert patched.json()["error"]["code"] == "invalid_category"
+    bought = add_txn(accounts[0], -500, category_id=groceries)
+    patched = client.patch(f"{URL}/{bought['id']}", json={"kind": "adjustment"})
+    assert patched.json()["error"]["code"] == "invalid_category"
+    # Clearing the category in the same edit is fine.
+    patched = client.patch(
+        f"{URL}/{bought['id']}", json={"kind": "adjustment", "category_id": None}
+    )
+    assert patched.status_code == 200, patched.text
+
+
 def test_create_with_dollar_amount(client, add_txn, accounts):
     created = add_txn(accounts[0], None, amount="-12.30")
     assert created["amount_cents"] == -1_230

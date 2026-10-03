@@ -82,6 +82,17 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `seen_nonces` | device_id, nonce (bytes), ts; UNIQUE(device_id, nonce); replay cache pruned below the device's watermark |
 
 Money is always stored as **integer cents**, never floats. Every table also has `created_at` / `updated_at`.
+
+### Transaction kinds and what counts as income or spending
+
+- `normal`: everyday money in or out. Counts as income or spending, decided by its category's group.
+- `refund`: money coming back for an earlier purchase. **Always positive.** It nets against spending in
+  its category; it is never income.
+- `transfer`: one half of a linked pair moving money between two of your own accounts. Never income or
+  spending.
+- `adjustment`: corrects a balance, including the **opening balance** of a new account. **Adjustments
+  (including opening balances) change balances but are never counted as income or spending.** They have
+  no category, so they can't slip in through a category group.
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
 `budget.db.bak-<revision>` is saved next to it.

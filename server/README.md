@@ -53,7 +53,9 @@ editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead.
 
 - Accounts: `GET/POST /api/local/accounts`, `GET/PATCH/DELETE /api/local/accounts/{id}`.
   `balance_cents` is the sum of the account's transactions (record a starting balance as an
-  `adjustment`). An account with transactions can't be deleted.
+  `adjustment`). Adjustments (including opening balances) change balances but are never counted
+  as income or spending, so they can't have a category. A `refund` must be a positive amount. An
+  account with transactions can't be deleted.
 - Transactions: `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`,
   `date_from`, `date_to`, `kind`, `q`, `limit`, `offset`; newest first),
   `GET/PATCH/DELETE /api/local/transactions/{id}`, and `POST/DELETE

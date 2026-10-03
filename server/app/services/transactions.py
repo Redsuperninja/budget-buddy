@@ -41,7 +41,7 @@ def _check_references(session: Session, data: dict) -> None:
         raise not_found("category")
 
 
-def _check_kind_rules(kind: TransactionKind, amount_cents: int) -> None:
+def _check_kind_rules(kind: TransactionKind, amount_cents: int, category_id: int | None) -> None:
     """Rules that depend on several fields together. Run on the final values after an edit,
     since a PATCH can change the kind and the amount separately."""
     if kind == TransactionKind.REFUND and amount_cents <= 0:
@@ -49,6 +49,15 @@ def _check_kind_rules(kind: TransactionKind, amount_cents: int) -> None:
             422,
             "invalid_refund",
             "A refund is money coming back, so its amount must be positive.",
+        )
+    # Adjustments (including opening balances) change balances but are never income or
+    # spending, so they mustn't reach the monthly summary through a category.
+    if kind == TransactionKind.ADJUSTMENT and category_id is not None:
+        raise ApiError(
+            422,
+            "invalid_category",
+            "Adjustments, such as a starting balance, aren't income or spending, so they can't "
+            "have a category.",
         )
 
 
@@ -87,7 +96,7 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
 
 def create_transaction(session: Session, data: TransactionCreate) -> Transaction:
     values = data.model_dump(exclude={"amount"})
-    _check_kind_rules(values["kind"], values["amount_cents"])
+    _check_kind_rules(values["kind"], values["amount_cents"], values["category_id"])
     _check_references(session, values)
     transaction = Transaction(**values, source=TransactionSource.MANUAL)
     session.add(transaction)
@@ -111,6 +120,7 @@ def update_transaction(
     _check_kind_rules(
         changes.get("kind", transaction.kind),
         changes.get("amount_cents", transaction.amount_cents),
+        changes.get("category_id", transaction.category_id),
     )
     _check_references(session, changes)
     for field, value in changes.items():

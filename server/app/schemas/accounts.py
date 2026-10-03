@@ -36,7 +36,8 @@ class AccountOut(Schema):
     last4: str | None
     notes: str | None
     # Sum of all the account's transactions. There's no opening-balance field: record a
-    # starting balance as an "adjustment" transaction.
+    # starting balance as an "adjustment" transaction. Adjustments (including opening balances)
+    # change balances but are never counted as income or spending.
     balance_cents: int
     transaction_count: int
     created_at: dt.datetime
