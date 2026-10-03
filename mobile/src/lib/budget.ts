@@ -201,6 +201,29 @@ export function categoriesById(snapshot: Snapshot): Map<number, BudgetCategory> 
   return map;
 }
 
+/**
+ * Neutral screen-reader word for a transaction's direction. A negative amount isn't always
+ * spending (it may be a move into savings) and a positive one isn't always income (it may be a
+ * refund, a transfer back, or an adjustment), so we don't guess.
+ */
+export function moneyDirection(amountCents: number): 'Money in' | 'Money out' {
+  return amountCents > 0 ? 'Money in' : 'Money out';
+}
+
+/**
+ * Category label for a Recent activity row. Categories in the savings group are prefixed with the
+ * group name ("Savings: Vacation fund") so a move into savings doesn't look like spending.
+ * No category is "No category" whatever the sign: we can't tell income from a refund or transfer.
+ */
+export function transactionCategoryLabel(tx: SnapshotTransaction, snapshot: Snapshot): string {
+  if (tx.category_id === null) return 'No category';
+  for (const g of snapshot.budget.groups) {
+    const c = g.categories.find((cat) => cat.id === tx.category_id);
+    if (c) return g.group === 'savings' ? `${g.name}: ${c.name}` : c.name;
+  }
+  return 'Other';
+}
+
 /** The most recent transactions, newest first (ties keep the snapshot's order). */
 export function recentTransactions(snapshot: Snapshot, limit = 10): SnapshotTransaction[] {
   return [...snapshot.transactions]

@@ -51,6 +51,16 @@ describe('Home screen', () => {
     expect(screen.getAllByText('+$2,600.00').length).toBeGreaterThan(0);
   });
 
+  it('labels Recent activity with neutral money in / money out wording', async () => {
+    await render(<HomeScreen />, { wrapper: Wrapper });
+    await screen.findByText(SAMPLE_BANNER_TEXT);
+
+    expect(screen.getByLabelText(/^Move to Vacation fund, .*, Savings: Vacation fund\. Money out \$100\.00\.$/)).toBeTruthy();
+    expect(screen.getAllByLabelText(/^Paycheck, .*, No category\. Money in \$2,600\.00\.$/).length).toBeGreaterThan(0);
+    expect(screen.queryAllByLabelText(/\. Spent \$[\d,.]+\.$/)).toHaveLength(0);
+    expect(screen.queryByText(/· Income$/)).toBeNull();
+  });
+
   it('expands a group to show its categories when tapped', async () => {
     await render(<HomeScreen />, { wrapper: Wrapper });
     await screen.findByText(SAMPLE_BANNER_TEXT);

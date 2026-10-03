@@ -3,7 +3,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { GroupCard } from '@/components/BudgetBreakdown';
 import { Card, Screen } from '@/components/Screen';
 import { LastSynced, SnapshotNotices } from '@/components/SnapshotNotices';
-import { categoriesById, monthHeadline, orderedGroups, recentTransactions, savingsStat, spentStat } from '@/lib/budget';
+import {
+  moneyDirection,
+  monthHeadline,
+  orderedGroups,
+  recentTransactions,
+  savingsStat,
+  spentStat,
+  transactionCategoryLabel,
+} from '@/lib/budget';
 import { formatDay, formatMonth } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import type { Snapshot, SnapshotTransaction } from '@/sync/snapshot';
@@ -72,7 +80,7 @@ function TransactionRow({
   return (
     <View
       accessible
-      accessibilityLabel={`${tx.description}, ${formatDay(tx.date, 'long')}, ${categoryName}. ${moneyIn ? 'Money in' : 'Spent'} ${amount}.`}
+      accessibilityLabel={`${tx.description}, ${formatDay(tx.date, 'long')}, ${categoryName}. ${moneyDirection(tx.amount_cents)} ${amount}.`}
       style={{
         minHeight: t.minTouchSize,
         paddingVertical: t.spacing.sm,
@@ -103,7 +111,6 @@ function TransactionRow({
 function RecentActivity({ snapshot }: { snapshot: Snapshot }) {
   const t = useTheme();
   const recent = recentTransactions(snapshot, 10);
-  const cats = categoriesById(snapshot);
   return (
     <View style={{ gap: t.spacing.sm }}>
       <SectionTitle>Recent activity</SectionTitle>
@@ -116,13 +123,7 @@ function RecentActivity({ snapshot }: { snapshot: Snapshot }) {
               key={tx.id}
               tx={tx}
               currency={snapshot.currency}
-              categoryName={
-                tx.category_id === null
-                  ? tx.amount_cents > 0
-                    ? 'Income'
-                    : 'No category'
-                  : (cats.get(tx.category_id)?.name ?? 'Other')
-              }
+              categoryName={transactionCategoryLabel(tx, snapshot)}
             />
           ))}
         </View>

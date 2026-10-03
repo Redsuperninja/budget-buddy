@@ -5,6 +5,7 @@ import {
   barPercent,
   categoriesById,
   CLOSE_THRESHOLD_PERCENT,
+  moneyDirection,
   monthHeadline,
   orderedGroups,
   percentUsed,
@@ -14,6 +15,7 @@ import {
   spendingStatus,
   spentStat,
   statusText,
+  transactionCategoryLabel,
 } from '../budget';
 
 describe('percentUsed', () => {
@@ -196,6 +198,35 @@ describe('monthHeadline', () => {
     const none: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
     none.income.received_cents = 0;
     expect(monthHeadline(none).savingsRatePercent).toBeNull();
+  });
+});
+
+describe('Recent activity labels', () => {
+  const tx = (id: number) => SAMPLE_SNAPSHOT.transactions.find((t) => t.id === id)!;
+
+  it('uses neutral money in / money out wording, never "Spent" or "Income"', () => {
+    expect(moneyDirection(-1475)).toBe('Money out');
+    expect(moneyDirection(-10000)).toBe('Money out'); // a move into savings is not spending
+    expect(moneyDirection(260000)).toBe('Money in');
+  });
+
+  it('labels a move into savings with the savings group', () => {
+    expect(transactionCategoryLabel(tx(1011), SAMPLE_SNAPSHOT)).toBe('Savings: Vacation fund');
+    expect(transactionCategoryLabel(tx(1004), SAMPLE_SNAPSHOT)).toBe('Savings: Emergency fund');
+  });
+
+  it('uses the plain category name for spending', () => {
+    expect(transactionCategoryLabel(tx(1015), SAMPLE_SNAPSHOT)).toBe('Eating out');
+  });
+
+  it('says "No category" for uncategorised rows whatever the sign', () => {
+    expect(transactionCategoryLabel(tx(1012), SAMPLE_SNAPSHOT)).toBe('No category'); // paycheck
+    const refund = { ...tx(1012), amount_cents: 2500, description: 'Store refund' };
+    expect(transactionCategoryLabel(refund, SAMPLE_SNAPSHOT)).toBe('No category');
+  });
+
+  it('says "Other" for a category the snapshot does not list', () => {
+    expect(transactionCategoryLabel({ ...tx(1015), category_id: 999 }, SAMPLE_SNAPSHOT)).toBe('Other');
   });
 });
 
