@@ -8,11 +8,12 @@ from fastapi import FastAPI
 
 from app import __version__
 from app.config import Settings
-from app.crypto import FieldCipher, load_keys
+from app.crypto import EncryptedFileStore, FieldCipher, load_keys
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
-from app.routers import accounts, health, transactions
+from app.routers import accounts, health, receipts, transactions
+from app.services.receipts import remove_orphan_files
 
 
 def ensure_data_dir(path: Path) -> None:
@@ -39,6 +40,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     keys = load_keys(settings)
     engine = create_db_engine(settings.data_dir, field_cipher=FieldCipher(keys.db_fields))
     run_migrations(engine)
+    receipt_store = EncryptedFileStore.for_receipts(settings.data_dir, keys.files)
+    remove_orphan_files(engine, receipt_store)  # leftovers from a crash; see services/receipts
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
@@ -51,6 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
+    app.state.receipt_store = receipt_store
     # Middleware added last runs first: the home-network check, then the Host rules.
     app.add_middleware(LocalAccessMiddleware, port=settings.port)
     app.add_middleware(PrivateNetworkOnlyMiddleware)
@@ -58,4 +62,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router)
     app.include_router(accounts.router)
     app.include_router(transactions.router)
+    app.include_router(receipts.router)
     return app

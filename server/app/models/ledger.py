@@ -106,6 +106,11 @@ class Receipt(TimestampMixin, Base):
     transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL")
     )
+    # The photo's ID in the encrypted file store (``<data_dir>/receipts/<id>.bbf``), not a path.
     image_path: Mapped[str | None] = mapped_column(EncryptedString("receipts.image_path"))
     tax_deductible: Mapped[bool] = mapped_column(default=False, server_default="0")
     notes: Mapped[str | None] = mapped_column(EncryptedString("receipts.notes"))
+
+    @property
+    def has_image(self) -> bool:
+        return self.image_path is not None
