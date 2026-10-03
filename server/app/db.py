@@ -17,6 +17,7 @@ from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.crypto._fs import write_private_bytes
 from app.crypto.fields import FieldCipher, set_field_cipher
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,9 @@ MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 BUSY_TIMEOUT_MS = 5000
 # Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
 FIRST_ENCRYPTED_REVISION = "0003"
+# Written before that migration runs, removed once the leftover plain text has been cleaned out
+# of the database file. While it exists, every start tries the clean-up again.
+SCRUB_MARKER_FILENAME = "scrub-pending"
 
 # Not bound to an engine here: each app passes its own engine (see ``get_session``), so tests
 # with different data folders never share a database.
@@ -63,6 +67,8 @@ def _set_sqlite_pragmas(dbapi_connection, _connection_record) -> None:
     cursor.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.execute("PRAGMA journal_mode=WAL")
+    # Overwrite deleted data with zeros instead of leaving it in free pages.
+    cursor.execute("PRAGMA secure_delete=ON")
     cursor.close()
 
 
@@ -137,41 +143,53 @@ def _upgrade(config: Config, engine: Engine) -> None:
         command.upgrade(config, "head")
 
 
+def scrub_marker_path(db_path: Path) -> Path:
+    return db_path.with_name(SCRUB_MARKER_FILENAME)
+
+
 def run_migrations(engine: Engine) -> None:
     """Bring the database up to date (``alembic upgrade head``). Safe to run on every start.
 
     Runs under a lock file so two copies starting at once can't both migrate. Before changing a
     database that already has data, a backup copy is saved next to it as ``budget.db.bak-<rev>``.
+
+    When an existing database is first encrypted, a ``scrub-pending`` marker is written before
+    the migration runs. As long as it exists, each start cleans leftover plain text out of the
+    database file, and the marker is only removed once that has fully worked. So a power cut or
+    a locked file during the clean-up just means it's retried next time.
     """
     db_path = Path(engine.url.database)
+    marker = scrub_marker_path(db_path)
     config = alembic_config()
     head = ScriptDirectory.from_config(config).get_current_head()
 
     with _exclusive_lock(db_path.with_name(db_path.name + ".lock")):
         with engine.connect() as connection:
             current = MigrationContext.configure(connection).get_current_revision()
-        if current == head:
-            return
+        if current != head:
+            _upgrade_with_backup(engine, db_path, config, current)
+        if marker.exists():
+            _scrub_plaintext(engine, db_path)
 
-        backup_path = None
-        if current is not None:
-            backup_path = db_path.with_name(f"{db_path.name}.bak-{current}")
-            _backup(engine, backup_path)
-        try:
-            _upgrade(config, engine)
-        except Exception as exc:
-            message = "Budget Buddy couldn't update its database to work with this version."
-            if backup_path is not None:
-                message += f" A copy of your data from before the update is saved at {backup_path}."
-            message += " Please close Budget Buddy and try again, or ask for help."
-            raise DatabaseUpgradeError(message) from exc
 
-        if (
-            current is not None
-            and current.isdigit()
-            and int(current) < int(FIRST_ENCRYPTED_REVISION)
-        ):
-            _after_first_encryption(engine, db_path)
+def _upgrade_with_backup(
+    engine: Engine, db_path: Path, config: Config, current: str | None
+) -> None:
+    backup_path = None
+    if current is not None:
+        backup_path = db_path.with_name(f"{db_path.name}.bak-{current}")
+        _backup(engine, backup_path)
+        if current.isdigit() and int(current) < int(FIRST_ENCRYPTED_REVISION):
+            # Before the migration commits, so a crash right after it still leaves the marker.
+            write_private_bytes(scrub_marker_path(db_path), b"")
+    try:
+        _upgrade(config, engine)
+    except Exception as exc:
+        message = "Budget Buddy couldn't update its database to work with this version."
+        if backup_path is not None:
+            message += f" A copy of your data from before the update is saved at {backup_path}."
+        message += " Please close Budget Buddy and try again, or ask for help."
+        raise DatabaseUpgradeError(message) from exc
 
 
 def unencrypted_backups(db_path: Path) -> list[Path]:
@@ -184,16 +202,46 @@ def unencrypted_backups(db_path: Path) -> list[Path]:
     return found
 
 
-def _after_first_encryption(engine: Engine, db_path: Path) -> None:
-    """Clean up plain text left behind when sensitive columns were first encrypted.
+def _vacuum_and_checkpoint(engine: Engine) -> bool:
+    """Rewrite the database file and empty the write-ahead log. True only if both fully worked.
 
-    Rewrites the database file (VACUUM) and empties the write-ahead log, so the old text isn't
-    left in unused pages. Backup copies are never deleted automatically; the user is told about
-    them instead.
+    ``wal_checkpoint(TRUNCATE)`` returns ``(busy, log pages, checkpointed pages)``. ``busy`` is
+    1 when another connection was still reading, in which case the log (with old pages) was not
+    emptied.
     """
     with engine.connect() as connection:
         connection.exec_driver_sql("VACUUM")
-        connection.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+        busy, _log, _checkpointed = connection.exec_driver_sql(
+            "PRAGMA wal_checkpoint(TRUNCATE)"
+        ).one()
+    return busy == 0
+
+
+def _scrub_plaintext(engine: Engine, db_path: Path) -> None:
+    """Clean up plain text left behind when sensitive columns were first encrypted.
+
+    Rewrites the database file (VACUUM) and empties the write-ahead log, so the old text isn't
+    left in unused pages. The ``scrub-pending`` marker is removed only if that worked; otherwise
+    it's tried again on the next start. Backup copies are never deleted automatically; the user
+    is told about them instead.
+    """
+    try:
+        done = _vacuum_and_checkpoint(engine)
+    except Exception:
+        logger.warning(
+            "Budget Buddy couldn't finish clearing old unencrypted copies of your data out of "
+            "its database file. It will try again the next time it starts.",
+            exc_info=True,
+        )
+        return
+    if not done:
+        logger.warning(
+            "Budget Buddy couldn't finish clearing old unencrypted copies of your data out of "
+            "its database file, because something else had it open. It will try again the next "
+            "time it starts."
+        )
+        return
+    scrub_marker_path(db_path).unlink(missing_ok=True)
     backups = unencrypted_backups(db_path)
     if backups:
         logger.warning(

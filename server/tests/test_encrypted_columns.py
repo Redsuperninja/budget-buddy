@@ -353,3 +353,124 @@ def test_models_match_migrations_so_autogenerate_proposes_nothing(tmp_path):
             assert compare_metadata(context, Base.metadata) == []
     finally:
         engine.dispose()
+
+
+# --- plain-text clean-up is retried until it works (security review M1) ----------------------
+
+
+def _seed_many_plaintext_notes(engine, count=2000):
+    with engine.begin() as conn:
+        for i in range(count):
+            conn.execute(
+                text(
+                    "INSERT INTO transactions (account_id, date, amount_cents, description, "
+                    "source, notes) VALUES (1, '2026-01-01', -1, 'x', 'manual', :note)"
+                ),
+                {"note": f"SECRETNOTE-{i:05d} " + "y" * 60},
+            )
+
+
+def _plaintext_notes_on_disk(data_dir):
+    import re
+
+    blob = database_path(data_dir).read_bytes()
+    wal = data_dir / "budget.db-wal"
+    if wal.exists():
+        blob += wal.read_bytes()
+    return len(re.findall(rb"SECRETNOTE-\d{5}", blob))
+
+
+def test_interrupted_cleanup_is_retried_on_next_start(tmp_path, monkeypatch):
+    from app import db as db_module
+
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        _migrate(engine, "0002")
+        _insert_plaintext_rows(engine)
+        _seed_many_plaintext_notes(engine)
+
+        def power_cut(_engine):
+            raise KeyboardInterrupt("power cut after migration 0003 committed")
+
+        monkeypatch.setattr(db_module, "_vacuum_and_checkpoint", power_cut)
+        with pytest.raises(KeyboardInterrupt):
+            run_migrations(engine)
+        marker = db_module.scrub_marker_path(database_path(tmp_path))
+        assert marker.is_file()  # written before the migration ran
+        assert _raw(tmp_path, "SELECT version_num FROM alembic_version") == [("0003",)]
+
+        monkeypatch.undo()
+        run_migrations(engine)  # next start: already at head, but the marker says "clean up"
+        assert not marker.exists()
+    finally:
+        engine.dispose()
+    assert _plaintext_notes_on_disk(tmp_path) == 0
+
+
+def test_cleanup_keeps_marker_when_checkpoint_is_busy(tmp_path, monkeypatch, caplog):
+    from app import db as db_module
+
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        _migrate(engine, "0002")
+        _insert_plaintext_rows(engine)
+        marker = db_module.scrub_marker_path(database_path(tmp_path))
+
+        monkeypatch.setattr(db_module, "_vacuum_and_checkpoint", lambda _engine: False)
+        run_migrations(engine)
+        assert marker.is_file()
+        assert "try again the next time it starts" in caplog.text
+
+        def locked(_engine):
+            raise sqlite3.OperationalError("database is locked")
+
+        monkeypatch.setattr(db_module, "_vacuum_and_checkpoint", locked)
+        run_migrations(engine)
+        assert marker.is_file()
+
+        monkeypatch.undo()
+        run_migrations(engine)
+        assert not marker.exists()
+    finally:
+        engine.dispose()
+
+
+def test_cleanup_reports_failure_while_another_reader_holds_the_log(tmp_path, monkeypatch):
+    """A reader on an old snapshot stops the TRUNCATE checkpoint; that must not count as done."""
+    from app import db as db_module
+
+    monkeypatch.setattr(db_module, "BUSY_TIMEOUT_MS", 0)  # don't wait 5 seconds for the reader
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        run_migrations(engine)
+        assert db_module._vacuum_and_checkpoint(engine) is True
+        reader = sqlite3.connect(database_path(tmp_path))
+        try:
+            reader.execute("BEGIN")
+            reader.execute("SELECT count(*) FROM categories").fetchone()  # holds a snapshot
+            assert db_module._vacuum_and_checkpoint(engine) is False
+        finally:
+            reader.close()
+        assert db_module._vacuum_and_checkpoint(engine) is True
+    finally:
+        engine.dispose()
+
+
+def test_new_database_needs_no_cleanup(tmp_path):
+    from app import db as db_module
+
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        run_migrations(engine)
+        assert not db_module.scrub_marker_path(database_path(tmp_path)).exists()
+    finally:
+        engine.dispose()
+
+
+def test_secure_delete_is_on(tmp_path):
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        with engine.connect() as conn:
+            assert conn.exec_driver_sql("PRAGMA secure_delete").scalar() == 1
+    finally:
+        engine.dispose()
