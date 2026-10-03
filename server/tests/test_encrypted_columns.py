@@ -283,7 +283,7 @@ def test_migration_0003_encrypts_existing_plaintext_and_downgrade_restores_it(tm
             account = session.get(Account, 1)
             assert (account.last4, account.notes) == ("4821", "joint")
             assert session.get(Transaction, 1).notes == "with Alex"
-            assert session.scalars(select(Paycheck)).one().notes == "raise"
+            assert session.scalar(select(Paycheck.notes)) == "raise"  # 0003: no 0004 columns yet
             receipt = session.scalars(select(Receipt)).one()
             assert (receipt.image_path, receipt.notes) == ("abc.jpg", "lunch")
             assert session.scalars(select(Donation)).one().notes == "book sale"
@@ -397,7 +397,7 @@ def test_interrupted_cleanup_is_retried_on_next_start(tmp_path, monkeypatch):
             run_migrations(engine)
         marker = db_module.scrub_marker_path(database_path(tmp_path))
         assert marker.is_file()  # written before the migration ran
-        assert _raw(tmp_path, "SELECT version_num FROM alembic_version") == [("0003",)]
+        assert _raw(tmp_path, "SELECT version_num FROM alembic_version") == [("0004",)]
 
         monkeypatch.undo()
         run_migrations(engine)  # next start: already at head, but the marker says "clean up"

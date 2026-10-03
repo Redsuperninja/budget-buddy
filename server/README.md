@@ -106,6 +106,10 @@ editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead.
   Only two regular (`normal`) transactions can be linked; both move to the Transfer category. While
   linked, a transaction's account, amount, kind and category are locked and it can't be deleted:
   remove the link first.
+- Paychecks: `GET/POST /api/local/paychecks` (filter: `year`), `GET/PATCH/DELETE
+  /api/local/paychecks/{id}`, `POST/DELETE /api/local/paychecks/{id}/deposit` to link or unlink the
+  bank deposit, and `GET /api/local/paychecks/summary?year=2026` for year-to-date totals. Amounts
+  are whole cents only. See [docs/paychecks.md](../docs/paychecks.md).
 
 ## Settings
 
