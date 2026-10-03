@@ -86,6 +86,7 @@ def test_key_store_selection():
 
 def test_key_store_setting(monkeypatch):
     monkeypatch.delenv("BUDGET_BUDDY_KEY_STORE")
+    assert Settings().insecure_test_keystore is True  # set by conftest for every test
     assert Settings().key_store == "keyring"
     monkeypatch.setenv("BUDGET_BUDDY_KEY_STORE", "memory")
     assert Settings().key_store == "memory"
@@ -140,10 +141,76 @@ def test_no_os_vault_gives_clear_error():
     previous = keyring.get_keyring()
     keyring.set_keyring(keyring.backends.fail.Keyring())
     try:
-        with pytest.raises(KeyStoreError, match="BUDGET_BUDDY_KEY_STORE=memory"):
+        with pytest.raises(KeyStoreError, match="password vault") as raised:
             KeyringKeyStore().get("data-x")
+        # Don't point everyday users at the test-only memory key store (security review H1).
+        assert "memory" not in str(raised.value).lower()
+        assert "KEY_STORE" not in str(raised.value)
     finally:
         keyring.set_keyring(previous)
+
+
+# --- memory key store guard rails (security review H1) ---------------------------------------
+
+
+def test_memory_key_store_needs_the_test_only_switch(monkeypatch, tmp_path):
+    monkeypatch.delenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE")
+    with pytest.raises(KeyStoreError, match="only for automated tests"):
+        Settings(key_store="memory", data_dir=tmp_path)
+    monkeypatch.setenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE", "0")
+    with pytest.raises(KeyStoreError):
+        Settings(key_store="memory", data_dir=tmp_path)
+    assert Settings(key_store="keyring", data_dir=tmp_path).key_store == "keyring"
+    monkeypatch.setenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE", "1")
+    assert Settings(key_store="memory", data_dir=tmp_path).key_store == "memory"
+
+
+@pytest.fixture
+def fresh_memory_store(monkeypatch):
+    """An empty memory store, like a brand-new process."""
+    import app.crypto.keystore as keystore_module
+
+    fresh = MemoryKeyStore()
+    monkeypatch.setattr(keystore_module, "_MEMORY_STORE", fresh)
+    return fresh
+
+
+def test_memory_key_store_works_on_a_fresh_folder(tmp_path, fresh_memory_store):
+    settings = Settings(key_store="memory", data_dir=tmp_path)
+    first = load_keys(settings)
+    assert load_keys(settings) == first  # same process, same folder: key reused
+
+
+def test_memory_key_store_refuses_folder_with_a_key_fingerprint(tmp_path, fresh_memory_store):
+    load_or_create_master_key(MemoryKeyStore(), tmp_path)  # folder already has a key elsewhere
+    with pytest.raises(KeyStoreError, match="new, empty data folder"):
+        load_keys(Settings(key_store="memory", data_dir=tmp_path))
+    assert fresh_memory_store.get(key_name_for(tmp_path)) is None
+
+
+def test_memory_key_store_refuses_folder_with_existing_data(tmp_path, fresh_memory_store):
+    import sqlite3
+
+    connection = sqlite3.connect(tmp_path / "budget.db")
+    connection.execute("CREATE TABLE accounts (id INTEGER PRIMARY KEY, last4 TEXT)")
+    connection.execute("INSERT INTO accounts (last4) VALUES ('4821')")
+    connection.commit()
+    connection.close()
+    with pytest.raises(KeyStoreError, match="new, empty data folder"):
+        load_keys(Settings(key_store="memory", data_dir=tmp_path))
+    assert read_fingerprint(tmp_path) is None  # nothing was changed
+
+
+def test_memory_key_store_allows_empty_database(tmp_path, fresh_memory_store):
+    import sqlite3
+
+    connection = sqlite3.connect(tmp_path / "budget.db")
+    connection.execute("CREATE TABLE accounts (id INTEGER PRIMARY KEY, last4 TEXT)")
+    connection.execute("CREATE TABLE alembic_version (version_num TEXT)")
+    connection.execute("INSERT INTO alembic_version VALUES ('0002')")
+    connection.commit()
+    connection.close()
+    load_keys(Settings(key_store="memory", data_dir=tmp_path))
 
 
 def test_load_keys_uses_keyring_by_default(tmp_path, monkeypatch, fake_keyring):

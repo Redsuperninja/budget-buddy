@@ -4,7 +4,7 @@ import pytest
 
 from app import cli
 from app.config import Settings
-from app.crypto import MemoryKeyStore, key_name_for, master_key_to_phrase
+from app.crypto import EncryptionError, MemoryKeyStore, key_name_for, master_key_to_phrase
 from app.crypto import keystore as keystore_module
 from app.crypto.keys import load_or_create_master_key, read_fingerprint
 from app.main import create_app
@@ -56,7 +56,8 @@ def test_restore_after_vault_was_lost(data_dir, store, monkeypatch):
     # Simulate a Windows reinstall: the vault is empty, the data folder is still there.
     lost = MemoryKeyStore()
     monkeypatch.setattr(keystore_module, "_MEMORY_STORE", lost)
-    with pytest.raises(Exception, match="can't find the encryption key"):
+    # (With the keyring this is MissingKeyError; the memory store refuses non-empty folders.)
+    with pytest.raises(EncryptionError):
         create_app()
 
     code, out = _run(["recovery-phrase", "restore"], [phrase.lower().replace("-", " ")])

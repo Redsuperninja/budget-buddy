@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     """Runtime settings.
 
     Override with env vars: ``BUDGET_BUDDY_DATA_DIR``, ``BUDGET_BUDDY_HOST``, ``BUDGET_BUDDY_PORT``,
-    ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``.
+    ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``, ``BUDGET_BUDDY_INSECURE_TEST_KEYSTORE``.
     """
 
     model_config = SettingsConfigDict(env_prefix="BUDGET_BUDDY_")
@@ -36,3 +36,18 @@ class Settings(BaseSettings):
     # Where the encryption key is kept: the OS password vault ("keyring"), or "memory" for
     # automated tests and CI only (the key is lost when the process ends).
     key_store: Literal["keyring", "memory"] = "keyring"
+    # Second, separate switch that must also be on before "memory" is allowed, so the memory key
+    # store can't be turned on by accident in normal use (security review H1, PR #22).
+    insecure_test_keystore: bool = False
+
+    @model_validator(mode="after")
+    def _memory_key_store_needs_test_switch(self) -> "Settings":
+        if self.key_store == "memory" and not self.insecure_test_keystore:
+            from app.crypto.errors import KeyStoreError
+
+            raise KeyStoreError(
+                "BUDGET_BUDDY_KEY_STORE=memory is only for automated tests. It loses the "
+                "encryption key when Budget Buddy stops, which would make your data unreadable. "
+                "Remove that setting to keep the key in this computer's password vault."
+            )
+        return self

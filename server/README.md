@@ -74,9 +74,15 @@ All optional, set as environment variables:
 | `BUDGET_BUDDY_HOST` | `127.0.0.1` | Network address to listen on. The default means "this computer only". |
 | `BUDGET_BUDDY_PORT` | `8765` | Port to listen on. |
 | `BUDGET_BUDDY_DEV_MODE` | `false` | Set to `true` to turn on the API explorer at `/docs` (for developers). |
-| `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. `memory` is for automated tests only: anything saved can't be read after a restart. |
+| `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. Leave this alone: `memory` is for developers' automated tests only (see below). |
 
 On macOS/Linux the data folder is made readable only by your user account.
+
+**Developers only:** automated tests and CI have no password vault, so they keep the key in
+memory with `BUDGET_BUDDY_KEY_STORE=memory` **plus** `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1`.
+The key is lost when the process stops, so this only works on a new, empty data folder and is
+refused on any folder that already has data or a `key-fingerprint` file. `tests/conftest.py`
+and the CI workflow set both. Never use it for real data.
 
 ## Letting your phone connect (later)
 

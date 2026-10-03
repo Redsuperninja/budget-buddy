@@ -10,6 +10,7 @@ from app.main import create_app
 def memory_key_store(monkeypatch: pytest.MonkeyPatch) -> None:
     """Keep encryption keys in memory: tests must never touch the real OS password vault."""
     monkeypatch.setenv("BUDGET_BUDDY_KEY_STORE", "memory")
+    monkeypatch.setenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE", "1")
 
 
 @pytest.fixture

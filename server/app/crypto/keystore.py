@@ -52,8 +52,7 @@ class MemoryKeyStore:
 _NO_VAULT_MESSAGE = (
     "Budget Buddy couldn't use this computer's password vault to keep its encryption key safe. "
     "On Windows this is Credential Manager, on macOS the Keychain, and on Linux a Secret Service "
-    "such as GNOME Keyring or KWallet. Make sure one is installed and unlocked, then try again. "
-    "(Developers running automated tests can set BUDGET_BUDDY_KEY_STORE=memory.)"
+    "such as GNOME Keyring or KWallet. Make sure one is installed and unlocked, then try again."
 )
 
 
