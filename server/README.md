@@ -253,6 +253,20 @@ All optional, set as environment variables:
 
 On macOS/Linux the data folder is made readable only by your user account.
 
+### Moving your data folder
+
+If the Home Base warns that your data folder is inside a code project or a cloud-synced folder
+(OneDrive, Dropbox, iCloud, Google Drive, Box, pCloud, Nextcloud), move it:
+
+1. Close the Home Base.
+2. Move the whole data folder to a place that isn't synced, for example
+   `C:\BudgetBuddyData` on Windows or a folder in your home folder on macOS/Linux.
+3. Set `BUDGET_BUDDY_DATA_DIR` to the new folder's full path, then start the Home Base again.
+
+Your encryption key stays in this computer's password vault, so it still works after the move.
+On a Mac, `Desktop` and `Documents` are synced by iCloud when "Desktop & Documents Folders" is
+turned on, so Budget Buddy warns about those too.
+
 **Developers only:** automated tests and CI have no password vault, so they keep the key in
 memory with `BUDGET_BUDDY_KEY_STORE=memory` **plus** `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1`.
 The key is lost when the process stops, so this only works on a new, empty data folder and is
