@@ -10,8 +10,9 @@ from app import __version__
 from app.config import Settings
 from app.crypto import FieldCipher, load_keys
 from app.db import create_db_engine, run_migrations
-from app.network import PrivateNetworkOnlyMiddleware
-from app.routers import health
+from app.errors import install_error_handlers
+from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
+from app.routers import accounts, health, transactions
 
 
 def ensure_data_dir(path: Path) -> None:
@@ -50,6 +51,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
+    # Middleware added last runs first: the home-network check, then the Host rules.
+    app.add_middleware(LocalAccessMiddleware, port=settings.port)
     app.add_middleware(PrivateNetworkOnlyMiddleware)
+    install_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(accounts.router)
+    app.include_router(transactions.router)
     return app

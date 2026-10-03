@@ -10,7 +10,10 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [x] 4. Encryption at rest: keyring master key, encrypted file storage — *backend-engineer* + *security-reviewer*
 
 ## Phase 2: Getting data in
-- [ ] 5. Accounts + transactions API (manual entry) — *backend-engineer*
+- [x] 5. Accounts + transactions API (manual entry) — *backend-engineer*
+- [ ] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
+  - Adjustments (including opening balances) change balances but are never counted as income or spending.
+    Transfers are excluded too (see "Transaction kinds" in ARCHITECTURE.md).
 - [ ] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
 - [ ] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [ ] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
@@ -32,7 +35,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 ## Phase 5: Phone app
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
 - [ ] 18. Pair screen (QR scan, secure key storage) — *mobile-engineer*
-- [ ] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
+- [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
 - [ ] 20. Receipt capture with offline queue — *mobile-engineer*
 - [ ] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
 

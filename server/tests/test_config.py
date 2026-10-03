@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 from app.config import Settings, default_data_dir
 from app.main import create_app
@@ -72,15 +71,15 @@ def test_existing_data_dir_is_tightened_on_posix(data_dir):
     assert stat.S_IMODE(data_dir.stat().st_mode) == 0o700
 
 
-def test_api_docs_disabled_by_default(data_dir, monkeypatch):
+def test_api_docs_disabled_by_default(make_client, monkeypatch):
     monkeypatch.delenv("BUDGET_BUDDY_DEV_MODE", raising=False)
-    client = TestClient(create_app(), client=("127.0.0.1", 50000))
+    client = make_client()
     for path in ("/docs", "/redoc", "/openapi.json"):
         assert client.get(path).status_code == 404, path
 
 
-def test_api_docs_enabled_in_dev_mode(data_dir, monkeypatch):
+def test_api_docs_enabled_in_dev_mode(make_client, monkeypatch):
     monkeypatch.setenv("BUDGET_BUDDY_DEV_MODE", "true")
-    client = TestClient(create_app(), client=("127.0.0.1", 50000))
+    client = make_client()
     for path in ("/docs", "/redoc", "/openapi.json"):
         assert client.get(path).status_code == 200, path

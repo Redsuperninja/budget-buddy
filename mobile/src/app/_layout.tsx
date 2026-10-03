@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
 
+import { SnapshotProvider } from '@/sync/store';
 import { useTheme } from '@/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -17,7 +18,7 @@ function tabIcon(name: IconName) {
 export default function RootLayout() {
   const t = useTheme();
   return (
-    <>
+    <SnapshotProvider>
       <StatusBar style={t.dark ? 'light' : 'dark'} />
       <Tabs
         screenOptions={{
@@ -44,6 +45,6 @@ export default function RootLayout() {
           options={{ title: 'Settings', tabBarIcon: tabIcon('settings') }}
         />
       </Tabs>
-    </>
+    </SnapshotProvider>
   );
 }
