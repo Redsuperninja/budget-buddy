@@ -194,6 +194,63 @@ describe('monthHeadline', () => {
     expect(h.leftToSpendCents).toBe(416000 - (225680 + 300000));
   });
 
+  it('ignores the transaction list: transfers, refunds and adjustments never change the totals', () => {
+    // The phone must never derive income or spending from `transactions` (finance review #8).
+    // Totals come only from income.received_cents and the server's group actuals.
+    const before = monthHeadline(SAMPLE_SNAPSHOT);
+    const more: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    more.transactions.unshift(
+      // Transfer between your own accounts, both legs.
+      { id: 2001, date: '2026-10-18', description: 'Transfer to Rainy day', amount_cents: -25000, category_id: null, account_id: 1 },
+      { id: 2002, date: '2026-10-18', description: 'Transfer from Everyday checking', amount_cents: 25000, category_id: null, account_id: 2 },
+      // Refunds, categorised and not.
+      { id: 2003, date: '2026-10-18', description: 'Shop refund', amount_cents: 4999, category_id: 8, account_id: 1 },
+      { id: 2004, date: '2026-10-18', description: 'Refund', amount_cents: 1200, category_id: null, account_id: 1 },
+      // Balance adjustments, both directions.
+      { id: 2005, date: '2026-10-18', description: 'Balance adjustment', amount_cents: 731, category_id: null, account_id: 1 },
+      { id: 2006, date: '2026-10-18', description: 'Balance adjustment', amount_cents: -731, category_id: null, account_id: 2 },
+    );
+    expect(monthHeadline(more)).toEqual(before);
+  });
+
+  it('zero income with spending: left to spend is target minus spent, no savings rate', () => {
+    const s: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    s.income.received_cents = 0;
+    const h = monthHeadline(s);
+    expect(h.incomeReceivedCents).toBe(0);
+    expect(h.spentCents).toBe(296027);
+    expect(h.leftToSpendCents).toBe(416000 - 296027);
+    expect(h.savingsRatePercent).toBeNull();
+  });
+
+  it('works on an empty-database snapshot', () => {
+    const empty: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    empty.income = { expected_cents: 0, received_cents: 0, last_paycheck: null };
+    empty.budget.target_cents = 0;
+    empty.budget.actual_cents = 0;
+    for (const g of empty.budget.groups) {
+      g.target_cents = 0;
+      g.actual_cents = 0;
+      g.categories = [];
+    }
+    empty.transactions = [];
+    empty.accounts = [];
+    const h = monthHeadline(empty);
+    expect(h).toEqual({
+      incomeReceivedCents: 0,
+      incomeExpectedCents: 0,
+      spentCents: 0,
+      spendingTargetCents: 0,
+      leftToSpendCents: 0,
+      isOverBudget: false,
+      savedCents: 0,
+      savingsRatePercent: null,
+    });
+    expect(spentStat(h)).toEqual({ value: '$0.00', note: 'of $0.00 planned' });
+    expect(savingsStat(h)).toEqual({ value: 'Not yet', note: '$0.00 saved' });
+    expect(recentTransactions(empty)).toEqual([]);
+  });
+
   it('has no savings rate before any income arrives', () => {
     const none: Snapshot = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
     none.income.received_cents = 0;
