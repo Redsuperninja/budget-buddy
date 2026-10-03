@@ -11,13 +11,29 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A throwaway data folder so tests never touch real user data."""
     path = tmp_path / "bb-data"
     monkeypatch.setenv("BUDGET_BUDDY_DATA_DIR", str(path))
+    monkeypatch.delenv("BUDGET_BUDDY_PORT", raising=False)
     return path
 
 
+# What a browser on this computer sends when it opens the Home Base at its default address.
+BASE_URL = "http://127.0.0.1:8765"
+
+
 @pytest.fixture
-def client(data_dir: Path) -> TestClient:
+def make_client(data_dir: Path):
+    """Build a test client for a fresh app, connecting from ``peer`` (this computer by default)."""
+
+    def make(peer: str = "127.0.0.1", **kwargs) -> TestClient:
+        kwargs.setdefault("base_url", BASE_URL)
+        return TestClient(create_app(), client=(peer, 50000), **kwargs)
+
+    return make
+
+
+@pytest.fixture
+def client(make_client) -> TestClient:
     """Test client that looks like it's connecting from this computer."""
-    return TestClient(create_app(), client=("127.0.0.1", 50000))
+    return make_client()
 
 
 @pytest.fixture

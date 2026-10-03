@@ -10,7 +10,7 @@ from app import __version__
 from app.config import Settings
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
-from app.network import PrivateNetworkOnlyMiddleware
+from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.routers import accounts, health, transactions
 
 
@@ -47,6 +47,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="Budget Buddy Home Base", version=__version__, lifespan=lifespan, **docs)
     app.state.settings = settings
     app.state.engine = engine
+    # Middleware added last runs first: the home-network check, then the Host rules.
+    app.add_middleware(LocalAccessMiddleware, port=settings.port)
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     install_error_handlers(app)
     app.include_router(health.router)

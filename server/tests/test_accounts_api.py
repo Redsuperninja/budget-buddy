@@ -1,9 +1,7 @@
 """Accounts API, loopback-only access, and the shared error format. Fake data only."""
 
 import pytest
-from fastapi.testclient import TestClient
 
-from app.main import create_app
 from app.network import is_loopback_address
 
 URL = "/api/local/accounts"
@@ -80,8 +78,8 @@ def test_account_name_cannot_be_cleared(client, make_account):
 
 
 @pytest.mark.parametrize("host", ["192.168.1.20", "10.0.0.5", "fe80::1", "::ffff:192.168.1.20"])
-def test_local_api_rejects_non_loopback_clients(data_dir, host):
-    lan = TestClient(create_app(), client=(host, 50000))
+def test_local_api_rejects_non_loopback_clients(make_client, host):
+    lan = make_client(host)
     for method, path in [
         ("get", URL),
         ("post", URL),
@@ -93,14 +91,14 @@ def test_local_api_rejects_non_loopback_clients(data_dir, host):
         assert response.json()["error"]["code"] == "not_this_computer"
 
 
-def test_local_api_ignores_forwarded_for_header(data_dir):
-    lan = TestClient(create_app(), client=("192.168.1.20", 50000))
+def test_local_api_ignores_forwarded_for_header(make_client):
+    lan = make_client("192.168.1.20")
     response = lan.get(URL, headers={"X-Forwarded-For": "127.0.0.1"})
     assert response.status_code == 403
 
 
-def test_local_api_allows_ipv6_loopback(data_dir):
-    assert TestClient(create_app(), client=("::1", 50000)).get(URL).status_code == 200
+def test_local_api_allows_ipv6_loopback(make_client):
+    assert make_client("::1").get(URL).status_code == 200
 
 
 @pytest.mark.parametrize(

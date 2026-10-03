@@ -78,3 +78,57 @@ class PrivateNetworkOnlyMiddleware:
 
         response = JSONResponse(status_code=403, content={"detail": FORBIDDEN_DETAIL})
         await response(scope, receive, send)
+
+
+def allowed_hosts(port: int) -> frozenset[str]:
+    """The ``Host`` header values we answer to (sync contract §3.1).
+
+    Only this computer's own names. A DNS-rebinding page in the browser sends its own hostname
+    here, so it gets refused. The LAN address joins this list when pairing ships (#14).
+    """
+    return frozenset({f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"})
+
+
+def _header(scope: Scope, name: bytes) -> str | None:
+    """The value of a request header, or None if it's missing or sent more than once."""
+    values = [v for k, v in scope.get("headers", []) if k.lower() == name]
+    if len(values) != 1:
+        return None
+    return values[0].decode("latin-1")
+
+
+class LocalAccessMiddleware:
+    """ASGI middleware for the sync contract §3.1 rules that apply on top of the network check.
+
+    - Every request must name this computer in its ``Host`` header, else 403 ``bad_host``.
+    """
+
+    def __init__(self, app: ASGIApp, port: int) -> None:
+        self.app = app
+        self.hosts = allowed_hosts(port)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+
+        host = _header(scope, b"host")
+        if host is None or host.lower() not in self.hosts:
+            await _refuse(scope, receive, send, "bad_host", BAD_HOST_MESSAGE)
+            return
+
+        await self.app(scope, receive, send)
+
+
+BAD_HOST_MESSAGE = (
+    "Budget Buddy only answers when it's opened as http://127.0.0.1 or http://localhost "
+    "on this computer."
+)
+
+
+async def _refuse(scope: Scope, receive: Receive, send: Send, code: str, message: str) -> None:
+    if scope["type"] == "websocket":
+        await send({"type": "websocket.close", "code": WS_POLICY_VIOLATION})
+        return
+    response = JSONResponse(status_code=403, content={"error": {"code": code, "message": message}})
+    await response(scope, receive, send)
