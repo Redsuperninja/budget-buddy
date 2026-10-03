@@ -38,6 +38,8 @@ class AccountOut(Schema):
     # Sum of all the account's transactions. There's no opening-balance field: record a
     # starting balance as an "adjustment" transaction. Adjustments (including opening balances)
     # change balances but are never counted as income or spending.
+    # For credit_card and loan accounts a negative balance means money owed. Charges are
+    # negative, and payments and refunds are positive.
     balance_cents: int
     transaction_count: int
     created_at: dt.datetime

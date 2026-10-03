@@ -43,6 +43,48 @@ def test_balance_is_sum_of_transactions(client, add_txn, make_account):
     assert balances == {checking: 98_450, other: 700}
 
 
+# Credit card sign convention (docs/ARCHITECTURE.md, "Signs and balances"): a negative card
+# balance is money owed. Charges are negative; payments and refunds are positive.
+CARD_EXAMPLE = [
+    # (account, amount_cents, kind, transfer link key)
+    ("checking", 200_000, "adjustment", None),  # opening balance $2,000.00
+    ("checking", -30_000, "normal", "payment"),  # card payment out of checking
+    ("card", -12_000, "normal", None),  # charge
+    ("card", -25_000, "normal", None),  # charge
+    ("card", 2_000, "refund", None),  # refund lowers what you owe
+    ("card", 30_000, "normal", "payment"),  # the payment arriving on the card
+]
+
+
+@pytest.mark.parametrize(
+    ("rows", "expected"),
+    [
+        (CARD_EXAMPLE, {"checking": 170_000, "card": -5_000, "total": 165_000}),
+        (
+            CARD_EXAMPLE[:1] + CARD_EXAMPLE[2:4],
+            {"checking": 200_000, "card": -37_000, "total": 163_000},
+        ),
+    ],
+)
+def test_credit_card_balance_is_negative_when_owed(client, add_txn, make_account, rows, expected):
+    ids = {
+        "checking": make_account(name="Checking", kind="checking")["id"],
+        "card": make_account(name="Card", kind="credit_card")["id"],
+    }
+    links: dict[str, list[int]] = {}
+    for account, amount, kind, link in rows:
+        txn = add_txn(ids[account], amount, kind=kind)
+        if link:
+            links.setdefault(link, []).append(txn["id"])
+    for first, second in links.values():
+        linked = client.post(f"/api/local/transactions/{first}/transfer", json={"other_id": second})
+        assert linked.status_code == 200, linked.text
+
+    balances = {a["name"].lower(): a["balance_cents"] for a in client.get(URL).json()}
+    assert balances == {"checking": expected["checking"], "card": expected["card"]}
+    assert sum(balances.values()) == expected["total"]  # net worth is a plain sum
+
+
 def test_delete_blocked_when_account_has_transactions(client, add_txn, make_account):
     account_id = make_account()["id"]
     add_txn(account_id, -500)

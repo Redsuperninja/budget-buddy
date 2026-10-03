@@ -93,6 +93,29 @@ Money is always stored as **integer cents**, never floats. Every table also has 
 - `adjustment`: corrects a balance, including the **opening balance** of a new account. **Adjustments
   (including opening balances) change balances but are never counted as income or spending.** They have
   no category, so they can't slip in through a category group.
+
+### Signs and balances
+
+`amount_cents` is signed from the account's point of view: **negative = money out, positive = money in**. An
+account's balance is the plain sum of its transactions.
+
+**For `credit_card` and `loan` accounts a negative balance means money owed. Charges are negative, and payments
+and refunds are positive.** A card payment from checking is a linked transfer: -X on checking, +X on the card.
+This makes net worth the plain sum of every account's balance. CSV import (#6) must flip card issuers that
+export charges as positive numbers. The dashboard should show a negative card balance as "$50.00 owed".
+
+Worked example (fake data, also a test in `server/tests/test_accounts_api.py`):
+
+| Account | Transaction | `amount_cents` |
+| --- | --- | ---: |
+| Checking | Opening balance (`adjustment`) | 200000 |
+| Checking | Card payment (`transfer`, linked) | -30000 |
+| Card | Charge | -12000 |
+| Card | Charge | -25000 |
+| Card | Refund | 2000 |
+| Card | Card payment (`transfer`, linked) | 30000 |
+
+Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all balances = **165000**.
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
 `budget.db.bak-<revision>` is saved next to it.
