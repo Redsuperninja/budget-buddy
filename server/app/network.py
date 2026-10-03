@@ -39,6 +39,19 @@ def is_private_address(host: str | None) -> bool:
     return any(ip in net for net in ALLOWED_NETWORKS if net.version == ip.version)
 
 
+def is_loopback_address(host: str | None) -> bool:
+    """True only for this computer: ``127.0.0.0/8`` or ``::1`` (including IPv4-mapped forms)."""
+    if not host:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    if ip.version == 6 and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return ip.is_loopback
+
+
 class PrivateNetworkOnlyMiddleware:
     """ASGI middleware: reject anyone outside the home network.
 
@@ -65,3 +78,103 @@ class PrivateNetworkOnlyMiddleware:
 
         response = JSONResponse(status_code=403, content={"detail": FORBIDDEN_DETAIL})
         await response(scope, receive, send)
+
+
+def allowed_hosts(port: int) -> frozenset[str]:
+    """The ``Host`` header values we answer to (sync contract §3.1).
+
+    Only this computer's own names. A DNS-rebinding page in the browser sends its own hostname
+    here, so it gets refused. The LAN address joins this list when pairing ships (#14).
+    """
+    return frozenset({f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"})
+
+
+def allowed_origins(port: int) -> frozenset[str]:
+    """The ``Origin`` values a dashboard page on this computer sends (sync contract §3.1)."""
+    return frozenset(f"http://{host}" for host in allowed_hosts(port))
+
+
+# The only routes the phone needs over Wi-Fi (sync contract §3.1). Everything else is for this
+# computer only.
+LAN_ROUTES = ("/api/health", "/api/pair")
+LAN_ROUTE_PREFIXES = ("/api/sync/",)
+
+# Reading is safe to allow without an Origin; anything else changes data.
+SAFE_METHODS = frozenset({"GET", "HEAD"})
+
+
+def is_lan_route(path: str) -> bool:
+    """True for the few routes a paired phone may call from the home network."""
+    return path in LAN_ROUTES or path.startswith(LAN_ROUTE_PREFIXES)
+
+
+def _header(scope: Scope, name: bytes) -> str | None:
+    """The value of a request header, or None if it's missing or sent more than once."""
+    values = [v for k, v in scope.get("headers", []) if k.lower() == name]
+    if len(values) != 1:
+        return None
+    return values[0].decode("latin-1")
+
+
+class LocalAccessMiddleware:
+    """ASGI middleware for the sync contract §3.1 rules that apply on top of the network check.
+
+    - Every request must name this computer in its ``Host`` header, else 403 ``bad_host``.
+    - Deny by default: only the phone's routes (``is_lan_route``) answer the home network. Every
+      other route answers this computer only (socket peer is loopback; proxy headers such as
+      ``X-Forwarded-For`` are never trusted), else 403 ``not_this_computer``. New routes are
+      protected without anyone having to remember a dependency.
+    - Requests that change data on a dashboard route (anything but GET/HEAD) must come from a
+      page on this computer: ``Origin`` must be present and match, else 403 ``bad_origin``. This
+      stops other websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
+    """
+
+    def __init__(self, app: ASGIApp, port: int) -> None:
+        self.app = app
+        self.hosts = allowed_hosts(port)
+        self.origins = allowed_origins(port)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+
+        host = _header(scope, b"host")
+        if host is None or host.lower() not in self.hosts:
+            await _refuse(scope, receive, send, "bad_host", BAD_HOST_MESSAGE)
+            return
+
+        if is_lan_route(scope["path"]):
+            await self.app(scope, receive, send)
+            return
+
+        client = scope.get("client")
+        if not is_loopback_address(client[0] if client else None):
+            await _refuse(scope, receive, send, "not_this_computer", NOT_THIS_COMPUTER_MESSAGE)
+            return
+
+        if scope.get("method", "GET") not in SAFE_METHODS:
+            origin = _header(scope, b"origin")
+            if origin is None or origin.lower() not in self.origins:
+                await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
+                return
+
+        await self.app(scope, receive, send)
+
+
+BAD_HOST_MESSAGE = (
+    "Budget Buddy only answers when it's opened as http://127.0.0.1 or http://localhost "
+    "on this computer."
+)
+
+
+NOT_THIS_COMPUTER_MESSAGE = "This only works on the computer where Budget Buddy is running."
+BAD_ORIGIN_MESSAGE = "Changes can only be made from the Budget Buddy page on this computer."
+
+
+async def _refuse(scope: Scope, receive: Receive, send: Send, code: str, message: str) -> None:
+    if scope["type"] == "websocket":
+        await send({"type": "websocket.close", "code": WS_POLICY_VIOLATION})
+        return
+    response = JSONResponse(status_code=403, content={"error": {"code": code, "message": message}})
+    await response(scope, receive, send)
