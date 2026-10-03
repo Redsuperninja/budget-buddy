@@ -8,7 +8,17 @@ import { useTheme } from '@/theme';
 
 const TAX_NOTE = 'Estimates, not tax advice. Check with a tax professional before you file.';
 
-function EstimateTag() {
+export const DEDUCTIONS_TITLE = 'Possibly deductible expenses';
+export const DEDUCTIONS_NOTE =
+  'Whether these lower your tax depends on things like itemizing and income limits. ' +
+  'Your tax software or a tax pro will work it out.';
+
+/** Shown when the Home Base is missing something it needs (contract §5.1 `is_estimate`). */
+export const MISSING_INFO_TAG = 'missing info';
+const GAINS_MISSING_A11Y = 'Some details are missing, like what you paid for the shares.';
+const DEDUCTION_MISSING_A11Y = 'Some details are missing.';
+
+function MissingInfoTag() {
   const t = useTheme();
   return (
     <Text
@@ -23,14 +33,15 @@ function EstimateTag() {
         paddingHorizontal: t.spacing.sm,
         paddingVertical: 2,
       }}>
-      estimate
+      {MISSING_INFO_TAG}
     </Text>
   );
 }
 
-function Row({ label, value, estimate, note }: { label: string; value: string; estimate?: boolean; note?: string }) {
+/** `missingInfo` is the screen-reader sentence to read when details are missing; omit when complete. */
+function Row({ label, value, missingInfo, note }: { label: string; value: string; missingInfo?: string; note?: string }) {
   const t = useTheme();
-  const a11y = [label, value, note, estimate ? 'This is an estimate.' : undefined].filter(Boolean).join('. ');
+  const a11y = [label, value, note].filter(Boolean).join('. ') + (missingInfo ? `. ${missingInfo}` : '');
   return (
     <View
       accessible
@@ -49,7 +60,7 @@ function Row({ label, value, estimate, note }: { label: string; value: string; e
       <View style={{ flexShrink: 1, gap: 2 }}>
         <Text style={{ fontSize: t.fontSizes.body, color: t.colors.text }}>{label}</Text>
         {note ? <Text style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted }}>{note}</Text> : null}
-        {estimate ? <EstimateTag /> : null}
+        {missingInfo ? <MissingInfoTag /> : null}
       </View>
       <Text style={{ fontSize: t.fontSizes.body, fontWeight: '700', color: t.colors.text }}>{value}</Text>
     </View>
@@ -95,7 +106,7 @@ export default function TaxesScreen() {
 
       <View>
         <SectionTitle>Donations</SectionTitle>
-        <Row label="Given to charity this year" value={fmt(tax.donations_total_cents)} />
+        <Row label="Donations you've recorded this year" value={fmt(tax.donations_total_cents)} />
       </View>
 
       <View>
@@ -104,27 +115,28 @@ export default function TaxesScreen() {
           label="Short-term (held 1 year or less)"
           value={fmt(gains.short_term_cents)}
           note={gainNote(gains.short_term_cents)}
-          estimate={gains.is_estimate}
+          missingInfo={gains.is_estimate ? GAINS_MISSING_A11Y : undefined}
         />
         <Row
           label="Long-term (held more than 1 year)"
           value={fmt(gains.long_term_cents)}
           note={gainNote(gains.long_term_cents)}
-          estimate={gains.is_estimate}
+          missingInfo={gains.is_estimate ? GAINS_MISSING_A11Y : undefined}
         />
       </View>
 
       <View>
-        <SectionTitle>Deductions</SectionTitle>
+        <SectionTitle>{DEDUCTIONS_TITLE}</SectionTitle>
+        <BodyText muted>{DEDUCTIONS_NOTE}</BodyText>
         {tax.deductions.length === 0 ? (
-          <BodyText muted>No deductions recorded yet.</BodyText>
+          <BodyText muted>None recorded yet.</BodyText>
         ) : (
           tax.deductions.map((d, i) => (
             <Row
               key={`${d.kind}-${i}`}
               label={d.label || d.kind}
               value={fmt(d.amount_cents)}
-              estimate={d.is_estimate}
+              missingInfo={d.is_estimate ? DEDUCTION_MISSING_A11Y : undefined}
             />
           ))
         )}

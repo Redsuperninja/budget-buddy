@@ -53,7 +53,7 @@ function Headline({ snapshot }: { snapshot: Snapshot }) {
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: t.spacing.xl, rowGap: t.spacing.md, marginTop: t.spacing.sm }}>
         <Stat
-          label="Income so far"
+          label="Take-home pay so far"
           value={fmt(h.incomeReceivedCents)}
           note={`of ${fmt(h.incomeExpectedCents)} expected`}
         />
