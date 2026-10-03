@@ -1,9 +1,15 @@
-"""Sync contract §3.1 access rules: Host allowlist, Origin on writes. Fake data only."""
+"""Sync contract §3.1 access rules: Host allowlist, Origin on writes, and this-computer-only by
+default. Fake data only."""
 
 import asyncio
+import re
 
 import pytest
+from fastapi import APIRouter
+from starlette.routing import Mount, WebSocketRoute
 from starlette.websockets import WebSocketDisconnect
+
+from app.network import is_lan_route
 
 ACCOUNTS = "/api/local/accounts"
 
@@ -177,3 +183,91 @@ def test_phone_routes_do_not_need_an_origin(make_client, path):
     # so a 404 shows the request got past the Origin check.
     response = make_client(headers={}).post(path, json={})
     assert response.status_code == 404
+
+
+# --- M2: this computer only, unless the route is one of the phone's ---
+
+LAN_PEERS = ["192.168.1.20", "10.0.0.5", "fe80::1", "::ffff:192.168.1.20"]
+
+
+def _concrete(path: str) -> str:
+    return re.sub(r"{[^}]+}", "1", path)
+
+
+def _walk(routes) -> list[tuple[str, str]]:
+    found = []
+    for route in routes:
+        if hasattr(route, "effective_candidates"):  # an included router (FastAPI >= 0.140)
+            found += _walk(route.effective_candidates())
+        elif isinstance(route, Mount):
+            raise AssertionError(f"walk doesn't look inside mounts yet: {route.path}")
+        elif isinstance(route, WebSocketRoute):
+            continue  # covered by the WebSocket tests in test_network.py
+        else:
+            methods = sorted(route.methods or ["GET"])
+            found += [(method, _concrete(route.path)) for method in methods]
+    return found
+
+
+def _http_routes(app) -> list[tuple[str, str]]:
+    """Every (method, path) the app serves, with path parameters filled in."""
+    return _walk(app.routes)
+
+
+@pytest.mark.parametrize("peer", LAN_PEERS)
+def test_every_route_but_the_phones_refuses_the_home_network(make_client, monkeypatch, peer):
+    monkeypatch.setenv("BUDGET_BUDDY_DEV_MODE", "true")  # include /docs and /openapi.json
+    lan = make_client(peer)
+    routes = _http_routes(lan.app)
+    assert ("POST", "/api/local/transactions/1/transfer") in routes  # the walk sees everything
+    assert ("GET", "/openapi.json") in routes
+
+    lan_facing = sorted({path for _, path in routes if is_lan_route(path)})
+    assert lan_facing == ["/api/health"]  # /api/pair and /api/sync/* arrive with #14/#15
+
+    for method, path in routes:
+        response = lan.request(method, path, json={})
+        if is_lan_route(path):
+            assert response.status_code != 403, (method, path)
+        else:
+            assert response.status_code == 403, (method, path)
+            if method != "HEAD":  # HEAD answers have no body
+                assert _error_code(response) == "not_this_computer", (method, path)
+
+
+def test_new_router_is_this_computer_only_without_any_setup(make_client):
+    lan = make_client("192.168.1.20")
+    loopback = make_client()
+    for client in (lan, loopback):
+        router = APIRouter(prefix="/api/local/new-thing")  # no dependencies on purpose
+        router.add_api_route("", lambda: {"ok": True}, methods=["GET"])
+        client.app.include_router(router)
+    assert lan.get("/api/local/new-thing").status_code == 403
+    assert loopback.get("/api/local/new-thing").json() == {"ok": True}
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("/api/health", True),
+        ("/api/pair", True),
+        ("/api/sync/snapshot", True),
+        ("/api/sync/", True),
+        ("/api/sync", False),
+        ("/api/syncx/snapshot", False),
+        ("/api/health/", False),
+        ("/api/healthz", False),
+        ("/api/pair/qr", False),
+        ("/api/local/accounts", False),
+        ("/docs", False),
+        ("/", False),
+    ],
+)
+def test_is_lan_route(path, expected):
+    assert is_lan_route(path) is expected
+
+
+def test_wrong_network_answer_comes_before_origin_answer(make_client):
+    # A LAN device is told "this computer only", not something about Origin.
+    response = make_client("192.168.1.20", headers={}).post(ACCOUNTS, json={})
+    assert _error_code(response) == "not_this_computer"

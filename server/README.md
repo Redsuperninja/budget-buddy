@@ -43,8 +43,11 @@ Developers changing the tables: edit `app/models/`, then generate a migration an
 
 ## Local API (for the computer-side dashboard)
 
-Routes under `/api/local/` answer this computer only (anything else gets 403
-`not_this_computer`). Money goes in and out as whole cents (`amount_cents`); when creating or
+Every route answers this computer only (anything else gets 403 `not_this_computer`), except the
+phone's routes: `/api/health`, and later `/api/pair` and `/api/sync/*`. Requests must also be
+addressed to `127.0.0.1:{port}`, `localhost:{port}` or `[::1]:{port}` (else 403 `bad_host`), and
+anything that changes data must come with an `Origin` of `http://` plus one of those (else 403
+`bad_origin`). These checks stop other websites open in your browser from reaching your data. Money goes in and out as whole cents (`amount_cents`); when creating or
 editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead. Errors look like
 `{"error": {"code": "...", "message": "..."}}`. With dev mode on, `/docs` lists every route.
 

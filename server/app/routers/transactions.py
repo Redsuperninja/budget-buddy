@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
-from app.deps import LOCAL_ONLY, SessionDep
+from app.deps import SessionDep
 from app.models import TransactionKind
 from app.schemas.transactions import (
     TransactionCreate,
@@ -14,7 +14,7 @@ from app.schemas.transactions import (
 )
 from app.services import transactions as service
 
-router = APIRouter(prefix="/api/local/transactions", tags=["transactions"], dependencies=LOCAL_ONLY)
+router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
 
 
 @router.get("")

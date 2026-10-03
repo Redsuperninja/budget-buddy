@@ -120,6 +120,10 @@ class LocalAccessMiddleware:
     """ASGI middleware for the sync contract §3.1 rules that apply on top of the network check.
 
     - Every request must name this computer in its ``Host`` header, else 403 ``bad_host``.
+    - Deny by default: only the phone's routes (``is_lan_route``) answer the home network. Every
+      other route answers this computer only (socket peer is loopback; proxy headers such as
+      ``X-Forwarded-For`` are never trusted), else 403 ``not_this_computer``. New routes are
+      protected without anyone having to remember a dependency.
     - Requests that change data on a dashboard route (anything but GET/HEAD) must come from a
       page on this computer: ``Origin`` must be present and match, else 403 ``bad_origin``. This
       stops other websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
@@ -140,7 +144,16 @@ class LocalAccessMiddleware:
             await _refuse(scope, receive, send, "bad_host", BAD_HOST_MESSAGE)
             return
 
-        if not is_lan_route(scope["path"]) and scope.get("method", "GET") not in SAFE_METHODS:
+        if is_lan_route(scope["path"]):
+            await self.app(scope, receive, send)
+            return
+
+        client = scope.get("client")
+        if not is_loopback_address(client[0] if client else None):
+            await _refuse(scope, receive, send, "not_this_computer", NOT_THIS_COMPUTER_MESSAGE)
+            return
+
+        if scope.get("method", "GET") not in SAFE_METHODS:
             origin = _header(scope, b"origin")
             if origin is None or origin.lower() not in self.origins:
                 await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
@@ -155,6 +168,7 @@ BAD_HOST_MESSAGE = (
 )
 
 
+NOT_THIS_COMPUTER_MESSAGE = "This only works on the computer where Budget Buddy is running."
 BAD_ORIGIN_MESSAGE = "Changes can only be made from the Budget Buddy page on this computer."
 
 

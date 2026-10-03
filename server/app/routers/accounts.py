@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status
 
-from app.deps import LOCAL_ONLY, SessionDep
+from app.deps import SessionDep
 from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
 from app.services import accounts as service
 
-router = APIRouter(prefix="/api/local/accounts", tags=["accounts"], dependencies=LOCAL_ONLY)
+router = APIRouter(prefix="/api/local/accounts", tags=["accounts"])
 
 
 @router.get("")

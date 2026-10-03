@@ -57,33 +57,44 @@ def test_middleware_rejects_public_client(make_client):
 
 
 # TestClient.websocket_connect ignores base_url, so give it the full address.
-WS_URL = "ws://127.0.0.1:8765/test-ws"
+WS_BASE = "ws://127.0.0.1:8765"
+LAN_WS = "/api/sync/test-ws"  # under a route group the phone may use
+LOCAL_WS = "/test-ws"  # anywhere else: this computer only
 
 
-def _client_with_test_websocket(make_client, peer: str) -> TestClient:
-    """The real app plus a test-only WebSocket echo route (not part of the shipped app)."""
+def _client_with_test_websockets(make_client, peer: str) -> TestClient:
+    """The real app plus test-only WebSocket echo routes (not part of the shipped app)."""
     client = make_client(peer)
 
-    @client.app.websocket("/test-ws")
     async def echo(websocket: WebSocket) -> None:
         await websocket.accept()
         await websocket.send_text(await websocket.receive_text())
         await websocket.close()
 
+    client.app.add_api_websocket_route(LAN_WS, echo)
+    client.app.add_api_websocket_route(LOCAL_WS, echo)
     return client
 
 
-def test_websocket_allowed_from_lan_client(make_client):
-    client = _client_with_test_websocket(make_client, "192.168.1.50")
-    with client.websocket_connect(WS_URL) as ws:
+@pytest.mark.parametrize(
+    ("peer", "path"),
+    [("192.168.1.50", LAN_WS), ("127.0.0.1", LAN_WS), ("127.0.0.1", LOCAL_WS)],
+)
+def test_websocket_allowed(make_client, peer, path):
+    client = _client_with_test_websockets(make_client, peer)
+    with client.websocket_connect(WS_BASE + path) as ws:
         ws.send_text("hi")
         assert ws.receive_text() == "hi"
 
 
-def test_websocket_rejected_from_public_client(make_client):
-    client = _client_with_test_websocket(make_client, "203.0.113.7")
+@pytest.mark.parametrize(
+    ("peer", "path"),
+    [("203.0.113.7", LAN_WS), ("203.0.113.7", LOCAL_WS), ("192.168.1.50", LOCAL_WS)],
+)
+def test_websocket_rejected(make_client, peer, path):
+    client = _client_with_test_websockets(make_client, peer)
     with pytest.raises(WebSocketDisconnect) as excinfo:
-        with client.websocket_connect(WS_URL):
+        with client.websocket_connect(WS_BASE + path):
             pass
     assert excinfo.value.code == 1008
 
