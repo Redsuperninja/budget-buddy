@@ -155,8 +155,16 @@ describe('parseSnapshot', () => {
     expectRejected(broken((s) => (s.generated_at = 'yesterday')), 'generated_at');
   });
 
-  it('rejects an unknown account kind and bad reminder settings', () => {
-    expectRejected(broken((s) => (s.accounts[0].kind = 'credit_card')), 'accounts[0].kind');
+  it('skips an account with a kind this phone does not know yet (contract 7.1)', () => {
+    const result = parseSnapshot(broken((s) => (s.accounts[0].kind = 'credit_card')));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.accounts).toEqual(SAMPLE_SNAPSHOT.accounts.slice(1));
+    }
+  });
+
+  it('rejects a missing account kind and bad reminder settings', () => {
+    expectRejected(broken((s) => (s.accounts[0].kind = 42)), 'accounts[0].kind');
     expectRejected(broken((s) => (s.settings.reminder_days_default = 7)), 'reminder_days_default');
   });
 

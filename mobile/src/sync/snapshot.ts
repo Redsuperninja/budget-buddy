@@ -218,12 +218,21 @@ function parseTransaction(v: unknown, p: string): SnapshotTransaction {
   };
 }
 
-function parseAccount(v: unknown, p: string): SnapshotAccount {
+const ACCOUNT_KINDS = ['checking', 'savings', 'brokerage'] as const;
+
+/**
+ * Returns null for an account kind this phone doesn't know yet. Contract §7.1 lets a newer
+ * Home Base add enum values without bumping the version, so we skip that account rather than
+ * rejecting the whole snapshot.
+ */
+function parseAccount(v: unknown, p: string): SnapshotAccount | null {
   const o = obj(v, p);
+  const kind = str(o.kind, `${p}.kind`);
+  if (!(ACCOUNT_KINDS as readonly string[]).includes(kind)) return null;
   return {
     id: int(o.id, `${p}.id`),
     name: str(o.name, `${p}.name`),
-    kind: oneOf(o.kind, ['checking', 'savings', 'brokerage'] as const, `${p}.kind`),
+    kind: kind as SnapshotAccount['kind'],
     balance_cents: int(o.balance_cents, `${p}.balance_cents`),
     balance_as_of: date(o.balance_as_of, `${p}.balance_as_of`),
   };
@@ -325,7 +334,9 @@ function parseOrThrow(input: unknown): Snapshot {
     transactions: arr(root.transactions, 'transactions').map((t, i) =>
       parseTransaction(t, `transactions[${i}]`),
     ),
-    accounts: arr(root.accounts, 'accounts').map((a, i) => parseAccount(a, `accounts[${i}]`)),
+    accounts: arr(root.accounts, 'accounts')
+      .map((a, i) => parseAccount(a, `accounts[${i}]`))
+      .filter((a): a is SnapshotAccount => a !== null),
     tax: parseTax(root.tax, 'tax'),
     settings: parseSettings(root.settings, 'settings'),
   };
