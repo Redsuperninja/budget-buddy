@@ -70,7 +70,8 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | Table | Key fields |
 | --- | --- |
 | `accounts` | id, name, kind (checking/savings/brokerage/credit_card/cash/loan/retirement/hsa/other), institution, last4 (enc), notes (enc) |
-| `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc) |
+| `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique) |
+| `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
 | `paychecks` | id, pay_date, employer, account_id?, gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, other_deductions_cents, net_cents (all ≥ 0) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
@@ -102,7 +103,7 @@ account's balance is the plain sum of its transactions.
 **For `credit_card` and `loan` accounts a negative balance means money owed. Charges are negative, and payments
 and refunds are positive.** A card payment from checking is a linked transfer: -X on checking, +X on the card.
 This makes net worth the plain sum of every account's balance. CSV import (#6) must flip card issuers that
-export charges as positive numbers. The dashboard should show a negative card balance as "$50.00 owed".
+export charges as positive numbers (the `flip_sign` choice, saved with the account's mapping). The dashboard should show a negative card balance as "$50.00 owed".
 
 Worked example (fake data, also a test in `server/tests/test_accounts_api.py`):
 

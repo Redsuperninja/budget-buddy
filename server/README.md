@@ -106,6 +106,48 @@ editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead.
   Only two regular (`normal`) transactions can be linked; both move to the Transfer category. While
   linked, a transaction's account, amount, kind and category are locked and it can't be deleted:
   remove the link first.
+- Bank CSV import: `POST /api/local/accounts/{id}/csv-import/preview`, then
+  `POST /api/local/accounts/{id}/csv-import`, and `DELETE /api/local/accounts/{id}/csv-import/mapping`
+  to forget a saved mapping. See below.
+
+## Importing a bank statement (CSV)
+
+Most banks let you download your transactions as a CSV file ("Download" or "Export", then CSV).
+Budget Buddy can read that file straight into one of your accounts.
+
+1. **Preview.** Send the file to the preview route. The request body is the file itself
+   (`Content-Type: text/csv`). Budget Buddy works out which column is the date, the description
+   and the amount (or separate money-out and money-in columns), and shows you every row it would
+   add. Nothing is saved yet.
+2. **Check it.** Look at the dates and the signs. Money out should be negative. If something's
+   off, send the preview again with your own choices as query parameters, for example
+   `?date_format=DD/MM/YYYY` or `?flip_sign=true`. Columns are numbered from 0.
+3. **Import.** Send the same file and the same choices to the import route. Add
+   `save_mapping=true` and next time this account's file is recognized straight away.
+
+Good to know:
+
+- **Importing the same rows twice is safe.** Each imported row remembers a fingerprint (account,
+  date, amount, description, and how many identical rows came before it in the file). If you
+  import an overlapping statement, rows already in Budget Buddy are skipped and counted as
+  `skipped_duplicates`. Two identical purchases on the same day in one file are both kept.
+- **Credit cards:** many card companies list charges as positive numbers. Budget Buddy needs
+  charges negative (money you owe), so choose `flip_sign=true` for those files.
+- **Dates:** US-style month/day is tried first. If your bank writes day/month and every day in
+  the file is 12 or less, choose `date_format=DD/MM/YYYY` yourself. Formats understood:
+  `YYYY-MM-DD`, `MM/DD/YYYY`, `MM/DD/YY`, `DD/MM/YYYY`, `DD/MM/YY`, `YYYY/MM/DD`, `MM-DD-YYYY`,
+  `DD.MM.YYYY`, `YYYYMMDD`, `Mon D, YYYY`, `D Mon YYYY` (a time after the date is ignored).
+- **Amounts** may have `$` signs, thousands commas, `(12.34)` or `12.34-` for negatives. An
+  amount that can't be read exactly, like `12,34` with a decimal comma, is never guessed: the row
+  is reported as a problem.
+- **Rows with problems** stop the import and are listed by row number, so nothing half-imports.
+  Fix your choices, or add `skip_invalid_rows=true` to import the rest. Blank lines are ignored.
+- **Limits:** 5 MB and 10,000 rows per file. Text files saved as UTF-8, UTF-16 or Windows-1252
+  are all fine.
+- A description that starts with `=`, `+`, `-` or `@` gets a `'` in front, so a spreadsheet never
+  runs it as a formula if you export it later.
+- Imported rows are regular transactions with no category. Transfers between your accounts
+  aren't spotted automatically yet: link them yourself.
 
 ## Settings
 

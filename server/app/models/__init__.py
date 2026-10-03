@@ -10,7 +10,14 @@ from app.models.enums import (
     TransactionKind,
     TransactionSource,
 )
-from app.models.ledger import Account, Category, Paycheck, Receipt, Transaction
+from app.models.ledger import (
+    Account,
+    Category,
+    CsvImportMapping,
+    Paycheck,
+    Receipt,
+    Transaction,
+)
 from app.models.tax import Deduction, Donation, StockLot, StockSale
 
 __all__ = [
@@ -19,6 +26,7 @@ __all__ = [
     "Base",
     "Category",
     "CategoryGroup",
+    "CsvImportMapping",
     "Deduction",
     "DeductionKind",
     "Device",
