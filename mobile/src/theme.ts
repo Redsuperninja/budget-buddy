@@ -18,6 +18,7 @@ export type ColorPalette = {
   onDisabled: string;
   positive: string;
   negative: string;
+  warning: string;
   tabInactive: string;
 };
 
@@ -34,6 +35,7 @@ export const colors: { light: ColorPalette; dark: ColorPalette } = {
     onDisabled: '#4A5753', // ~5.5:1 on disabled
     positive: '#1B6E3A',
     negative: '#B3261E',
+    warning: '#8A5300', // ~6:1 on white
     tabInactive: '#4A5753',
   },
   dark: {
@@ -48,6 +50,7 @@ export const colors: { light: ColorPalette; dark: ColorPalette } = {
     onDisabled: '#B4C0BC', // ~7:1 on disabled
     positive: '#7FD89A',
     negative: '#FFB4AB',
+    warning: '#FFC870', // ~12:1 on background
     tabInactive: '#B4C0BC',
   },
 };
