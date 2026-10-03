@@ -4,7 +4,15 @@ from typing import Annotated, Literal
 from pydantic import Field, StringConstraints, model_validator
 
 from app.models import TransactionKind, TransactionSource
-from app.schemas.common import Cents, DollarText, Notes, Schema, UpdateSchema, resolve_amount
+from app.schemas.common import (
+    Cents,
+    DollarText,
+    Id,
+    Notes,
+    Schema,
+    UpdateSchema,
+    resolve_amount,
+)
 
 Description = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 # "transfer" is set only by linking two transactions (POST .../transfer), never directly.
@@ -14,12 +22,12 @@ EditableKind = Literal[TransactionKind.NORMAL, TransactionKind.REFUND, Transacti
 class TransactionCreate(Schema):
     """Negative amount = money out, positive = money in. Send ``amount_cents`` or ``amount``."""
 
-    account_id: int
+    account_id: Id
     date: dt.date
     amount_cents: Cents | None = None
     amount: DollarText | None = None
     description: Description
-    category_id: int | None = None
+    category_id: Id | None = None
     kind: EditableKind = TransactionKind.NORMAL
     notes: Notes = None
 
@@ -35,12 +43,12 @@ class TransactionCreate(Schema):
 class TransactionUpdate(UpdateSchema):
     not_null = ("account_id", "date", "amount_cents", "description", "kind")
 
-    account_id: int | None = None
+    account_id: Id | None = None
     date: dt.date | None = None
     amount_cents: Cents | None = None
     amount: DollarText | None = None
     description: Description | None = None
-    category_id: int | None = None
+    category_id: Id | None = None
     kind: EditableKind | None = None
     notes: Notes = None
 
@@ -57,12 +65,12 @@ class TransactionUpdate(UpdateSchema):
 
 
 class TransferLink(Schema):
-    other_id: int = Field(description="The matching transaction on your other account.")
+    other_id: Id = Field(description="The matching transaction on your other account.")
 
 
 class TransactionOut(Schema):
     id: int
-    account_id: int
+    account_id: Id
     date: dt.date
     amount_cents: int
     description: str

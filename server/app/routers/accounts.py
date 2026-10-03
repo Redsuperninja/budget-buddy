@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.deps import SessionDep
+from app.deps import PathId, SessionDep
 from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
 from app.services import accounts as service
 
@@ -18,15 +18,15 @@ def create_account(data: AccountCreate, session: SessionDep) -> AccountOut:
 
 
 @router.get("/{account_id}")
-def get_account(account_id: int, session: SessionDep) -> AccountOut:
+def get_account(account_id: PathId, session: SessionDep) -> AccountOut:
     return service.account_out(session, account_id)
 
 
 @router.patch("/{account_id}")
-def update_account(account_id: int, data: AccountUpdate, session: SessionDep) -> AccountOut:
+def update_account(account_id: PathId, data: AccountUpdate, session: SessionDep) -> AccountOut:
     return service.update_account(session, account_id, data)
 
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_account(account_id: int, session: SessionDep) -> None:
+def delete_account(account_id: PathId, session: SessionDep) -> None:
     service.delete_account(session, account_id)

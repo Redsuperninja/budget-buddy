@@ -15,6 +15,9 @@ from app.money import MAX_ABS_CENTS, dollars_to_cents
 
 # Strict: a JSON float like 12.5 (or the string "1250") is rejected instead of silently converted.
 Cents = Annotated[int, Field(strict=True, gt=-MAX_ABS_CENTS, lt=MAX_ABS_CENTS)]
+# SQLite stores integers in 64 bits; a bigger ID can't exist and would crash the query.
+MAX_ID = 2**63 - 1
+Id = Annotated[int, Field(ge=1, le=MAX_ID)]
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
 OptionalShortText = Annotated[str | None, StringConstraints(strip_whitespace=True, max_length=100)]
 Notes = Annotated[str | None, Field(max_length=10_000)]

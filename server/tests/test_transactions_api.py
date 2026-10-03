@@ -190,3 +190,46 @@ def test_transfer_needs_two_existing_transactions(client, add_txn, accounts):
     same = client.post(f"{URL}/{first['id']}/transfer", json={"other_id": first["id"]})
     assert same.status_code == 422
     assert client.post(f"{URL}/{first['id']}/transfer", json={"other_id": 999}).status_code == 404
+
+
+HUGE = 99_999_999_999_999_999_999  # bigger than SQLite's 64-bit integers
+BIGGEST_ID = 2**63 - 1
+
+
+def test_huge_ids_are_a_validation_error_not_a_crash(client, add_txn, accounts):
+    txn = add_txn(accounts[0], -100)
+    body = {"account_id": accounts[0], "date": "2026-01-15", "description": "x", "amount_cents": 1}
+    requests = [
+        ("get", f"/api/local/accounts/{HUGE}", None, None),
+        ("patch", f"/api/local/accounts/{HUGE}", None, {"name": "x"}),
+        ("delete", f"/api/local/accounts/{HUGE}", None, None),
+        ("get", f"{URL}/{HUGE}", None, None),
+        ("patch", f"{URL}/{HUGE}", None, {"description": "x"}),
+        ("delete", f"{URL}/{HUGE}", None, None),
+        ("post", f"{URL}/{HUGE}/transfer", None, {"other_id": txn["id"]}),
+        ("delete", f"{URL}/{HUGE}/transfer", None, None),
+        ("get", URL, {"account_id": HUGE}, None),
+        ("get", URL, {"category_id": HUGE}, None),
+        ("get", URL, {"offset": HUGE}, None),
+        ("post", URL, None, {**body, "account_id": HUGE}),
+        ("post", URL, None, {**body, "category_id": HUGE}),
+        ("patch", f"{URL}/{txn['id']}", None, {"account_id": HUGE}),
+        ("patch", f"{URL}/{txn['id']}", None, {"category_id": HUGE}),
+        ("post", f"{URL}/{txn['id']}/transfer", None, {"other_id": HUGE}),
+    ]
+    for method, path, params, json in requests:
+        response = client.request(method, path, params=params, json=json)
+        assert response.status_code == 422, (method, path, params, json)
+        assert response.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.parametrize("bad_id", [0, -1])
+def test_ids_start_at_one(client, bad_id):
+    assert client.get(f"{URL}/{bad_id}").status_code == 422
+    assert client.get(URL, params={"account_id": bad_id}).status_code == 422
+
+
+def test_biggest_possible_id_is_just_not_found(client, accounts):
+    assert client.get(f"/api/local/accounts/{BIGGEST_ID}").status_code == 404
+    assert client.get(f"{URL}/{BIGGEST_ID}").status_code == 404
+    assert client.get(URL, params={"offset": BIGGEST_ID}).json()["items"] == []
