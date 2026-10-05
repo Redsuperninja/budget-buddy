@@ -106,6 +106,13 @@ editing a transaction you may send `amount` as dollar text (`"-12.34"`) instead.
   Only two regular (`normal`) transactions can be linked; both move to the Transfer category. While
   linked, a transaction's account, amount, kind and category are locked and it can't be deleted:
   remove the link first.
+- Categories: `GET/POST /api/local/categories` and `GET/PATCH /api/local/categories/{id}`. You can add a
+  category, rename it, and set its monthly `budget_cents` (not negative; it applies to every month). The
+  group can't be changed, and you can't add a `transfer` one. Names can't repeat, ignoring case.
+- Monthly summary: `GET /api/local/summary/monthly?month=2026-01` gives income, spending, and savings for
+  that month. Transfers and adjustments aren't counted, refunds lower spending, and transactions without
+  a usable category are reported as `unassigned_in_cents` / `unassigned_out_cents` instead of being
+  guessed at. Money moved to your own savings account isn't counted as saved yet.
 
 ## Settings
 
