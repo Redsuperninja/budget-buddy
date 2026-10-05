@@ -9,8 +9,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Account, Transaction
+from app.models import Account, AccountKind, StockLot, StockSaleOrder, Transaction
 from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
+
+# Selling inside these accounts isn't taxed, so they can't hold tracked stock purchases or
+# sales.
+TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}
 
 
 def _totals(session: Session, account_ids: list[int]) -> dict[int, tuple[int, int]]:
@@ -62,16 +66,38 @@ def create_account(session: Session, data: AccountCreate) -> AccountOut:
     return account_out(session, account.id)
 
 
+def _has_stocks(session: Session, account_id: int) -> bool:
+    return bool(
+        session.scalar(select(StockLot.id).where(StockLot.account_id == account_id).limit(1))
+        or session.scalar(
+            select(StockSaleOrder.id).where(StockSaleOrder.account_id == account_id).limit(1)
+        )
+    )
+
+
 def update_account(session: Session, account_id: int, data: AccountUpdate) -> AccountOut:
     account = get_account(session, account_id)
-    for field, value in data.changes().items():
+    changes = data.changes()
+    if (
+        changes.get("kind") in TAX_FREE_KINDS
+        and changes["kind"] != account.kind
+        and _has_stocks(session, account_id)
+    ):
+        raise ApiError(
+            409,
+            "account_has_stocks",
+            "This account has stock purchases or sales, so it can't become a retirement account "
+            "or HSA: sales there aren't taxed, so the gains summary would be wrong. Delete those "
+            "purchases and sales first, or add a separate account.",
+        )
+    for field, value in changes.items():
         setattr(account, field, value)
     session.commit()
     return account_out(session, account_id)
 
 
 def delete_account(session: Session, account_id: int) -> None:
-    """Delete an account that has no transactions.
+    """Delete an account that has no transactions and no stock purchases or sales.
 
     The model has no "archived" flag, and transactions point at their account with a plain
     foreign key (no cascade), so an account with history can't be removed.
@@ -83,6 +109,15 @@ def delete_account(session: Session, account_id: int) -> None:
             "account_has_transactions",
             "This account has transactions, so it can't be deleted. "
             "Delete or move its transactions first.",
+        )
+    # Deleting would quietly move its stock purchases and sales out of the account, which
+    # changes how FIFO matches them.
+    if _has_stocks(session, account_id):
+        raise ApiError(
+            409,
+            "account_has_stocks",
+            "This account has stock purchases or sales, so it can't be deleted. "
+            "Delete those first.",
         )
     session.delete(account)
     session.commit()

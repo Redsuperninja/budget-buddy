@@ -18,7 +18,7 @@ from app.models.ledger import (
     Receipt,
     Transaction,
 )
-from app.models.tax import Deduction, Donation, StockLot, StockSale
+from app.models.tax import Deduction, Donation, StockLot, StockSale, StockSaleOrder
 
 __all__ = [
     "Account",
@@ -38,6 +38,7 @@ __all__ = [
     "Receipt",
     "StockLot",
     "StockSale",
+    "StockSaleOrder",
     "Transaction",
     "TransactionKind",
     "TransactionSource",

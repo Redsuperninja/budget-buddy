@@ -1,5 +1,7 @@
 """Startup migrations: locking, backups, and plain-English failures."""
 
+import io
+import re
 import sqlite3
 import stat
 import sys
@@ -127,7 +129,6 @@ def test_failed_upgrade_gives_plain_english_error(tmp_path, monkeypatch):
 
 
 def test_migrations_have_one_head_and_no_duplicate_revision_ids():
-    import re
 
     from alembic.script import ScriptDirectory
 
@@ -141,3 +142,69 @@ def test_migrations_have_one_head_and_no_duplicate_revision_ids():
     found = [m.group(1) for m in matches if m]
     assert len(found) == len(matches)  # every file declares a revision
     assert len(found) == len(set(found)), f"duplicate revision ids: {found}"
+
+
+def test_migration_0007_works_in_offline_sql_mode():
+    """``alembic upgrade --sql`` prints the script instead of running it."""
+    config = alembic_config()
+    config.output_buffer = io.StringIO()
+    command.upgrade(config, "0006:0007", sql=True)
+    script = config.output_buffer.getvalue()
+    assert "INSERT INTO stock_sale_orders" in script
+    assert "UPDATE stock_sales SET order_id = id" in script
+
+
+def test_migration_0007_turns_existing_stock_sales_into_orders(tmp_path):
+    engine = create_db_engine(tmp_path)
+    config = alembic_config()
+
+    def migrate(direction, target):
+        with engine.begin() as conn:
+            config.attributes["connection"] = conn
+            getattr(command, direction)(config, target)
+
+    try:
+        migrate("upgrade", "0006")
+        with engine.begin() as conn:
+            conn.execute(text("INSERT INTO accounts (id, name, kind) VALUES (1, 'B', 'brokerage')"))
+            conn.execute(
+                text(
+                    "INSERT INTO stock_lots (id, account_id, symbol, shares_micro, acquired_on, "
+                    "cost_basis_cents) VALUES (1, 1, 'FAKE', 3000000, '2025-01-02', 3000)"
+                )
+            )
+            conn.execute(
+                text(
+                    "INSERT INTO stock_sales (lot_id, sold_on, shares_micro, proceeds_cents) "
+                    "VALUES (1, '2026-02-01', 1000000, 1500), (1, '2026-03-01', 2000000, 2500)"
+                )
+            )
+
+        migrate("upgrade", "0007")
+        with engine.connect() as conn:
+            orders = conn.execute(
+                text(
+                    "SELECT id, account_id, symbol, sold_on, shares_micro, proceeds_cents "
+                    "FROM stock_sale_orders ORDER BY id"
+                )
+            ).all()
+            pieces = conn.execute(
+                text("SELECT order_id, lot_id, shares_micro FROM stock_sales ORDER BY id")
+            ).all()
+        assert [tuple(o)[1:] for o in orders] == [
+            (1, "FAKE", "2026-02-01", 1_000_000, 1500),
+            (1, "FAKE", "2026-03-01", 2_000_000, 2500),
+        ]
+        assert [tuple(p) for p in pieces] == [
+            (orders[0].id, 1, 1_000_000),
+            (orders[1].id, 1, 2_000_000),
+        ]
+        assert _revision(engine) == "0007"
+
+        migrate("downgrade", "0006")
+        with engine.connect() as conn:
+            assert conn.execute(text("SELECT count(*) FROM stock_sales")).scalar() == 2
+            columns = [row[1] for row in conn.execute(text("PRAGMA table_info(stock_sales)"))]
+            assert "order_id" not in columns
+    finally:
+        engine.dispose()

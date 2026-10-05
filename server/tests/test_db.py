@@ -27,6 +27,7 @@ from app.models import (
     Receipt,
     StockLot,
     StockSale,
+    StockSaleOrder,
     Transaction,
     TransactionKind,
     TransactionSource,
@@ -42,6 +43,7 @@ EXPECTED_TABLES = {
     "donations",
     "stock_lots",
     "stock_sales",
+    "stock_sale_orders",
     "deductions",
     "devices",
     "pairing_sessions",
@@ -198,7 +200,14 @@ def test_round_trip_every_table(session):
         acquired_on=dt.date(2024, 1, 2),
         cost_basis_cents=35012,
     )
-    session.add(lot)
+    order = StockSaleOrder(
+        account_id=brokerage.id,
+        symbol="VTI",
+        sold_on=dt.date(2026, 3, 1),
+        shares_micro=500_000,
+        proceeds_cents=14000,
+    )
+    session.add_all([lot, order])
     session.flush()
     session.add_all(
         [
@@ -220,6 +229,7 @@ def test_round_trip_every_table(session):
                 receipt_id=receipt.id,
             ),
             StockSale(
+                order_id=order.id,
                 lot_id=lot.id,
                 sold_on=dt.date(2026, 3, 1),
                 shares_micro=500_000,
@@ -395,10 +405,19 @@ def test_stock_sale_shares_must_be_positive(session):
     lot = StockLot(
         symbol="VTI", shares_micro=1, acquired_on=dt.date(2026, 1, 1), cost_basis_cents=1
     )
-    session.add(lot)
+    order = StockSaleOrder(
+        symbol="VTI", sold_on=dt.date(2026, 2, 1), shares_micro=1, proceeds_cents=0
+    )
+    session.add_all([lot, order])
     session.flush()
     session.add(
-        StockSale(lot_id=lot.id, sold_on=dt.date(2026, 2, 1), shares_micro=0, proceeds_cents=0)
+        StockSale(
+            order_id=order.id,
+            lot_id=lot.id,
+            sold_on=dt.date(2026, 2, 1),
+            shares_micro=0,
+            proceeds_cents=0,
+        )
     )
     with pytest.raises(IntegrityError):
         session.commit()

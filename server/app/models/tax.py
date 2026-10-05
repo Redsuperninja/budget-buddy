@@ -10,7 +10,8 @@ from app.models.base import Base, TimestampMixin, str_enum
 from app.models.enums import DeductionKind, DonationKind
 
 # Share counts can be fractional, so they're stored as whole millionths of a share
-# (1.5 shares -> 1_500_000). Gains and short/long-term are calculated, not stored (roadmap #12).
+# (1.5 shares -> 1_500_000), never as floats. Gains and short/long-term are calculated, not
+# stored (see app/services/stock_gains.py).
 SHARES_SCALE = 1_000_000
 
 
@@ -44,8 +45,30 @@ class StockLot(TimestampMixin, Base):
     cost_basis_cents: Mapped[int]  # total paid, including fees
 
 
+class StockSaleOrder(TimestampMixin, Base):
+    """One sale as the user entered it: a symbol, a date, a number of shares, and the money
+    received after fees. FIFO matching splits it into ``StockSale`` rows, one per lot used."""
+
+    __tablename__ = "stock_sale_orders"
+    __table_args__ = (
+        CheckConstraint("shares_micro > 0", name="shares_positive"),
+        CheckConstraint("proceeds_cents >= 0", name="proceeds_not_negative"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    account_id: Mapped[int | None] = mapped_column(ForeignKey("accounts.id", ondelete="SET NULL"))
+    symbol: Mapped[str] = mapped_column(String(16), index=True)
+    sold_on: Mapped[dt.date] = mapped_column(Date)
+    shares_micro: Mapped[int]
+    proceeds_cents: Mapped[int]  # total received, after fees
+
+
 class StockSale(TimestampMixin, Base):
-    """Shares sold out of one lot."""
+    """Shares sold out of one lot: the part of a ``StockSaleOrder`` matched to that lot.
+
+    Rebuilt by ``app.services.stocks`` whenever a lot or sale of the same symbol and account
+    changes, so FIFO order always follows the dates.
+    """
 
     __tablename__ = "stock_sales"
     __table_args__ = (
@@ -54,10 +77,13 @@ class StockSale(TimestampMixin, Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("stock_sale_orders.id", ondelete="CASCADE"), index=True
+    )
     lot_id: Mapped[int] = mapped_column(ForeignKey("stock_lots.id"), index=True)
     sold_on: Mapped[dt.date] = mapped_column(Date)
     shares_micro: Mapped[int]
-    proceeds_cents: Mapped[int]  # total received, after fees
+    proceeds_cents: Mapped[int]  # this lot's share of the order's proceeds
 
 
 class Deduction(TimestampMixin, Base):
