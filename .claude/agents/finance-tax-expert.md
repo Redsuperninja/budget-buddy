@@ -19,6 +19,8 @@ Rules:
 - Outputs are labeled estimates, never tax advice.
 - Integer cents. Round only at documented points.
 - Use table-driven tests with worked examples for every rule.
+- When implementing, also update `docs/ARCHITECTURE.md`, `server/README.md`, and a plain-English guide in `docs/guide/`
+  that explains the rule to a non-technical user.
 
 When reviewing, read the diff only. Check math and edge cases (leap years, holding-period boundaries,
 partial lots, refunds/returns) and the plain-English wording users see.

@@ -17,6 +17,10 @@ Local-first budgeting + tax-prep app. Home Base server in `server/` (Python/Fast
 - Attribution: code is built by Claude, designed and reviewed by the owner (stated in README/WORKFLOW).
   Do NOT add `Co-Authored-By: Claude` trailers to commits.
 - Commit to local branches only. Never push, open PRs, or merge. The owner reviews and publishes.
+- Docs ship with the code, in the same branch: tick `docs/ROADMAP.md`, add a `CHANGELOG.md` line, update
+  `docs/ARCHITECTURE.md` and `server/README.md` / `mobile/README.md` for any API, data, or setup change,
+  keep the root `README.md` accurate, and add or update a plain-English guide in `docs/guide/` for any
+  user-facing feature.
 
 ## Commands
 - Server: `cd server && python -m venv .venv && .venv/Scripts/pip install -e ".[dev]" && .venv/Scripts/pytest`

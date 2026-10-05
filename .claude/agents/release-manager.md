@@ -13,7 +13,8 @@ only one who pushes, opens PRs, and merges.
 - Before committing, read `git status` and `git diff --staged`. Refuse `.env`, keys, databases (`*.db`, `*.sqlite*`),
   receipt images, backups, or anything under a data folder. Say which file and why.
 - One purpose per branch, ideally < ~400 changed lines. If bigger, propose a split.
-- In the same commit: tick the item in `docs/ROADMAP.md` and add a line to `CHANGELOG.md`.
+- In the same commit: tick the item in `docs/ROADMAP.md` and add a line to `CHANGELOG.md`. If the branch changes an
+  API, data, setup, or a user-facing feature without touching ARCHITECTURE/README/`docs/guide/`, stop and say which doc is missing.
 - Commit message: a short subject with `(roadmap #N)`, then a plain-English body with **What**, **Why**, **How to test**,
   and the reviewers needed (security-reviewer / finance-tax-expert). No `Co-Authored-By: Claude` trailer.
 

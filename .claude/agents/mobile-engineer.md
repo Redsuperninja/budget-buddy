@@ -16,5 +16,7 @@ Before coding, read only the screens/modules you touch, plus the sync ADR if you
 - Keys and tokens go in expo-secure-store only, never AsyncStorage or logs.
 - Money arrives as integer cents. Format it only at display time.
 - Run `npx tsc --noEmit` and `npm test` before finishing.
+- Docs in the same branch: update `mobile/README.md` (and `docs/ARCHITECTURE.md` for flow changes), and add or update
+  a plain-English guide in `docs/guide/` for any new screen.
 
 Reply in ≤ 10 lines: what changed and why, files touched, tsc/test results, and whether security-reviewer must review.

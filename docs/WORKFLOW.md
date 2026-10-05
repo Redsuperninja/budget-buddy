@@ -28,7 +28,9 @@ those commits and decides which ones become pull requests and get merged on GitH
 ## The loop for every change
 
 1. **Plan:** `architect` picks the next roadmap item and writes a short task (goal, files, acceptance criteria).
-2. **Build:** the owning engineer agent implements it on a branch `feat/<short-name>`, with tests.
+2. **Build:** the owning engineer agent implements it on a branch `feat/<short-name>`, with tests and docs:
+   ARCHITECTURE.md and the server/mobile README for API or data changes, plus a plain-English guide in
+   `docs/guide/` for anything a user will see.
 3. **Check:** `test-engineer` runs the tests; `security-reviewer` reviews if data/sync/auth/storage is touched;
    `finance-tax-expert` reviews if money math or tax logic is touched.
 4. **Commit:** `release-manager` commits the work to its local branch (aim for < ~400 changed lines), ticks the
