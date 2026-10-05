@@ -7,12 +7,24 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Category, CategoryGroup, Transaction, TransactionKind, TransactionSource
+from app.models import (
+    Category,
+    CategoryGroup,
+    Paycheck,
+    Transaction,
+    TransactionKind,
+    TransactionSource,
+)
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
 
-# Changing these on one side of a transfer would break the pair, so unlink first.
+# Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
+# so unlink first.
 _TRANSFER_LOCKED_FIELDS = {"account_id", "amount_cents", "kind"}
+_DEPOSIT_LOCKED_MESSAGE = (
+    "This deposit is linked to a paycheck. Remove that link before changing its account, amount, "
+    "or kind, or making it part of a transfer."
+)
 
 
 @dataclass(frozen=True)
@@ -120,6 +132,8 @@ def update_transaction(
             "This transaction is part of a transfer. Remove the transfer link before changing "
             "its account, amount, kind, or category.",
         )
+    if _TRANSFER_LOCKED_FIELDS & changes.keys() and _is_paycheck_deposit(session, transaction):
+        raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
     _check_kind_rules(
         changes.get("kind", transaction.kind),
         changes.get("amount_cents", transaction.amount_cents),
@@ -130,6 +144,11 @@ def update_transaction(
         setattr(transaction, field, value)
     session.commit()
     return transaction
+
+
+def _is_paycheck_deposit(session: Session, transaction: Transaction) -> bool:
+    query = select(Paycheck.id).where(Paycheck.deposit_transaction_id == transaction.id)
+    return session.scalar(query) is not None
 
 
 def _is_transfer_category(session: Session, category_id: int | None) -> bool:
@@ -191,6 +210,8 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
             "One of these transactions is already part of another transfer. "
             "Remove that link first.",
         )
+    if _is_paycheck_deposit(session, first) or _is_paycheck_deposit(session, second):
+        raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
     if first.kind != TransactionKind.NORMAL or second.kind != TransactionKind.NORMAL:
         # Linking would hide what a refund or an opening-balance adjustment was, and unlinking
         # couldn't bring it back.

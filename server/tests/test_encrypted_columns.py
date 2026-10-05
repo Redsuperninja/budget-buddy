@@ -286,7 +286,7 @@ def test_migration_0003_encrypts_existing_plaintext_and_downgrade_restores_it(tm
             account = session.get(Account, 1)
             assert (account.last4, account.notes) == ("4821", "joint")
             assert session.get(Transaction, 1).notes == "with Alex"
-            assert session.scalars(select(Paycheck)).one().notes == "raise"
+            assert session.scalar(select(Paycheck.notes)) == "raise"  # 0003: no 0004 columns yet
             receipt = session.scalars(select(Receipt)).one()
             assert (receipt.image_path, receipt.notes) == ("abc.jpg", "lunch")
             assert session.scalars(select(Donation)).one().notes == "book sale"

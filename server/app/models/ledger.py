@@ -84,6 +84,8 @@ class Paycheck(TimestampMixin, Base):
             "medicare_cents",
             "retirement_cents",
             "hsa_cents",
+            "health_insurance_cents",
+            "roth_retirement_cents",
             "other_deductions_cents",
             "net_cents",
         )
@@ -95,13 +97,24 @@ class Paycheck(TimestampMixin, Base):
     account_id: Mapped[int | None] = mapped_column(
         ForeignKey("accounts.id", ondelete="SET NULL")
     )  # where the money was deposited
+    # The deposit in your bank account that this paycheck explains (roadmap #7). Its amount is
+    # the net pay. One deposit can back only one paycheck.
+    deposit_transaction_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transactions.id", ondelete="SET NULL"), index=True, unique=True
+    )
     gross_cents: Mapped[int]
     federal_tax_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     state_tax_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     social_security_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     medicare_cents: Mapped[int] = mapped_column(default=0, server_default="0")
+    # Pre-tax (traditional) 401(k)/403(b)/457 contributions.
     retirement_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     hsa_cents: Mapped[int] = mapped_column(default=0, server_default="0")
+    # Pre-tax: Section 125 health/dental/vision premiums, FSAs, and similar benefits.
+    health_insurance_cents: Mapped[int] = mapped_column(default=0, server_default="0")
+    # After tax: Roth 401(k)/403(b) contributions.
+    roth_retirement_cents: Mapped[int] = mapped_column(default=0, server_default="0")
+    # After tax: anything else (union dues, after-tax insurance, ESPP, garnishments).
     other_deductions_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     net_cents: Mapped[int]
     notes: Mapped[str | None] = mapped_column(EncryptedString("paychecks.notes"))

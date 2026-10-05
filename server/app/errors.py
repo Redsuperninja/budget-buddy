@@ -1,7 +1,9 @@
 """One error shape for the whole API: ``{"error": {"code": ..., "message": ...}}``.
 
 ``code`` is stable and machine-readable; ``message`` is plain English. This matches the sync
-contract's error style. Messages never include amounts, descriptions, SQL, or exception text.
+contract's error style. Messages never include descriptions, SQL, or exception text, and never
+include amounts, with one exception: a paycheck that doesn't add up says by how much, because the
+person needs that to fix their own entry. Error responses are never logged.
 """
 
 from fastapi import FastAPI, Request
@@ -11,11 +13,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 class ApiError(Exception):
-    def __init__(self, status: int, code: str, message: str) -> None:
+    def __init__(self, status: int, code: str, message: str, **extra) -> None:
         super().__init__(message)
         self.status = status
         self.code = code
         self.message = message
+        self.extra = extra  # extra machine-readable fields next to code and message
 
 
 def not_found(thing: str) -> ApiError:
@@ -49,7 +52,7 @@ async def _validation_error(_request: Request, exc: RequestValidationError) -> J
 
 
 async def _api_error(_request: Request, exc: ApiError) -> JSONResponse:
-    return error_response(exc.status, exc.code, exc.message)
+    return error_response(exc.status, exc.code, exc.message, **exc.extra)
 
 
 async def _http_error(_request: Request, exc: StarletteHTTPException) -> JSONResponse:

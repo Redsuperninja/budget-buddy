@@ -155,6 +155,10 @@ Good to know:
   runs it as a formula if you export it later.
 - Imported rows are regular transactions with no category. Transfers between your accounts
   aren't spotted automatically yet: link them yourself.
+- Paychecks: `GET/POST /api/local/paychecks` (filter: `year`), `GET/PATCH/DELETE
+  /api/local/paychecks/{id}`, `POST/DELETE /api/local/paychecks/{id}/deposit` to link or unlink the
+  bank deposit, and `GET /api/local/paychecks/summary?year=2026` for year-to-date totals. Amounts
+  are whole cents only. See [docs/paychecks.md](../docs/paychecks.md).
 
 ## Settings
 
