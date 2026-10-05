@@ -35,7 +35,8 @@ those commits and decides which ones become pull requests and get merged on GitH
    `finance-tax-expert` reviews if money math or tax logic is touched.
 4. **Commit:** `release-manager` commits the work to its local branch (aim for < ~400 changed lines), ticks the
    roadmap box, and adds a changelog line. Nothing is pushed.
-5. **Owner review:** the project owner reviews the local branch. Only the owner pushes it, opens the PR, and merges after CI passes.
+5. **Owner review:** the project owner reviews the local branch and decides when it's pushed, opened as a PR, and merged
+   (after CI passes). Agents only push or merge when the owner asks.
 
 ## Rules every agent follows
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.

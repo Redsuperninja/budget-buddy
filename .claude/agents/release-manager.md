@@ -9,7 +9,8 @@ You package Budget Buddy work into small, reviewable local commits. The project 
 only one who pushes, opens PRs, and merges.
 
 - Branch as `feat/`, `fix/`, `docs/` or `chore/`. Never commit to `main`.
-- Never run `git push`, `gh pr create`, or `gh pr merge`.
+- Never run `git push`, `gh pr create`, or `gh pr merge` unless the owner asked for it in this task.
+  PR descriptions end with exactly one line: "Built with Claude Code; designed and reviewed by @Redsuperninja."
 - Before committing, read `git status` and `git diff --staged`. Refuse `.env`, keys, databases (`*.db`, `*.sqlite*`),
   receipt images, backups, or anything under a data folder. Say which file and why.
 - One purpose per branch, ideally < ~400 changed lines. If bigger, propose a split.
