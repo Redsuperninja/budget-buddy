@@ -73,7 +73,7 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique) |
 | `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
-| `paychecks` | id, pay_date, employer, account_id?, gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, other_deductions_cents, net_cents (all ≥ 0) |
+| `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
 | `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
@@ -139,6 +139,27 @@ Routes (this computer only, like the rest of `/api/local/`): `GET/POST /api/loca
   and `unassigned_count`, and are left out of the totals.
 - **Known gap:** money moved into your own savings account is a transfer, so it isn't counted as saved yet.
   Roadmap item 10b covers this.
+### Paychecks and income (no double counting)
+
+A paycheck records what you earned and what was taken out. The lines always add up exactly:
+`gross - (federal + state + social_security + medicare) - (retirement + hsa + health_insurance)
+- (roth_retirement + other_deductions) = net`, in whole cents, or the API answers 422
+`net_mismatch` with the difference.
+
+**Income in budget totals comes only from bank transactions. A paycheck is never counted as
+income by itself.** Linking a paycheck to its deposit (`deposit_transaction_id`) only explains
+that deposit, so the money is counted once: as the deposit. An unlinked paycheck adds nothing to
+income either; its money shows up when the deposit is entered or imported. Paychecks feed the
+tax side (wages and withholding by tax year, by `pay_date`) and the "expected take-home"
+estimate, never "received".
+
+Link rules: the deposit is a regular (`normal`) transaction of exactly `+net_cents` in a checking
+or savings account, and one deposit backs at most one paycheck. While linked, the paycheck's net
+and account and the deposit's amount, account and kind are locked (409), and the deposit can't
+become half of a transfer. Deleting either side just removes the link.
+
+### Database migrations
+
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
 `budget.db.bak-<revision>` is saved next to it.

@@ -12,7 +12,7 @@ from app.crypto import FieldCipher, load_keys
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
-from app.routers import accounts, categories, csv_import, health, summary, transactions
+from app.routers import accounts, categories, csv_import, health, paychecks, summary, transactions
 
 
 def ensure_data_dir(path: Path) -> None:
@@ -61,4 +61,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(categories.router)
     app.include_router(summary.router)
     app.include_router(csv_import.router)
+    app.include_router(paychecks.router)
     return app
