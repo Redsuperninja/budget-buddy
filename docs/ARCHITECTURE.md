@@ -30,6 +30,15 @@
   - `receipts` — photo storage (encrypted), amount, merchant, category, optional OCR
   - `budget` — suggestions + monthly targets vs. actual
   - `tax` — charitable donations, stock lots/sales (cost basis, short/long-term), other deductions, yearly summary
+    - Donations (roadmap #11): `/api/local/donations` (this computer only) to add, list, edit, and
+      remove cash and goods gifts, plus `GET /api/local/donations/summary/{tax_year}`. The summary
+      totals what was given that calendar year and lists the proof each gift needs, and the
+      paperwork that depends on the whole year (Form 8283, the "check similar items" note, and
+      the 2026+ note for people who don't itemize). Every dollar threshold comes from that year's
+      tax data file (`docs/tax-data.md`); a year without a file gets 404 `no_tax_data`. Totals are
+      what was given, not what can be deducted, and every summary is labeled an estimate
+      (`is_estimate`, `disclaimer`). Gift dates more than one day after the Home Base's date are
+      rejected (pledges count once paid). User guide: `docs/guide/donations.md`.
   - `sync` — device pairing and the snapshot/upload protocol
 
 ### Phone app (`mobile/`)
@@ -75,7 +84,7 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
 | `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
-| `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
+| `donations` | id, date, organization, amount_cents (≥ 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), nonce_watermark, revoked, paired_at, last_sync_at |

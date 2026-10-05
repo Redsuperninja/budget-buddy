@@ -192,6 +192,15 @@ What happens to a photo:
   touched.
 - Reading text off the photo (OCR) isn't built yet: see
   [issue #33](https://github.com/Redsuperninja/budget-buddy/issues/33).
+- Donations: `GET/POST /api/local/donations` (filters: `tax_year`, `kind`, `limit`, `offset`;
+  newest first) and `GET/PATCH/DELETE /api/local/donations/{id}`. Each gift has a date, the
+  charity's name (`organization`), a kind (`cash` or `goods`), an amount (`amount_cents`, or
+  `amount` as dollar text; for goods, what the items were worth), and optionally a `receipt_id`
+  and notes. The amount must be more than zero, and the date can't be more than one day in the
+  future. `GET /api/local/donations/summary/{tax_year}` gives that year's cash, goods and overall
+  totals and the proof to keep for each gift, using the thresholds in that year's tax data file.
+  It's an estimate, not tax advice, and the totals are what you gave, not what you can deduct.
+  See `docs/guide/donations.md`.
 
 ## Settings
 

@@ -24,7 +24,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 - [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
 - [ ] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
 - [ ] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
-- [ ] 11. Charitable donations tracking — *finance-tax-expert*
+- [x] 11. Charitable donations tracking — *finance-tax-expert*
 - [ ] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
 - [ ] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 
