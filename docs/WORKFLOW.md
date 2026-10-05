@@ -37,6 +37,9 @@ those commits and decides which ones become pull requests and get merged on GitH
    roadmap box, and adds a changelog line. Nothing is pushed.
 5. **Owner review:** the project owner reviews the local branch and decides when it's pushed, opened as a PR, and merged
    (after CI passes). Agents only push or merge when the owner asks.
+6. **Clean up:** PRs are squash-merged, and GitHub deletes the branch automatically after the merge. The merged
+   PR keeps the full record (commits, description, reviews, checks), and its branch can be restored from the PR
+   page if ever needed. Local branches and agent workspaces are removed once their PR has merged.
 
 ## Rules every agent follows
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.
