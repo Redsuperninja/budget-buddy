@@ -39,6 +39,13 @@ budget-buddy/
 
 Early development. See the roadmap for what's done and what's next.
 
+## Built with Claude
+
+The code in Budget Buddy is built by [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant.
+The design and every review are done by the project's owner, a human who decides what gets built and approves
+each change before it's merged. See [docs/WORKFLOW.md](docs/WORKFLOW.md) for how Claude's specialized agents
+split the work.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

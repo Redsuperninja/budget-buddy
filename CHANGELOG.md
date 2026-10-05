@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Project workflow: leaner, more specialized AI agents (each uses a model matched to its job and replies briefly), and a clear note that the code is built by Claude and designed and reviewed by the project owner.
 - Project scaffold: architecture, roadmap, ADRs, and specialized agent definitions.
 - Home Base server skeleton: FastAPI app, settings, data folder, `/api/health`, home-network-only access, tests, and CI.
 - Phone app starter: Expo app with bottom tabs (Home, Add Receipt, Taxes, Settings), light/dark theme, money formatting, and mobile CI.
