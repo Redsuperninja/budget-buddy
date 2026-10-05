@@ -16,6 +16,7 @@ from app.routers import (
     accounts,
     categories,
     csv_import,
+    donations,
     health,
     paychecks,
     receipts,
@@ -76,4 +77,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(csv_import.router)
     app.include_router(paychecks.router)
     app.include_router(receipts.router)
+    app.include_router(donations.router)
     return app

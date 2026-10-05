@@ -36,6 +36,12 @@ each file against a strict schema when it loads.
 | `medical_expense` | Medical costs count only above 7.5% of income |
 | `fica` | Social Security and Medicare rates, the Social Security wage cap, and the Additional Medicare Tax |
 
+The donations summary (`/api/local/donations/summary/{tax_year}`, roadmap #11) reads the
+`charitable` paperwork thresholds and `non_itemizer_deduction_cents` from these files, and its
+messages show the amounts from the file. Changing a threshold here changes the donation flags; no
+code change is needed. If `non_itemizer_deduction_cents` is `null`, the summary leaves out the note
+for people who don't itemize.
+
 Each file also has `tax_year`, `last_reviewed` (the date someone last checked it against the IRS),
 and a `sources` list. Every section names the sources that back it in `source_ids`, and may have a
 `note` explaining anything unusual.
