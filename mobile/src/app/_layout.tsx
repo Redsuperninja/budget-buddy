@@ -44,6 +44,8 @@ export default function RootLayout() {
           name="settings"
           options={{ title: 'Settings', tabBarIcon: tabIcon('settings') }}
         />
+        {/* Reached from Settings, not a tab of its own. */}
+        <Tabs.Screen name="pair" options={{ href: null, title: 'Connect' }} />
       </Tabs>
     </SnapshotProvider>
   );
