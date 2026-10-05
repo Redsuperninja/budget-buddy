@@ -62,6 +62,23 @@ codes, reminder rules, test vectors) is in **[api/sync-contract.md](api/sync-con
    encrypted `POST /api/pair`, checks the answer is for that request and from the same computer, and only
    then saves the credentials, replacing any old ones. If the phone is already connected to a different
    computer, it asks first. Scanning is turned off on the web build.
+   - *Server side (roadmap #14):* `POST /api/local/pairing` (this computer only) makes a session: a 16-byte
+     one-time code (only its SHA-256 is stored), a fresh X25519 keypair (`pair_sk` stored encrypted and erased
+     when the session ends), valid for 10 minutes, once. Starting a new one cancels the old one. The same call
+     returns the QR payload as a JSON object and as one line of text ("Show code as text"). The phone calls
+     `POST /api/pair`: encrypted and authenticated, replay-checked (nonces kept per session), limited to 10
+     tries a minute per address, and 5 wrong codes end the session. Only a hash of the device token is kept; the
+     sync key is stored encrypted.
+   - *Devices:* `GET /api/local/devices` lists phones (never tokens or keys); `POST
+     /api/local/devices/{id}/revoke` marks one removed and deletes its sync key, so its token stops working
+     at once. The row stays as history.
+   - *Home-network listener:* the main server listens on `127.0.0.1` only. While a pairing session is live, or
+     while at least one phone is paired, `python -m app` also opens a second listener on this computer's own
+     home-network address (`BUDGET_BUDDY_LAN_IP`, or detected), never `0.0.0.0`, and closes it when neither
+     is true. It is re-checked when pairing starts, a phone is removed, and the device list is read (there is no
+     timer: a listener for an expired, unused QR is closed at the next check; the dashboard, #16, should poll the device list). An explicit `BUDGET_BUDDY_HOST` wins:
+     loopback means phones can never connect (pairing says so), another address is used as the main listener.
+     The `Host` allowlist includes `{lan address}:{port}`.
 2. **Sync (every 1–3 days):** on home Wi-Fi the user taps **Sync**. The phone:
    - uploads queued receipts (photo + details),
    - downloads a fresh **snapshot** (budget breakdown, recent transactions, tax summary).
@@ -92,8 +109,9 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `donations` | id, date, organization, amount_cents (≥ 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
-| `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), nonce_watermark, revoked, paired_at, last_sync_at |
-| `pairing_sessions` | id, code_hash, pair_pub, pair_sk (deleted when the session ends), exp, used_at, wrong_code_count |
+| `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark (arrives with sync, #15), revoked, revoked_at, paired_at, last_sync_at |
+| `pairing_sessions` | id, code_hash, pair_pub, pair_sk (enc, erased when the session ends), created_at, exp, used_at, cancelled_at, wrong_attempts |
+| `pairing_nonces` | session_id, nonce (bytes); UNIQUE(session_id, nonce); replay cache for `/api/pair`, removed with the session |
 | `seen_nonces` | device_id, nonce (bytes), ts; UNIQUE(device_id, nonce); replay cache pruned below the device's watermark |
 
 Money is always stored as **integer cents**, never floats. Every table also has `created_at` / `updated_at`.
@@ -176,4 +194,4 @@ become half of a transfer. Deleting either side just removes the link.
 
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
-`budget.db.bak-<revision>` is saved next to it.
+`budget.db.bak-<revision>` is saved next to it. Migration 0004 adds the pairing tables and the new device columns above.

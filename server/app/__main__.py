@@ -14,10 +14,16 @@ from app.main import create_app
 
 def serve() -> None:
     settings = Settings()
+    app = create_app(settings)
+    # The main server answers this computer only (unless BUDGET_BUDDY_HOST says otherwise). The
+    # home-network listener is opened separately, on this computer's own address, while pairing
+    # or once a phone is paired (app/listeners.py).
+    app.state.listener.attach()
+    app.state.listener.sync_from_database()
     # proxy_headers=False: never trust X-Forwarded-For, so the private-network check
     # always sees the real client address. log_config: access logs leave out query strings.
     uvicorn.run(
-        create_app(settings),
+        app,
         host=settings.host,
         port=settings.port,
         proxy_headers=False,

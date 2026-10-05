@@ -13,6 +13,12 @@ def memory_key_store(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE", "1")
 
 
+@pytest.fixture(autouse=True)
+def fixed_lan_ip(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests never depend on the real network: pretend this computer is 192.168.1.20."""
+    monkeypatch.setenv("BUDGET_BUDDY_LAN_IP", "192.168.1.20")
+
+
 @pytest.fixture
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A throwaway data folder so tests never touch real user data."""
