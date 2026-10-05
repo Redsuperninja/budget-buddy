@@ -57,6 +57,11 @@ codes, reminder rules, test vectors) is in **[api/sync-contract.md](api/sync-con
    own fresh public key, both sides derive a shared key, and the Home Base answers, encrypted with it, with a
    device token and a new **sync key**. The phone keeps both in secure storage. The dashboard immediately shows
    "New phone paired" with a Remove button.
+   Phone side (`mobile/src/sync/`, `mobile/src/app/pair.tsx`): the pair screen reads the QR (or pasted text),
+   checks it (known version, the address is a private home-network IP, code not expired), sends one
+   encrypted `POST /api/pair`, checks the answer is for that request and from the same computer, and only
+   then saves the credentials, replacing any old ones. If the phone is already connected to a different
+   computer, it asks first. Scanning is turned off on the web build.
 2. **Sync (every 1–3 days):** on home Wi-Fi the user taps **Sync**. The phone:
    - uploads queued receipts (photo + details),
    - downloads a fresh **snapshot** (budget breakdown, recent transactions, tax summary).

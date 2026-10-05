@@ -4,8 +4,9 @@ The phone side of Budget Buddy, built with [Expo](https://expo.dev) (React Nativ
 [expo-router](https://docs.expo.dev/router/introduction/). It runs inside the free **Expo Go** app on
 iPhone and Android, so there's nothing to publish to an app store.
 
-> Right now Home and Taxes show a made-up **sample** budget (with a banner saying so). Connecting to your
-> computer, taking receipt photos, and syncing come in later updates; then these screens show your real budget.
+> Right now Home and Taxes show a made-up **sample** budget (with a banner saying so). You can pair the
+> phone with your computer (see below), but the computer side isn't built yet. Receipt photos and syncing
+> come in later updates; then these screens show your real budget.
 
 ## Run it on your phone
 
@@ -45,6 +46,36 @@ npm test            # Jest unit tests (jest-expo preset)
 | `src/sync/snapshot.ts` | Snapshot types (sync contract §5) and `parseSnapshot()`, which checks a snapshot before use. |
 | `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
 | `src/sync/store.tsx` | `SnapshotProvider` / `useSnapshot()`: loads the saved snapshot, falls back to the sample. |
+
+## Pairing (Settings, then Connect)
+
+The pair screen (`src/app/pair.tsx`) connects the phone to the Home Base following the
+[sync contract](../docs/api/sync-contract.md) (sections 2 and 3.6). It scans the QR code with the camera, or the
+user can type or paste the code's text instead. Plain-English steps for users are in
+[docs/guide/connect-your-phone.md](../docs/guide/connect-your-phone.md).
+
+- **Secure storage:** the device token, sync key, and computer address are saved in `expo-secure-store`
+  (`src/sync/credentials.ts`) only after the whole pairing succeeded. The phone's temporary pairing keys are
+  never saved or logged.
+- **Different computer:** if the phone is already connected and the new code is from another computer, the
+  screen asks before replacing the connection. Cancel keeps the old one.
+- **Web:** QR scanning is turned off on the web build (only typing the code works), so the scanner never loads
+  code from the internet.
+- **Not built yet:** the computer-side pairing server and dashboard button (other roadmap items), and the first
+  sync after pairing. Pairing can't be tried end to end until those exist.
+
+New dependencies for pairing:
+
+| Package | Why |
+| --- | --- |
+| `expo-camera` | Scans the pairing QR code. |
+| `expo-secure-store` | Keeps the token and sync key in the phone's secure storage. |
+| `expo-crypto` | Secure random numbers for the pairing keys (no weaker fallback is ever used). |
+| `expo-device` | The phone model name, used as the default name shown on the computer. |
+| `tweetnacl`, `tweetnacl-util` | The encryption the contract specifies (pinned to exact versions). |
+
+Pairing code lives in `src/sync/`: `pairingQr.ts` (checks the QR), `pairClient.ts` (the `/api/pair` call),
+`pairErrors.ts` (plain-English messages), `credentials.ts`, `base64url.ts`.
 
 ## Rules of the road
 
