@@ -6,16 +6,24 @@ Agent briefs live in [`.claude/agents/`](../.claude/agents). They are plain text
 
 ## The team
 
-| Agent | Job | Can edit code? |
-| --- | --- | --- |
-| `architect` | Breaks features into small PRs, keeps ARCHITECTURE/ROADMAP/ADRs current | Docs only |
-| `backend-engineer` | Home Base server (Python/FastAPI/SQLite) | Yes (`server/`) |
-| `mobile-engineer` | Phone app (Expo/React Native) | Yes (`mobile/`) |
-| `finance-tax-expert` | Budget math, tax categories & rules, checks correctness | Yes (budget/tax modules + tests) |
-| `security-reviewer` | Reviews every PR touching data, sync, auth or storage | No, review only |
-| `test-engineer` | Adds/repairs tests, keeps CI green | Yes (tests) |
-| `docs-writer` | Plain-English guides for non-technical users | Docs only |
-| `release-manager` | Branches, commits, small PRs, changelog | Git/GitHub only |
+| Agent | Job | Can edit code? | Model |
+| --- | --- | --- | --- |
+| `architect` | Breaks features into small PRs, keeps ARCHITECTURE/ROADMAP/ADRs current | Docs only | Opus |
+| `backend-engineer` | Home Base server (Python/FastAPI/SQLite) | Yes (`server/`) | Sonnet |
+| `mobile-engineer` | Phone app (Expo/React Native) | Yes (`mobile/`) | Sonnet |
+| `finance-tax-expert` | Budget math, tax categories & rules, checks correctness | Yes (budget/tax modules + tests) | Opus |
+| `security-reviewer` | Reviews every PR touching data, sync, auth or storage | No, review only | Opus |
+| `test-engineer` | Adds/repairs tests, keeps CI green | Yes (tests) | Sonnet |
+| `docs-writer` | Plain-English guides for non-technical users | Docs only | Haiku |
+| `release-manager` | Branches, commits, small PRs, changelog | Git/GitHub only | Haiku |
+
+The model matches the job. Judgment-heavy work (planning, security, tax math) gets the strongest model.
+Routine coding and tests get a mid-size one. Docs and git chores get the fastest, cheapest one.
+Agents read only the files their task needs and reply with short summaries, which keeps token use low.
+
+**Who does what:** the code is built by [Claude Code](https://claude.com/claude-code) (Anthropic) through these agents.
+The design and all reviews come from the project owner. Agents commit to local branches only. The owner reviews
+those commits and decides which ones become pull requests and get merged on GitHub.
 
 ## The loop for every change
 
@@ -23,11 +31,12 @@ Agent briefs live in [`.claude/agents/`](../.claude/agents). They are plain text
 2. **Build:** the owning engineer agent implements it on a branch `feat/<short-name>`, with tests.
 3. **Check:** `test-engineer` runs the tests; `security-reviewer` reviews if data/sync/auth/storage is touched;
    `finance-tax-expert` reviews if money math or tax logic is touched.
-4. **Ship:** `release-manager` opens a **small PR** (aim for < ~400 changed lines) with a plain-English summary.
-5. **Merge:** after CI passes. The roadmap checkbox gets ticked in the same PR.
+4. **Commit:** `release-manager` commits the work to its local branch (aim for < ~400 changed lines), ticks the
+   roadmap box, and adds a changelog line. Nothing is pushed.
+5. **Owner review:** the project owner reviews the local branch. Only the owner pushes it, opens the PR, and merges after CI passes.
 
 ## Rules every agent follows
-- Small PRs, one purpose each. Push early, push often.
+- Small changes, one purpose each. Commit locally; the owner decides what gets pushed.
 - **Never commit real personal/financial data**, keys, tokens, or `.env` files. Test data is fake.
 - Money is integer cents. Dates are ISO `YYYY-MM-DD`.
 - Every PR explains *what* and *why* in words a non-programmer can follow.
