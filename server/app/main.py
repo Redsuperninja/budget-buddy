@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app import __version__
 from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, load_keys
+from app.data_folder import warn_if_risky_data_dir
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
 from app.lan import LanAddress, detect_lan_ip, host_header
@@ -56,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     """
     settings = settings or Settings()
     ensure_data_dir(settings.data_dir)
+    warn_if_risky_data_dir(settings.data_dir)
     keys = load_keys(settings)
     engine = create_db_engine(settings.data_dir, field_cipher=FieldCipher(keys.db_fields))
     run_migrations(engine)
