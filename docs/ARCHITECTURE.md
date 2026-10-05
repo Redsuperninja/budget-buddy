@@ -116,6 +116,28 @@ Worked example (fake data, also a test in `server/tests/test_accounts_api.py`):
 | Card | Card payment (`transfer`, linked) | 30000 |
 
 Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all balances = **165000**.
+
+### Categories and the monthly summary
+
+Routes (this computer only, like the rest of `/api/local/`): `GET/POST /api/local/categories`,
+`GET/PATCH /api/local/categories/{id}`, and `GET /api/local/summary/monthly?month=YYYY-MM`.
+
+- A category has a name (unique, ignoring upper/lower case), a group (`needs`, `wants`, `savings`,
+  `income`, or the built-in `transfer`), and a `budget_cents` target. You can rename it and change its
+  budget. The group can't change, and new categories can't use the `transfer` group.
+- **Budgets apply to every month.** There is no per-month budget, so changing one also changes what past
+  months show.
+- The summary only counts `normal` and `refund` transactions, by their own date, from the first to the last
+  day of the month. **Transfers and adjustments (including opening balances) are never counted.**
+- The category's group decides where a transaction goes: `income` is income; `needs` and `wants` add up to
+  `spending_cents`; `savings` is `saved_cents`. Spending and savings are shown as money out, positive.
+  **Refunds lower spending** (or savings) in their category and are never income. Spending can go
+  negative if refunds are bigger than spending.
+- Transactions with no category, and refunds filed under an income or transfer category, can't be placed.
+  They are not guessed at: they show up as `unassigned_in_cents`, `unassigned_out_cents` (both positive)
+  and `unassigned_count`, and are left out of the totals.
+- **Known gap:** money moved into your own savings account is a transfer, so it isn't counted as saved yet.
+  Roadmap item 10b covers this.
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
 `budget.db.bak-<revision>` is saved next to it.

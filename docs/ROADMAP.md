@@ -11,7 +11,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 
 ## Phase 2: Getting data in
 - [x] 5. Accounts + transactions API (manual entry) — *backend-engineer*
-- [ ] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
+- [x] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
   - Adjustments (including opening balances) change balances but are never counted as income or spending.
     Transfers are excluded too (see "Transaction kinds" in ARCHITECTURE.md).
 - [ ] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
@@ -22,6 +22,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 ## Phase 3: Budget & taxes
 - [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
 - [ ] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
+- [ ] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [ ] 11. Charitable donations tracking — *finance-tax-expert*
 - [ ] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
 - [ ] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
