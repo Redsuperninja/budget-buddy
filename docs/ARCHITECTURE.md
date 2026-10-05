@@ -108,6 +108,8 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
 | `donations` | id, date, organization, amount_cents (≥ 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
+| `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
+| `stock_lots` / `stock_sale_orders` / `stock_sales` | lot (a purchase): account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) · sale order (a sale as entered): account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) · sale (one lot's part of an order): order_id, lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0), rebuilt with FIFO per symbol and account whenever a lot or order changes → cost, gain, term, and wash-sale flag are calculated, not stored (`app/services/stock_gains.py`) |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark (arrives with sync, #15), revoked, revoked_at, paired_at, last_sync_at |
 | `pairing_sessions` | id, code_hash, pair_pub, pair_sk (enc, erased when the session ends), created_at, exp, used_at, cancelled_at, wrong_attempts |
@@ -195,3 +197,37 @@ become half of a transfer. Deleting either side just removes the link.
 The schema is managed by Alembic (`server/app/migrations/`) and upgraded automatically when the Home Base starts,
 under a lock file so only one copy migrates at a time. Before upgrading an existing database, a backup copy
 `budget.db.bak-<revision>` is saved next to it. Migration 0004 adds the pairing tables and the new device columns above.
+`budget.db.bak-<revision>` is saved next to it.
+
+### Stocks: lots, sales, and gains (roadmap #12)
+
+API: `/api/local/stocks/...` (this computer only), see `server/README.md`. User guide:
+[guide/stocks.md](guide/stocks.md).
+
+- **Tables.** `stock_lots` = one purchase. `stock_sale_orders` = one sale as the user entered it (symbol,
+  date, shares, proceeds after fees, optional account). `stock_sales` = the part of an order that came out
+  of one lot (`order_id`, `lot_id`, shares, that lot's share of the proceeds); deleting an order deletes
+  its parts (`ON DELETE CASCADE`). Migration 0004 added `stock_sale_orders` and `stock_sales.order_id`.
+- **Shares** are whole millionths of a share (`shares_micro`, `SHARES_SCALE = 1_000_000`), never floats.
+  The API also takes and returns them as text (`"2.5"`).
+- **FIFO, rebuilt.** Each symbol + account is matched on its own, oldest purchase first (same date: the
+  one entered first), using only purchases dated on or before the sale. The `stock_sales` rows of that
+  symbol + account are rebuilt on every add or delete, so a purchase entered late still sells first.
+  A sale needing more shares than were held is refused (422 `not_enough_shares`); deleting a purchase
+  a sale needs is refused (409 `purchase_in_use`). There's no edit: delete and re-enter.
+- **Calculated, not stored** (`server/app/services/stock_gains.py`, no database code): cost basis per
+  part, gain, term, wash-sale flag, and yearly totals.
+  - Rounding: a lot's cost is shared out over its sold shares cumulatively, rounding half up, so a fully
+    sold lot's parts add up to exactly its cost. A sale's proceeds are split over its lots the same way.
+  - Term: the holding period starts the day after purchase. Long term = sold on or after the day one
+    full year from that start has passed (`long_term_from`); a year starting Feb 29 ends Feb 28.
+  - Possible wash sale (flag only, nothing adjusted): a loss part, with another purchase of the same
+    symbol in any account entered here within 30 days before or after the sale. The rest of the losing
+    lot doesn't count (Rev. Rul. 56-602); another lot the same sale used up completely doesn't count;
+    one it only partly used does. IRA/HSA and spouse purchases aren't known, so they aren't checked.
+  - Year: a sale counts in the year of its sale date (`GET /api/local/stocks/gains/{tax_year}`).
+- **Statutory constants** (one year, 30 days) live in `stock_gains.py` with sources, not in the
+  per-year tax data files: they don't change by year.
+- **Accounts.** Retirement and HSA accounts can't hold tracked purchases or sales (sales there aren't
+  taxed). An account with stock records can't be deleted or changed to one of those kinds.
+- Every result is labeled an estimate, not tax advice.

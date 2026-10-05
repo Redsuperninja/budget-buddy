@@ -220,6 +220,22 @@ These routes answer this computer only (the phone uses `POST /api/pair`):
 - `POST /api/local/devices/{id}/revoke`: removes a phone.
 - `POST /api/pair` (phone, home network): the encrypted pairing request. Errors use the codes in
   `docs/api/sync-contract.md`.
+- Stocks (estimates, not tax advice; plain-English guide in
+  [docs/guide/stocks.md](../docs/guide/stocks.md)):
+  - `GET/POST /api/local/stocks/lots` and `GET/DELETE /api/local/stocks/lots/{id}`: shares you
+    bought. Send the symbol, `acquired_on`, the shares as text (`"shares": "2.5"`) or in millionths
+    (`shares_micro`), and the total you paid including fees (`cost_basis` dollar text or
+    `cost_basis_cents`). Each purchase shows how many shares are left and the first date a sale of
+    them counts as long term. Filters: `symbol`, `account_id`.
+  - `GET/POST /api/local/stocks/sales` and `GET/DELETE /api/local/stocks/sales/{id}`: shares you
+    sold, with the total you received after fees (`proceeds` or `proceeds_cents`). Each sale lists
+    which purchases it used (oldest first), with cost, gain or loss, short or long term, and a
+    possible-wash-sale flag. Filters: `symbol`, `account_id`, `tax_year`. Newest first.
+  - `GET /api/local/stocks/gains/{tax_year}`: short- and long-term totals for sales in that year.
+  - Selling more shares than you held is refused (`not_enough_shares`), and so is deleting a
+    purchase a sale still needs (`purchase_in_use`). There's no editing: delete and enter again.
+    Retirement and HSA accounts can't be used, and an account with stock records can't be
+    deleted or changed into one.
 
 ## Settings
 
