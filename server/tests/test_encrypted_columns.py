@@ -7,6 +7,7 @@ import pytest
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import select, text
 from sqlalchemy.exc import StatementError
 
@@ -275,7 +276,9 @@ def test_migration_0003_encrypts_existing_plaintext_and_downgrade_restores_it(tm
         _migrate(engine, "0002")
         _insert_plaintext_rows(engine)
 
-        _migrate(engine, "0003")
+        # Through 0003 to the newest migration: the models below match the newest tables, and
+        # later migrations don't touch these columns.
+        _migrate(engine, "head")
         raw_last4 = _raw(tmp_path, "SELECT last4 FROM accounts WHERE id = 1")[0][0]
         assert isinstance(raw_last4, bytes) and b"4821" not in raw_last4
         assert _raw(tmp_path, "SELECT last4, notes FROM accounts WHERE id = 2") == [(None, None)]
@@ -397,7 +400,8 @@ def test_interrupted_cleanup_is_retried_on_next_start(tmp_path, monkeypatch):
             run_migrations(engine)
         marker = db_module.scrub_marker_path(database_path(tmp_path))
         assert marker.is_file()  # written before the migration ran
-        assert _raw(tmp_path, "SELECT version_num FROM alembic_version") == [("0003",)]
+        head = ScriptDirectory.from_config(alembic_config()).get_current_head()
+        assert _raw(tmp_path, "SELECT version_num FROM alembic_version") == [(head,)]
 
         monkeypatch.undo()
         run_migrations(engine)  # next start: already at head, but the marker says "clean up"

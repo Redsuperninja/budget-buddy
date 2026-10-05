@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, ForeignKey, String, UniqueConstraint
+from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.crypto.fields import EncryptedString
@@ -56,6 +56,20 @@ class Transaction(TimestampMixin, Base):
         ForeignKey("transactions.id", ondelete="SET NULL")
     )
     notes: Mapped[str | None] = mapped_column(EncryptedString("transactions.notes"))
+    # CSV import only: a hash of (account, date, amount, description, occurrence) so importing
+    # an overlapping statement again doesn't add the same rows twice. See services/csv_import.py.
+    import_fingerprint: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+
+
+class CsvImportMapping(TimestampMixin, Base):
+    """The column mapping saved for an account, so its next CSV import is one click."""
+
+    __tablename__ = "csv_import_mappings"
+
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
+    )
+    mapping: Mapped[str] = mapped_column(Text)  # JSON, see app.schemas.csv_import.CsvMapping
 
 
 class Paycheck(TimestampMixin, Base):

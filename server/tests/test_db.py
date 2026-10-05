@@ -36,6 +36,7 @@ EXPECTED_TABLES = {
     "accounts",
     "categories",
     "transactions",
+    "csv_import_mappings",
     "paychecks",
     "receipts",
     "donations",

@@ -8,6 +8,7 @@ import time
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from sqlalchemy import func, select, text
 
 from app import db
@@ -25,6 +26,10 @@ from app.models import Category
 def _category_count(engine) -> int:
     with SessionLocal(bind=engine) as session:
         return session.scalar(select(func.count()).select_from(Category))
+
+
+# The newest migration. Not hard-coded, so adding a migration doesn't break these tests.
+HEAD = ScriptDirectory.from_config(alembic_config()).get_current_head()
 
 
 def _revision(engine) -> str:
@@ -62,7 +67,7 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
     try:
         assert errors == []
         assert len(calls) == 1
-        assert _revision(engines[0]) == "0003"
+        assert _revision(engines[0]) == HEAD
         assert _category_count(engines[0]) == 18  # seed not duplicated
     finally:
         for engine in engines:
@@ -96,7 +101,7 @@ def test_backup_made_before_upgrading_existing_database(tmp_path):
             assert conn.execute("SELECT count(*) FROM categories").fetchone() == (0,)
         if sys.platform != "win32":
             assert stat.S_IMODE(backup.stat().st_mode) == 0o600
-        assert _revision(engine) == "0003"
+        assert _revision(engine) == HEAD
     finally:
         engine.dispose()
 
