@@ -159,6 +159,39 @@ Good to know:
   /api/local/paychecks/{id}`, `POST/DELETE /api/local/paychecks/{id}/deposit` to link or unlink the
   bank deposit, and `GET /api/local/paychecks/summary?year=2026` for year-to-date totals. Amounts
   are whole cents only. See [docs/paychecks.md](../docs/paychecks.md).
+- Receipts: `GET/POST /api/local/receipts` (`limit`, `offset`; newest first) and
+  `GET/PATCH/DELETE /api/local/receipts/{id}`. A receipt has a `date`, `merchant` (the shop),
+  `total_cents` (zero or more), and optionally a `category_id`, a `transaction_id` (the matching
+  bank transaction), `tax_deductible`, and `notes` (encrypted). `has_image` says whether a photo is
+  attached. Deleting a linked transaction or category just unlinks the receipt.
+
+### Receipt photos
+
+- **Add or replace:** `PUT /api/local/receipts/{id}/image` with the photo's bytes as the request
+  body (not a form upload). JPEG, PNG or HEIC, up to **3 MB**. The type is worked out from the
+  file's first bytes, so a renamed file or a wrong `Content-Type` doesn't fool it. Too big gets
+  413 `image_too_large`; anything that isn't a readable photo gets 422 `image_invalid`.
+- **See it:** `GET /api/local/receipts/{id}/image` shows it in the browser; add `?download=true`
+  to save it instead. It's named `receipt-<id>.<jpg|png|heic>`, never after the shop.
+- **Remove it:** `DELETE /api/local/receipts/{id}/image` (the receipt details stay).
+
+What happens to a photo:
+
+- **Hidden details are removed first.** Phones and cameras tuck extra information into photos,
+  such as where the picture was taken and which phone took it. For JPEG and PNG, Budget Buddy
+  keeps only the picture (and its colour profile) and throws the rest away before saving. Side
+  effect: a photo taken sideways may show sideways, because the "rotate me" note goes too.
+- **HEIC photos are saved as they are**, so they may still hold the photo's location. It's
+  encrypted and never leaves your computer, but if that bothers you, save the photo as JPEG
+  first. Fixing this is tracked in [issue #34](https://github.com/Redsuperninja/budget-buddy/issues/34).
+- **It's encrypted** before it's written to `receipts/` in the data folder, under a random file
+  name with no shop, date or amount in it. The plain photo is never written to disk.
+- **Deleting a receipt deletes its photo file.** If Budget Buddy is stopped part-way through
+  (say a power cut), the worst case is an unused encrypted file. Those are removed the next time
+  Budget Buddy starts, once they're over an hour old. Files Budget Buddy didn't make are never
+  touched.
+- Reading text off the photo (OCR) isn't built yet: see
+  [issue #33](https://github.com/Redsuperninja/budget-buddy/issues/33).
 
 ## Settings
 

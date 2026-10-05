@@ -16,7 +16,8 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
     Transfers are excluded too (see "Transaction kinds" in ARCHITECTURE.md).
 - [x] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
-- [ ] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
+- [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
+  - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
 - [ ] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 
 ## Phase 3: Budget & taxes
