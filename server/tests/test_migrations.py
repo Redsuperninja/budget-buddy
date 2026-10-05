@@ -124,3 +124,20 @@ def test_failed_upgrade_gives_plain_english_error(tmp_path, monkeypatch):
         assert isinstance(info.value.__cause__, RuntimeError)
     finally:
         engine.dispose()
+
+
+def test_migrations_have_one_head_and_no_duplicate_revision_ids():
+    import re
+
+    from alembic.script import ScriptDirectory
+
+    assert len(ScriptDirectory.from_config(alembic_config()).get_heads()) == 1
+    versions = db.MIGRATIONS_DIR / "versions"
+    matches = [
+        re.search(r'^revision(?::\s*str)?\s*=\s*"([^"]+)"', p.read_text(encoding="utf-8"), re.M)
+        for p in sorted(versions.glob("*.py"))
+        if p.name != "__init__.py"
+    ]
+    found = [m.group(1) for m in matches if m]
+    assert len(found) == len(matches)  # every file declares a revision
+    assert len(found) == len(set(found)), f"duplicate revision ids: {found}"

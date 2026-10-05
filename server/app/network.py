@@ -1,6 +1,7 @@
 """Only answer requests coming from this computer or the home network (see ADR-0002)."""
 
 import ipaddress
+from collections.abc import Callable
 
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -84,7 +85,8 @@ def allowed_hosts(port: int) -> frozenset[str]:
     """The ``Host`` header values we answer to (sync contract §3.1).
 
     Only this computer's own names. A DNS-rebinding page in the browser sends its own hostname
-    here, so it gets refused. The LAN address joins this list when pairing ships (#14).
+    here, so it gets refused. The computer's own home-network address is added separately
+    (see ``LocalAccessMiddleware``'s ``lan_host``).
     """
     return frozenset({f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"})
 
@@ -129,10 +131,15 @@ class LocalAccessMiddleware:
       stops other websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
     """
 
-    def __init__(self, app: ASGIApp, port: int) -> None:
+    def __init__(
+        self, app: ASGIApp, port: int, lan_host: Callable[[], str | None] | None = None
+    ) -> None:
         self.app = app
         self.hosts = allowed_hosts(port)
         self.origins = allowed_origins(port)
+        # The computer's home-network ``ip:port``, which phones put in ``Host`` (§3.1). Asked on
+        # each request because the address is detected or changed while the app runs.
+        self.lan_host = lan_host or (lambda: None)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in ("http", "websocket"):
@@ -140,7 +147,7 @@ class LocalAccessMiddleware:
             return
 
         host = _header(scope, b"host")
-        if host is None or host.lower() not in self.hosts:
+        if host is None or (host.lower() not in self.hosts and host.lower() != self.lan_host()):
             await _refuse(scope, receive, send, "bad_host", BAD_HOST_MESSAGE)
             return
 

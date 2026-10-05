@@ -87,7 +87,7 @@ Buddy tells you about them so you can delete them.
 ## Local API (for the computer-side dashboard)
 
 Every route answers this computer only (anything else gets 403 `not_this_computer`), except the
-phone's routes: `/api/health`, and later `/api/pair` and `/api/sync/*`. Requests must also be
+phone's routes: `/api/health`, `/api/pair`, and later `/api/sync/*`. Requests must also be
 addressed to `127.0.0.1:{port}`, `localhost:{port}` or `[::1]:{port}` (else 403 `bad_host`), and
 anything that changes data must come with an `Origin` of `http://` plus one of those (else 403
 `bad_origin`). These checks stop other websites open in your browser from reaching your data. Money goes in and out as whole cents (`amount_cents`); when creating or
@@ -202,6 +202,25 @@ What happens to a photo:
   It's an estimate, not tax advice, and the totals are what you gave, not what you can deduct.
   See `docs/guide/donations.md`.
 
+## Pairing a phone
+
+Pairing connects one phone to this computer, once. On the computer you ask for a one-time code,
+and the phone scans it as a QR code (or you paste it as text). The code works once and runs out
+after 10 minutes. The QR holds no secret key, so a photo of it isn't enough to read anything.
+Paired phones are listed, and you can remove one at any time; it stops working right away.
+
+These routes answer this computer only (the phone uses `POST /api/pair`):
+
+- `POST /api/local/pairing`: starts pairing and returns the QR contents (`payload`), the same
+  contents as one line of text (`payload_text`, for "Show code as text"), when it runs out
+  (`expires_at`), and `phone_can_connect` with a plain-English `message` if a phone can't reach
+  this computer yet. Starting again cancels the earlier code. Never share or save the result.
+- `GET /api/local/devices`: connected phones (name, platform, app version, when paired, last sync,
+  removed or not). Never shows codes or keys.
+- `POST /api/local/devices/{id}/revoke`: removes a phone.
+- `POST /api/pair` (phone, home network): the encrypted pairing request. Errors use the codes in
+  `docs/api/sync-contract.md`.
+
 ## Settings
 
 All optional, set as environment variables:
@@ -209,7 +228,9 @@ All optional, set as environment variables:
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `BUDGET_BUDDY_DATA_DIR` | `%LOCALAPPDATA%\BudgetBuddy` (Windows), `~/.local/share/budget-buddy` (others) | Where your data is kept. Never inside this repo. |
-| `BUDGET_BUDDY_HOST` | `127.0.0.1` | Network address to listen on. The default means "this computer only". |
+| `BUDGET_BUDDY_HOST` | `127.0.0.1` | Leave unset. Budget Buddy listens on this computer only and opens a home-network connection by itself while pairing or once a phone is paired. Set to `127.0.0.1` to never allow phones. Setting any other address makes that the main listener (not recommended). |
+| `BUDGET_BUDDY_LAN_IP` | detected | This computer's home-network address (such as `192.168.1.20`), put in the pairing QR and used for the phone connection. Set it if detection picks the wrong one. Must be a private address. |
+| `BUDGET_BUDDY_SERVER_NAME` | `Home Base` | The name your phone shows for this computer (50 characters at most). |
 | `BUDGET_BUDDY_PORT` | `8765` | Port to listen on. |
 | `BUDGET_BUDDY_DEV_MODE` | `false` | Set to `true` to turn on the API explorer at `/docs` (for developers). |
 | `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. Leave this alone: `memory` is for developers' automated tests only (see below). |
@@ -222,19 +243,21 @@ The key is lost when the process stops, so this only works on a new, empty data 
 refused on any folder that already has data or a `key-fingerprint` file. `tests/conftest.py`
 and the CI workflow set both. Never use it for real data.
 
-## Letting your phone connect (later)
+## Letting your phone connect
 
-Until phone pairing is ready, the Home Base only listens to this computer. When you want your
-phone to reach it over your home Wi-Fi, start it like this:
-
-```powershell
-$env:BUDGET_BUDDY_HOST = "0.0.0.0"
-.venv\Scripts\python -m app
-```
+Nothing to set up. The Home Base normally listens to this computer only. While you're pairing a
+phone (after you click **Pair a phone**), and from then on while at least one phone is paired, it
+also opens a second connection on this computer's own home-network address (for example
+`192.168.1.20`), never on every network. When no pairing is in progress and no phone is paired,
+that connection is closed again. If Budget Buddy can't work out your address, set
+`BUDGET_BUDDY_LAN_IP`.
 
 The first time, Windows Firewall will ask whether to allow Python on networks. Tick
 **Private networks** only. Leave **Public networks** unticked, so the Home Base stays hidden on
 coffee-shop or airport Wi-Fi.
+
+If you set `BUDGET_BUDDY_HOST` yourself, that choice wins: `127.0.0.1` means phones can never
+connect (pairing will tell you so), and any other address is used as the main listener.
 
 Even then, the server only answers requests from this computer or your home network; anything
 else gets "403 Forbidden".

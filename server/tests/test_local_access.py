@@ -38,7 +38,7 @@ def test_allowed_hosts(client, host):
         "localhost:80",
         "127.0.0.1",  # no port
         "localhost",
-        "192.168.1.20:8765",  # LAN address isn't allowed until pairing ships
+        "192.168.1.21:8765",  # not this computer's own home-network address
         "127.0.0.1:8765.attacker.example",
         "",
     ],
@@ -177,12 +177,14 @@ def test_cross_site_form_post_does_not_succeed(make_client):
     assert make_client().get(ACCOUNTS).json() == []
 
 
-@pytest.mark.parametrize("path", ["/api/pair", "/api/sync/ack"])
-def test_phone_routes_do_not_need_an_origin(make_client, path):
-    # The phone app isn't a browser and sends no Origin. These routes don't exist yet (#14/#15),
-    # so a 404 shows the request got past the Origin check.
-    response = make_client(headers={}).post(path, json={})
-    assert response.status_code == 404
+def test_phone_routes_do_not_need_an_origin(make_client):
+    # The phone app isn't a browser and sends no Origin. /api/sync/* doesn't exist yet (#15), so
+    # a 404 shows the request got past the Origin check; /api/pair answers (no QR code is active).
+    client = make_client(headers={})
+    assert client.post("/api/sync/ack", json={}).status_code == 404
+    response = client.post("/api/pair", json={})
+    assert response.status_code == 410
+    assert _error_code(response) == "pairing_expired"
 
 
 # --- M2: this computer only, unless the route is one of the phone's ---
@@ -223,12 +225,12 @@ def test_every_route_but_the_phones_refuses_the_home_network(make_client, monkey
     assert ("GET", "/openapi.json") in routes
 
     lan_facing = sorted({path for _, path in routes if is_lan_route(path)})
-    assert lan_facing == ["/api/health"]  # /api/pair and /api/sync/* arrive with #14/#15
+    assert lan_facing == ["/api/health", "/api/pair"]  # /api/sync/* arrives with #15
 
     for method, path in routes:
         response = lan.request(method, path, json={})
         if is_lan_route(path):
-            assert response.status_code != 403, (method, path)
+            assert response.status_code != 403, (method, path)  # "/api/pair" says 410/400, not 403
         else:
             assert response.status_code == 403, (method, path)
             if method != "HEAD":  # HEAD answers have no body

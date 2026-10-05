@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     # This computer only until phone pairing ships. Set to 0.0.0.0 to allow the home network.
     host: str = "127.0.0.1"
     port: int = Field(default=8765, ge=1, le=65535)
+    # The computer's home-network address that goes into the pairing QR. Leave empty to detect it.
+    lan_ip: str | None = None
+    # Friendly name the phone shows for this computer (at most 50 characters).
+    server_name: str = Field(default="Home Base", min_length=1, max_length=50)
     # Developer extras such as the /docs API explorer. Off for normal use.
     dev_mode: bool = False
     # Where the encryption key is kept: the OS password vault ("keyring"), or "memory" for
@@ -39,6 +43,19 @@ class Settings(BaseSettings):
     # Second, separate switch that must also be on before "memory" is allowed, so the memory key
     # store can't be turned on by accident in normal use (security review H1, PR #22).
     insecure_test_keystore: bool = False
+
+    @field_validator("lan_ip", mode="before")
+    @classmethod
+    def _lan_ip_is_private(cls, value):
+        if value in (None, ""):
+            return None
+        from app.network import is_loopback_address, is_private_address
+
+        if not is_private_address(value) or is_loopback_address(value):
+            raise ValueError(
+                "BUDGET_BUDDY_LAN_IP must be a home-network address such as 192.168.1.20."
+            )
+        return value
 
     @model_validator(mode="after")
     def _memory_key_store_needs_test_switch(self) -> "Settings":

@@ -44,6 +44,8 @@ EXPECTED_TABLES = {
     "stock_sales",
     "deductions",
     "devices",
+    "pairing_sessions",
+    "pairing_nonces",
 }
 
 

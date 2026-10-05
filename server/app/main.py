@@ -1,28 +1,36 @@
 import os
 import sys
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from sqlalchemy.orm import Session
 
 from app import __version__
 from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, load_keys
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
+from app.lan import LanAddress, detect_lan_ip, host_header
+from app.listeners import LanListener
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
+from app.ratelimit import RateLimiter
 from app.routers import (
     accounts,
     categories,
     csv_import,
     donations,
     health,
+    pair,
+    pairing,
     paychecks,
     receipts,
     summary,
     transactions,
 )
+from app.services.pairing import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
 
 
@@ -55,7 +63,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        with Session(engine) as session:
+            purge_ended_sessions(session, app.state.clock())  # erase keys of old QR codes
         yield
+        app.state.listener.close()
         engine.dispose()
 
     # The API explorer pages list every endpoint, so they're only on in dev mode.
@@ -63,13 +74,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="Budget Buddy Home Base", version=__version__, lifespan=lifespan, **docs)
     app.state.settings = settings
     app.state.engine = engine
+    app.state.clock = lambda: int(time.time())  # Unix seconds; tests replace it
+    app.state.server_id = load_server_id(settings.data_dir)
+    app.state.lan = LanAddress(settings.lan_ip or detect_lan_ip(), pinned=bool(settings.lan_ip))
+    app.state.pair_limiter = RateLimiter(limit=10, window_seconds=60)  # per address, §2.3
+    app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.state.receipt_store = receipt_store
     # Middleware added last runs first: the home-network check, then the Host rules.
-    app.add_middleware(LocalAccessMiddleware, port=settings.port)
+    app.add_middleware(
+        LocalAccessMiddleware,
+        port=settings.port,
+        lan_host=lambda: host_header(app.state.lan.ip, settings.port) if app.state.lan.ip else None,
+    )
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     install_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(pair.router)
+    app.include_router(pairing.router)
     app.include_router(accounts.router)
     app.include_router(transactions.router)
     app.include_router(categories.router)
