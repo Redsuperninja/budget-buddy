@@ -27,12 +27,13 @@ budget-buddy/
 ├── server/        Home Base: Python (FastAPI) + SQLite, runs on your PC
 ├── mobile/        Phone app: Expo (React Native), iPhone + Android
 ├── docs/          Architecture, decisions (ADRs), user guides, workflow
-├── scripts/       One-click start scripts
+├── scripts/       Setup, testing and demo-data helpers (see docs/TESTING.md)
 └── .claude/agents Specialized AI agents that build & maintain this project
 ```
 
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+- Roadmap and what's next: [docs/ROADMAP.md](docs/ROADMAP.md)
+- Try it out (early preview, demo data only): [docs/TESTING.md](docs/TESTING.md)
 - How the project is built and managed (agents, PRs): [docs/WORKFLOW.md](docs/WORKFLOW.md)
 
 ## Status

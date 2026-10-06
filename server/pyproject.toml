@@ -27,6 +27,10 @@ dev = [
     "httpx2>=2.13",
     "ruff>=0.8",
 ]
+# Only for the user-testing helper scripts in scripts/ (QR code for pairing a test phone).
+testing = [
+    "segno>=1.6,<2",
+]
 
 [tool.setuptools.dynamic]
 version = { attr = "app.__version__" }
