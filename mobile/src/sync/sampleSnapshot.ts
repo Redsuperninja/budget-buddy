@@ -28,6 +28,7 @@ export const SAMPLE_SNAPSHOT: Snapshot = {
   budget: {
     target_cents: 520000,
     actual_cents: 356027,
+    unassigned: { in_cents: 0, out_cents: 4599, count: 2 },
     groups: [
       {
         group: 'needs',
@@ -88,6 +89,7 @@ export const SAMPLE_SNAPSHOT: Snapshot = {
   accounts: [
     { id: 1, name: 'Everyday checking', kind: 'checking', balance_cents: 284315, balance_as_of: '2026-10-18' },
     { id: 2, name: 'Rainy day', kind: 'savings', balance_cents: 960000, balance_as_of: '2026-10-15' },
+    { id: 3, name: 'Blue travel card', kind: 'credit_card', balance_cents: -5000, balance_as_of: '2026-10-17' },
   ],
   tax: {
     year: 2026,

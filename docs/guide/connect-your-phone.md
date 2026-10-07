@@ -28,6 +28,8 @@ Your phone syncs by itself once, right after you connect it. Until your first sy
 **Sample data**. If a sync doesn't work, your old budget stays on the phone and a message tells you what to do.
 If you see **Pair again**, your computer no longer knows this phone: tap it and scan a new code.
 
+See [What your phone's Home screen shows](phone-home-screen.md) for what each part means.
+
 ## What "Connected to ..." means
 You'll see **Connected to** and your computer's name. Your phone and computer now trust each other. Your
 computer should also show "New phone paired". If you didn't just pair a phone, click **Remove** there.

@@ -15,10 +15,11 @@ export const DEDUCTIONS_NOTE =
 
 /** Shown when the Home Base is missing something it needs (contract §5.1 `is_estimate`). */
 export const MISSING_INFO_TAG = 'missing info';
-const GAINS_MISSING_A11Y = 'Some details are missing, like what you paid for the shares.';
+export const GAINS_MAY_CHANGE_TAG = 'May change: possible wash sale';
+const GAINS_MISSING_A11Y = 'May change: possible wash sale.';
 const DEDUCTION_MISSING_A11Y = 'Some details are missing.';
 
-function MissingInfoTag() {
+function MissingInfoTag({ text = MISSING_INFO_TAG }: { text?: string }) {
   const t = useTheme();
   return (
     <Text
@@ -33,13 +34,13 @@ function MissingInfoTag() {
         paddingHorizontal: t.spacing.sm,
         paddingVertical: 2,
       }}>
-      {MISSING_INFO_TAG}
+      {text}
     </Text>
   );
 }
 
 /** `missingInfo` is the screen-reader sentence to read when details are missing; omit when complete. */
-function Row({ label, value, missingInfo, note }: { label: string; value: string; missingInfo?: string; note?: string }) {
+function Row({ label, value, missingInfo, note, tag }: { label: string; value: string; missingInfo?: string; note?: string; tag?: string }) {
   const t = useTheme();
   const a11y = [label, value, note].filter(Boolean).join('. ') + (missingInfo ? `. ${missingInfo}` : '');
   return (
@@ -60,7 +61,7 @@ function Row({ label, value, missingInfo, note }: { label: string; value: string
       <View style={{ flexShrink: 1, gap: 2 }}>
         <Text style={{ fontSize: t.fontSizes.body, color: t.colors.text }}>{label}</Text>
         {note ? <Text style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted }}>{note}</Text> : null}
-        {missingInfo ? <MissingInfoTag /> : null}
+        {missingInfo ? <MissingInfoTag text={tag} /> : null}
       </View>
       <Text style={{ fontSize: t.fontSizes.body, fontWeight: '700', color: t.colors.text }}>{value}</Text>
     </View>
@@ -116,12 +117,14 @@ export default function TaxesScreen() {
           value={fmt(gains.short_term_cents)}
           note={gainNote(gains.short_term_cents)}
           missingInfo={gains.is_estimate ? GAINS_MISSING_A11Y : undefined}
+          tag={GAINS_MAY_CHANGE_TAG}
         />
         <Row
           label="Long-term (held more than 1 year)"
           value={fmt(gains.long_term_cents)}
           note={gainNote(gains.long_term_cents)}
           missingInfo={gains.is_estimate ? GAINS_MISSING_A11Y : undefined}
+          tag={GAINS_MAY_CHANGE_TAG}
         />
       </View>
 

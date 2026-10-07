@@ -42,7 +42,10 @@ npm test            # Jest unit tests (jest-expo preset)
 | `src/lib/money.ts` | `formatCents()`: turns integer cents into text like `$1,234.56`. |
 | `src/lib/budget.ts` | Budget math for Home: percent used, left to spend, savings rate, on track / close / over. |
 | `src/lib/dates.ts` | Plain-English dates ("October 2026", "2 days ago"). |
-| `src/sync/snapshot.ts` | Snapshot types (sync contract §5) and `parseSnapshot()`, which checks a snapshot before use. |
+| `src/sync/snapshot.ts` | `parseSnapshot()`, which checks a snapshot before use (re-exports the types). Accepts all account kinds (checking, savings, brokerage, credit_card, cash, loan, retirement, hsa, other; unknown kinds are skipped) and the optional `budget.unassigned`. |
+| `src/sync/snapshotTypes.ts` | Snapshot types (sync contract §5). |
+| `src/sync/snapshotChecks.ts` / `snapshotSections.ts` | Field checks, and the parser for each snapshot section. |
+| `src/lib/accounts.ts` | Account kind labels, "$50.00 owed" balances for cards and loans, the "need a category" note. |
 | `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
 | `src/sync/transport.ts` | Shared by pairing and syncing: secure random numbers, one HTTP request with a 10 s timeout, and the encrypted envelope (`sealRequest` / `openResponse`, contract section 4). |
 | `src/sync/syncClient.ts` | `syncNow()`: health check, receipt-upload hook (#20), snapshot, save, best-effort ack. |
