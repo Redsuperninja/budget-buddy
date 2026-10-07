@@ -14,6 +14,7 @@ Local-first budgeting + tax-prep app. Home Base server in `server/` (Python/Fast
 - Money is integer cents. Dates are ISO `YYYY-MM-DD`.
 - Tax-year numbers live in per-year data files with sources, not in logic.
 - User-facing text is plain English for non-technical users.
+- Small files, no repetition: one job per file, reuse shared helpers, one topic per doc. See `docs/CONVENTIONS.md`.
 - Attribution: code is built by Claude, designed and reviewed by the owner (stated in README/WORKFLOW).
   Do NOT add `Co-Authored-By: Claude` trailers or "Generated with Claude Code" lines. PR descriptions end with
   exactly one line: "Built with Claude Code; designed and reviewed by @Redsuperninja."

@@ -15,6 +15,8 @@ Before coding, read only the screens/modules you touch, plus the sync ADR if you
 - Offline first: show the last snapshot, queue receipts, sync when on home Wi-Fi.
 - Keys and tokens go in expo-secure-store only, never AsyncStorage or logs.
 - Money arrives as integer cents. Format it only at display time.
+- Follow `docs/CONVENTIONS.md`: one job per file (aim < ~300 lines), reuse `components/` and `lib/` helpers,
+  move repeated UI or logic into a shared one instead of copying it.
 - Run `npx tsc --noEmit` and `npm test` before finishing.
 - Docs in the same branch: update `mobile/README.md` (and `docs/ARCHITECTURE.md` for flow changes), and add or update
   a plain-English guide in `docs/guide/` for any new screen.

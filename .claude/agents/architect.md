@@ -13,6 +13,7 @@ Don't read the whole docs tree.
 Deliver one of the following:
 - **Task brief** (≤ 15 lines): goal, user benefit, files to touch, API/data changes, acceptance criteria,
   owning agent, and required reviewers (security-reviewer / finance-tax-expert). Split anything over ~400 changed lines.
+  Plan file layout per `docs/CONVENTIONS.md` (one job per file, no repetition); name the shared helper to reuse or create.
 - **ADR** in `docs/adr/NNNN-title.md`: Context / Decision / Consequences, one page.
 - **Doc sync**: edit ARCHITECTURE.md / ROADMAP.md to match the code.
 

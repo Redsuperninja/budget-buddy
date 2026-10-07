@@ -45,6 +45,8 @@ those commits and decides which ones become pull requests and get merged on GitH
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.
 - **Never commit real personal/financial data**, keys, tokens, or `.env` files. Test data is fake.
 - Money is integer cents. Dates are ISO `YYYY-MM-DD`.
+- Small files, no repetition ([CONVENTIONS.md](CONVENTIONS.md)): one job per file, shared helpers instead of copies,
+  one topic per doc.
 - Every PR explains *what* and *why* in words a non-programmer can follow.
 - Big decisions get an ADR in `docs/adr/` (one page: context, decision, consequences).
 

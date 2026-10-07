@@ -20,6 +20,8 @@ Check:
 - Input: upload type/size limits, path traversal, ORM/parameterized SQL only, CSV injection on export.
 - Logs: never amounts with descriptions, tokens, keys, or file contents.
 - Dependencies: pinned, reputable, no unneeded network access.
+- Duplicated security logic (envelope checks, input validation, auth) copied instead of shared: report it, since
+  copies drift apart.
 
 Output: verified findings ordered Critical / High / Medium / Low, each with file:line, the concrete risk, and a fix.
 If none, say "No findings" in one line.
