@@ -11,6 +11,11 @@ export type PairErrorCode =
   | 'wrong_server'
   | 'clock_skew'
   | 'update_needed'
+  | 'not_paired'
+  | 'device_revoked'
+  | 'decrypt_failed'
+  | 'replay'
+  | 'too_large'
   | 'something_wrong';
 
 export const PAIR_MESSAGES: Record<PairErrorCode, string> = {
@@ -32,8 +37,18 @@ export const PAIR_MESSAGES: Record<PairErrorCode, string> = {
     'The clock on your phone or your computer is wrong. Turn on automatic date and time on both, then try again.',
   update_needed:
     'Budget Buddy needs an update on your phone or computer so they can talk to each other.',
+  not_paired: "This phone isn't connected to your computer anymore. Please pair again.",
+  device_revoked:
+    'This phone was removed from Budget Buddy on your computer. Pair again to keep syncing.',
+  decrypt_failed:
+    "This phone's connection to your computer needs to be set up again. Please pair again.",
+  replay: 'Sync got interrupted. Please try again.',
+  too_large: 'A receipt photo is too big to send. Try taking it again.',
   something_wrong: 'Something went wrong. Try again in a minute.',
 };
+
+/** Plaintext (unauthenticated) errors that only raise a "Pair again" flag; credentials are never deleted (contract 7.2). */
+export const NEEDS_ATTENTION_CODES: readonly PairErrorCode[] = ['not_paired', 'device_revoked', 'decrypt_failed'];
 
 export class PairError extends Error {
   readonly code: PairErrorCode;
@@ -51,6 +66,11 @@ const KNOWN_SERVER_CODES: Record<string, PairErrorCode> = {
   too_many_attempts: 'too_many_attempts',
   clock_skew: 'clock_skew',
   update_needed: 'update_needed',
+  not_paired: 'not_paired',
+  device_revoked: 'device_revoked',
+  decrypt_failed: 'decrypt_failed',
+  replay: 'replay',
+  too_large: 'too_large',
 };
 
 /** Map a server error code to our own text. Unknown codes become the generic message. */

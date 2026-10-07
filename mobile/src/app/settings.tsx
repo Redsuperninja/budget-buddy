@@ -2,6 +2,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import { BigButton, BodyText, Card, Screen } from '@/components/Screen';
+import { LastSynced } from '@/components/SnapshotNotices';
+import { SyncPanel } from '@/components/SyncPanel';
 import { loadCredentials } from '@/sync/credentials';
 
 export default function SettingsScreen() {
@@ -29,6 +31,8 @@ export default function SettingsScreen() {
           Connecting lets your phone get your latest budget from Budget Buddy on your computer.
         </BodyText>
       </Card>
+      <LastSynced />
+      <SyncPanel />
       <BigButton
         label={computer ? 'Connect to a different computer' : 'Connect to your computer'}
         onPress={() => router.push('/pair')}

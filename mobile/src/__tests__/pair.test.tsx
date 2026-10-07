@@ -6,6 +6,7 @@ import PairScreen, { DIFFERENT_COMPUTER_QUESTION } from '@/app/pair';
 import { loadCredentials, saveCredentials } from '@/sync/credentials';
 import SettingsScreen from '@/app/settings';
 import { PAIR_MESSAGES } from '@/sync/pairErrors';
+import { SnapshotProvider } from '@/sync/store';
 
 jest.mock('expo-camera', () => ({
   CameraView: () => null,
@@ -18,12 +19,16 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => require('react').useEffect(cb, []),
 }));
 
+jest.setTimeout(30_000); // the first render of a screen is slow on a cold cache
+
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 const Wrapper = ({ children }: { children: ReactNode }) => (
-  <SafeAreaProvider initialMetrics={metrics}>{children}</SafeAreaProvider>
+  <SafeAreaProvider initialMetrics={metrics}>
+    <SnapshotProvider>{children}</SnapshotProvider>
+  </SafeAreaProvider>
 );
 
 describe('Settings', () => {

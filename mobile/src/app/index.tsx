@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { GroupCard } from '@/components/BudgetBreakdown';
 import { Card, Screen } from '@/components/Screen';
 import { LastSynced, SnapshotNotices } from '@/components/SnapshotNotices';
+import { SyncPanel } from '@/components/SyncPanel';
 import {
   moneyDirection,
   monthHeadline,
@@ -139,6 +140,7 @@ export default function HomeScreen() {
     <Screen title="Your budget" intro={formatMonth(snapshot.period.month)}>
       <SnapshotNotices />
       <LastSynced />
+      <SyncPanel />
       <Headline snapshot={snapshot} />
       <View style={{ gap: t.spacing.md }}>
         <SectionTitle>Where your money is going</SectionTitle>

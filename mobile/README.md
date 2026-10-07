@@ -4,9 +4,8 @@ The phone side of Budget Buddy, built with [Expo](https://expo.dev) (React Nativ
 [expo-router](https://docs.expo.dev/router/introduction/). It runs inside the free **Expo Go** app on
 iPhone and Android, so there's nothing to publish to an app store.
 
-> Right now Home and Taxes show a made-up **sample** budget (with a banner saying so). You can pair the
-> phone with your computer (see below), but the computer side isn't built yet. Receipt photos and syncing
-> come in later updates; then these screens show your real budget.
+> Home and Taxes show a made-up **sample** budget (with a banner saying so) until you connect to your computer
+> and tap **Sync now**. After that they show your real budget. Receipt photos come in a later update.
 
 ## Run it on your phone
 
@@ -45,6 +44,10 @@ npm test            # Jest unit tests (jest-expo preset)
 | `src/lib/dates.ts` | Plain-English dates ("October 2026", "2 days ago"). |
 | `src/sync/snapshot.ts` | Snapshot types (sync contract §5) and `parseSnapshot()`, which checks a snapshot before use. |
 | `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
+| `src/sync/transport.ts` | Shared by pairing and syncing: secure random numbers, one HTTP request with a 10 s timeout, and the encrypted envelope (`sealRequest` / `openResponse`, contract section 4). |
+| `src/sync/syncClient.ts` | `syncNow()`: health check, receipt-upload hook (#20), snapshot, save, best-effort ack. |
+| `src/sync/runSync.ts` | Runs one sync for the screens (one at a time) and turns every outcome into plain English. |
+| `src/components/SyncPanel.tsx` | The **Sync now** button and its status, on Home and Settings. |
 | `src/sync/store.tsx` | `SnapshotProvider` / `useSnapshot()`: loads the saved snapshot, falls back to the sample. |
 
 ## Pairing (Settings, then Connect)
@@ -61,8 +64,9 @@ user can type or paste the code's text instead. Plain-English steps for users ar
   screen asks before replacing the connection. Cancel keeps the old one.
 - **Web:** QR scanning is turned off on the web build (only typing the code works), so the scanner never loads
   code from the internet.
-- **Not built yet:** the computer-side pairing server and dashboard button (other roadmap items), and the first
-  sync after pairing. Pairing can't be tried end to end until those exist.
+- Right after pairing succeeds the phone runs its first sync, so Home shows real data straight away.
+- **Needs the computer side:** pairing and syncing can only be tried end to end once the Home Base endpoints
+  (roadmap #14, #15) are running.
 
 New dependencies for pairing:
 
@@ -76,6 +80,35 @@ New dependencies for pairing:
 
 Pairing code lives in `src/sync/`: `pairingQr.ts` (checks the QR), `pairClient.ts` (the `/api/pair` call),
 `pairErrors.ts` (plain-English messages), `credentials.ts`, `base64url.ts`.
+
+## Syncing (Sync now)
+
+Follows [sync contract](../docs/api/sync-contract.md) sections 3.5, 3.8, 3.9, 4, 7.2 and 8.
+
+1. `GET /api/health` first, so "computer not reachable" is told apart from other problems.
+2. (Hook only: receipt upload is roadmap #20. `SyncDeps.uploadReceipts` is where it plugs in.)
+3. `POST /api/sync/snapshot`, encrypted with the sync key, `Authorization: Bearer <token>`, a fresh random nonce
+   per request. The answer must open, be `type: "res"`, and have `re` equal to our nonce, or it is thrown away
+   (`bad_response`). The snapshot is checked by `parseSnapshot()`, must carry this computer's `server_id`, and is
+   only then saved. That moment counts as a successful sync.
+4. `POST /api/sync/ack`, best effort; failures are not shown.
+
+Safety rules: plaintext errors are unauthenticated, so they only show a message (and, for `not_paired`,
+`device_revoked` and `decrypt_failed`, a **Pair again** button). They never delete the token, sync key or saved
+snapshot. An encrypted `replay` answer is retried once with a new nonce. `clock_skew` is never retried with the
+server's clock. Every request times out after 10 s (`AbortController`).
+
+Further checks on every request: the saved address must still be a private or loopback IP with a valid port
+(checked inside `transport.ts`, so the health check and pairing too); redirects are never followed; and the answer
+size is capped (16 KiB, snapshot 2 MiB). A `Content-Length` over the cap is refused up front, and when the fetch
+provides a streaming body the phone counts bytes as they arrive and aborts at the cap. **Limitation:** React
+Native's built-in `fetch` may not stream, in which case the whole answer is read first and then measured in real
+bytes (the 10 s timeout still applies). The health check must report `contract: 1`, otherwise the phone asks for
+an update.
+
+**Saved snapshot:** still kept in AsyncStorage (no keys in it), protected by the phone's lock. Encrypting it at
+rest (issue #19) is not done here: secure-store has a small size limit, so it needs an encryption key in
+secure-store plus an encrypted file. TODO for #19.
 
 ## Rules of the road
 
