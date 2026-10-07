@@ -563,14 +563,15 @@ export interface Snapshot {
     days_in_month: number;
   };
   income: {
-    expected_cents: Cents;        // this month's expected take-home (from paychecks)
-    received_cents: Cents;        // take-home received so far this month
+    expected_cents: Cents;        // the larger of received so far and this month's paycheck take-home
+    received_cents: Cents;        // take-home income received so far this month, >= 0
     last_paycheck: { pay_date: IsoDate; net_cents: Cents } | null;
   };
   budget: {
     target_cents: Cents;          // sum of group targets
     actual_cents: Cents;          // sum of group actuals
     groups: BudgetGroup[];        // always needs, wants, savings in that order
+    unassigned?: { in_cents: Cents; out_cents: Cents; count: number }; // all >= 0
   };
   transactions: SnapshotTransaction[];
   accounts: SnapshotAccount[];
@@ -605,8 +606,9 @@ export interface SnapshotTransaction {
 export interface SnapshotAccount {
   id: number;
   name: string;                   // user's label, e.g. "Everyday checking"
-  kind: 'checking' | 'savings' | 'brokerage';
-  balance_cents: Cents;
+  kind: 'checking' | 'savings' | 'brokerage' | 'credit_card' | 'cash' | 'loan'
+      | 'retirement' | 'hsa' | 'other';
+  balance_cents: Cents;           // counts transactions dated up to balance_as_of; negative = owed
   balance_as_of: IsoDate;
 }
 
@@ -631,7 +633,11 @@ export interface SyncSettings {
 Rules:
 - `transactions`: last **60 days** up to and including today, newest first, at most **500**. No account
   numbers, notes, or raw bank memo fields.
-- `accounts`: never includes account numbers or `last4`.
+- `accounts`: every account, whatever its kind. Never includes account numbers or `last4`.
+  `credit_card` and `loan` balances are negative when money is owed.
+- `budget.unassigned`: money from this month that couldn't be placed in a budget category (no category, or a
+  refund), so the phone can say "N transactions need a category". `in_cents` and `out_cents` are both
+  positive amounts; the phone treats a missing field as zeros.
 - `deductions[].kind` is a stable key (`medical`, `education`, `home_office`, `hsa`, `business`, `other`, …);
   `label` is the display text. The phone shows unknown kinds using `label`.
 - `deductions[].amount_cents` is the **amount recorded** (what the user spent or imported in that kind),
@@ -644,17 +650,20 @@ Rules:
 
 Money rules (how the server fills the totals; the phone trusts them and never re-derives them from
 `transactions`):
-- `income.received_cents` (and `expected_cents`) count **take-home pay only**. Refunds, transfers between
-  the user's own accounts, and balance adjustments are never income.
+- `income.received_cents` is the month's income transactions (clamped to 0 or more). Paychecks entered on
+  the Home Base are never counted as received, so pay isn't counted twice. `expected_cents` is
+  `received_cents` or the month's paycheck take-home, whichever is larger. Refunds, transfers between the
+  user's own accounts, and balance adjustments are never income.
 - Needs and wants `actual_cents` (group and category) are **net of refunds** in the same category, so a
   refund-heavy month can make them negative. They exclude transfers between the user's own accounts and
   balance adjustments.
 - The savings `actual_cents` is money moved into savings this month **minus withdrawals**, so it can be
-  negative when more came out than went in.
+  negative when more came out than went in. Money moved into the user's own savings account (a transfer)
+  isn't counted as saved yet (roadmap 10b).
 - `transactions` still lists transfers, refunds and adjustments as they happened (sign = direction of
   money); they are for display only.
-- `accounts[].balance_cents` is the account balance. **Negative means money owed** (e.g. overdrawn
-  checking). Any future debt kind (credit card, loan) follows the same rule: an amount owed is negative.
+- `accounts[].balance_cents` is the account balance as of `balance_as_of`: transactions dated after today
+  are left out. **Negative means money owed** (e.g. overdrawn checking, a credit card or loan balance).
 
 ### 5.2 Example
 
@@ -689,7 +698,8 @@ Money rules (how the server fills the totals; the phone trusts them and never re
         "group": "savings", "name": "Savings", "target_cents": 104000, "actual_cents": 10000,
         "categories": [ { "id": 12, "name": "Emergency fund", "target_cents": 50000, "actual_cents": 10000 } ]
       }
-    ]
+    ],
+    "unassigned": { "in_cents": 0, "out_cents": 4200, "count": 2 }
   },
   "transactions": [
     { "id": 981, "date": "2026-10-02", "description": "Corner Cafe", "amount_cents": -3245, "category_id": 7, "account_id": 1 },
@@ -725,8 +735,10 @@ Receipt photos travel **base64url-encoded inside the encrypted envelope**, not a
   path on both sides. One envelope format for everything is simpler and easier to review.
 - The cost is ~33 % base64 overhead plus memory for one batch. The phone keeps that small by **re-encoding
   before queueing** with `expo-image-manipulator`: longest edge ≤ **1600 px**, JPEG quality **0.7**. That
-  gives roughly 200–600 KB per receipt, readable for OCR. With ≤ 5 receipts per batch a request stays around
-  1–4 MB, well inside the 12 MiB limit.
+  gives roughly 200–600 KB per receipt, readable for OCR. A typical batch of ≤ 5 receipts is around 1–4 MB.
+- **The phone batches by size.** Five photos at the 3 MiB limit would encode to about 20 MiB, over the
+  12 MiB body limit (which stays). So a batch is 1–5 items **and** its encoded request stays under
+  12 MiB; the phone starts a new batch when the next item would not fit.
 - **The phone strips EXIF** (location, device details). Re-encoding through the image manipulator drops
   it; the phone MUST NOT copy metadata across.
 - **Server checks before decoding the full image:** decoded data ≤ 3 MiB; starts with the JPEG magic bytes
@@ -801,9 +813,11 @@ export interface ReceiptResult {
 ```
 
 Rules:
-- **Idempotency:** `client_id` is unique across the Home Base. If it already exists, the server stores
-  nothing new and returns `duplicate` with the original `receipt_id` (first upload wins, even if the details
-  differ). A retry after a dropped connection is always safe.
+- **Idempotency:** `client_id` is unique across the Home Base and is remembered with the phone that sent
+  it. If the same phone sends it again, the server stores nothing new and returns `duplicate` with the
+  original `receipt_id` (first upload wins, even if the details differ). A retry after a dropped
+  connection is always safe. If a different phone sends an ID that exists, that item is `rejected` with
+  `invalid_field`, and no `receipt_id` is revealed.
 - `category_id` that doesn't exist (e.g. deleted since the last snapshot): accept, set category to none, add
   warning `unknown_category`.
 - `tax_deductible: true` without `deduction_kind` → treat as `other`. Turning a `donation` receipt into a

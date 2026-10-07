@@ -178,10 +178,11 @@ def test_cross_site_form_post_does_not_succeed(make_client):
 
 
 def test_phone_routes_do_not_need_an_origin(make_client):
-    # The phone app isn't a browser and sends no Origin. /api/sync/* doesn't exist yet (#15), so
-    # a 404 shows the request got past the Origin check; /api/pair answers (no QR code is active).
+    # The phone app sends no Origin. /api/sync/* answers "not paired" (no token), which shows the
+    # request got past the Origin check; /api/pair answers (no QR code is active).
     client = make_client(headers={})
-    assert client.post("/api/sync/ack", json={}).status_code == 404
+    response = client.post("/api/sync/ack", json={})
+    assert response.status_code == 401 and _error_code(response) == "not_paired"
     response = client.post("/api/pair", json={})
     assert response.status_code == 410
     assert _error_code(response) == "pairing_expired"
@@ -225,7 +226,13 @@ def test_every_route_but_the_phones_refuses_the_home_network(make_client, monkey
     assert ("GET", "/openapi.json") in routes
 
     lan_facing = sorted({path for _, path in routes if is_lan_route(path)})
-    assert lan_facing == ["/api/health", "/api/pair"]  # /api/sync/* arrives with #15
+    assert lan_facing == [
+        "/api/health",
+        "/api/pair",
+        "/api/sync/ack",
+        "/api/sync/receipts",
+        "/api/sync/snapshot",
+    ]
 
     for method, path in routes:
         response = lan.request(method, path, json={})

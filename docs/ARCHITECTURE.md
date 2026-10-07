@@ -90,6 +90,25 @@ codes, reminder rules, test vectors) is in **[api/sync-contract.md](api/sync-con
      timer: a listener for an expired, unused QR is closed at the next check; the dashboard polls the device list about every 3 seconds while a QR is showing). An explicit `BUDGET_BUDDY_HOST` wins:
      loopback means phones can never connect (pairing says so), another address is used as the main listener.
      The `Host` allowlist includes `{lan address}:{port}`.
+   - *Sync server side (roadmap #15):* `POST /api/sync/receipts`, `/api/sync/snapshot` and `/api/sync/ack`
+     (`routers/sync.py`, `services/sync.py`, `sync_receipts.py`, `snapshot.py`, `snapshot_tax.py`). The phone's token is checked before the
+     body is read, and the body is read with a hard size limit (16 KiB; 12 MiB for receipts) that stops
+     reading at the limit. Opening and sealing the envelope lives in one place, `services/envelope.py`, shared
+     with `/api/pair`. Every request goes through the contract's §4.4 order: `Host`/network checks, token,
+     body, `ts` window and per-device watermark, open the box with the device's sync key, check the inner
+     `type`/`ts`/`method`/`path`, then insert `(device_id, nonce bytes, ts)` into `seen_nonces`
+     (`UNIQUE(device_id, nonce)`; a failed insert is an encrypted 409 `replay`). The watermark
+     (`devices.nonce_watermark`) only moves with accepted requests (`ts − 600`) and old nonces are pruned
+     below it; revoking a phone deletes its nonces. From the replay check on, every answer is encrypted,
+     including errors, and unexpected failures return a fixed `server_error` message. The snapshot is built
+     from the existing services (monthly summary, account balances, paychecks, donations, stock gains,
+     deductions) and contains only the fields §5 lists. Receipt uploads are saved through the receipts
+     service and `EncryptedFileStore` (JPEG only, ≤ 3 MiB, ≤ 4096 px a side and ≤ 16 MP read from the header
+     before anything is decoded), one result per item, idempotent per phone on `client_id`
+     (`receipts.client_id`, unique, with `receipts.device_id`; another phone's ID is `rejected`). A phone
+     removed while its body was arriving is re-checked in the nonce transaction and gets a plain 401.
+     The snapshot's income is the summary's income (paychecks only raise `expected`), and it lists all accounts. The home-network middleware's 403 now uses the contract's error shape
+     (`not_home_network`).
 2. **Sync (every 1–3 days):** on home Wi-Fi the user taps **Sync**. The phone:
    - uploads queued receipts (photo + details),
    - downloads a fresh **snapshot** (budget breakdown, recent transactions, tax summary).
@@ -116,13 +135,13 @@ words ("Make sure your computer is on and Budget Buddy is running").
 | `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
 | `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
-| `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag |
+| `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, client_id?, deduction_kind?, device_id? (phone uploads) |
 | `donations` | id, date, organization, amount_cents (≥ 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |
 | `stock_lots` / `stock_sales` | lot: symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0) · sale: lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0) → gain and term are calculated, not stored |
 | `donations` | id, date, organization, amount_cents (≥ 0), kind (cash/goods), receipt_id? |
 | `stock_lots` / `stock_sale_orders` / `stock_sales` | lot (a purchase): account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) · sale order (a sale as entered): account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) · sale (one lot's part of an order): order_id, lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0), rebuilt with FIFO per symbol and account whenever a lot or order changes → cost, gain, term, and wash-sale flag are calculated, not stored (`app/services/stock_gains.py`) |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
-| `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark (arrives with sync, #15), revoked, revoked_at, paired_at, last_sync_at |
+| `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark, revoked, revoked_at, paired_at, last_sync_at |
 | `pairing_sessions` | id, code_hash, pair_pub, pair_sk (enc, erased when the session ends), created_at, exp, used_at, cancelled_at, wrong_attempts |
 | `pairing_nonces` | session_id, nonce (bytes); UNIQUE(session_id, nonce); replay cache for `/api/pair`, removed with the session |
 | `seen_nonces` | device_id, nonce (bytes), ts; UNIQUE(device_id, nonce); replay cache pruned below the device's watermark |

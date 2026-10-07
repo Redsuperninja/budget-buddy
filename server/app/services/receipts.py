@@ -14,6 +14,7 @@ Never log a merchant, an amount, or a photo's contents. File IDs are random and 
 
 import logging
 import time
+from collections.abc import Callable
 
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
@@ -65,14 +66,28 @@ def create_receipt(
     store: EncryptedFileStore,
     data: ReceiptCreate,
     image: bytes | None = None,
+    *,
+    client_id: str | None = None,
+    deduction_kind: str | None = None,
+    device_id: int | None = None,
+    before_commit: Callable[[], None] | None = None,
 ) -> Receipt:
-    """Add a receipt, optionally with its photo in the same step (phone uploads, #15)."""
-    values = data.model_dump()
+    """Add a receipt, optionally with its photo in the same step (phone uploads, #15).
+
+    ``client_id`` is the phone's own ID for it. It's unique, so a second insert with the same ID
+    raises ``IntegrityError`` (after the new photo file has been cleaned up again).
+    ``before_commit`` runs just before the commit; if it raises, nothing is saved.
+    """
+    values = data.model_dump() | {
+        "client_id": client_id,
+        "deduction_kind": deduction_kind,
+        "device_id": device_id,
+    }
     _check_references(session, values)
     cleaned = clean_image(image)[0] if image is not None else None  # before anything is saved
     receipt = Receipt(**values)
     session.add(receipt)
-    return _commit_with_image(session, store, receipt, cleaned)
+    return _commit_with_image(session, store, receipt, cleaned, before_commit)
 
 
 def update_receipt(session: Session, receipt_id: int, data: ReceiptUpdate) -> Receipt:
@@ -135,13 +150,19 @@ def load_image(store: EncryptedFileStore, receipt: Receipt) -> tuple[bytes, Imag
 
 
 def _commit_with_image(
-    session: Session, store: EncryptedFileStore, receipt: Receipt, image: bytes | None
+    session: Session,
+    store: EncryptedFileStore,
+    receipt: Receipt,
+    image: bytes | None,
+    before_commit: Callable[[], None] | None = None,
 ) -> Receipt:
     old_file = receipt.image_path
     new_file = store.save(image) if image is not None else None
     try:
         if new_file is not None:
             receipt.image_path = new_file
+        if before_commit is not None:
+            before_commit()
         session.commit()
     except BaseException:
         session.rollback()

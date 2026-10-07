@@ -57,6 +57,31 @@ def _invalid() -> ImageRejected:
     )
 
 
+def jpeg_size(data: bytes) -> tuple[int, int] | None:
+    """(width, height) from a JPEG's frame header, reading only the headers, never the picture."""
+    i = 2
+    while i + 4 <= len(data):
+        if data[i] != 0xFF:
+            return None
+        marker = data[i + 1]
+        if marker == 0xFF:  # fill byte
+            i += 1
+            continue
+        if marker in (0x01, _JPEG_EOI, _JPEG_SOS) or 0xD0 <= marker <= 0xD8:
+            return None  # no frame header before the picture data starts
+        length = int.from_bytes(data[i + 2 : i + 4], "big")
+        if length < 2:
+            return None
+        if marker in _JPEG_SOF:
+            if i + 9 > len(data):
+                return None
+            height = int.from_bytes(data[i + 5 : i + 7], "big")
+            width = int.from_bytes(data[i + 7 : i + 9], "big")
+            return (width, height) if width and height else None
+        i += 2 + length
+    return None
+
+
 def too_large() -> ImageRejected:
     return ImageRejected(
         "image_too_large",

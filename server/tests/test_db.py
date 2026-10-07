@@ -48,6 +48,7 @@ EXPECTED_TABLES = {
     "devices",
     "pairing_sessions",
     "pairing_nonces",
+    "seen_nonces",
 }
 
 

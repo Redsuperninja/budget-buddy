@@ -32,8 +32,13 @@ def month_range(year: int, month: int) -> tuple[dt.date, dt.date]:
     return start, end
 
 
-def monthly_summary(session: Session, year: int, month: int) -> MonthlySummary:
+def monthly_summary(
+    session: Session, year: int, month: int, *, through: dt.date | None = None
+) -> MonthlySummary:
+    """Totals for a month; with ``through``, only transactions dated up to that day."""
     start, end = month_range(year, month)
+    if through is not None:
+        end = min(end, through + dt.timedelta(days=1))
     rows = session.execute(
         select(
             Transaction.category_id,
