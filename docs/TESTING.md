@@ -7,7 +7,7 @@ real bank details. Everything here runs on your own computer and phone.
 
 | Part | Ready to try | Not built yet |
 | --- | --- | --- |
-| Computer (Home Base) | Accounts, transactions, categories and budgets, monthly summary, bank CSV import, paychecks, receipts, donations, stocks, connecting a phone. All through the **API explorer page** (a developer-style web page). | The friendly computer dashboard (roadmap #16) |
+| Computer (Home Base) | Accounts, transactions, categories and budgets, monthly summary, bank CSV import, paychecks, receipts, donations, stocks, connecting a phone. All through the **Budget Buddy dashboard**, a normal web page at <http://127.0.0.1:8766/> on the computer. | Editing or deleting most items from the page (add and view work; ask us if you need to fix something) |
 | Phone app | Connecting to your computer, the Home and Taxes screens | Showing your real data (it shows **sample data** until sync, #15), receipt photos (#20), the Sync button and reminders (#21) |
 
 ## Before you start (once)
@@ -80,28 +80,23 @@ Budget Buddy opens inside Expo Go.
 **Connect the phone to the computer**
 
 1. On the phone: **Settings → Connect**.
-2. In window 2, run:
-
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File scripts\pair-phone.ps1
-   ```
-
-3. Scan the code that appears (a bigger copy opens in a picture window). It works once, for 10 minutes.
+2. On the computer, open <http://127.0.0.1:8766/> in your browser, click **Connect phone**, then **Show pairing code**.
+   (Alternative: in window 2 run `powershell -ExecutionPolicy Bypass -File scripts\pair-phone.ps1` for a code in the window.)
+3. Scan the code on the screen. It works once, for 10 minutes. The page says **New phone paired** when it worked.
 4. The phone should say **"Connected to …"**.
 
 ## Things to try (checklist)
 
-Open <http://127.0.0.1:8766/docs> on the computer. Click a section, then **Try it out → Execute**.
+Open <http://127.0.0.1:8766/> on the computer and use the tabs along the top (Home, Accounts, Transactions, and so on).
 
-- [ ] **Monthly summary:** `GET /api/local/summary/monthly` with this month, like `2026-10`. Do income and spending look right? Is the "not sorted yet" money clear?
+- [ ] **Monthly summary:** on **Home**, pick this month. Do income and spending look right? Is the "not sorted yet" money clear?
 - [ ] **Categories:** add one, rename it, give it a budget. Try a name that already exists.
-- [ ] **Transactions:** add a purchase (money out is negative, like `-12.34`). Add a refund.
-- [ ] **CSV import:** run `powershell -ExecutionPolicy Bypass -File scripts\import-csv.ps1`. It previews the sample
-  bank file, then asks before importing. Run it again: rows already there should be skipped. (The API explorer
-  page can't send files; the computer dashboard will have an upload button.)
+- [ ] **Transactions:** add a purchase (choose "Money out", amount `12.34`). Add a refund.
+- [ ] **CSV import:** on **Import bank file**, choose `scripts\sample-bank-statement.csv`, check the preview,
+  then import. Do it again: rows already there should be skipped. (`scripts\import-csv.ps1` still works too.)
 - [ ] **Paychecks:** add one whose numbers don't add up. Is the message clear?
 - [ ] **Donations:** look at the year summary for this year. Does the "proof to keep" list make sense?
-- [ ] **Stocks:** look at `gains` for this year. Add a sale of more shares than you own.
+- [ ] **Stocks:** look at the gains for this year. Add a sale of more shares than you own.
 - [ ] **Phone:** connect, then disconnect and connect again. Try scanning an old or used code.
 - [ ] **Messages:** were any error messages confusing or too technical? Note the exact words.
 

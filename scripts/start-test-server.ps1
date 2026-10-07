@@ -35,6 +35,7 @@ foreach ($name in $Names) { $Saved[$name] = [Environment]::GetEnvironmentVariabl
 Write-Host ""
 Write-Host "Budget Buddy TEST Home Base" -ForegroundColor Cyan
 Write-Host "  Test data folder: $TestDataDir"
+Write-Host "  Open Budget Buddy:  http://127.0.0.1:$TestPort/   (type this into your browser)" -ForegroundColor Green
 Write-Host "  Check it's running: http://127.0.0.1:$TestPort/api/health"
 Write-Host "  API explorer:       http://127.0.0.1:$TestPort/docs"
 Write-Host ""

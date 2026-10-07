@@ -17,13 +17,44 @@ On macOS/Linux use `python3 -m venv .venv` and `.venv/bin/...` instead.
 .venv\Scripts\python -m app
 ```
 
-Then open <http://127.0.0.1:8765/api/health>. You should see `{"status": "ok", ...}`.
+Then open <http://127.0.0.1:8765/> in your browser: that is the Budget Buddy dashboard. (To check the server
+alone, <http://127.0.0.1:8765/api/health> should show `{"status": "ok", ...}`.)
+
+## The dashboard
+
+`server/app/dashboard/` holds the computer dashboard: `index.html`, `app.css` and the scripts in `js/`. There is
+no build step and it never loads anything from the internet. `GET /` serves the page and `GET /static/{path}`
+the `.js` and `.css` files (a list built at startup from the files in that folder; nothing else is reachable); they answer this computer only. Responses carry a strict Content-Security-Policy, `nosniff`,
+`no-referrer`, and the HTML is `no-store`. Writes need a matching `Origin` and the per-run token in
+`X-CSRF-Token`: the page gets the token in `<meta name="csrf-token">`; scripts can read it from
+`GET /api/local/csrf-token` (this computer only). Missing or wrong token gives 403 `bad_origin`.
+### Dashboard code layout
+
+All under `server/app/dashboard/js/` (plain ES modules, no build step; each file starts with a one-line purpose):
+
+| File | Job |
+| --- | --- |
+| `main.js` | Starts the dashboard: the list of screens, in navigation order |
+| `router.js` | Navigation buttons, `#hash` routing, `reload()` and `onLeave()` for screens |
+| `api.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
+| `dom.js` | `h()` / `fill()` / `card` / `table` / `form` builders (textContent only, never `innerHTML`) |
+| `forms.js` | Shared form pieces: account and category pickers, the tax-year picker and "Estimate, not tax advice" note |
+| `money.js` | Cents to dollars and typed dollars to cents (string logic, no float maths) |
+| `dates.js` | Today, current month, month ranges |
+| `labels.js` | Plain-English names for account types, groups and so on |
+| `screens/*.js` | One file per screen (`home`, `accounts`, `transactions`, `categories`, `import`, `connect-phone`, `paychecks`, `donations`, `stocks`), each exporting `render(root, options)` |
+
+To add a screen: create `screens/<name>.js` with a `render` function and add one line to `main.js`.
+
+Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Import bank file,
+Connect phone, Paychecks, Donations, Stocks. The QR code comes from the `segno` package, which is now a
+normal dependency (the `testing` extra is gone; `pip install -e ".[dev]"` is enough).
 
 ## Try it with demo data
 
 The `scripts\` folder at the top of the repo starts a separate **test** Home Base (its own data folder,
-port 8766) and fills it with made-up data. See [docs/TESTING.md](../docs/TESTING.md). Those helpers need
-the `testing` extra (`pip install -e ".[dev,testing]"`, which `scripts\setup.ps1` does for you).
+port 8766) and fills it with made-up data. See [docs/TESTING.md](../docs/TESTING.md). `scripts\setup.ps1`
+installs everything they need.
 
 ## Check your work
 
@@ -220,7 +251,8 @@ These routes answer this computer only (the phone uses `POST /api/pair`):
 - `POST /api/local/pairing`: starts pairing and returns the QR contents (`payload`), the same
   contents as one line of text (`payload_text`, for "Show code as text"), when it runs out
   (`expires_at`), and `phone_can_connect` with a plain-English `message` if a phone can't reach
-  this computer yet. Starting again cancels the earlier code. Never share or save the result.
+  this computer yet. It also has `qr_svg`, the QR code as an SVG picture for the dashboard. Starting
+  again cancels the earlier code. Never share or save the result.
 - `GET /api/local/devices`: connected phones (name, platform, app version, when paired, last sync,
   removed or not). Never shows codes or keys.
 - `POST /api/local/devices/{id}/revoke`: removes a phone.

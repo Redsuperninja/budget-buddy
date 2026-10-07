@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from _testguard import refuse_unless_test_server
+from _testguard import csrf_token, refuse_unless_test_server
 
 
 def main() -> int:
@@ -34,6 +34,7 @@ def main() -> int:
     )
     request.add_header("Origin", base)
     try:
+        request.add_header("X-CSRF-Token", csrf_token(base))
         with urllib.request.urlopen(request, timeout=15) as response:
             started = json.loads(response.read())
     except urllib.error.HTTPError as exc:

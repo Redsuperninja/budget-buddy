@@ -23,6 +23,8 @@ class PairingStarted(BaseModel):
     payload: PairingPayload
     # The same payload as one line of text, for "Show code as text" (paste into the phone).
     payload_text: str
+    # The QR code for ``payload_text`` as an SVG picture (the dashboard shows it).
+    qr_svg: str
     expires_at: int
     seconds_valid: int
     # False when Budget Buddy is only listening on this computer, so a phone can't reach it yet.

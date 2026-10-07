@@ -21,7 +21,7 @@ Push-Location $ServerDir
 try {
     if (-not (Test-Path $Python)) { py -3 -m venv .venv }
     & $Python -m pip install --quiet --upgrade pip
-    & $Python -m pip install --quiet -e ".[dev,testing]"
+    & $Python -m pip install --quiet -e ".[dev]"
     if ($LASTEXITCODE -ne 0) { throw "Installing the Home Base failed." }
 } finally { Pop-Location }
 

@@ -1,4 +1,5 @@
 import os
+import secrets
 import sys
 import time
 from collections.abc import AsyncIterator
@@ -22,6 +23,7 @@ from app.routers import (
     accounts,
     categories,
     csv_import,
+    dashboard,
     donations,
     health,
     pair,
@@ -81,6 +83,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.server_id = load_server_id(settings.data_dir)
     app.state.lan = LanAddress(settings.lan_ip or detect_lan_ip(), pinned=bool(settings.lan_ip))
     app.state.pair_limiter = RateLimiter(limit=10, window_seconds=60)  # per address, §2.3
+    app.state.csrf_token = secrets.token_urlsafe(32)  # per run; the dashboard sends it on writes
     app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.state.receipt_store = receipt_store
@@ -89,6 +92,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         LocalAccessMiddleware,
         port=settings.port,
         lan_host=lambda: host_header(app.state.lan.ip, settings.port) if app.state.lan.ip else None,
+        csrf_token=lambda: app.state.csrf_token,
     )
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     install_error_handlers(app)
@@ -104,4 +108,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(receipts.router)
     app.include_router(donations.router)
     app.include_router(stocks.router)
+    app.include_router(dashboard.router)
     return app

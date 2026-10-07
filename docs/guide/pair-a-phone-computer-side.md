@@ -3,17 +3,30 @@
 Pairing connects your phone to Budget Buddy on this computer. You do it once per phone. Your
 computer and phone need to be on the same home Wi-Fi.
 
-## Start pairing
+## Start pairing (main method: the dashboard)
 
-1. Open Budget Buddy on your computer and ask to pair a phone ("Pair a phone").
-2. Budget Buddy shows a one-time code as a QR code. It works **once** and runs out after
+1. Open the Budget Buddy dashboard on your computer (<http://127.0.0.1:8765/>).
+2. Click the **Connect phone** button.
+3. Click **Show pairing code**.
+4. Budget Buddy shows a one-time code as a QR code. It works **once** and runs out after
    **10 minutes**. If it runs out, or you ask again, the old code stops working and you get a new one.
-3. On your phone, open Budget Buddy and scan the QR code.
-4. The first time, Windows may ask whether to let Python use the network. Choose
+5. On your phone, open Budget Buddy and scan the QR code.
+6. The first time, Windows may ask whether to let Python use the network. Choose
    **Private networks** only. Leave **Public networks** unticked.
 
 Anyone who can see the QR code could try to pair with it, so don't leave it on screen or share a
 photo of it. Once your phone is paired, the code is used up.
+
+## Alternate method: the pairing script
+
+If the dashboard doesn't work, you can pair using a script instead:
+
+1. Open a terminal on your computer.
+2. Run `.venv\Scripts\python pair_phone.py` (Windows) or `.venv/bin/python pair_phone.py` (macOS/Linux) from the `scripts/` folder.
+3. The script shows a one-time code as a QR code. It works **once** and runs out after 10 minutes.
+4. On your phone, open Budget Buddy and scan the QR code.
+
+The rest is the same as the dashboard method.
 
 ## "Show code as text"
 

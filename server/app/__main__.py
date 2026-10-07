@@ -20,6 +20,8 @@ def serve() -> None:
     # or once a phone is paired (app/listeners.py).
     app.state.listener.attach()
     app.state.listener.sync_from_database()
+    url = f"http://127.0.0.1:{settings.port}"
+    print(f"Budget Buddy is starting. Open {url} in your browser.", flush=True)
     # proxy_headers=False: never trust X-Forwarded-For, so the private-network check
     # always sees the real client address. log_config: access logs leave out query strings.
     uvicorn.run(

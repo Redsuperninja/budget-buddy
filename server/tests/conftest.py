@@ -40,7 +40,12 @@ def make_client(data_dir: Path):
         kwargs.setdefault("base_url", BASE_URL)
         # Like the dashboard page: browsers send Origin on every POST/PATCH/DELETE.
         kwargs.setdefault("headers", {"Origin": kwargs["base_url"]})
-        return TestClient(create_app(), client=(peer, 50000), **kwargs)
+        app = create_app()
+        # ...and the CSRF token the page carries (tests that set their own X-CSRF-Token win).
+        headers = dict(kwargs.pop("headers"))
+        if not any(k.lower() == "x-csrf-token" for k in headers):
+            headers["X-CSRF-Token"] = app.state.csrf_token
+        return TestClient(app, client=(peer, 50000), headers=headers, **kwargs)
 
     return make
 

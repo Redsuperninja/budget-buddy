@@ -19,6 +19,7 @@ dependencies = [
     "cryptography>=44",
     "keyring>=25",
     "pynacl>=1.5,<2",
+    "segno>=1.6,<2",  # draws the pairing QR code
 ]
 
 [project.optional-dependencies]
@@ -26,10 +27,6 @@ dev = [
     "pytest>=8.3",
     "httpx2>=2.13",
     "ruff>=0.8",
-]
-# Only for the user-testing helper scripts in scripts/ (QR code for pairing a test phone).
-testing = [
-    "segno>=1.6,<2",
 ]
 
 [tool.setuptools.dynamic]
@@ -41,6 +38,7 @@ include = ["app*"]
 [tool.setuptools.package-data]
 "app.tax_data" = ["*.json"]
 "app.migrations" = ["script.py.mako"]
+"app.dashboard" = ["*.html", "*.css", "js/*.js", "js/screens/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

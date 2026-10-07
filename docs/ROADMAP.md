@@ -12,7 +12,7 @@ Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom.
 
 **B. Alpha: the whole loop works for a non-technical tester.** The biggest gap today is that the
 computer has no friendly screen and the phone only shows sample data.
-1. **16. Local web dashboard.** Comes first, because it's how testers will use the computer. Must include the
+1. ~~**16. Local web dashboard.**~~ Comes first, because it's how testers will use the computer. Must include the
    CSRF/DNS-rebinding protection (#4), showing the pairing QR, CSV upload, and polling the device list.
 2. **15. Encrypted sync** (snapshot download, receipt upload), with the phone-side checks: #19 (encrypt the
    cached snapshot), #20 (size limits), #23 and #24 (stale or inconsistent snapshots).
@@ -63,7 +63,7 @@ computer has no friendly screen and the phone only shows sample data.
 - [x] 13b. Sync API contract v1 — *architect*
 - [x] 14. Pairing: QR code, one-time code, device tokens, revoke — *backend-engineer* + *security-reviewer*
 - [ ] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
-- [ ] 16. Local web dashboard (computer side) — *backend-engineer* (note: poll the device list while a QR is showing so the home-network listener closes after the code expires; no timer closes it)
+- [x] 16. Local web dashboard (computer side) — *backend-engineer* (note: poll the device list while a QR is showing so the home-network listener closes after the code expires; no timer closes it)
 
 ## Phase 5: Phone app
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
