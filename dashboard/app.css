@@ -1,15 +1,16 @@
+/* Colors follow the computer's light or dark setting. The Colors picker (js/theme.js) can pin one by
+   setting data-theme="light" or "dark" on <html>. light-dark() takes the light value first. */
 :root {
-  --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5d6677; --line: #d9dde4;
-  --accent: #1f6feb; --accent-text: #ffffff; --good: #187a3b; --bad: #b3261e; --warn-bg: #fff4d6;
+  color-scheme: light dark;
+  --bg: light-dark(#f6f7f9, #14171d); --card: light-dark(#ffffff, #1e232c); --text: light-dark(#1d2330, #e8ebf0);
+  --muted: light-dark(#5d6677, #a0a8b6); --line: light-dark(#d9dde4, #343b48);
+  --accent: light-dark(#1f6feb, #5b9bff); --accent-text: light-dark(#ffffff, #0b0f16);
+  --good: light-dark(#187a3b, #5fd08a); --bad: light-dark(#b3261e, #ff8a80); --warn-bg: light-dark(#fff4d6, #3a3112);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px; line-height: 1.45;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14171d; --card: #1e232c; --text: #e8ebf0; --muted: #a0a8b6; --line: #343b48;
-    --accent: #5b9bff; --accent-text: #0b0f16; --good: #5fd08a; --bad: #ff8a80; --warn-bg: #3a3112;
-  }
-}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem;
@@ -40,6 +41,7 @@ form { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)
 form .wide { grid-column: 1 / -1; }
 label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; color: var(--muted); }
 label.check { flex-direction: row; align-items: center; gap: 0.5rem; }
+label.theme { flex-direction: row; align-items: center; gap: 0.5rem; margin-left: auto; }
 input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--text); min-width: 0; }
 button.primary, button.danger, button.plain, a.button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; }
@@ -55,6 +57,7 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 
 /* Printing (or saving as PDF) shows only the page content, without navigation or forms. */
 @media print {
+  :root { color-scheme: light; }
   header, footer, form, button, .no-print { display: none !important; }
   .card { break-inside: avoid; border-color: #999; }
 }

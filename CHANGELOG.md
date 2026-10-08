@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Light and dark mode: the dashboard follows your computer's setting, and a **Colors** picker at the top lets you choose Light or Dark instead (remembered on this computer).
 - Project rules: CI fails if test coverage drops (server 94%, dashboard logic 100%, phone 90/80/90/92%), a git hook stops pushes to `main` and its deletion from each computer, and the workflow guide explains how to merge stacked pull requests safely.
 - Plans: Budget Buddy becomes a Windows app with its own window (no browser or Python install needed), with an optional light start at login that only fully starts when you open it (ADR-0008, proposed).
 - Easy start on Windows: double-click **Start Budget Buddy** in the Budget Buddy folder. The first time it sets itself up; after that it starts in seconds and opens the dashboard, and if it's already running it just opens the dashboard. Close the window to stop.

@@ -45,6 +45,8 @@ All under `js/` (each file starts with a one-line purpose):
 | `money.js` | Cents to dollars and typed dollars to cents (string logic, no float maths) |
 | `dates.js` | Today, current month, month ranges |
 | `labels.js` | Plain-English names for account types, groups and so on |
+| `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
+| `theme.js`, `theme-picker.js` | Light, dark or match the computer: the saved choice (pure, tested) and the header picker. Colors live in `app.css` as `light-dark()` pairs |
 | `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js` and `phone-list.js` are parts of the Import and Connect phone screens |
 
 To add a screen: create `screens/<name>.js` with a `render` function and add one line to `main.js`. To call a new
