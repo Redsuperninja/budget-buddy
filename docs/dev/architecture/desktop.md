@@ -22,7 +22,9 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
   it shows it only if it proves it's Budget Buddy (`genuine.py`): the running Home Base keeps a random key in
   `home-base-running.json` in the private data folder (`server/app/instance_proof.py`), and the window sends a
   fresh nonce to `GET /api/local/instance/proof` (this computer only) and checks the HMAC-SHA256 answer. A
-  look-alike can't read the data folder, so it's refused with a plain message. A reused Home Base (for example
+  look-alike can't read the data folder, so it's refused with a plain message. The desktop finds the data folder
+  by the server's rule (`BUDGET_BUDDY_DATA_DIR`, else `%LOCALAPPDATA%\BudgetBuddy`); `genuine.data_dir` keeps a
+  copy, pinned by a test, since parts don't import each other. A reused Home Base (for example
   from `launch\Start Budget Buddy.bat`) keeps running when the window closes.
 - **Home Base**: `server/.venv` `python -m app` from source, or `home-base\Budget Buddy Home Base.exe` beside the
   app. With `BUDGET_BUDDY_STOP_WITH_PID` it watches that process (`server/app/parent_watch.py`, through a handle

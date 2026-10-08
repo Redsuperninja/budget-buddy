@@ -22,8 +22,12 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 ## The desktop app and a Home Base already running
 
 The window shows a Home Base it didn't start only after a challenge-response with a per-run key kept in the
-private data folder (`home-base-running.json`, removed on shutdown; [desktop.md](desktop.md)). The key is never
-logged or sent; the proof route answers this computer only.
+private data folder (`home-base-running.json`: port, process ID, 32-byte key as hex; [desktop.md](desktop.md)).
+The proof is `hex(HMAC-SHA256(key, nonce as ASCII))` for a fresh hex nonce, compared in constant time; both
+parts compute it this way (`server/app/instance_proof.py`, `desktop/budget_buddy_desktop/genuine.py`). The file is
+written only after the port is bound (a second copy that can't bind leaves it alone), removed on shutdown, and
+ignored when its process isn't running. The key is never logged or sent; the proof route answers this computer
+only, and the desktop's local requests skip any proxy.
 
 ## Never cached
 

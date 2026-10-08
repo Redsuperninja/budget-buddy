@@ -81,10 +81,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         with Session(engine) as session:
             purge_ended_sessions(session, app.state.clock())  # erase keys of old QR codes
-        # So the desktop app can check this is really Budget Buddy before showing it.
-        instance_proof.write(settings.data_dir, settings.port, app.state.instance_key)
         yield
-        instance_proof.remove(settings.data_dir, app.state.instance_key)
         app.state.listener.close()
         engine.dispose()
 

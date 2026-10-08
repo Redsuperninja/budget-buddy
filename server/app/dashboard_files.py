@@ -11,8 +11,9 @@ import logging
 import os
 import stat
 import sys
+import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 log = logging.getLogger("app.dashboard")
@@ -39,6 +40,7 @@ class DashboardFiles:
     folder: Path  # resolved
     assets: dict[str, Path]  # URL path such as "js/main.js" -> file
     _rescanned_at: float = 0.0
+    _rescan_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def read_index(self) -> str | None:
         return self._read(self.folder / "index.html")
@@ -52,18 +54,23 @@ class DashboardFiles:
     def _rescan(self) -> bool:
         """Build the list again (same rules), at most every few seconds. An update can add files
         while Budget Buddy runs; without this, the new page would fail to load until a restart."""
-        now = time.monotonic()
-        if now - self._rescanned_at < RESCAN_SECONDS:
-            return False
-        self._rescanned_at = now
+        if not self._rescan_lock.acquire(blocking=False):
+            return False  # another request is rescanning right now
         try:
-            assets = _find_assets(self.folder)
-        except OSError:
-            return False
-        if len(assets) > MAX_FILES:
-            return False
-        self.assets = assets
-        return True
+            now = time.monotonic()
+            if now - self._rescanned_at < RESCAN_SECONDS:
+                return False
+            self._rescanned_at = now
+            try:
+                assets = _find_assets(self.folder)
+            except OSError:
+                return False
+            if len(assets) > MAX_FILES:
+                return False
+            self.assets = assets
+            return True
+        finally:
+            self._rescan_lock.release()
 
     def _read(self, path: Path) -> str | None:
         # Checked again at request time, in case a file was swapped for a link since startup.

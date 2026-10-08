@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import http.server
 import json
+import os
 import threading
 import urllib.parse
 
@@ -41,8 +42,9 @@ def folder(tmp_path, monkeypatch):
     return tmp_path
 
 
-def write(folder, port, key=KEY):
-    (folder / genuine.FILE_NAME).write_text(json.dumps({"port": port, "pid": 1, "key": key}))
+def write(folder, port, key=KEY, pid=None):
+    body = {"port": port, "pid": pid or os.getpid(), "key": key}  # a live process: this one
+    (folder / genuine.FILE_NAME).write_text(json.dumps(body))
 
 
 def test_the_real_home_base_proves_itself(folder):
@@ -89,3 +91,28 @@ def test_default_data_folder(monkeypatch, tmp_path):
         assert genuine.data_dir() == tmp_path / "BudgetBuddy"
     monkeypatch.delenv("LOCALAPPDATA")
     assert genuine.data_dir().name in ("BudgetBuddy", "budget-buddy")
+
+
+def test_a_file_left_by_a_crash_is_ignored(folder):
+    server = serve(KEY)
+    try:
+        write(folder, server.server_port, pid=2**30)  # no such process
+        assert not genuine.is_budget_buddy(server.server_port)
+    finally:
+        server.shutdown()
+
+
+def test_process_alive():
+    assert genuine.process_alive(os.getpid())
+    assert not genuine.process_alive(0)
+    assert not genuine.process_alive(2**30)
+
+
+def test_same_data_folder_rule_as_the_home_base(monkeypatch, tmp_path):
+    """Pinned to the server's rule: server/app/config.py default_data_dir, BUDGET_BUDDY_DATA_DIR."""
+    monkeypatch.setenv("BUDGET_BUDDY_DATA_DIR", str(tmp_path / "chosen"))
+    assert genuine.data_dir() == tmp_path / "chosen"
+    monkeypatch.delenv("BUDGET_BUDDY_DATA_DIR")
+    monkeypatch.setattr(genuine.sys, "platform", "linux")
+    monkeypatch.setattr(genuine.Path, "home", lambda: tmp_path)
+    assert genuine.data_dir() == tmp_path / ".local" / "share" / "budget-buddy"

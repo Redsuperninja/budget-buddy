@@ -16,9 +16,17 @@ def local_url(on_port: int) -> str:
     return f"http://127.0.0.1:{on_port}"
 
 
+# Requests to this computer never go through a proxy (one set up in Windows could see them).
+_LOCAL = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+def open_local(url: str, timeout: float):
+    return _LOCAL.open(url, timeout=timeout)
+
+
 def is_running(on_port: int, timeout: float = 1.0) -> bool:
     try:
-        with urllib.request.urlopen(f"{local_url(on_port)}/api/health", timeout=timeout) as reply:
+        with open_local(f"{local_url(on_port)}/api/health", timeout=timeout) as reply:
             return reply.status == 200
     except OSError:
         return False

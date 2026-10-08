@@ -1,25 +1,53 @@
 """The desktop app's check that the Home Base on the port is really Budget Buddy, and new dashboard
 files being found without a restart."""
 
+import asyncio
 import hashlib
 import hmac
 import json
+
+import pytest
 
 from app import instance_proof
 
 NONCE = "ab" * 16
 
 
-def test_running_file_and_proof(make_client, data_dir):
-    client = make_client()
-    with client:  # runs start-up and shutdown
-        saved = json.loads((data_dir / instance_proof.FILE_NAME).read_text(encoding="ascii"))
-        assert saved["port"] == 8765 and saved["key"] == client.app.state.instance_key
-        reply = client.get("/api/local/instance/proof", params={"nonce": NONCE})
-        expected = hmac.new(bytes.fromhex(saved["key"]), NONCE.encode(), hashlib.sha256).hexdigest()
-        assert reply.json() == {"proof": expected}
-        assert reply.headers["cache-control"] == "no-store"
-    assert not (data_dir / instance_proof.FILE_NAME).exists()
+def test_proof(client):
+    key = client.app.state.instance_key
+    reply = client.get("/api/local/instance/proof", params={"nonce": NONCE})
+    expected = hmac.new(bytes.fromhex(key), NONCE.encode(), hashlib.sha256).hexdigest()
+    assert reply.json() == {"proof": expected}
+    assert reply.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("bound", [True, False])
+def test_running_file_only_once_the_port_is_ours(data_dir, monkeypatch, bound):
+    """A second copy that can't bind the port must not replace or remove the first one's file."""
+    import uvicorn
+
+    from app.config import Settings
+    from app.serving import build_server
+
+    data_dir.mkdir(parents=True)
+    instance_proof.write(data_dir, 8765, "aa" * 32)  # the copy already running
+
+    async def fake_startup(self, sockets=None):
+        self.started = bound
+
+    async def fake_shutdown(self, sockets=None):
+        pass
+
+    monkeypatch.setattr(uvicorn.Server, "startup", fake_startup)
+    monkeypatch.setattr(uvicorn.Server, "shutdown", fake_shutdown)
+    server = build_server(Settings())
+    asyncio.run(server.startup())
+    saved = json.loads((data_dir / instance_proof.FILE_NAME).read_text(encoding="ascii"))
+    assert saved["key"] == (server.config.app.state.instance_key if bound else "aa" * 32)
+    if bound:
+        assert saved["port"] == 8765
+    asyncio.run(server.shutdown())
+    assert (data_dir / instance_proof.FILE_NAME).exists() is (not bound)
 
 
 def test_a_bad_nonce_is_refused(client):
