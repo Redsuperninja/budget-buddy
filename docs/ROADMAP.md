@@ -84,6 +84,7 @@ items (20, 21).
 - [x] 11b. Sort a payment into charity: a donation linked to its transaction — *finance-tax-expert* + *backend-engineer*
 - [x] 11c. Gift categories: charity gifts filed under "Charitable giving", personal gifts under "Gifts" — *finance-tax-expert*
 - [x] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
+- [x] 12b. Investments: stocks in any account, holdings and typed-in prices, retirement and HSA limits — *finance-tax-expert*
 - [x] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 
 ## Phase 4: Sync

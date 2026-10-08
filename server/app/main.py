@@ -36,6 +36,7 @@ from app.routers import (
     paychecks,
     receipts,
     remote_computers,
+    retirement,
     stocks,
     summary,
     sync,
@@ -131,6 +132,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
     app.include_router(stocks.router)
+    app.include_router(retirement.router)
     app.include_router(remote_computers.router)
     app.include_router(dashboard.router)
     return app

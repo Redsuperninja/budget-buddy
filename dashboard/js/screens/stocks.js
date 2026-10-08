@@ -1,4 +1,5 @@
-// Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales.
+// Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales. What
+// you hold now and its value are on the Investments page.
 
 import { createLot, createSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
@@ -15,6 +16,7 @@ const termRow = (label, t) =>
 export async function render(root, options) {
   const year = options.year || thisYear();
   const accounts = await listAccounts();
+  const accountName = new Map(accounts.map((a) => [a.id, a.name]));
   const [lots, gains] = await Promise.all([
     listLots(), stockGains(year),
   ]);
@@ -26,7 +28,7 @@ export async function render(root, options) {
       { name: dateName, label: dateLabel, type: "date", value: today(), required: true },
       { name: "shares", label: "Number of shares", required: true, inputmode: "decimal", placeholder: "2.5" },
       { name: moneyName, label: `${moneyLabel} in dollars`, required: true, inputmode: "decimal" },
-      accountField(accounts, "Account (optional)", "(none)"),
+      accountField(accounts, "Account (optional; retirement and HSA sales aren't taxed)", "(none)"),
     ], submitLabel, async (v) => {
       await save({
         symbol: v.symbol, [dateName]: v[dateName], shares: v.shares.trim(),
@@ -51,8 +53,9 @@ export async function render(root, options) {
               s.possible_wash_sale ? "Possible wash sale" : ""]), [3, 4])
         : empty("No sales in this year.")),
     card("Shares you bought", lots.length
-      ? table(["Symbol", "Bought", "Shares", "Still held", "Cost"], lots.map((l) =>
-          [l.symbol, l.acquired_on, l.shares, l.remaining_shares, formatCents(l.cost_basis_cents)]), [4])
+      ? table(["Symbol", "Account", "Bought", "Shares", "Still held", "Cost"], lots.map((l) =>
+          [l.symbol, accountName.get(l.account_id) || "", l.acquired_on, l.shares, l.remaining_shares,
+            formatCents(l.cost_basis_cents)]), [5])
       : empty("No purchases entered yet.")),
     card("Add a purchase", tradeForm({
       dateName: "acquired_on", dateLabel: "Date bought", moneyName: "cost_basis",

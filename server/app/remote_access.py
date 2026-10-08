@@ -35,6 +35,7 @@ JOINED_AREAS = frozenset(
         "donations",
         "paychecks",
         "receipts",
+        "retirement",
         "stocks",
         "summary",
         "tax-summary",

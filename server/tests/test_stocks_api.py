@@ -256,15 +256,6 @@ def test_brk_b_style_symbol(buy):
     assert buy("2026-01-02", "1", "1.00", symbol="brk.b")["symbol"] == "BRK.B"
 
 
-def test_retirement_and_hsa_accounts_are_refused(client, make_account):
-    for kind in ("retirement", "hsa"):
-        account = make_account(name=f"Fake {kind}", kind=kind)["id"]
-        body = {"account_id": account, "symbol": "FAKE", "acquired_on": "2026-01-02"}
-        response = client.post(LOTS, json={**body, "shares": "1", "cost_basis": "1.00"})
-        assert response.status_code == 422
-        assert response.json()["error"]["code"] == "tax_free_account"
-
-
 def test_no_account_is_fine_and_separate(client, buy, sell):
     body = {"symbol": "FAKE", "acquired_on": "2026-01-02", "shares": "1", "cost_basis": "1.00"}
     assert client.post(LOTS, json=body).json()["account_id"] is None
@@ -299,24 +290,34 @@ def test_home_network_cannot_reach_stocks(make_client):
 
 
 @pytest.mark.parametrize("kind", ["retirement", "hsa"])
-def test_account_with_stocks_cant_become_tax_free(client, brokerage, buy, kind):
-    lot = buy("2026-01-02", "1", "1.00")
+def test_retirement_and_hsa_accounts_hold_stocks_but_sales_arent_taxed(
+    client, buy, sell, make_account, kind
+):
+    ira = make_account(name=f"Fake {kind}", kind=kind)["id"]
+    buy("2025-01-02", "2", "100.00", account_id=ira)
+    sale = sell("2026-03-02", "1", "80.00", account_id=ira)  # a loss, but not taxed
+    assert (sale["taxed"], sale["possible_wash_sale"], sale["gain_cents"]) == (False, False, 3_000)
+    gains = client.get(f"{GAINS}/2026").json()
+    assert gains["sales"] == [] and gains["total_gain_cents"] == 0
+
+
+def test_buying_in_an_ira_can_flag_a_wash_sale(client, buy, sell, make_account):
+    ira = make_account(name="Fake IRA", kind="retirement")["id"]
+    buy("2025-01-02", "1", "100.00")
+    sale = sell("2026-03-02", "1", "60.00")  # a loss in the taxed account
+    assert sale["possible_wash_sale"] is False
+    buy("2026-03-20", "1", "60.00", account_id=ira)  # bought back within 30 days, in the IRA
+    assert client.get(f"{SALES}/{sale['id']}").json()["possible_wash_sale"] is True
+
+
+def test_an_account_with_stocks_can_change_kind(client, brokerage, buy, sell):
+    buy("2025-01-02", "1", "1.00")
+    sell("2026-02-02", "1", "2.00")
     url = f"/api/local/accounts/{brokerage}"
-    response = client.patch(url, json={"kind": kind})
-    assert response.status_code == 409
-    error = response.json()["error"]
-    assert error["code"] == "account_has_stocks"
-    assert "retirement account or HSA" in error["message"]
-    assert client.get(url).json()["kind"] == "brokerage"
-    # Other edits are fine, and so is the change once the stocks are gone.
-    assert client.patch(url, json={"kind": "other"}).status_code == 200
-    client.delete(f"{LOTS}/{lot['id']}")
-    assert client.patch(url, json={"kind": kind}).json()["kind"] == kind
+    assert client.patch(url, json={"kind": "retirement"}).json()["kind"] == "retirement"
+    assert client.get(f"{GAINS}/2026").json()["sales"] == []
 
 
-def test_wash_sale_limits_are_explained(client, make_account):
-    account = make_account(name="Fake IRA", kind="retirement")["id"]
-    body = {"account_id": account, "symbol": "FAKE", "acquired_on": "2026-01-02"}
-    response = client.post(LOTS, json={**body, "shares": "1", "cost_basis": "1.00"})
-    assert "a spouse buying it" in response.json()["error"]["message"]
-    assert "We don't check those purchases." in client.get(f"{GAINS}/2026").json()["note"]
+def test_wash_sale_limits_are_explained(client):
+    note = client.get(f"{GAINS}/2026").json()["note"]
+    assert "including an IRA or HSA" in note and "spouse" in note

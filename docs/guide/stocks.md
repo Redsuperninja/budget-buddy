@@ -4,8 +4,9 @@
 > your gains and losses. Before you file, check everything against the Form 1099-B from your
 > broker, your tax software, or a tax professional.
 
-Budget Buddy can keep a record of stocks and funds you buy and sell in a regular (taxable)
-brokerage account. It works out how much you gained or lost on each sale, whether that counts as
+Budget Buddy can keep a record of stocks and funds you buy and sell, in a brokerage account, an IRA or 401(k), or
+an HSA. Sales inside a retirement account or HSA aren't taxed, so they're left out of your gains. What you hold now
+and its value are on the [Investments](investments.md) page. It works out how much you gained or lost on each sale, whether that counts as
 short term or long term, and adds it all up for each tax year. Enter your purchases and sales in the Budget Buddy dashboard on your computer.
 
 ## Entering a purchase
@@ -17,7 +18,7 @@ For each time you bought shares, enter:
 - **Number of shares.** Fractions are fine, up to 6 decimal places (for example `2.5`).
 - **Total you paid, including any fees.** For example, if 10 shares cost $1,000.00 plus a $5.00
   fee, enter `1005.00`.
-- **Account** (optional): the brokerage account they're in.
+- **Account** (optional): the account they're in, like a brokerage account, IRA or HSA.
 
 If you bought the same stock several times, enter each purchase separately. Each one is called a
 "lot".
@@ -70,9 +71,9 @@ bought. This is called a wash sale.
 Budget Buddy only **flags** a possible wash sale. It doesn't change any numbers. If you see the
 flag, check your broker's Form 1099-B or ask a tax professional.
 
-We only compare purchases of the same symbol entered here. Buying the same stock in an IRA or HSA,
-or a spouse buying it, within 30 days of a sale at a loss can also cause a wash sale. We don't
-check those purchases.
+We compare purchases of the same symbol entered here, in any account, including an IRA or HSA. A
+spouse buying it within 30 days of a sale at a loss can also cause a wash sale; Budget Buddy doesn't
+know about those purchases.
 
 ## Something went wrong?
 
@@ -86,9 +87,8 @@ check those purchases.
   still uses. Delete that sale first.
 - **A mistake in a purchase or sale**: there's no editing yet. Delete it and enter it again. Your
   other sales are matched again automatically.
-- **"Sales inside a retirement account or HSA aren't taxed"**: those accounts can't be used here.
-  Pick a regular brokerage account, or leave the account empty.
-- **An account can't be deleted, or changed to a retirement account or HSA**: it still has stock
-  purchases or sales. Delete those first, or add a separate account.
+- **A sale doesn't show in the gains**: sales inside a retirement account or HSA aren't taxed, so
+  they're left out. Check the sale's account.
+- **An account can't be deleted**: it still has stock purchases or sales. Delete those first.
 - **The numbers don't match your broker**: your broker may use a different method than "oldest
   first", or may have adjusted a wash sale. Your Form 1099-B is the official record.

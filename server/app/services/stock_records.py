@@ -11,9 +11,8 @@ import datetime as dt
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.errors import ApiError, not_found
-from app.models import StockLot, StockSale, StockSaleOrder
-from app.schemas.stocks import WASH_SALE_LIMITS
+from app.errors import not_found
+from app.models import Account, StockLot, StockSale, StockSaleOrder
 from app.services import stock_gains as gains
 from app.services.accounts import TAX_FREE_KINDS, get_account
 
@@ -54,16 +53,15 @@ def get_order(session: Session, sale_id: int) -> StockSaleOrder:
 
 
 def check_account(session: Session, account_id: int | None) -> None:
-    if account_id is None:
-        return
-    if get_account(session, account_id).kind in TAX_FREE_KINDS:
-        raise ApiError(
-            422,
-            "tax_free_account",
-            "Sales inside a retirement account or HSA aren't taxed, so there's nothing to track "
-            "here. Pick a regular brokerage account, or leave the account empty. "
-            + WASH_SALE_LIMITS,
-        )
+    """Any account may hold stocks. In a retirement account or HSA, sales aren't taxed: they're
+    left out of the gains summary, but purchases there still count for wash sales."""
+    if account_id is not None:
+        get_account(session, account_id)
+
+
+def untaxed_account_ids(session: Session) -> set[int]:
+    """Retirement and HSA accounts: selling inside them isn't taxed."""
+    return set(session.scalars(select(Account.id).where(Account.kind.in_(TAX_FREE_KINDS))))
 
 
 def rematch(session: Session, symbol: str, account_id: int | None) -> None:
