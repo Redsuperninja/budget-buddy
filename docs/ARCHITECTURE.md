@@ -21,8 +21,19 @@
 - **Python + FastAPI** HTTP API, **SQLite** database, **SQLAlchemy** models, **Alembic** migrations.
 - Data folder lives **outside the repo** (default `%LOCALAPPDATA%\BudgetBuddy` on Windows,
   `~/.local/share/budget-buddy` elsewhere). Code in git never contains personal data.
-- Includes a small local web dashboard (served by the same app) for the computer side:
-  importing bank CSVs, entering paychecks, reviewing tax items, and showing the pairing QR code.
+- Includes a small local web dashboard (served by the same app, `server/app/dashboard/`) for the computer side:
+  accounts, transactions, categories, bank CSV import, paychecks, donations, stocks, and the pairing QR code.
+  It is plain HTML, CSS and JavaScript with no build step and no internet requests (system fonts, local files
+  only). It lives at `/` (assets at `/static/`) and answers this computer only, because it is not one of the phone
+  routes. Every page response carries a strict Content-Security-Policy (`default-src 'self'`, no inline script,
+  `frame-ancestors 'none'`), `nosniff`, `Referrer-Policy: no-referrer`, and the HTML is `no-store`. The page builds
+  its screens with `textContent` only (never `innerHTML` with API data). Issue #4 (CSRF and DNS rebinding) is met
+  by `LocalAccessMiddleware` plus that CSP: Host allowlist, loopback-only peer, `Origin` must match on every
+  write, and a per-run CSRF token (random, in `app.state`, never logged) must come back in `X-CSRF-Token`
+  (constant-time compare; failure is 403 `bad_origin`). The token is in a `<meta name="csrf-token">` tag of the
+  page, and `GET /api/local/csrf-token` gives it to the helper scripts. There are no CORS headers, so other
+  websites can't read it. The pairing QR is drawn on the server (`segno`) and returned as SVG; the QR still
+  holds no secret key (ADR-0004).
 - Modules:
   - `accounts` — checking & savings accounts, balances
   - `transactions` — imported/entered transactions, categories, auto-categorization rules
@@ -76,7 +87,7 @@ codes, reminder rules, test vectors) is in **[api/sync-contract.md](api/sync-con
      while at least one phone is paired, `python -m app` also opens a second listener on this computer's own
      home-network address (`BUDGET_BUDDY_LAN_IP`, or detected), never `0.0.0.0`, and closes it when neither
      is true. It is re-checked when pairing starts, a phone is removed, and the device list is read (there is no
-     timer: a listener for an expired, unused QR is closed at the next check; the dashboard, #16, should poll the device list). An explicit `BUDGET_BUDDY_HOST` wins:
+     timer: a listener for an expired, unused QR is closed at the next check; the dashboard polls the device list about every 3 seconds while a QR is showing). An explicit `BUDGET_BUDDY_HOST` wins:
      loopback means phones can never connect (pairing says so), another address is used as the main listener.
      The `Host` allowlist includes `{lan address}:{port}`.
 2. **Sync (every 1–3 days):** on home Wi-Fi the user taps **Sync**. The phone:

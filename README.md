@@ -20,6 +20,17 @@ A private, local-first budgeting and tax-prep helper.
 | Budget | Suggested budget from your real income & spending, monthly targets vs. actual |
 | Taxes | Charitable donations, stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |
 
+## Quick start
+
+**On your computer:**
+
+1. Set up Home Base (the Python server): from the `server/` folder, run `python -m venv .venv` and `.venv\Scripts\pip install -e ".[dev]"` (Windows) or use `.venv/bin/...` on macOS/Linux.
+2. Start it: `.venv\Scripts\python -m app` (Windows) or `.venv/bin/python -m app` (macOS/Linux).
+3. Open the dashboard in your browser: <http://127.0.0.1:8765/>.
+4. Add accounts, transactions, and connect your phone.
+
+See [docs/guide/using-the-dashboard.md](docs/guide/using-the-dashboard.md) for details.
+
 ## How it's organized
 
 ```

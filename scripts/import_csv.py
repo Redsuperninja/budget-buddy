@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from _testguard import refuse_unless_test_server
+from _testguard import csrf_token, refuse_unless_test_server
 
 
 def call(
@@ -20,6 +20,8 @@ def call(
 ):
     request = urllib.request.Request(base + path, data=body, method=method)
     request.add_header("Origin", base)
+    if method != "GET":
+        request.add_header("X-CSRF-Token", csrf_token(base))
     request.add_header("Content-Type", "text/csv" if csv else "application/json")
     try:
         with urllib.request.urlopen(request, timeout=30) as response:

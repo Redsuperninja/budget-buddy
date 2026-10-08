@@ -13,7 +13,7 @@ import sys
 import urllib.error
 import urllib.request
 
-from _testguard import refuse_unless_test_server
+from _testguard import csrf_token, refuse_unless_test_server
 
 DEMO_CHECKING = "Demo Everyday Checking"
 
@@ -31,6 +31,8 @@ class Api:
         request = urllib.request.Request(self.base + path, data=data, method=method)
         request.add_header("Content-Type", "application/json")
         request.add_header("Origin", self.base)  # local API: same-origin requests only
+        if method != "GET":
+            request.add_header("X-CSRF-Token", csrf_token(self.base))
         try:
             with urllib.request.urlopen(request, timeout=15) as response:
                 raw = response.read()
@@ -96,7 +98,7 @@ def main() -> int:
     except ApiError as exc:
         print(f"Something went wrong loading demo data: {exc}")
         return 1
-    print(f"Done. Look around at http://127.0.0.1:{port}/docs (try 'summary/monthly').")
+    print(f"Done. Open http://127.0.0.1:{port}/ in your browser to look around.")
     return 0
 
 

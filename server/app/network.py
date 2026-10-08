@@ -1,5 +1,6 @@
 """Only answer requests coming from this computer or the home network (see ADR-0002)."""
 
+import hmac
 import ipaddress
 from collections.abc import Callable
 
@@ -53,6 +54,26 @@ def is_loopback_address(host: str | None) -> bool:
     return ip.is_loopback
 
 
+# Added to every HTTP response, including refusals: stops browsers guessing file types and keeps
+# other websites from embedding our responses.
+ALWAYS_HEADERS = (
+    (b"x-content-type-options", b"nosniff"),
+    (b"cross-origin-resource-policy", b"same-origin"),
+)
+
+
+def _with_always_headers(send: Send) -> Send:
+    async def wrapped(message):
+        if message["type"] == "http.response.start":
+            headers = list(message.get("headers", []))
+            present = {k.lower() for k, _ in headers}
+            headers += [(k, v) for k, v in ALWAYS_HEADERS if k not in present]
+            message = {**message, "headers": headers}
+        await send(message)
+
+    return wrapped
+
+
 class PrivateNetworkOnlyMiddleware:
     """ASGI middleware: reject anyone outside the home network.
 
@@ -67,6 +88,9 @@ class PrivateNetworkOnlyMiddleware:
         if scope["type"] not in ("http", "websocket"):
             await self.app(scope, receive, send)
             return
+
+        if scope["type"] == "http":
+            send = _with_always_headers(send)  # outermost middleware: covers every response
 
         client = scope.get("client")
         if is_private_address(client[0] if client else None):
@@ -127,12 +151,17 @@ class LocalAccessMiddleware:
       ``X-Forwarded-For`` are never trusted), else 403 ``not_this_computer``. New routes are
       protected without anyone having to remember a dependency.
     - Requests that change data on a dashboard route (anything but GET/HEAD) must come from a
-      page on this computer: ``Origin`` must be present and match, else 403 ``bad_origin``. This
-      stops other websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
+      page on this computer: ``Origin`` must be present and match, and ``X-CSRF-Token`` must carry
+      this run's token (compared in constant time), else 403 ``bad_origin``. This stops other
+      websites from submitting forms or ``fetch`` calls to the Home Base (CSRF).
     """
 
     def __init__(
-        self, app: ASGIApp, port: int, lan_host: Callable[[], str | None] | None = None
+        self,
+        app: ASGIApp,
+        port: int,
+        lan_host: Callable[[], str | None] | None = None,
+        csrf_token: Callable[[], str] | None = None,
     ) -> None:
         self.app = app
         self.hosts = allowed_hosts(port)
@@ -140,6 +169,9 @@ class LocalAccessMiddleware:
         # The computer's home-network ``ip:port``, which phones put in ``Host`` (§3.1). Asked on
         # each request because the address is detected or changed while the app runs.
         self.lan_host = lan_host or (lambda: None)
+        # The per-run CSRF token the dashboard page sends back on every write. No token means
+        # no dashboard write can ever pass.
+        self.csrf_token = csrf_token or (lambda: "")
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in ("http", "websocket"):
@@ -163,6 +195,11 @@ class LocalAccessMiddleware:
         if scope.get("method", "GET") not in SAFE_METHODS:
             origin = _header(scope, b"origin")
             if origin is None or origin.lower() not in self.origins:
+                await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
+                return
+            sent = _header(scope, b"x-csrf-token") or ""
+            expected = self.csrf_token()
+            if not expected or not hmac.compare_digest(sent.encode(), expected.encode()):
                 await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
                 return
 

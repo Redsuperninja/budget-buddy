@@ -4,8 +4,10 @@ Every route here is loopback-only by default (``LocalAccessMiddleware``). Respon
 pairing code are ``no-store`` and the code never goes in a URL or a log.
 """
 
+import io
 import json
 
+import segno
 from fastapi import APIRouter, Request, Response
 
 from app.deps import PathId, SessionDep
@@ -22,6 +24,15 @@ NO_NETWORK_MESSAGE = (
     "Budget Buddy can't find your home network. Connect this computer to your home Wi-Fi, "
     "then try again."
 )
+
+
+def qr_svg(text: str) -> str:
+    """The QR code as an SVG picture, black on white so it scans in dark mode too."""
+    buffer = io.BytesIO()
+    segno.make(text, error="m").save(
+        buffer, kind="svg", scale=6, border=2, dark="#000", light="#fff", xmldecl=False, nl=False
+    )
+    return buffer.getvalue().decode("utf-8")
 
 
 @router.post("/pairing")
@@ -44,9 +55,11 @@ def start_pairing(request: Request, response: Response, session: SessionDep) -> 
     listener = state.listener
     listener.sync(True, host)  # a live pairing: open the home-network listener
     reachable = listener.reachable()
+    payload_text = json.dumps(payload, separators=(",", ":"))
     return PairingStarted(
         payload=payload,
-        payload_text=json.dumps(payload, separators=(",", ":")),
+        payload_text=payload_text,
+        qr_svg=qr_svg(payload_text),
         expires_at=payload["exp"],
         seconds_valid=service.CODE_TTL_SECONDS,
         phone_can_connect=reachable,
