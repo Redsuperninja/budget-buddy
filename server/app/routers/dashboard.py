@@ -1,4 +1,4 @@
-"""The computer dashboard: a small web page served by the Home Base itself (roadmap #16).
+"""Serves the computer dashboard (roadmap #16) from the ``dashboard/`` folder (ADR-0005).
 
 Everything is local: no scripts, fonts or images come from the internet. These routes are not
 phone routes, so ``LocalAccessMiddleware`` already answers this computer only. The page carries
@@ -6,13 +6,12 @@ the per-run CSRF token in a ``<meta>`` tag (inline script is barred by the CSP, 
 script reads it from there) and sends it back on every write.
 """
 
-from importlib import resources
-from importlib.resources.abc import Traversable
 from pathlib import PurePosixPath
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
+from app.dashboard_files import CONTENT_TYPES
 from app.errors import not_found
 
 router = APIRouter(tags=["dashboard"], include_in_schema=False)
@@ -30,45 +29,35 @@ SECURITY_HEADERS = {
     "X-Frame-Options": "DENY",
     "Cross-Origin-Opener-Policy": "same-origin",
 }
-CONTENT_TYPES = {".js": "text/javascript", ".css": "text/css"}
 TOKEN_PLACEHOLDER = "__CSRF_TOKEN__"
-
-
-def _find_assets(folder: Traversable, prefix: str = "") -> dict[str, Traversable]:
-    """Every .js and .css file in the dashboard folder, by URL path (such as "js/main.js")."""
-    found: dict[str, Traversable] = {}
-    for item in folder.iterdir():
-        if item.is_dir():
-            found |= _find_assets(item, f"{prefix}{item.name}/")
-        elif any(item.name.endswith(ext) for ext in CONTENT_TYPES):
-            found[prefix + item.name] = item
-    return found
-
-
-# Built once at startup. Only these exact paths are served, so there is no directory listing and
-# nothing outside this folder can be asked for.
-ASSETS = _find_assets(resources.files("app.dashboard"))
-
-
-def _read(name: str) -> str:
-    return (resources.files("app.dashboard") / name).read_text(encoding="utf-8")
+HTML = "text/html; charset=utf-8"
+NO_DASHBOARD_PAGE = (
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Budget Buddy</title></head>'
+    "<body><h1>Budget Buddy is running</h1><p>The dashboard files weren't found, so there is "
+    "no web page to show. Your phone can still connect.</p></body></html>"
+)
 
 
 @router.get("/")
 def index(request: Request) -> Response:
-    html = _read("index.html").replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token)
+    dashboard = request.app.state.dashboard
+    html = dashboard.read_index() if dashboard else None
     headers = {**SECURITY_HEADERS, "Cache-Control": "no-store"}
-    return Response(html, media_type="text/html; charset=utf-8", headers=headers)
+    if html is None:  # API-only: no dashboard folder (ADR-0005)
+        return Response(NO_DASHBOARD_PAGE, 404, media_type=HTML, headers=headers)
+    html = html.replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token)
+    return Response(html, media_type=HTML, headers=headers)
 
 
 @router.get("/static/{name:path}")
-def asset(name: str) -> Response:
-    file = ASSETS.get(name)
-    if file is None:
+def asset(name: str, request: Request) -> Response:
+    dashboard = request.app.state.dashboard
+    text = dashboard.read_asset(name) if dashboard else None
+    if text is None:
         raise not_found("page")
     media_type = CONTENT_TYPES[PurePosixPath(name).suffix]
     headers = {**SECURITY_HEADERS, "Cache-Control": "no-cache"}
-    return Response(file.read_text(encoding="utf-8"), media_type=media_type, headers=headers)
+    return Response(text, media_type=media_type, headers=headers)
 
 
 @router.get("/api/local/csrf-token")

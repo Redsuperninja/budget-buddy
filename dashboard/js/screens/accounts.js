@@ -1,14 +1,16 @@
 // Accounts: the list with balances, and adding a new one.
 
-import { api } from "../api.js";
-import { card, empty, fill, form, table } from "../dom.js";
-import { optionalText } from "../forms.js";
+import { createAccount, listAccounts } from "../api/endpoints.js";
+import { fill } from "../dom.js";
+import { optionalText } from "../fields.js";
+import { form } from "../form.js";
 import { ACCOUNT_KINDS, kindLabel } from "../labels.js";
 import { formatBalance } from "../money.js";
 import { reload } from "../router.js";
+import { card, empty, table } from "../widgets.js";
 
 export async function render(root) {
-  const accounts = await api("GET", "/api/local/accounts");
+  const accounts = await listAccounts();
   fill(root,
     card("Accounts", accounts.length
       ? table(["Name", "Type", "Bank", "Balance", "Transactions"],
@@ -21,8 +23,7 @@ export async function render(root) {
         { name: "kind", label: "Type", options: ACCOUNT_KINDS },
         { name: "institution", label: "Bank or company (optional)", maxlength: 100 },
       ], "Add account", async (v) => {
-        await api("POST", "/api/local/accounts",
-          { json: { name: v.name, kind: v.kind, institution: optionalText(v.institution) } });
+        await createAccount({ name: v.name, kind: v.kind, institution: optionalText(v.institution) });
         await reload();
       }),
       empty("To record a starting balance, add a transaction of type \"Balance adjustment\" on the Transactions page.")),

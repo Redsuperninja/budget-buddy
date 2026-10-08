@@ -1,46 +1,25 @@
-// Connect phone: show the pairing QR with a countdown, notice when a phone pairs, list and remove phones.
+// Connect phone: show the pairing QR with a countdown and notice when a phone pairs.
 
-import { api } from "../api.js";
-import { card, empty, fill, h, showError, table } from "../dom.js";
+import { startPairing as requestPairing, listDevices } from "../api/endpoints.js";
+import { fill, h, showError } from "../dom.js";
 import { onLeave } from "../router.js";
+import { card, empty } from "../widgets.js";
+import { phoneList } from "./phone-list.js";
 
 const POLL_MS = 3000; // also lets the Home Base close the home-network listener after the code runs out
 
 export async function render(root) {
   const area = h("div", {});
-  const deviceBox = h("div", {});
+  const { box: deviceBox, showDevices } = phoneList();
   let timers = [];
   let qrUrl = null;
   const stopTimers = () => { timers.forEach(clearInterval); timers = []; };
   onLeave(() => { stopTimers(); if (qrUrl) URL.revokeObjectURL(qrUrl); });
 
-  async function showDevices() {
-    const devices = await api("GET", "/api/local/devices");
-    const active = devices.filter((d) => !d.revoked);
-    fill(deviceBox, active.length
-      ? table(["Phone", "Paired", "Last sync", ""], active.map((d) => [
-          `${d.name}${d.platform ? ` (${d.platform})` : ""}`,
-          d.paired_at.slice(0, 10),
-          d.last_sync_at ? d.last_sync_at.slice(0, 16).replace("T", " ") : "not yet",
-          h("button", { class: "danger", type: "button", onclick: () => removeDevice(d) }, "Remove")]))
-      : empty("No phones are connected yet."));
-    return devices;
-  }
-
-  async function removeDevice(d) {
-    if (!confirm(`Remove "${d.name}"? It will stop syncing right away. You can pair it again later.`)) return;
-    try {
-      await api("POST", `/api/local/devices/${d.id}/revoke`);
-      await showDevices();
-    } catch (err) {
-      showError(deviceBox, err);
-    }
-  }
-
   async function startPairing() {
     stopTimers();
-    const knownIds = new Set((await api("GET", "/api/local/devices")).map((d) => d.id));
-    const p = await api("POST", "/api/local/pairing");
+    const knownIds = new Set((await listDevices()).map((d) => d.id));
+    const p = await requestPairing();
     if (qrUrl) URL.revokeObjectURL(qrUrl);
     qrUrl = URL.createObjectURL(new Blob([p.qr_svg], { type: "image/svg+xml" }));
     const countdown = h("p", { class: "muted" });

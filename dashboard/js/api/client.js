@@ -1,4 +1,5 @@
-// Talking to the Home Base: same-address fetch with the CSRF token, errors in plain English.
+// The only place that calls fetch: same-address request with the CSRF token, errors in plain English.
+// Screens don't use this directly; they call the named functions in endpoints.js.
 
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]').content;
 

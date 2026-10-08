@@ -38,7 +38,6 @@ include = ["app*"]
 [tool.setuptools.package-data]
 "app.tax_data" = ["*.json"]
 "app.migrations" = ["script.py.mako"]
-"app.dashboard" = ["*.html", "*.css", "js/*.js", "js/screens/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

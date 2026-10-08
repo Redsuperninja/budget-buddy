@@ -1,9 +1,11 @@
 // Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales.
 
-import { api } from "../api.js";
+import { createLot, createSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
-import { card, empty, fill, form, h, note, table } from "../dom.js";
-import { accountField, idOrNull, taxYearHeader } from "../forms.js";
+import { fill, h } from "../dom.js";
+import { accountField, idOrNull, taxYearHeader } from "../fields.js";
+import { form } from "../form.js";
+import { card, empty, note, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
 
@@ -12,13 +14,13 @@ const termRow = (label, t) =>
 
 export async function render(root, options) {
   const year = options.year || thisYear();
-  const accounts = await api("GET", "/api/local/accounts");
+  const accounts = await listAccounts();
   const [lots, gains] = await Promise.all([
-    api("GET", "/api/local/stocks/lots"), api("GET", `/api/local/stocks/gains/${year}`),
+    listLots(), stockGains(year),
   ]);
 
   // Purchases and sales are entered the same way, apart from the date and money labels.
-  const tradeForm = ({ dateName, dateLabel, moneyName, moneyLabel, submitLabel, path, moneyKey, moneyWhat }) =>
+  const tradeForm = ({ dateName, dateLabel, moneyName, moneyLabel, submitLabel, save, moneyKey, moneyWhat }) =>
     form([
       { name: "symbol", label: "Symbol", required: true, maxlength: 16, placeholder: "VTI" },
       { name: dateName, label: dateLabel, type: "date", value: today(), required: true },
@@ -26,10 +28,10 @@ export async function render(root, options) {
       { name: moneyName, label: `${moneyLabel} in dollars`, required: true, inputmode: "decimal" },
       accountField(accounts, "Account (optional)", "(none)"),
     ], submitLabel, async (v) => {
-      await api("POST", path, { json: {
+      await save({
         symbol: v.symbol, [dateName]: v[dateName], shares: v.shares.trim(),
         [moneyKey]: centsOrThrow(v[moneyName], moneyWhat), account_id: idOrNull(v.account_id),
-      } });
+      });
       await reload({ year });
     });
 
@@ -54,10 +56,10 @@ export async function render(root, options) {
       : empty("No purchases entered yet.")),
     card("Add a purchase", tradeForm({
       dateName: "acquired_on", dateLabel: "Date bought", moneyName: "cost_basis",
-      moneyLabel: "Total cost including fees", submitLabel: "Add purchase", path: "/api/local/stocks/lots",
+      moneyLabel: "Total cost including fees", submitLabel: "Add purchase", save: createLot,
       moneyKey: "cost_basis_cents", moneyWhat: "cost" })),
     card("Add a sale", tradeForm({
       dateName: "sold_on", dateLabel: "Date sold", moneyName: "proceeds",
-      moneyLabel: "Total received after fees", submitLabel: "Add sale", path: "/api/local/stocks/sales",
+      moneyLabel: "Total received after fees", submitLabel: "Add sale", save: createSale,
       moneyKey: "proceeds_cents", moneyWhat: "amount received" })));
 }

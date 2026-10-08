@@ -22,33 +22,18 @@ alone, <http://127.0.0.1:8765/api/health> should show `{"status": "ok", ...}`.)
 
 ## The dashboard
 
-`server/app/dashboard/` holds the computer dashboard: `index.html`, `app.css` and the scripts in `js/`. There is
-no build step and it never loads anything from the internet. `GET /` serves the page and `GET /static/{path}`
-the `.js` and `.css` files (a list built at startup from the files in that folder; nothing else is reachable); they answer this computer only. Responses carry a strict Content-Security-Policy, `nosniff`,
-`no-referrer`, and the HTML is `no-store`. Writes need a matching `Origin` and the per-run token in
-`X-CSRF-Token`: the page gets the token in `<meta name="csrf-token">`; scripts can read it from
-`GET /api/local/csrf-token` (this computer only). Missing or wrong token gives 403 `bad_origin`.
-### Dashboard code layout
+The web page lives in its own top-level folder, [`dashboard/`](../dashboard/README.md), and is not part of the
+server's code. The server finds the folder at startup (default `<repo>/dashboard`, or
+`BUDGET_BUDDY_DASHBOARD_DIR`) and serves `GET /` and `GET /static/{path}` from an allowlist: `index.html`, top-level
+`*.css` and `js/**/*.js` only, no symlinks, nothing outside the folder, size-capped. If the folder is missing, the
+server runs **API only**: `/` shows a plain 404 page and every `/api/...` route works. A non-editable
+`pip install` doesn't include `dashboard/`, so it serves the API only until the installer (roadmap #22) ships it.
 
-All under `server/app/dashboard/js/` (plain ES modules, no build step; each file starts with a one-line purpose):
-
-| File | Job |
-| --- | --- |
-| `main.js` | Starts the dashboard: the list of screens, in navigation order |
-| `router.js` | Navigation buttons, `#hash` routing, `reload()` and `onLeave()` for screens |
-| `api.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
-| `dom.js` | `h()` / `fill()` / `card` / `table` / `form` builders (textContent only, never `innerHTML`) |
-| `forms.js` | Shared form pieces: account and category pickers, the tax-year picker and "Estimate, not tax advice" note |
-| `money.js` | Cents to dollars and typed dollars to cents (string logic, no float maths) |
-| `dates.js` | Today, current month, month ranges |
-| `labels.js` | Plain-English names for account types, groups and so on |
-| `screens/*.js` | One file per screen (`home`, `accounts`, `transactions`, `categories`, `import`, `connect-phone`, `paychecks`, `donations`, `stocks`), each exporting `render(root, options)` |
-
-To add a screen: create `screens/<name>.js` with a `render` function and add one line to `main.js`.
-
-Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Import bank file,
-Connect phone, Paychecks, Donations, Stocks. The QR code comes from the `segno` package, which is now a
-normal dependency (the `testing` extra is gone; `pip install -e ".[dev]"` is enough).
+Pages answer this computer only. Responses carry a strict Content-Security-Policy, `nosniff`, `no-referrer`, and the
+HTML is `no-store`. Writes need a matching `Origin` and the per-run token in `X-CSRF-Token`: the page gets the token
+in `<meta name="csrf-token">`; scripts can read it from `GET /api/local/csrf-token` (this computer only). Missing
+or wrong token gives 403 `bad_origin`. The QR code comes from the `segno` package, a normal dependency.
+Server tests use a fake dashboard folder (`fake_dashboard` in `tests/conftest.py`), never the real one.
 
 ## Try it with demo data
 
@@ -307,6 +292,7 @@ All optional, set as environment variables:
 | `BUDGET_BUDDY_LAN_IP` | detected | This computer's home-network address (such as `192.168.1.20`), put in the pairing QR and used for the phone connection. Set it if detection picks the wrong one. Must be a private address. |
 | `BUDGET_BUDDY_SERVER_NAME` | `Home Base` | The name your phone shows for this computer (50 characters at most). |
 | `BUDGET_BUDDY_PORT` | `8765` | Port to listen on. |
+| `BUDGET_BUDDY_DASHBOARD_DIR` | `<repo>/dashboard` | Folder with the web dashboard files. If it isn't there, the server runs API-only (no web page). |
 | `BUDGET_BUDDY_DEV_MODE` | `false` | Set to `true` to turn on the API explorer at `/docs` (for developers). |
 | `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. Leave this alone: `memory` is for developers' automated tests only (see below). |
 

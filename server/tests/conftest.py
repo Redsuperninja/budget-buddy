@@ -19,6 +19,28 @@ def fixed_lan_ip(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BUDGET_BUDDY_LAN_IP", "192.168.1.20")
 
 
+FAKE_INDEX = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="csrf-token" content="__CSRF_TOKEN__"><title>Budget Buddy</title>
+<link rel="stylesheet" href="/static/app.css">
+<script type="module" src="/static/js/main.js"></script></head>
+<body><h1>Budget Buddy</h1></body></html>
+"""
+
+
+@pytest.fixture(autouse=True)
+def fake_dashboard(tmp_path_factory, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A tiny stand-in for ``dashboard/``, so server tests never read the real dashboard files."""
+    folder = tmp_path_factory.mktemp("fake-dashboard")  # not inside the test's own tmp_path
+    (folder / "js" / "screens").mkdir(parents=True)
+    (folder / "index.html").write_text(FAKE_INDEX, encoding="utf-8")
+    (folder / "app.css").write_text("body { margin: 0; }", encoding="utf-8")
+    (folder / "js" / "main.js").write_text("export const started = true;", encoding="utf-8")
+    (folder / "js" / "screens" / "home.js").write_text("export const home = 1;", encoding="utf-8")
+    monkeypatch.setenv("BUDGET_BUDDY_DASHBOARD_DIR", str(folder))
+    return folder
+
+
 @pytest.fixture
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A throwaway data folder so tests never touch real user data."""

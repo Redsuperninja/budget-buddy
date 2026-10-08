@@ -1,9 +1,10 @@
-// Form pieces several screens share: account and category pickers, the tax-year picker, and the
+// Form fields several screens share: account and category pickers, the tax-year picker, and the
 // small conversions from typed text to what the API wants.
 
-import { form, note } from "./dom.js";
+import { form } from "./form.js";
 import { NOT_TAX_ADVICE } from "./labels.js";
 import { reload } from "./router.js";
+import { note } from "./widgets.js";
 
 export const optionalText = (text) => (text.trim() === "" ? null : text.trim());
 export const idOrNull = (text) => (text ? Number(text) : null);

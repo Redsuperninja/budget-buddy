@@ -1,9 +1,11 @@
 // Paychecks: year totals (an estimate), the year's paychecks, and adding one from a pay stub.
 
-import { api } from "../api.js";
+import { createPaycheck, listAccounts, listPaychecks, paycheckSummary } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
-import { card, empty, fill, form, h, table } from "../dom.js";
-import { accountField, idOrNull, taxYearHeader } from "../forms.js";
+import { fill, h } from "../dom.js";
+import { accountField, idOrNull, taxYearHeader } from "../fields.js";
+import { form } from "../form.js";
+import { card, empty, table } from "../widgets.js";
 import { formatCents, parseDollars } from "../money.js";
 import { reload } from "../router.js";
 
@@ -25,10 +27,10 @@ function stubCents(text, label) {
 
 export async function render(root, options) {
   const year = options.year || thisYear();
-  const accounts = await api("GET", "/api/local/accounts");
+  const accounts = await listAccounts();
   const [page, summary] = await Promise.all([
-    api("GET", `/api/local/paychecks?year=${year}`),
-    api("GET", `/api/local/paychecks/summary?year=${year}`),
+    listPaychecks(year),
+    paycheckSummary(year),
   ]);
   const gross = summary.totals.gross_cents || 0;
   const net = summary.totals.net_cents || 0;
@@ -58,7 +60,7 @@ export async function render(root, options) {
       ], "Add paycheck", async (v) => {
         const json = { pay_date: v.pay_date, employer: v.employer, account_id: idOrNull(v.account_id) };
         for (const [name, label] of PAY_FIELDS) json[name] = stubCents(v[name], label);
-        await api("POST", "/api/local/paychecks", { json });
+        await createPaycheck(json);
         await reload({ year });
       })));
 }

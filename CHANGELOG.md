@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Project layout: the web dashboard now lives in its own top-level `dashboard/` folder, separate from the server and the phone app. The server serves it from a fixed list of files (or runs API-only without it), and it has its own tests and checks (ADR-0005).
 - Project conventions: small single-purpose files and no copy-paste, for both code and docs (`docs/CONVENTIONS.md`); every agent brief now follows and checks them.
 - Phone sync on the Home Base: a paired phone can now download a budget snapshot (this month's budget, recent transactions, accounts, tax totals), upload receipt photos, and report that it finished syncing. Everything is encrypted and each request works only once; removed phones are refused immediately. Photos are checked (JPEG, 3 MB, size in pixels) before they are saved encrypted, and a retried upload never creates a second copy. The phone app side comes later.
 - Phone Home: Your accounts list shows all account kinds (checking, savings, credit card, loan, investment, other) with balances and money owed; budget.unassigned optionally shown as unsorted spending; gains tag notes possible wash sales.
