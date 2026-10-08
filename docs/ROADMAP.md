@@ -22,7 +22,7 @@ computer has no friendly screen and the phone only shows sample data.
    #29 (future-dated transactions in balances), #25 and #32 (show negative balances as money owed).
 
 **C. Tax-season beta: the numbers people file with.**
-1. **10. Budget engine** and **10b** (count transfers into savings as saved).
+1. ~~**10. Budget engine** and **10b** (count transfers into savings as saved).~~
 2. ~~**9. Auto-categorization rules.**~~
 3. **13. Other deductions + yearly tax summary export.**
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
@@ -53,7 +53,7 @@ computer has no friendly screen and the phone only shows sample data.
 
 ## Phase 3: Budget & taxes
 - [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
-- [ ] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
+- [x] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
 - [x] 10a. Budgets as a percentage of income (planned or actual), and each group's share of income — *finance-tax-expert*
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*

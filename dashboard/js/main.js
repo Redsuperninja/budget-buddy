@@ -8,6 +8,7 @@ import * as donations from "./screens/donations.js";
 import * as home from "./screens/home.js";
 import * as importCsv from "./screens/import.js";
 import * as paychecks from "./screens/paychecks.js";
+import * as plan from "./screens/plan.js";
 import * as rules from "./screens/rules.js";
 import * as stocks from "./screens/stocks.js";
 import * as transactions from "./screens/transactions.js";
@@ -17,6 +18,7 @@ start([
   { id: "accounts", label: "Accounts", render: accounts.render },
   { id: "transactions", label: "Transactions", render: transactions.render },
   { id: "categories", label: "Categories", render: categories.render },
+  { id: "plan", label: "Suggested budget", render: plan.render },
   { id: "rules", label: "Auto-sort", render: rules.render },
   { id: "import", label: "Import bank file", render: importCsv.render },
   { id: "phone", label: "Connect phone", render: connectPhone.render },

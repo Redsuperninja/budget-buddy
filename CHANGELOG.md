@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Suggested budget: a new dashboard page builds a 50/30/20 plan from your last three months. Needs keep what you really spend, savings aim for 20% (or what you already save), wants get what's left up to 30%, with plain-English notes when your numbers don't fit the guide. One click uses it as dollar amounts or as percentages of income.
 - Saving by transfer: money you move from an everyday account into your own savings, investment, retirement or HSA account now counts as saved (once linked as a transfer), on the dashboard and on the phone. Moving it back out lowers the total; card and loan payments don't count.
 - Percentage budgets: a category's budget can be a share of your income, like 15%, instead of a dollar amount. Percentages are worked out from a planned monthly income you can set (or from what actually came in that month), the Home page shows how much of each budget is used and what share of your income went to needs, wants and savings, and the phone gets the worked-out amounts.
 - Auto-sort rules: tell Budget Buddy that a description containing some text (like "GROCERY MART") belongs in a category. New bank-file rows and transactions added without a category are sorted automatically, the longest matching text wins, a category you picked is never changed, and a "Sort transactions now" button sorts older transactions that have no category yet.

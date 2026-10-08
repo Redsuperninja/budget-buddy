@@ -57,6 +57,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [database.md](database.md) | Alembic migrations, automatic upgrade, backup copies |
 | [ledger.md](ledger.md) | Accounts and transactions: kinds, signs, balances, routes |
 | [budget-summary.md](budget-summary.md) | Categories and the monthly summary |
+| [budget-engine.md](budget-engine.md) | Suggested budget (50/30/20 from recent months) |
 | [category-rules.md](category-rules.md) | Auto-categorization rules |
 | [csv-import.md](csv-import.md) | Bank CSV import |
 | [receipts.md](receipts.md) | Receipts and receipt photos |
