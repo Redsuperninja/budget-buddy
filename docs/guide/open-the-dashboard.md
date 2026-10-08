@@ -11,6 +11,11 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 
 **Your data stays on this computer.** The dashboard only works when you open it from this computer. You can't access it from other computers or your phone.
 
+## Light or dark
+
+Budget Buddy follows your computer's light or dark setting. To pick one yourself, use **Colors** at the top
+right: **Match my computer**, **Light** or **Dark**. Your choice is remembered on this computer.
+
 ## The tabs
 
 - **Home:** see your monthly budget: money in, money spent, money saved, how much of each budget you've used, what share of your income went to needs, wants and savings, and your account balances

@@ -1,6 +1,7 @@
 // Starts the dashboard: the list of screens, in the order of the navigation bar.
 
 import { start } from "./router.js";
+import { addThemePicker } from "./theme-picker.js";
 import * as accounts from "./screens/accounts.js";
 import * as categories from "./screens/categories.js";
 import * as connectPhone from "./screens/connect-phone.js";
@@ -28,3 +29,5 @@ start([
   { id: "stocks", label: "Stocks", render: stocks.render },
   { id: "taxes", label: "Tax summary", render: taxes.render },
 ]);
+
+addThemePicker();
