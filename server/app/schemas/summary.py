@@ -32,9 +32,11 @@ class MonthlySummary(Schema):
     income_cents: int
     # Needs + wants, refunds netted off. Can be negative if refunds exceed spending.
     spending_cents: int
-    # Savings group, same sign rule as spending. Money moved to your own savings account
-    # isn't counted here yet.
+    # Savings group, same sign rule as spending, including saved_by_transfer_cents.
     saved_cents: int
+    # Linked transfers into your own savings-type accounts minus transfers back out. Part of
+    # saved_cents and the savings group's actual, but of no category.
+    saved_by_transfer_cents: int
     # Needs + wants budgets (what you planned to spend). Budgets apply to every month, so
     # changing one also changes what past months show.
     spending_budget_cents: int

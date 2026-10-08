@@ -49,7 +49,8 @@ export async function render(root, options) {
       statCard("Money in", formatCents(summary.income_cents)),
       statCard("Spent", formatCents(summary.spending_cents),
         h("div", { class: "muted" }, `Planned: ${formatCents(summary.spending_budget_cents)}`)),
-      statCard("Saved", formatCents(summary.saved_cents)),
+      statCard("Saved", formatCents(summary.saved_cents), summary.saved_by_transfer_cents
+        ? h("div", { class: "muted" }, `Moved to savings: ${formatCents(summary.saved_by_transfer_cents)}`) : null),
       statCard("Not sorted yet (money out)", formatCents(summary.unassigned_out_cents))),
     summary.unassigned_count
       ? note(`${summary.unassigned_count} transaction(s) have no category yet ` +
