@@ -30,11 +30,3 @@ def refuse_unless_test_server(port: int) -> str | None:
         )
     return None
 
-
-def csrf_token(base: str) -> str:
-    """The Home Base's write token (it changes every time the Home Base starts)."""
-    import json
-    import urllib.request
-
-    with urllib.request.urlopen(base + "/api/local/csrf-token", timeout=15) as response:
-        return json.loads(response.read())["token"]

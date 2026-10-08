@@ -5,40 +5,24 @@ any problem rows) and asks before saving anything.
 """
 
 import argparse
-import json
 import sys
-import urllib.error
 import urllib.parse
-import urllib.request
 from pathlib import Path
 
-from _testguard import csrf_token, refuse_unless_test_server
+from _local_api import ApiError, LocalApi, NotRunning
+from _testguard import refuse_unless_test_server
 
 
-def call(
-    base: str, method: str, path: str, body: bytes | None = None, csv: bool = False
-):
-    request = urllib.request.Request(base + path, data=body, method=method)
-    request.add_header("Origin", base)
-    if method != "GET":
-        request.add_header("X-CSRF-Token", csrf_token(base))
-    request.add_header("Content-Type", "text/csv" if csv else "application/json")
+def call(api: LocalApi, method: str, path: str, body: bytes | None = None):
+    """One request; a refusal or a missing Home Base ends the script with a plain message."""
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            raw = response.read()
-    except urllib.error.HTTPError as exc:
-        try:
-            message = (json.loads(exc.read()).get("error") or {}).get(
-                "message"
-            ) or exc.reason
-        except (ValueError, AttributeError):
-            message = exc.reason
-        raise SystemExit(f"Budget Buddy said: {message}") from None
-    except (urllib.error.URLError, OSError):
+        return api.call(method, path, body=body, content_type="text/csv", timeout=30)
+    except NotRunning:
         raise SystemExit(
             "The test Home Base isn't running. Start scripts\\start-test-server.ps1 first."
         ) from None
-    return json.loads(raw) if raw else None
+    except ApiError as exc:
+        raise SystemExit(f"Budget Buddy said: {exc}") from None
 
 
 def main() -> int:
@@ -64,9 +48,9 @@ def main() -> int:
     if not args.file.is_file():
         print(f"Couldn't find the file {args.file}.")
         return 1
-    base = f"http://127.0.0.1:{args.port}"
+    api = LocalApi(f"http://127.0.0.1:{args.port}")
 
-    accounts = call(base, "GET", "/api/local/accounts")
+    accounts = call(api, "GET", "/api/local/accounts")
     accounts = accounts["items"] if isinstance(accounts, dict) else accounts
     match = [a for a in accounts if a["name"].lower() == args.account.lower()]
     if not match:
@@ -84,7 +68,7 @@ def main() -> int:
     )
     path = f"/api/local/accounts/{account_id}/csv-import"
     data = args.file.read_bytes()
-    preview = call(base, "POST", f"{path}/preview?{query}", data, csv=True)
+    preview = call(api, "POST", f"{path}/preview?{query}", data)
 
     mapping = preview.get("mapping") or {}
     print(
@@ -115,7 +99,7 @@ def main() -> int:
     if input("\nImport these rows? Type y and press Enter: ").strip().lower() != "y":
         print("Nothing was imported.")
         return 0
-    result = call(base, "POST", f"{path}?{commit_query}", data, csv=True)
+    result = call(api, "POST", f"{path}?{commit_query}", data)
     print(
         f"Imported {result['imported']} rows. Skipped {result['skipped_duplicates']} already there"
         f" and {result['skipped_invalid']} with problems."

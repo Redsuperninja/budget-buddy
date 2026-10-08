@@ -2,28 +2,16 @@
 
 import uuid
 
-import pytest
 from fake_images import jpeg
+from fake_phone import NOW, SNAPSHOT, Phone, pair_phone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from sync_helpers import NOW, Phone, pair_phone
 
 from app.crypto.b64url import b64u_encode
 from app.models import Device, Receipt, SeenNonce
 from app.services import envelope, snapshot, sync_receipts
 
-SNAPSHOT = "/api/sync/snapshot"
 RECEIPTS = "/api/sync/receipts"
-
-
-@pytest.fixture
-def dashboard(make_client):
-    return make_client()
-
-
-@pytest.fixture
-def phone(dashboard) -> Phone:
-    return pair_phone(dashboard)
 
 
 def during_request(monkeypatch, action) -> None:

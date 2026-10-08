@@ -8,20 +8,15 @@ import uuid
 
 import fake_images as img
 import pytest
+from fake_phone import Phone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from sync_helpers import Phone, pair_phone
 
 from app.crypto.b64url import b64u_encode
 from app.models import Receipt
 from app.services.receipt_images import MAX_IMAGE_BYTES, jpeg_size
 
 PATH = "/api/sync/receipts"
-
-
-@pytest.fixture
-def phone(make_client) -> Phone:
-    return pair_phone(make_client())
 
 
 def cid() -> str:

@@ -14,7 +14,7 @@ from app.deps import PathId, SessionDep
 from app.errors import ApiError
 from app.schemas.pairing import DeviceOut, PairingStarted
 from app.services import devices as device_service
-from app.services import pairing as service
+from app.services import pairing_sessions as service
 
 # Note: the per-session CSRF token of contract §3.1 comes with the dashboard (#16); until then the
 # Origin check in LocalAccessMiddleware is what protects these routes.

@@ -36,7 +36,7 @@ from app.routers import (
     sync,
     transactions,
 )
-from app.services.pairing import load_server_id, purge_ended_sessions
+from app.services.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
 
 

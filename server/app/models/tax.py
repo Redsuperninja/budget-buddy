@@ -66,8 +66,8 @@ class StockSaleOrder(TimestampMixin, Base):
 class StockSale(TimestampMixin, Base):
     """Shares sold out of one lot: the part of a ``StockSaleOrder`` matched to that lot.
 
-    Rebuilt by ``app.services.stocks`` whenever a lot or sale of the same symbol and account
-    changes, so FIFO order always follows the dates.
+    Rebuilt by ``app.services.stock_records.rematch`` whenever a lot or sale of the same symbol
+    and account changes, so FIFO order always follows the dates.
     """
 
     __tablename__ = "stock_sales"
