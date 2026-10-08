@@ -46,6 +46,8 @@ class RemoteComputer(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
+    # The home-network address it joined from; its cookie works only from there (ADR-0009).
+    joined_from: Mapped[str] = mapped_column(String(45))
     paired_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())
     last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
     revoked_at: Mapped[dt.datetime | None] = mapped_column(DateTime)

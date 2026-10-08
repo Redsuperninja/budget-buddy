@@ -71,21 +71,21 @@ def test_code_is_case_and_dash_insensitive_and_works_once(home, laptop):
     code = new_code(home)
     assert join(laptop, code.lower().replace("-", " ")).status_code == 200
     again = join(laptop, code)
-    assert again.status_code == 409
-    assert code_of(again) == "no_join_code"
+    assert again.status_code == 403
+    assert code_of(again) == "wrong_code"
 
 
 def test_five_wrong_codes_end_it(home, laptop):
     code = new_code(home)
     for _ in range(5):
         assert code_of(join(laptop, "WRONG-CODE")) == "wrong_code"
-    assert code_of(join(laptop, code)) == "no_join_code"
+    assert code_of(join(laptop, code)) == "wrong_code"
 
 
 def test_an_expired_code_is_refused(home, laptop):
     code = new_code(home)
     home.app.state.clock = lambda: 10**10
-    assert code_of(join(laptop, code)) == "no_join_code"
+    assert code_of(join(laptop, code)) == "wrong_code"
 
 
 def test_joining_is_rate_limited(home, laptop):
@@ -178,3 +178,43 @@ def test_network_stays_wanted_while_a_code_is_live_or_a_computer_joined(home, la
 
 def test_normalize_code():
     assert service.normalize_code(" abcd-efgh ") == "ABCDEFGH"
+
+
+def test_the_cookie_only_works_from_the_address_that_joined(home, laptop):
+    laptop = joined(home, laptop)
+    stolen = TestClient(home.app, client=("192.168.1.66", 50000), base_url=LAN_BASE)
+    stolen.cookies.set(service.COOKIE_NAME, laptop.cookies[service.COOKIE_NAME])
+    assert stolen.get("/api/local/accounts").status_code == 403
+    (computer,) = home.get("/api/local/remote-computers").json()
+    assert computer["joined_from"] == "192.168.1.50"
+
+
+def test_the_cookie_runs_out(home, laptop, monkeypatch):
+    laptop = joined(home, laptop)
+    monkeypatch.setattr(service, "TOKEN_LIFETIME", service.dt.timedelta(seconds=-1))
+    assert laptop.get("/api/local/accounts").status_code == 403
+
+
+def test_a_bad_cookie_from_another_app_doesnt_lock_us_out(home, laptop):
+    laptop = joined(home, laptop)
+    token = laptop.cookies[service.COOKIE_NAME]
+    laptop.cookies.clear()
+    header = {"Cookie": f'x=1;; other="broken; {service.COOKIE_NAME}={token}'}
+    assert laptop.get("/api/local/accounts", headers=header).status_code == 200
+
+
+def test_every_dashboard_route_is_classified(data_dir):
+    """Joined computers get an allow-list. A new /api/local area must be added to JOINED_AREAS on
+    purpose, or stay this computer only by being listed here."""
+    from app.main import create_app
+    from app.remote_access import JOINED_AREAS
+
+    this_computer_only = {"pairing", "devices", "remote-computers", "csrf-token"}
+
+    def paths(routes):  # included routers are wrapped; their routes carry the full path
+        for route in routes:
+            inner = getattr(route, "original_router", None)
+            yield from paths(inner.routes) if inner is not None else [getattr(route, "path", "")]
+
+    areas = {p.split("/")[3] for p in paths(create_app().routes) if p.startswith("/api/local/")}
+    assert areas == set(JOINED_AREAS) | this_computer_only

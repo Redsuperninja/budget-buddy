@@ -36,5 +36,7 @@ class Joined(Schema):
 class ComputerOut(Schema):
     id: int
     name: str
+    joined_from: str  # the address it may use Budget Buddy from
     paired_at: dt.datetime
     last_seen_at: dt.datetime | None
+    expires_at: dt.datetime  # then it joins again with a new code

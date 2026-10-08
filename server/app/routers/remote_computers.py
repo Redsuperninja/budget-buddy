@@ -44,6 +44,7 @@ def new_join_code(request: Request, response: Response) -> JoinCode:
 
 @router.get("/api/local/remote-computers")
 def list_computers(request: Request, session: SessionDep) -> list[ComputerOut]:
+    """Joined computers still allowed in, with the address each may use and when it runs out."""
     request.app.state.listener.sync_from_database()  # closes the listener once nothing needs it
     return service.list_computers(session)
 
@@ -63,7 +64,7 @@ def join(data: JoinRequest, request: Request, response: Response, session: Sessi
     client = request.client.host if request.client else "unknown"
     if not state.join_limiter.allow(client, state.clock()):
         raise ApiError(429, "too_many_tries", TOO_MANY_MESSAGE)
-    token = service.join(session, state.join_codes, data.code, data.name, state.clock())
+    token = service.join(session, state.join_codes, data.code, data.name, client, state.clock())
     response.set_cookie(
         service.COOKIE_NAME,
         token,

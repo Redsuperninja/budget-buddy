@@ -26,6 +26,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(length=100), nullable=False),
         sa.Column("token_hash", sa.String(length=64), nullable=True),
+        sa.Column("joined_from", sa.String(length=45), nullable=False),
         sa.Column("paired_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.Column("last_seen_at", sa.DateTime(), nullable=True),
         sa.Column("revoked_at", sa.DateTime(), nullable=True),

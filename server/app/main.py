@@ -100,9 +100,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.join_codes = JoinCodes()  # other computers' one-time codes, memory only (ADR-0009)
     app.state.join_limiter = RateLimiter(limit=10, window_seconds=60)  # per address
 
-    def signed_in(token: str | None) -> bool:
+    def signed_in(token: str | None, address: str | None) -> bool:
         with Session(engine) as session:
-            return authenticate(session, token)
+            return authenticate(session, token, address)
 
     # Middleware added last runs first: the home-network check, then the Host rules.
     app.add_middleware(

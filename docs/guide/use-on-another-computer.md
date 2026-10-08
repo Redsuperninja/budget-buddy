@@ -21,8 +21,10 @@ On the **other computer**:
 4. Type the code and a name for this computer, like "Kitchen laptop", then click **Connect**.
 5. The page reloads and shows your budget. Bookmark the address so you can come back to it.
 
-The Budget Buddy computer shows **New computer connected**. If Windows asks whether to let Python or Budget Buddy
-use the network, allow **Private networks** only (the same as for phones).
+The connection works from that computer's network address for 90 days; after that, or if your router gives it
+a new address, connect it again with a new code. The Budget Buddy computer shows **New computer connected**. If
+Windows asks whether to let Python or Budget Buddy use the network, allow **Private networks** only (the same as
+for phones).
 
 ## What another computer can do
 
@@ -43,8 +45,7 @@ right away. To use it again, connect it again with a new code.
 | --- | --- |
 | The page won't load on the other computer | Check that both computers are on the same home network and Budget Buddy is running. Type the address exactly as shown, including the `:8765` part. Check that Windows Firewall allows Budget Buddy on **Private networks**. |
 | "Budget Buddy only answers when it's opened as ..." | Use the number address shown on the Budget Buddy computer, not the computer's name. |
-| "That code isn't right." | Check the code on the Budget Buddy computer. Upper or lower case and the dash don't matter. |
-| "That code has run out or was already used." | Click **Allow another computer** again for a new code. After five wrong tries a code stops working. |
-| "This computer isn't connected to Budget Buddy yet." | Reload the page and enter a new code. This happens after the computer was removed. |
+| "That code isn't right, or it has run out." | Check the code on the Budget Buddy computer (upper or lower case and the dash don't matter), or click **Allow another computer** for a new one. After five wrong tries a code stops working. |
+| "This computer isn't connected to Budget Buddy yet." | Reload the page and enter a new code. This happens after the computer was removed, after 90 days, or when its network address changed. |
 | "This can only be done on the computer where Budget Buddy is running." | Connecting phones and computers only works on the Budget Buddy computer. |
-| The address changed | Your router may give the Budget Buddy computer a new address. Get a new address on the **Other computers** tab; the connection is kept. |
+| The address changed | Your router may give the Budget Buddy computer a new address. Get the new one on the **Other computers** tab. |

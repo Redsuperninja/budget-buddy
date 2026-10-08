@@ -13,9 +13,10 @@ function computerList() {
   async function show() {
     const computers = await listComputers();
     fill(box, computers.length
-      ? table(["Computer", "Joined", "Last used", ""], computers.map((c) => [
-          c.name, c.paired_at.slice(0, 10),
+      ? table(["Computer", "Address", "Joined", "Last used", "Works until", ""], computers.map((c) => [
+          c.name, c.joined_from, c.paired_at.slice(0, 10),
           c.last_seen_at ? c.last_seen_at.slice(0, 16).replace("T", " ") : "not yet",
+          c.expires_at.slice(0, 10),
           h("button", { class: "danger", type: "button", onclick: () => remove(c) }, "Remove")]))
       : empty("No other computers are connected."));
     return computers;

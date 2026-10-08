@@ -7,7 +7,7 @@ from collections.abc import Callable
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from app.remote_access import JOIN_PATH
+from app.remote_access import JOIN_PATH, TOKEN_OK
 
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(net)
@@ -208,7 +208,7 @@ class LocalAccessMiddleware:
         if not is_loopback_address(client[0] if client else None):
             lan_host = self.lan_host()
             refusal = (
-                self.remote.refusal(scope, host.lower(), lan_host)
+                await self.remote.refusal(scope, host.lower(), lan_host)
                 if self.remote is not None
                 else ("not_this_computer", NOT_THIS_COMPUTER_MESSAGE)
             )
@@ -216,6 +216,8 @@ class LocalAccessMiddleware:
                 await _refuse(scope, receive, send, *refusal)
                 return
             origins = frozenset({f"http://{lan_host}"})
+        else:
+            scope.setdefault("state", {})[TOKEN_OK] = True  # this computer
 
         if scope.get("method", "GET") not in SAFE_METHODS:
             origin = _header(scope, b"origin")

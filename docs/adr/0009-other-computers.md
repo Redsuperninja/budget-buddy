@@ -21,11 +21,12 @@ computer *is* the permission. The owner wants to open the dashboard from another
   address. A new code cancels the old one.
 - **Joining.** The other computer opens the address shown (`http://<home-network address>:<port>/`) and types the
   code and a name. The Home Base answers with a random 32-byte token in a cookie (`HttpOnly`, `SameSite=Strict`,
-  `Path=/`, kept about a year) and keeps only its SHA-256 (table `remote_computers`).
-- **What a joined computer may do:** everything the dashboard does, **except** pair phones, allow or remove
-  computers, or read the scripts' CSRF token (`/api/local/pairing`, `/api/local/devices`,
-  `/api/local/remote-computers`, `/api/local/csrf-token`). Those stay on the Budget Buddy computer, so a lost
-  laptop can't let more devices in.
+  `Path=/`) and keeps only its SHA-256 (table `remote_computers`), with the address it joined from. The cookie
+  works **only from that address** and **for 90 days**; then the computer joins again.
+- **What a joined computer may do:** the dashboard areas on an **allow-list** (accounts, transactions,
+  categories, budget, rules, summaries, receipts, paychecks, donations, deductions, stocks, tax summary). Not
+  pairing phones, allowing or removing computers, or the scripts' CSRF token, and no route added later until it
+  is put on the list on purpose (a test lists every area). So a lost laptop can't let more devices in.
 - **Same rules as the local page:** Host must be the home-network address, private addresses only, and writes need
   `Origin: http://<home-network address>:<port>` plus the per-run CSRF token, which the page only gets once the
   cookie is valid. Someone who hasn't joined only sees the join page.
@@ -35,8 +36,15 @@ computer *is* the permission. The owner wants to open the dashboard from another
 ## Consequences
 - **Plain HTTP on the home network.** Unlike phone sync (encrypted by the app), a browser talks plain HTTP, so
   someone who can watch the Wi-Fi traffic could read the pages or copy the cookie. The guide says to use it only on
-  a home network you trust, with a strong Wi-Fi password, and to remove computers you no longer use. HTTPS with a
-  self-signed certificate would mean browser warnings; it can come later.
+  a home network you trust, with a strong Wi-Fi password, and to remove computers you no longer use. Tying the
+  cookie to the joining address and a 90-day lifetime limit what a copied cookie is worth. HTTPS with a
+  self-signed certificate (and its fingerprint shown once) is the stronger fix; it can come later.
+- Joining gives the same answer whether or not a code is live, so a device on the network can't tell when to
+  guess. The cookie check runs off the server's event loop, and noting "last used" never fails a request.
+- The home-network listener closes at the next check after a code runs out (opening the device or computer
+  list), as for phone pairing; there is no timer.
+- Joined computers get the same per-run CSRF token as this computer. It is useless without a valid cookie from
+  their own address, so removing a computer doesn't change it.
 - Cookies aren't separated by port, so another web app on the same computer address could see the cookie. Budget
   Buddy's computer is the user's own; noted, not fixed.
 - The Windows Firewall rule for **Private networks** that phones need also lets other computers in.
