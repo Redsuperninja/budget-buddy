@@ -5,7 +5,7 @@ See which phones are connected to your computer, and remove any that you no long
 ## See your connected phones
 
 1. Open Budget Buddy on your computer (go to http://127.0.0.1:8765/)
-2. Click the **Connect phone** button
+2. Click the **Phone** button at the top
 3. Scroll down to "Connected phones"
 4. You'll see each phone's name, when it was paired, and when it last synced
 

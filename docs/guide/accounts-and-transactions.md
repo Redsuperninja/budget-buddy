@@ -1,5 +1,7 @@
 # Accounts and transactions
 
+Both pages are in the **Money** section: click **Money** at the top, then the **Transactions** or **Accounts** tab.
+
 ## Your accounts
 
 Lists all your bank and savings accounts, and their current balances.
@@ -16,7 +18,7 @@ Lists all your bank and savings accounts, and their current balances.
 
 When you add a new account, record its starting balance:
 
-1. Go to **Transactions**
+1. Go to the **Transactions** tab
 2. Add a transaction with type "Balance adjustment" for the opening balance
 3. This doesn't count as income or spending
 

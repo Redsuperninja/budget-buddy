@@ -34,8 +34,8 @@ All under `js/` (each file starts with a one-line purpose):
 
 | File | Job |
 | --- | --- |
-| `main.js` | Starts the dashboard: the list of screens, in navigation order |
-| `router.js` | Navigation buttons, `#hash` routing, `reload()` and `onLeave()` for screens |
+| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Phone) and the pages in each, in order |
+| `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page), `reload()` and `onLeave()` for screens |
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |
 | `dom.js` | `h()`, `fill()`, `showError()` (textContent only, never `innerHTML`) |
@@ -50,8 +50,10 @@ All under `js/` (each file starts with a one-line purpose):
 | `theme.js`, `theme-picker.js` | Light, dark or match the computer: the saved choice (pure, tested) and the header picker. Colors live in `app.css` as `light-dark()` pairs |
 | `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js` and `phone-list.js` are parts of the Import and Connect phone screens |
 
-To add a screen: create `screens/<name>.js` with a `render` function and add one line to `main.js`. To call a new
+To add a screen: create `screens/<name>.js` with a `render` function and add one line to its section in `main.js`.
+Keep the top row short: add a page to an existing section rather than a new section. To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Suggested budget, Auto-sort (rules), Import bank file, Connect phone,
-Paychecks, Donations, Stocks, Tax summary (with a CSV download, and print styles in `app.css`).
+Screens, by section: **Home** (monthly summary, charts and balances); **Money**: Transactions, Accounts, Import bank file, Auto-sort (rules); **Budget**: Categories, Suggested budget;
+**Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks; **Phone**:
+Connect phone.

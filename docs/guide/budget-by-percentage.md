@@ -5,7 +5,7 @@ When your income changes, those budgets change with it.
 
 ## Set a percentage budget
 
-1. Open the dashboard and click **Categories**.
+1. Open the dashboard, click **Budget** at the top, then the **Categories** tab.
 2. In a category's **Monthly budget** box, type a percentage with a % sign, like `15%` or `12.5%`.
 3. Click **Save**.
 

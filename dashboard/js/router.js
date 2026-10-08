@@ -1,44 +1,70 @@
-// Navigation: one button per screen, the #hash picks the screen, and screens can redraw
+// Navigation: a few section buttons on top, and a row of page tabs under them when a section has more
+// than one page. The #hash names the page, so old links like #donations still work. Screens can redraw
 // themselves with reload() or register clean-up (stopping timers) with onLeave().
 
 import { fill, h, showError } from "./dom.js";
 
-let screens = [];
+let sections = [];
+let pages = [];
 let leaveHandlers = [];
 let nav;
+let subnav;
 let view;
 
-const currentId = () => location.hash.slice(1) || screens[0].id;
+const currentId = () => location.hash.slice(1) || pages[0].id;
+const go = (id) => { location.hash = id; };
 
 export const onLeave = (fn) => leaveHandlers.push(fn);
 
 // Redraw the current screen, optionally with a choice to keep ({ month } or { year }).
 export const reload = (options) => show(currentId(), options);
 
+function markCurrent(container, id) {
+  for (const button of container.children) {
+    if (button.dataset.id === id) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  }
+}
+
+function showTabs(section, page) {
+  if (section.pages.length < 2) {
+    fill(subnav);
+    subnav.hidden = true;
+    return;
+  }
+  fill(subnav, section.pages.map(({ id, label }) =>
+    h("button", { type: "button", "data-id": id, onclick: () => go(id) }, label)));
+  subnav.setAttribute("aria-label", `${section.label} pages`);
+  subnav.hidden = false;
+  markCurrent(subnav, page.id);
+}
+
 async function show(id, options = {}) {
   for (const fn of leaveHandlers) fn();
   leaveHandlers = [];
-  const screen = screens.find((s) => s.id === id) || screens[0];
-  for (const button of nav.children) {
-    if (button.dataset.id === screen.id) button.setAttribute("aria-current", "page");
-    else button.removeAttribute("aria-current");
-  }
+  const page = pages.find((p) => p.id === id) || sections.find((s) => s.id === id)?.pages[0] || pages[0];
+  const section = sections.find((s) => s.pages.includes(page));
+  markCurrent(nav, section.id);
+  showTabs(section, page);
   const root = h("div", {}, h("p", { class: "muted" }, "Loading..."));
   fill(view, root);
   try {
-    await screen.render(root, options);
+    await page.render(root, options);
   } catch (err) {
     showError(root, err);
   }
 }
 
-// table: [{ id, label, render(root, options) }, ...]
+// table: [{ id, label, pages: [{ id, label, render(root, options) }, ...] }, ...]
+// A section button opens its first page.
 export function start(table) {
-  screens = table;
+  sections = table;
+  pages = sections.flatMap((s) => s.pages);
   nav = document.getElementById("nav");
+  subnav = document.getElementById("subnav");
   view = document.getElementById("view");
-  for (const { id, label } of screens) {
-    nav.append(h("button", { type: "button", "data-id": id, onclick: () => { location.hash = id; } }, label));
+  for (const { id, label, pages: [first] } of sections) {
+    nav.append(h("button", { type: "button", "data-id": id, onclick: () => go(first.id) }, label));
   }
   window.addEventListener("hashchange", () => show(currentId()));
   show(currentId());

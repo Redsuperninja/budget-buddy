@@ -18,7 +18,7 @@ Upper and lower case don't matter, so "netflix" also matches "NETFLIX.COM 866-55
 
 ## Add a rule
 
-1. Open the dashboard and click **Auto-sort** at the top.
+1. Open the dashboard, click **Money** at the top, then the **Auto-sort** tab.
 2. Under **Add a rule**, type the text to look for. Copy it from a transaction's description; a short,
    distinctive part works best (at least 2 characters).
 3. Pick the category and click **Add rule**.
