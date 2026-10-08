@@ -34,7 +34,7 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | `main.py`, `__main__.py`, `cli.py` | Build the app; run it; command line |
 | `config.py` | Settings from environment variables ([settings](../settings.md)) |
 | `db.py`, `migrations/` | Engine and Alembic migrations |
-| `models/` | Tables: `ledger.py` (accounts, categories, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, stocks, deductions), `devices.py` (devices, pairing, nonces) |
+| `models/` | Tables: `ledger.py` (accounts, categories, category rules, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, stocks, deductions), `devices.py` (devices, pairing, nonces) |
 | `schemas/` | Request and response shapes; `common.py` holds shared helpers such as `resolve_amount` |
 | `routers/` | One per area; thin, no business logic |
 | `services/` | Business logic, one module per area |

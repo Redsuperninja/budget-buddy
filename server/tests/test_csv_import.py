@@ -41,6 +41,7 @@ def test_import_then_reimport_overlapping_statement_skips_duplicates(client, che
     result = ok(send(client, checking, CHECKING_CSV, "commit"))
     assert result == {
         "imported": 4,
+        "categorized": 0,
         "skipped_duplicates": 0,
         "skipped_invalid": 0,
         "mapping_saved": False,

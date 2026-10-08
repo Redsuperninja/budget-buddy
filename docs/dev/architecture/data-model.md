@@ -9,6 +9,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique) |
 | `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents |
+| `category_rules` | id, pattern (unique, "description contains"), category_id (deleted with its category) |
 | `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, notes (enc), client_id? (unique), deduction_kind?, device_id? (phone uploads) |
 | `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |

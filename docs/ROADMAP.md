@@ -23,7 +23,7 @@ computer has no friendly screen and the phone only shows sample data.
 
 **C. Tax-season beta: the numbers people file with.**
 1. **10. Budget engine** and **10b** (count transfers into savings as saved).
-2. **9. Auto-categorization rules.**
+2. ~~**9. Auto-categorization rules.**~~
 3. **13. Other deductions + yearly tax summary export.**
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
    #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
@@ -49,7 +49,7 @@ computer has no friendly screen and the phone only shows sample data.
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
   - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
-- [ ] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
+- [x] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 
 ## Phase 3: Budget & taxes
 - [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*

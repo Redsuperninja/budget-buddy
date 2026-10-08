@@ -23,6 +23,7 @@ from app.ratelimit import RateLimiter
 from app.routers import (
     accounts,
     categories,
+    category_rules,
     csv_import,
     dashboard,
     donations,
@@ -106,6 +107,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(accounts.router)
     app.include_router(transactions.router)
     app.include_router(categories.router)
+    app.include_router(category_rules.router)
     app.include_router(summary.router)
     app.include_router(csv_import.router)
     app.include_router(paychecks.router)
