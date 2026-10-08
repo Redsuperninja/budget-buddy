@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AccountsList } from '@/components/AccountsList';
 import { GroupCard } from '@/components/BudgetBreakdown';
 import { Card, Screen } from '@/components/Screen';
 import { LastSynced, SnapshotNotices } from '@/components/SnapshotNotices';
+import { SyncPanel } from '@/components/SyncPanel';
 import {
   moneyDirection,
   monthHeadline,
@@ -12,6 +14,7 @@ import {
   spentStat,
   transactionCategoryLabel,
 } from '@/lib/budget';
+import { UNASSIGNED_NOT_COUNTED, unassignedNote } from '@/lib/accounts';
 import { formatDay, formatMonth } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import type { Snapshot, SnapshotTransaction } from '@/sync/snapshot';
@@ -38,6 +41,19 @@ function Stat({ label, value, note, color }: { label: string; value: string; not
   );
 }
 
+function UnassignedNote({ count }: { count: number | undefined }) {
+  const t = useTheme();
+  const note = unassignedNote(count);
+  if (!note) return null;
+  return (
+    <Text
+      accessibilityRole="text"
+      style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted, marginTop: t.spacing.sm }}>
+      {note} {UNASSIGNED_NOT_COUNTED}
+    </Text>
+  );
+}
+
 function Headline({ snapshot }: { snapshot: Snapshot }) {
   const t = useTheme();
   const h = monthHeadline(snapshot);
@@ -60,6 +76,7 @@ function Headline({ snapshot }: { snapshot: Snapshot }) {
         <Stat label="Spent" {...spentStat(h, snapshot.currency)} />
         <Stat label="Savings rate" {...savingsStat(h, snapshot.currency)} />
       </View>
+      <UnassignedNote count={snapshot.budget.unassigned?.count} />
     </Card>
   );
 }
@@ -139,6 +156,7 @@ export default function HomeScreen() {
     <Screen title="Your budget" intro={formatMonth(snapshot.period.month)}>
       <SnapshotNotices />
       <LastSynced />
+      <SyncPanel />
       <Headline snapshot={snapshot} />
       <View style={{ gap: t.spacing.md }}>
         <SectionTitle>Where your money is going</SectionTitle>
@@ -149,6 +167,7 @@ export default function HomeScreen() {
           <GroupCard key={g.group} group={g} currency={snapshot.currency} />
         ))}
       </View>
+      <AccountsList accounts={snapshot.accounts} currency={snapshot.currency} />
       <RecentActivity snapshot={snapshot} />
     </Screen>
   );

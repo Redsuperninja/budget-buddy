@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import HomeScreen from '@/app/index';
-import TaxesScreen, { DEDUCTIONS_NOTE, DEDUCTIONS_TITLE, MISSING_INFO_TAG } from '@/app/taxes';
+import TaxesScreen, { DEDUCTIONS_NOTE, DEDUCTIONS_TITLE, GAINS_MAY_CHANGE_TAG, MISSING_INFO_TAG } from '@/app/taxes';
 import { SAMPLE_BANNER_TEXT } from '@/components/SnapshotNotices';
 import { SAMPLE_SNAPSHOT } from '@/sync/sampleSnapshot';
 import { SNAPSHOT_INVALID_MESSAGE } from '@/sync/snapshot';
@@ -37,6 +37,8 @@ describe('Home screen', () => {
 
     // Headline: 416,000 planned - 296,027 spent = 119,973 left.
     expect(screen.getByText('Left to spend')).toBeTruthy();
+    expect(screen.getByText(/2 transactions need a category on your computer\. They are not counted/)).toBeTruthy();
+    expect(screen.getByText('$50.00 owed')).toBeTruthy();
     expect(screen.getByText('Take-home pay so far')).toBeTruthy();
     expect(screen.queryByText('Income so far')).toBeNull();
     expect(screen.getByText('of take-home pay ($600.00 saved)')).toBeTruthy();
@@ -128,7 +130,8 @@ describe('Taxes screen', () => {
     expect(screen.getByText('$840.00')).toBeTruthy(); // long-term gain
     expect(screen.getByText('Medical')).toBeTruthy();
     expect(screen.getByText('Home office')).toBeTruthy();
-    expect(screen.getAllByText(MISSING_INFO_TAG).length).toBe(3);
+    expect(screen.getAllByText(MISSING_INFO_TAG).length).toBe(1);
+    expect(screen.getAllByText(GAINS_MAY_CHANGE_TAG).length).toBe(2);
     expect(screen.queryByText('estimate')).toBeNull();
   });
 
@@ -150,7 +153,7 @@ describe('Taxes screen', () => {
     expect(screen.getByText("Donations you've recorded this year")).toBeTruthy();
     expect(screen.queryByText('Given to charity this year')).toBeNull();
     expect(
-      screen.getAllByLabelText(/Some details are missing, like what you paid for the shares\.$/).length,
+      screen.getAllByLabelText(/May change: possible wash sale\.$/).length,
     ).toBe(2);
   });
 });

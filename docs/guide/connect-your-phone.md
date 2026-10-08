@@ -2,8 +2,7 @@
 
 Connecting lets your phone get your latest budget from Budget Buddy on your computer. You only do this once.
 
-> **Heads up:** the computer side of pairing (the part that makes the code and the "Pair a phone" button) is
-> coming in other updates. Until then, the phone's Connect screen is ready, but there's no code to scan yet.
+> **Heads up:** pairing and syncing need the Budget Buddy program on your computer to be running and updated.
 
 ## Before you start
 - Have your phone and your computer on the **same home Wi-Fi**.
@@ -16,6 +15,20 @@ Connecting lets your phone get your latest budget from Budget Buddy on your comp
 4. Tap **Scan the code** and point the camera at the code on your computer screen. If your phone asks to use the
    camera, tap Allow.
 5. Can't scan? Tap **Type the code instead**, type or paste the code's text, and tap **Connect**.
+
+## Sync your phone
+Syncing copies your latest budget from your computer to your phone, so Home and Taxes show **your** numbers
+instead of the sample ones.
+
+1. Be on your **home Wi-Fi** with Budget Buddy open on your computer.
+2. On your phone, tap **Sync now** on the Home tab (or in Settings).
+3. You'll see **Syncing...**, then **Synced just now**. **Last synced** shows how long ago it was.
+
+Your phone syncs by itself once, right after you connect it. Until your first sync you'll see a banner saying
+**Sample data**. If a sync doesn't work, your old budget stays on the phone and a message tells you what to do.
+If you see **Pair again**, your computer no longer knows this phone: tap it and scan a new code.
+
+See [What your phone's Home screen shows](phone-home-screen.md) for what each part means.
 
 ## What "Connected to ..." means
 You'll see **Connected to** and your computer's name. Your phone and computer now trust each other. Your

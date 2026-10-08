@@ -6,7 +6,7 @@ import { useSnapshot } from '@/sync/store';
 import { useTheme } from '@/theme';
 
 export const SAMPLE_BANNER_TEXT =
-  'Showing sample data. Connect to your computer in Settings to see your real budget.';
+  'Sample data — connect and sync to see yours. Connect to your computer in Settings, then tap Sync now.';
 
 function Notice({ icon, text, tone }: { icon: 'information-circle' | 'alert-circle'; text: string; tone: 'info' | 'problem' }) {
   const t = useTheme();

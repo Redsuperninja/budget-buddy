@@ -1,108 +1,22 @@
 /**
- * The budget snapshot the Home Base sends to the phone.
+ * Entry point for the budget snapshot the Home Base sends to the phone.
  *
- * Types mirror the sync contract v1, section 5 (`docs/api/sync-contract.md`) exactly, including
- * the snake_case field names used on the wire. `parseSnapshot()` checks untrusted JSON (from the
- * local cache today, from the network later) so a malformed snapshot turns into a friendly
- * message instead of a crash somewhere deep in a screen.
- *
- * Per the contract, unknown extra fields are ignored (forward compatibility).
+ * `parseSnapshot()` checks untrusted JSON (from the local cache or the network) so a malformed
+ * snapshot turns into a friendly message instead of a crash somewhere deep in a screen.
+ * Types live in `snapshotTypes.ts`, field checks in `snapshotChecks.ts`, per-section parsers in
+ * `snapshotSections.ts`. Per the contract, unknown extra fields are ignored (forward compatibility).
  */
 
-type Cents = number; // integer
-type IsoDate = string; // "YYYY-MM-DD"
-type IsoDateTime = string; // "2026-10-02T18:30:00Z"
+import {
+  arr, CURRENCY, date, int, ISO_DATE_TIME, matching, MONTH, nonNegInt, obj, Obj, SnapshotError, str,
+} from './snapshotChecks';
+import {
+  parseAccount, parseGroup, parseSettings, parseTax, parseTransaction, parseUnassigned,
+} from './snapshotSections';
+import { GROUP_ORDER } from './snapshotTypes';
+import type { Snapshot, SnapshotAccount } from './snapshotTypes';
 
-export interface Snapshot {
-  contract: 1;
-  server_id: string;
-  generated_at: IsoDateTime;
-  currency: string; // ISO 4217, e.g. "USD"
-  period: {
-    month: string; // "2026-10"
-    start: IsoDate; // first day of month
-    end: IsoDate; // last day of month
-    days_elapsed: number; // including today
-    days_in_month: number;
-  };
-  income: {
-    expected_cents: Cents; // this month's expected take-home (from paychecks)
-    received_cents: Cents; // take-home received so far this month
-    last_paycheck: { pay_date: IsoDate; net_cents: Cents } | null;
-  };
-  budget: {
-    target_cents: Cents; // sum of group targets
-    actual_cents: Cents; // sum of group actuals
-    groups: BudgetGroup[]; // always needs, wants, savings in that order
-  };
-  transactions: SnapshotTransaction[];
-  accounts: SnapshotAccount[];
-  tax: TaxSummary;
-  settings: SyncSettings;
-}
-
-export interface BudgetGroup {
-  group: 'needs' | 'wants' | 'savings';
-  name: string; // display name, e.g. "Needs"
-  target_cents: Cents;
-  actual_cents: Cents; // spent (needs/wants) or saved (savings) this month, >= 0 normally
-  categories: BudgetCategory[];
-}
-
-export interface BudgetCategory {
-  id: number; // valid as ReceiptUpload.category_id
-  name: string;
-  target_cents: Cents; // 0 if no target set
-  actual_cents: Cents;
-}
-
-export interface SnapshotTransaction {
-  id: number;
-  date: IsoDate;
-  description: string; // cleaned merchant/description, <= 100 chars
-  amount_cents: Cents; // negative = money out, positive = money in
-  category_id: number | null;
-  account_id: number;
-}
-
-export interface SnapshotAccount {
-  id: number;
-  name: string; // user's label, e.g. "Everyday checking"
-  kind: 'checking' | 'savings' | 'brokerage';
-  balance_cents: Cents;
-  balance_as_of: IsoDate;
-}
-
-export interface TaxDeduction {
-  kind: string;
-  label: string;
-  amount_cents: Cents;
-  is_estimate: boolean;
-}
-
-export interface TaxSummary {
-  year: number; // current calendar tax year
-  donations_total_cents: Cents;
-  realized_gains: {
-    short_term_cents: Cents; // negative = loss
-    long_term_cents: Cents;
-    is_estimate: boolean;
-  };
-  deductions: TaxDeduction[];
-  disclaimer: string; // plain-English "not tax advice, check with a pro" line
-}
-
-export interface SyncSettings {
-  reminder_days_default: 1 | 2 | 3; // 2 unless changed on the dashboard
-  reminder_days_allowed: [1, 2, 3];
-}
-
-export type GroupKey = BudgetGroup['group'];
-export const GROUP_ORDER: readonly GroupKey[] = ['needs', 'wants', 'savings'];
-
-// ---------------------------------------------------------------------------
-// Runtime validation
-// ---------------------------------------------------------------------------
+export * from './snapshotTypes';
 
 export type ParseResult =
   | { ok: true; snapshot: Snapshot }
@@ -118,163 +32,6 @@ export const SNAPSHOT_INVALID_MESSAGE =
   "Your budget info couldn't be read. Tap Sync on your home Wi-Fi to get a fresh copy.";
 export const SNAPSHOT_UPDATE_MESSAGE =
   'Budget Buddy needs an update on your phone or computer so they can talk to each other.';
-
-class SnapshotError extends Error {
-  constructor(readonly path: string, readonly problem: string) {
-    super(`${path}: ${problem}`);
-  }
-}
-
-type Obj = Record<string, unknown>;
-
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const MONTH = /^\d{4}-\d{2}$/;
-// RFC 3339: date, time, optional fraction, then Z or an offset.
-const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
-const CURRENCY = /^[A-Z]{3}$/;
-
-function obj(v: unknown, path: string): Obj {
-  if (typeof v !== 'object' || v === null || Array.isArray(v)) {
-    throw new SnapshotError(path, 'expected an object');
-  }
-  return v as Obj;
-}
-
-function arr(v: unknown, path: string): unknown[] {
-  if (!Array.isArray(v)) throw new SnapshotError(path, 'expected a list');
-  return v;
-}
-
-function str(v: unknown, path: string): string {
-  if (typeof v !== 'string') throw new SnapshotError(path, 'expected text');
-  return v;
-}
-
-function bool(v: unknown, path: string): boolean {
-  if (typeof v !== 'boolean') throw new SnapshotError(path, 'expected true/false');
-  return v;
-}
-
-function int(v: unknown, path: string): number {
-  if (typeof v !== 'number' || !Number.isSafeInteger(v)) {
-    throw new SnapshotError(path, 'expected a whole number');
-  }
-  return v;
-}
-
-function nonNegInt(v: unknown, path: string): number {
-  const n = int(v, path);
-  if (n < 0) throw new SnapshotError(path, 'expected zero or more');
-  return n;
-}
-
-function matching(v: unknown, re: RegExp, path: string, what: string): string {
-  const s = str(v, path);
-  if (!re.test(s)) throw new SnapshotError(path, `expected ${what}`);
-  return s;
-}
-
-const date = (v: unknown, p: string) => matching(v, ISO_DATE, p, 'a date like 2026-10-02');
-
-function oneOf<T extends string | number>(v: unknown, allowed: readonly T[], path: string): T {
-  if (!allowed.includes(v as T)) {
-    throw new SnapshotError(path, `expected one of ${allowed.join(', ')}`);
-  }
-  return v as T;
-}
-
-function parseCategory(v: unknown, p: string): BudgetCategory {
-  const o = obj(v, p);
-  return {
-    id: int(o.id, `${p}.id`),
-    name: str(o.name, `${p}.name`),
-    target_cents: int(o.target_cents, `${p}.target_cents`),
-    actual_cents: int(o.actual_cents, `${p}.actual_cents`),
-  };
-}
-
-function parseGroup(v: unknown, p: string): BudgetGroup {
-  const o = obj(v, p);
-  return {
-    group: oneOf(o.group, GROUP_ORDER, `${p}.group`),
-    name: str(o.name, `${p}.name`),
-    target_cents: int(o.target_cents, `${p}.target_cents`),
-    actual_cents: int(o.actual_cents, `${p}.actual_cents`),
-    categories: arr(o.categories, `${p}.categories`).map((c, i) =>
-      parseCategory(c, `${p}.categories[${i}]`),
-    ),
-  };
-}
-
-function parseTransaction(v: unknown, p: string): SnapshotTransaction {
-  const o = obj(v, p);
-  return {
-    id: int(o.id, `${p}.id`),
-    date: date(o.date, `${p}.date`),
-    description: str(o.description, `${p}.description`),
-    amount_cents: int(o.amount_cents, `${p}.amount_cents`),
-    category_id: o.category_id === null ? null : int(o.category_id, `${p}.category_id`),
-    account_id: int(o.account_id, `${p}.account_id`),
-  };
-}
-
-const ACCOUNT_KINDS = ['checking', 'savings', 'brokerage'] as const;
-
-/**
- * Returns null for an account kind this phone doesn't know yet. Contract §7.1 lets a newer
- * Home Base add enum values without bumping the version, so we skip that account rather than
- * rejecting the whole snapshot.
- */
-function parseAccount(v: unknown, p: string): SnapshotAccount | null {
-  const o = obj(v, p);
-  const kind = str(o.kind, `${p}.kind`);
-  if (!(ACCOUNT_KINDS as readonly string[]).includes(kind)) return null;
-  return {
-    id: int(o.id, `${p}.id`),
-    name: str(o.name, `${p}.name`),
-    kind: kind as SnapshotAccount['kind'],
-    balance_cents: int(o.balance_cents, `${p}.balance_cents`),
-    balance_as_of: date(o.balance_as_of, `${p}.balance_as_of`),
-  };
-}
-
-function parseTax(v: unknown, p: string): TaxSummary {
-  const o = obj(v, p);
-  const g = obj(o.realized_gains, `${p}.realized_gains`);
-  return {
-    year: int(o.year, `${p}.year`),
-    donations_total_cents: int(o.donations_total_cents, `${p}.donations_total_cents`),
-    realized_gains: {
-      short_term_cents: int(g.short_term_cents, `${p}.realized_gains.short_term_cents`),
-      long_term_cents: int(g.long_term_cents, `${p}.realized_gains.long_term_cents`),
-      is_estimate: bool(g.is_estimate, `${p}.realized_gains.is_estimate`),
-    },
-    deductions: arr(o.deductions, `${p}.deductions`).map((d, i) => {
-      const dp = `${p}.deductions[${i}]`;
-      const dobj = obj(d, dp);
-      return {
-        kind: str(dobj.kind, `${dp}.kind`),
-        label: str(dobj.label, `${dp}.label`),
-        amount_cents: int(dobj.amount_cents, `${dp}.amount_cents`),
-        is_estimate: bool(dobj.is_estimate, `${dp}.is_estimate`),
-      };
-    }),
-    disclaimer: str(o.disclaimer, `${p}.disclaimer`),
-  };
-}
-
-function parseSettings(v: unknown, p: string): SyncSettings {
-  const o = obj(v, p);
-  const days = [1, 2, 3] as const;
-  const allowed = arr(o.reminder_days_allowed, `${p}.reminder_days_allowed`);
-  allowed.forEach((d, i) => oneOf(d, days, `${p}.reminder_days_allowed[${i}]`));
-  return {
-    reminder_days_default: oneOf(o.reminder_days_default, days, `${p}.reminder_days_default`),
-    // The contract types this as exactly [1, 2, 3]. We only check each entry is 1–3, so a
-    // narrower list from a future Home Base doesn't make the whole snapshot unreadable.
-    reminder_days_allowed: allowed as SyncSettings['reminder_days_allowed'],
-  };
-}
 
 function parseOrThrow(input: unknown): Snapshot {
   const root = obj(input, 'snapshot');
@@ -309,6 +66,8 @@ function parseOrThrow(input: unknown): Snapshot {
     }
   }
 
+  const unassigned = parseUnassigned(budget.unassigned, 'budget.unassigned');
+
   return {
     contract: 1,
     server_id: str(root.server_id, 'server_id'),
@@ -330,6 +89,7 @@ function parseOrThrow(input: unknown): Snapshot {
       target_cents: int(budget.target_cents, 'budget.target_cents'),
       actual_cents: int(budget.actual_cents, 'budget.actual_cents'),
       groups,
+      ...(unassigned ? { unassigned } : {}),
     },
     transactions: arr(root.transactions, 'transactions').map((t, i) =>
       parseTransaction(t, `transactions[${i}]`),

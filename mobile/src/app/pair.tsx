@@ -9,6 +9,8 @@ import { loadCredentials, saveCredentials } from '@/sync/credentials';
 import { PairError, PAIR_MESSAGES } from '@/sync/pairErrors';
 import { pairWithComputer } from '@/sync/pairClient';
 import { parsePairingPayload } from '@/sync/pairingQr';
+import { runSync } from '@/sync/runSync';
+import { useSnapshot } from '@/sync/store';
 import { useTheme } from '@/theme';
 
 type Step =
@@ -17,7 +19,7 @@ type Step =
   | { name: 'typing' }
   | { name: 'working' }
   | { name: 'confirm'; text: string }
-  | { name: 'done'; computer: string }
+  | { name: 'done'; computer: string; sync: 'running' | 'ok' | { problem: string } }
   | { name: 'error'; message: string };
 
 export const DIFFERENT_COMPUTER_QUESTION =
@@ -27,6 +29,7 @@ const nowSeconds = () => Math.floor(Date.now() / 1000);
 
 export default function PairScreen() {
   const t = useTheme();
+  const { saveSnapshot } = useSnapshot();
   const [permission, requestPermission] = useCameraPermissions();
   const [step, setStep] = useState<Step>({ name: 'start' });
   const [typed, setTyped] = useState('');
@@ -53,7 +56,14 @@ export default function PairScreen() {
           appVersion: Constants.expoConfig?.version ?? '1.0.0',
         });
         await saveCredentials(creds); // only now, after the whole pairing worked
-        setStep({ name: 'done', computer: creds.server_name });
+        setStep({ name: 'done', computer: creds.server_name, sync: 'running' });
+        // First sync right after pairing (contract section 8), so the phone shows real data.
+        const outcome = await runSync(async (snapshot) => saveSnapshot(snapshot));
+        setStep({
+          name: 'done',
+          computer: creds.server_name,
+          sync: outcome.ok ? 'ok' : { problem: outcome.message },
+        });
       } catch (e) {
         setStep({
           name: 'error',
@@ -63,7 +73,7 @@ export default function PairScreen() {
         busy.current = false;
       }
     },
-    [phoneName],
+    [phoneName, saveSnapshot],
   );
 
   const canScan = Platform.OS !== 'web'; // web scanning would load code from the internet
@@ -172,6 +182,11 @@ export default function PairScreen() {
           <BodyText muted>
             Your phone and computer are paired. On your computer you should see "New phone paired".
           </BodyText>
+          {step.sync === 'running' ? <BodyText>Getting your budget from your computer...</BodyText> : null}
+          {step.sync === 'ok' ? <BodyText>Your budget is up to date. Check the Home tab.</BodyText> : null}
+          {typeof step.sync === 'object' ? (
+            <BodyText>{`${step.sync.problem} You can tap Sync now on the Home tab later.`}</BodyText>
+          ) : null}
         </Card>
       ) : null}
     </Screen>

@@ -71,6 +71,7 @@ computer has no friendly screen and the phone only shows sample data.
 - [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
 - [ ] 20. Receipt capture with offline queue — *mobile-engineer*
 - [ ] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
+  - Sync now button done (feat/phone-sync); reminders still to do
 
 ## Phase 6: Make it easy
 - [ ] 22. One-click Windows start (shortcut / tray), auto-start option — *backend-engineer*

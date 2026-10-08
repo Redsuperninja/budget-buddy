@@ -155,12 +155,31 @@ describe('parseSnapshot', () => {
     expectRejected(broken((s) => (s.generated_at = 'yesterday')), 'generated_at');
   });
 
+  it('accepts every account kind in the contract', () => {
+    const kinds = ['checking', 'savings', 'brokerage', 'credit_card', 'cash', 'loan', 'retirement', 'hsa', 'other'];
+    const result = parseSnapshot(broken((s) => (s.accounts = kinds.map((kind, i) => ({ ...s.accounts[0], id: i, kind })))));
+    expect(result.ok && result.snapshot.accounts.map((a) => a.kind)).toEqual(kinds);
+  });
+
   it('skips an account with a kind this phone does not know yet (contract 7.1)', () => {
-    const result = parseSnapshot(broken((s) => (s.accounts[0].kind = 'credit_card')));
+    const result = parseSnapshot(broken((s) => (s.accounts[0].kind = 'crypto_wallet')));
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.accounts).toEqual(SAMPLE_SNAPSHOT.accounts.slice(1));
     }
+  });
+
+  it('keeps budget.unassigned when present and allows it to be absent', () => {
+    const withIt = parseSnapshot(broken(() => {}));
+    expect(withIt.ok && withIt.snapshot.budget.unassigned).toEqual({ in_cents: 0, out_cents: 4599, count: 2 });
+    const without = parseSnapshot(broken((s) => delete s.budget.unassigned));
+    expect(without.ok && 'unassigned' in without.snapshot.budget).toBe(false);
+  });
+
+  it('rejects a bad budget.unassigned', () => {
+    expectRejected(broken((s) => (s.budget.unassigned.count = -1)), 'budget.unassigned.count');
+    expectRejected(broken((s) => (s.budget.unassigned.out_cents = 1.5)), 'budget.unassigned.out_cents');
+    expectRejected(broken((s) => (s.budget.unassigned = 'many')), 'budget.unassigned');
   });
 
   it('rejects a missing account kind and bad reminder settings', () => {

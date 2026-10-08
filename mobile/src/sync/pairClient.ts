@@ -2,18 +2,28 @@
  * Pairing HTTP client: POST /api/pair exactly as in sync contract v1 (sections 2.4, 3.6, 4).
  * The phone makes a fresh keypair, derives `shared`, sends one encrypted request, opens the
  * encrypted answer, and only then returns the credentials. phone_sk and shared never leave this function.
+ * The envelope, timeout and random-number plumbing is shared with syncing in `transport.ts`.
  */
-import * as Crypto from 'expo-crypto';
 import nacl from 'tweetnacl';
-import { encodeUTF8 } from 'tweetnacl-util';
 
 import { b64uDecode, b64uEncode } from './base64url';
 import type { Credentials } from './credentials';
 import { fromServerCode, PairError } from './pairErrors';
 import { baseUrl, CONTRACT_VERSION, type PairingPayload } from './pairingQr';
+import {
+  httpRequest,
+  installSecureRandom,
+  MAX_BODY_BYTES,
+  openResponse,
+  parseObject,
+  randomBytes,
+  REQUEST_TIMEOUT_MS,
+  sealRequest,
+} from './transport';
+
+export { installSecureRandom, MAX_BODY_BYTES, REQUEST_TIMEOUT_MS };
 
 export const PAIR_PATH = '/api/pair';
-export const REQUEST_TIMEOUT_MS = 10_000;
 
 export type PairDeps = {
   fetch?: typeof fetch;
@@ -25,65 +35,6 @@ export type PairDeps = {
 };
 
 export type DeviceInfo = { deviceName: string; platform: 'ios' | 'android'; appVersion: string };
-
-let prngInstalled = false;
-
-/** Use the phone's secure random source for nacl; fail closed (never Math.random). */
-export function installSecureRandom(): void {
-  if (prngInstalled) return;
-  nacl.setPRNG((x, n) => {
-    const bytes = Crypto.getRandomBytes(n);
-    if (!bytes || bytes.length !== n) throw new PairError('something_wrong');
-    for (let i = 0; i < n; i++) x[i] = bytes[i];
-  });
-  prngInstalled = true;
-}
-
-function randomBytes(n: number): Uint8Array {
-  try {
-    installSecureRandom();
-    return nacl.randomBytes(n);
-  } catch {
-    throw new PairError('something_wrong');
-  }
-}
-
-export const MAX_BODY_BYTES = 16 * 1024;
-
-/** One request. The 10 s timer covers the whole answer, including reading the body. */
-async function post(f: typeof fetch, url: string, body: string): Promise<{ status: number; text: string }> {
-  const controller = new AbortController();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => {
-      controller.abort();
-      reject(new PairError('server_unreachable'));
-    }, REQUEST_TIMEOUT_MS);
-  });
-  const work = (async () => {
-    let res: Response;
-    let text: string;
-    try {
-      res = await f(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
-        signal: controller.signal,
-      });
-      text = await res.text();
-    } catch {
-      throw new PairError('server_unreachable');
-    }
-    if (text.length > MAX_BODY_BYTES) throw new PairError('something_wrong');
-    return { status: res.status, text };
-  })();
-  work.catch(() => undefined); // avoid an unhandled rejection if the timeout wins
-  try {
-    return await Promise.race([work, timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
-}
 
 export async function pairWithComputer(
   qr: PairingPayload,
@@ -121,24 +72,15 @@ export async function pairWithComputer(
       app_version: device.appVersion,
     },
   };
-  const box = nacl.secretbox(new TextEncoder().encode(JSON.stringify(inner)), nonce, shared);
-  const body = JSON.stringify({
-    v: 1,
-    nonce: b64uEncode(nonce),
-    ts,
-    phone_pub: b64uEncode(phonePub),
-    box: b64uEncode(box),
-  });
+  const sealed = sealRequest(shared, inner, ts, { phone_pub: b64uEncode(phonePub) }, nonce);
 
-  const res = await post(f, baseUrl(qr.host, qr.port) + PAIR_PATH, body);
+  const res = await httpRequest(
+    f,
+    baseUrl(qr.host, qr.port) + PAIR_PATH,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: sealed.body },
+  );
 
-  let outer: Record<string, unknown> | null = null;
-  try {
-    const parsed: unknown = JSON.parse(res.text);
-    if (typeof parsed === 'object' && parsed !== null) outer = parsed as Record<string, unknown>;
-  } catch {
-    outer = null;
-  }
+  const outer = parseObject(res.text);
 
   // Plaintext errors (the server couldn't open our box). Unauthenticated: just report them.
   const plain = outer?.error as { code?: unknown } | undefined;
@@ -149,16 +91,7 @@ export async function pairWithComputer(
   }
 
   // Encrypted answer: open with `shared`, check type and re.
-  let reply: Record<string, unknown>;
-  try {
-    const respNonce = b64uDecode(String(outer.nonce), 24);
-    const opened = nacl.secretbox.open(b64uDecode(outer.box), respNonce, shared);
-    if (!opened) throw new Error('open failed');
-    reply = JSON.parse(encodeUTF8(opened));
-    if (reply.type !== 'res' || reply.re !== b64uEncode(nonce)) throw new Error('mismatch');
-  } catch {
-    throw new PairError('bad_response');
-  }
+  const reply = openResponse(outer, shared, sealed.nonce);
   if (reply.status !== 200) {
     throw fromServerCode((reply.error as { code?: unknown } | undefined)?.code);
   }
