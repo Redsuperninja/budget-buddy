@@ -1,8 +1,9 @@
 // Home: the month at a glance, account balances, and budget versus actual by category.
 
-import { api } from "../api.js";
+import { listAccounts, monthlySummary } from "../api/endpoints.js";
 import { currentMonth } from "../dates.js";
-import { card, empty, fill, h, note, statCard, table } from "../dom.js";
+import { fill, h } from "../dom.js";
+import { card, empty, note, statCard, table } from "../widgets.js";
 import { groupLabel, kindLabel } from "../labels.js";
 import { formatBalance, formatCents } from "../money.js";
 import { reload } from "../router.js";
@@ -10,8 +11,8 @@ import { reload } from "../router.js";
 export async function render(root, options) {
   const month = options.month || currentMonth();
   const [summary, accounts] = await Promise.all([
-    api("GET", `/api/local/summary/monthly?month=${month}`),
-    api("GET", "/api/local/accounts"),
+    monthlySummary(month),
+    listAccounts(),
   ]);
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
   picker.addEventListener("change", () => { if (picker.value) reload({ month: picker.value }); });

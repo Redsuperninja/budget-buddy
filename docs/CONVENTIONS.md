@@ -13,8 +13,9 @@ reviewers check them.
 - **Shared code lives in one obvious place:**
   - Server: business logic in `services/` (one module per area), request/response shapes in `schemas/`,
     small cross-cutting helpers next to what uses them (e.g. `app/crypto/`, `app/bodylimit.py`).
-  - Web dashboard (`server/app/dashboard/`): one module per screen, plus shared modules for API calls,
-    building the page, money, dates and labels.
+  - Web dashboard (`dashboard/js/`, its own part; it never imports server code and talks to the server only
+    over HTTP): one module per screen, plus shared modules for API calls (`api/endpoints.js` holds every
+    route string), building the page, money, dates and labels.
   - Phone (`mobile/src/`): screens in `app/`, reusable UI in `components/`, pure logic in `lib/`,
     sync in `sync/`.
 - **Short functions with clear names** over comments explaining long ones. A file starts with a one-line

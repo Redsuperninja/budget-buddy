@@ -36,6 +36,7 @@ See [docs/guide/using-the-dashboard.md](docs/guide/using-the-dashboard.md) for d
 ```
 budget-buddy/
 ├── server/        Home Base: Python (FastAPI) + SQLite, runs on your PC
+├── dashboard/     Web page for the computer: plain HTML/CSS/JS, talks to the Home Base over HTTP
 ├── mobile/        Phone app: Expo (React Native), iPhone + Android
 ├── docs/          Architecture, decisions (ADRs), user guides, workflow
 ├── scripts/       Setup, testing and demo-data helpers (see docs/TESTING.md)

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app import __version__
 from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, load_keys
+from app.dashboard_files import default_dashboard_dir, load_dashboard
 from app.data_folder import warn_if_risky_data_dir
 from app.db import create_db_engine, run_migrations
 from app.errors import install_error_handlers
@@ -84,6 +85,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.server_id = load_server_id(settings.data_dir)
     app.state.lan = LanAddress(settings.lan_ip or detect_lan_ip(), pinned=bool(settings.lan_ip))
     app.state.pair_limiter = RateLimiter(limit=10, window_seconds=60)  # per address, §2.3
+    app.state.dashboard = load_dashboard(settings.dashboard_dir or default_dashboard_dir())
     app.state.csrf_token = secrets.token_urlsafe(32)  # per run; the dashboard sends it on writes
     app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key

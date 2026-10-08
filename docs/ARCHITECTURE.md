@@ -21,7 +21,7 @@
 - **Python + FastAPI** HTTP API, **SQLite** database, **SQLAlchemy** models, **Alembic** migrations.
 - Data folder lives **outside the repo** (default `%LOCALAPPDATA%\BudgetBuddy` on Windows,
   `~/.local/share/budget-buddy` elsewhere). Code in git never contains personal data.
-- Includes a small local web dashboard (served by the same app, `server/app/dashboard/`) for the computer side:
+- Includes a small local web dashboard (its own top-level folder, `dashboard/`, served by the Home Base from a startup allowlist; ADR-0005) for the computer side:
   accounts, transactions, categories, bank CSV import, paychecks, donations, stocks, and the pairing QR code.
   It is plain HTML, CSS and JavaScript with no build step and no internet requests (system fonts, local files
   only). It lives at `/` (assets at `/static/`) and answers this computer only, because it is not one of the phone
@@ -34,6 +34,9 @@
   page, and `GET /api/local/csrf-token` gives it to the helper scripts. There are no CORS headers, so other
   websites can't read it. The pairing QR is drawn on the server (`segno`) and returned as SVG; the QR still
   holds no secret key (ADR-0004).
+  The dashboard talks to the server only through its HTTP API, so either can change without touching the other.
+  If `dashboard/` (or `BUDGET_BUDDY_DASHBOARD_DIR`) is missing, the Home Base runs API-only and `/` shows a
+  plain "dashboard files weren't found" page.
 - Modules:
   - `accounts` — checking & savings accounts, balances
   - `transactions` — imported/entered transactions, categories, auto-categorization rules

@@ -1,0 +1,47 @@
+// Money is whole cents. These cases cover formatting and typed-in dollars.
+
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { centsOrThrow, centsToInput, formatBalance, formatCents, parseDollars } from "../js/money.js";
+
+test("formatCents shows dollars with two decimals and thousands separators", () => {
+  assert.equal(formatCents(0), "$0.00");
+  assert.equal(formatCents(5), "$0.05");
+  assert.equal(formatCents(1250), "$12.50");
+  assert.equal(formatCents(123456789), "$1,234,567.89");
+  assert.equal(formatCents(-1250), "-$12.50");
+  assert.equal(formatCents(-5), "-$0.05");
+});
+
+test("formatBalance says owed for negative cards and loans only", () => {
+  assert.equal(formatBalance(-5000, "credit_card"), "$50.00 owed");
+  assert.equal(formatBalance(-5000, "loan"), "$50.00 owed");
+  assert.equal(formatBalance(-5000, "checking"), "-$50.00");
+  assert.equal(formatBalance(5000, "credit_card"), "$50.00");
+});
+
+test("centsToInput gives a plain number for a text box", () => {
+  assert.equal(centsToInput(25000), "250.00");
+  assert.equal(centsToInput(5), "0.05");
+});
+
+test("parseDollars reads common typed amounts into integer cents", () => {
+  const cases = [
+    ["12", 1200], ["12.5", 1250], [".50", 50], ["12.", 1200], ["$1,234.56", 123456],
+    [" 7.05 ", 705], ["-5", -500], ["0", 0], ["0.07", 7], ["19.99", 1999],
+  ];
+  for (const [text, cents] of cases) assert.equal(parseDollars(text), cents, text);
+});
+
+test("parseDollars refuses things that are not an exact amount", () => {
+  for (const text of ["", "abc", "1.234", "1e3", "--5", "12.5.1", "1234567890123", "$", "."]) {
+    assert.equal(parseDollars(text), null, text);
+  }
+});
+
+test("centsOrThrow explains a bad amount in plain English", () => {
+  assert.equal(centsOrThrow("3.10"), 310);
+  assert.throws(() => centsOrThrow("lots"), /Please enter the amount as a number, like 12.50\./);
+  assert.throws(() => centsOrThrow("x", "budget"), /Please enter the budget as a number/);
+});

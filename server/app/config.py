@@ -22,7 +22,8 @@ class Settings(BaseSettings):
     """Runtime settings.
 
     Override with env vars: ``BUDGET_BUDDY_DATA_DIR``, ``BUDGET_BUDDY_HOST``, ``BUDGET_BUDDY_PORT``,
-    ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``, ``BUDGET_BUDDY_INSECURE_TEST_KEYSTORE``.
+    ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``, ``BUDGET_BUDDY_INSECURE_TEST_KEYSTORE``,
+    ``BUDGET_BUDDY_DASHBOARD_DIR``.
     """
 
     model_config = SettingsConfigDict(env_prefix="BUDGET_BUDDY_")
@@ -33,6 +34,9 @@ class Settings(BaseSettings):
     port: int = Field(default=8765, ge=1, le=65535)
     # The computer's home-network address that goes into the pairing QR. Leave empty to detect it.
     lan_ip: str | None = None
+    # Folder with the web dashboard. Empty means ``<repo>/dashboard``. If it isn't there, the Home
+    # Base runs API-only (ADR-0005).
+    dashboard_dir: Path | None = None
     # Friendly name the phone shows for this computer (at most 50 characters).
     server_name: str = Field(default="Home Base", min_length=1, max_length=50)
     # Developer extras such as the /docs API explorer. Off for normal use.

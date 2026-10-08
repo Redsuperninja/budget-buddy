@@ -1,0 +1,9 @@
+{
+  "name": "budget-buddy-dashboard",
+  "private": true,
+  "type": "module",
+  "description": "Budget Buddy computer dashboard: plain HTML, CSS and JavaScript. No dependencies, no build step.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
