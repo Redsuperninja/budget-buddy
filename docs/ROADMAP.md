@@ -5,7 +5,8 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 
 ## What's next (milestones)
 
-Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom.
+Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom, except that **D (easy start)
+comes next**, at the owner's request (2026-10-07), alongside what's left of B.
 
 **A. Tester preview** (now): people can try the Home Base with demo data and connect a phone.
 - [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [testing guide](guide/set-up-for-testing.md).
@@ -21,15 +22,35 @@ computer has no friendly screen and the phone only shows sample data.
    `<TransactionKind.NORMAL: 'normal'>`), "1 rows" wording in CSV import errors, #31 (accept `.50` and `12.`),
    #29 (future-dated transactions in balances), #25 and #32 (show negative balances as money owed).
 
-**C. Tax-season beta: the numbers people file with.**
+**C. Tax-season beta: the numbers people file with.** Items 1 to 3 done (PRs #59 to #63).
 1. ~~**10. Budget engine** and **10b** (count transfers into savings as saved).~~
 2. ~~**9. Auto-categorization rules.**~~
 3. ~~**13. Other deductions + yearly tax summary export.**~~ (PDF through the browser's print dialog)
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
    #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
 
-**D. Easy install, then public release.**
-1. **22. One-click Windows start**, **24. Encrypted backup & restore**, **23. User guide with screenshots**.
+**D. Easy start (next).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
+1. **22a. One start script:** sets itself up on first run, starts the Home Base, opens the dashboard, and stops
+   cleanly; replaces the separate setup and start steps for everyday use.
+2. **22. One-click Windows start:** Start menu and desktop shortcut, a tray icon (open, stop), and an optional
+   start-with-Windows setting.
+
+**E. Bank data, free and open source first ([ADR-0006](adr/0006-bank-connections.md)).** Checking, savings and
+investment data from banks like Chase and Wells Fargo without hand-mapping CSV files.
+1. **26. Bank-file import (OFX/QFX):** balances, the bank's own transaction IDs, brokerage holdings.
+2. **27. Auto-import folder:** new bank files in a chosen folder (like Downloads) are imported automatically.
+3. **28. Optional live connection, bring your own free developer key** (Teller first, Plaid if needed); test
+   with the owner's own banks before building.
+
+**F. Fuller phone app ([ADR-0007](adr/0007-standalone-phone-app.md), accepted).** After milestone B's phone
+items (20, 21).
+1. **29. Phone database** (encrypted on-device SQLite) and shared budget-math test vectors.
+2. **30. Sync contract v2:** two-way changes with conflict rules.
+3. **31. Edit on the phone:** transactions, categories, budgets, suggested budget.
+4. **32. Standalone mode:** use the phone with no Home Base; pair one later.
+
+**G. Public release.**
+1. **24. Encrypted backup & restore**, **23. User guide with screenshots**.
 2. Security hardening: #6 (supply chain: lock file, pinned actions, Dependabot), #26, #27 and #28 (key and
    encryption hardening), #21 (npm advisories).
 3. **25. Public release prep.**
@@ -75,7 +96,19 @@ computer has no friendly screen and the phone only shows sample data.
   - Sync now button done (feat/phone-sync); reminders still to do
 
 ## Phase 6: Make it easy
+- [ ] 22a. One start script: first-run setup, start, open the dashboard, stop cleanly — *backend-engineer*
 - [ ] 22. One-click Windows start (shortcut / tray), auto-start option — *backend-engineer*
 - [ ] 23. Plain-English user guide with screenshots — *docs-writer*
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
+
+## Phase 7: Bank data (ADR-0006: free and open source first)
+- [ ] 26. Bank-file import (OFX/QFX): balances, bank transaction IDs, brokerage holdings — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
+- [ ] 27. Auto-import folder for new bank files — *backend-engineer* + *security-reviewer*
+- [ ] 28. Optional live connection with your own free developer key (Teller, then Plaid) — *backend-engineer* + *security-reviewer*
+
+## Phase 8: Fuller phone app (ADR-0007 accepted)
+- [ ] 29. Encrypted phone database + shared budget-math test vectors — *mobile-engineer* + *security-reviewer* + *finance-tax-expert*
+- [ ] 30. Sync contract v2: two-way changes, conflict rules — *architect* + *backend-engineer* + *mobile-engineer*
+- [ ] 31. Edit on the phone: transactions, categories, budgets, suggested budget — *mobile-engineer*
+- [ ] 32. Standalone mode (no Home Base needed; pair later) — *mobile-engineer* + *architect*
