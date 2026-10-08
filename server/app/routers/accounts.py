@@ -1,7 +1,14 @@
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
+from app.schemas.accounts import (
+    AccountCreate,
+    AccountOut,
+    AccountUpdate,
+    BalanceSet,
+    BalanceSetResult,
+)
+from app.services import account_balance
 from app.services import accounts as service
 
 router = APIRouter(prefix="/api/local/accounts", tags=["accounts"])
@@ -30,3 +37,9 @@ def update_account(account_id: PathId, data: AccountUpdate, session: SessionDep)
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(account_id: PathId, session: SessionDep) -> None:
     service.delete_account(session, account_id)
+
+
+@router.post("/{account_id}/balance")
+def set_balance(account_id: PathId, data: BalanceSet, session: SessionDep) -> BalanceSetResult:
+    """Make the balance at the end of ``date`` match the bank, with one balance adjustment."""
+    return account_balance.set_balance(session, account_id, data)

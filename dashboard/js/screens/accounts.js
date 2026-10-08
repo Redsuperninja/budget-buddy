@@ -1,4 +1,4 @@
-// Accounts: the list with balances, and adding a new one.
+// Accounts: the list with balances, matching a balance to the bank, and adding a new one.
 
 import { createAccount, listAccounts } from "../api/endpoints.js";
 import { fill } from "../dom.js";
@@ -8,8 +8,9 @@ import { ACCOUNT_KINDS, kindLabel } from "../labels.js";
 import { formatBalance } from "../money.js";
 import { reload } from "../router.js";
 import { card, empty, table } from "../widgets.js";
+import { balanceCard } from "./account-balance.js";
 
-export async function render(root) {
+export async function render(root, options) {
   const accounts = await listAccounts();
   fill(root,
     card("Accounts", accounts.length
@@ -17,6 +18,7 @@ export async function render(root) {
           accounts.map((a) => [a.name, kindLabel(a.kind), a.institution || "",
             formatBalance(a.balance_cents, a.kind), a.transaction_count]), [3, 4])
       : empty("No accounts yet.")),
+    accounts.length ? balanceCard(accounts, options.balanceDone) : null,
     card("Add an account",
       form([
         { name: "name", label: "Name", required: true, maxlength: 100, placeholder: "Everyday checking" },
@@ -25,7 +27,6 @@ export async function render(root) {
       ], "Add account", async (v) => {
         await createAccount({ name: v.name, kind: v.kind, institution: optionalText(v.institution) });
         await reload();
-      }),
-      empty("To record a starting balance, add a transaction of type \"Balance adjustment\" on the Transactions page.")),
+      })),
   );
 }

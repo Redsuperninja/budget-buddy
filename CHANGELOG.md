@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Match your bank's balance: on the Accounts page, type today's balance from your bank (or the balance at the start of the year, or on any day) and Budget Buddy adds one balance adjustment for the difference, so the balance shown is the one in your bank. Adjustments aren't income or spending.
 - Investments: stocks can be linked to any account, including an IRA, 401(k) or HSA (sales there aren't counted as taxable gains, but purchases there still count for wash sales). A new Investments page shows what you hold in each account, what it cost, and its value and gain at prices you type in, plus this year's 401(k), IRA and HSA contributions against the IRS limits. An estimate, not tax advice.
 - Auto-sort learns: after you put three transactions from the same shop in the same category, Budget Buddy adds an auto-sort rule for that shop (marked "Learned from your choices") and sorts the waiting ones. The Auto-sort page shows how many transactions each rule sorted and lists the latest auto-sorted transactions, and the Transactions page can show only auto-sorted or hand-picked ones.
 - Other computers: open Budget Buddy in a web browser on another computer at home. On the Budget Buddy computer, **Devices**, **Other computers**, **Allow another computer** shows an address and a one-time code; the other computer types the code once and can then use the whole dashboard, except connecting phones or more computers. Remove a computer at any time. For home networks you trust only (ADR-0009).

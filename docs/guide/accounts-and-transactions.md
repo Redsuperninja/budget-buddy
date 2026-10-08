@@ -14,13 +14,25 @@ Lists all your bank and savings accounts, and their current balances.
 4. Bank name is optional
 5. Click **Add account**
 
-### Record a starting balance
+### Match your bank's balance
 
-When you add a new account, record its starting balance:
+So the balance in Budget Buddy is the one your bank shows, tell it the balance once, and your transactions do the
+rest. On the **Accounts** tab, under **Match your bank's balance**:
 
-1. Go to the **Transactions** tab
-2. Add a transaction with type "Balance adjustment" for the opening balance
-3. This doesn't count as income or spending
+1. Pick the account.
+2. Pick when the balance is from:
+   - **Today:** the balance your bank's website or app shows now. Easiest if you've entered or imported this
+     year's transactions.
+   - **The start of this year:** the starting balance on your January statement. Then import or enter every
+     transaction since January 1.
+   - **Another day**, like the date of a statement, and pick the day.
+3. Type the balance. For a credit card or loan, type what you **owe** (Budget Buddy shows it as money owed).
+4. Click **Set balance**.
+
+Budget Buddy adds up the account's transactions up to that day and adds one **balance adjustment** for the
+difference, so the balance matches. It says how much it added. Balance adjustments aren't counted as income or
+spending. If the balance drifts later (a missed transaction, say), do it again with today's balance: only what's
+left over is added.
 
 ## Your transactions
 

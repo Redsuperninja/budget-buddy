@@ -37,7 +37,7 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   share of your income went to needs, wants and savings, and your account balances
 - **Money**
   - **Transactions:** money coming in and going out; add more; sort a payment into charity
-  - **Accounts:** your bank and savings accounts; record starting balances
+  - **Accounts:** your bank and savings accounts; match a balance to your bank
   - **Investments:** what you hold in each account and what it's worth; retirement and HSA contributions
   - **Import bank file:** download a CSV from your bank and import it
   - **Auto-sort:** rules that put transactions in the right category for you

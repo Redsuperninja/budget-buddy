@@ -68,6 +68,7 @@ items (20, 21).
 - [x] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
   - Adjustments (including opening balances) change balances but are never counted as income or spending.
     Transfers are excluded too (see "Transaction kinds" in [dev/architecture/ledger.md](dev/architecture/ledger.md)).
+- [x] 5c. Match an account's balance to the bank (today, start of year, or any day) with one adjustment — *backend-engineer* + *finance-tax-expert*
 - [x] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
