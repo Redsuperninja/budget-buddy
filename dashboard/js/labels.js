@@ -15,4 +15,12 @@ export const kindLabel = (kind) => lookup(ACCOUNT_KINDS, kind);
 export const groupLabel = (group) => (group === "transfer" ? "Transfer" : lookup(GROUPS, group));
 export const donationKindLabel = (kind) => (kind === "cash" ? "Cash" : "Goods");
 
+export const DEDUCTION_KINDS = [
+  ["medical", "Medical"], ["mortgage_interest", "Mortgage interest"], ["property_tax", "Property tax"],
+  ["state_local_tax", "State and local taxes"], ["student_loan_interest", "Student loan interest"],
+  ["hsa", "Health savings account"], ["ira", "IRA contributions"], ["education", "Education"],
+  ["childcare", "Childcare"], ["home_office", "Home office"], ["other", "Other"],
+];
+export const deductionKindLabel = (kind) => lookup(DEDUCTION_KINDS, kind);
+
 export const NOT_TAX_ADVICE = "Estimate, not tax advice.";

@@ -24,7 +24,7 @@ computer has no friendly screen and the phone only shows sample data.
 **C. Tax-season beta: the numbers people file with.**
 1. ~~**10. Budget engine** and **10b** (count transfers into savings as saved).~~
 2. ~~**9. Auto-categorization rules.**~~
-3. **13. Other deductions + yearly tax summary export.**
+3. ~~**13. Other deductions + yearly tax summary export.**~~ (PDF through the browser's print dialog)
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
    #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
 
@@ -58,7 +58,7 @@ computer has no friendly screen and the phone only shows sample data.
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
 - [x] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
-- [ ] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
+- [x] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 
 ## Phase 4: Sync
 - [x] 13b. Sync API contract v1 — *architect*

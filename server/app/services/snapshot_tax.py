@@ -7,21 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.models import Deduction, Donation
 from app.services import stock_sales
+from app.services.deductions import label
 
 TAX_DISCLAIMER = "These totals help you get ready for tax time. They aren't tax advice."
-_DEDUCTION_LABELS = {
-    "medical": "Medical",
-    "education": "Education",
-    "student_loan_interest": "Student loan interest",
-    "home_office": "Home office",
-    "mortgage_interest": "Mortgage interest",
-    "property_tax": "Property tax",
-    "state_local_tax": "State and local taxes",
-    "hsa": "Health savings account",
-    "ira": "IRA contributions",
-    "childcare": "Childcare",
-    "other": "Other",
-}
 
 
 def tax_summary(session: Session, year: int) -> dict:
@@ -41,7 +29,7 @@ def tax_summary(session: Session, year: int) -> dict:
         (
             {
                 "kind": kind.value,
-                "label": _DEDUCTION_LABELS.get(kind.value, kind.value.replace("_", " ").title()),
+                "label": label(kind),
                 "amount_cents": total,
                 "is_estimate": False,
             }

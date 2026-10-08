@@ -78,6 +78,7 @@ Every `/api/local/...` route answers this computer only; common rules are in
 | Paychecks | [paychecks.md](../docs/dev/architecture/paychecks.md) |
 | Donations | [donations.md](../docs/dev/architecture/donations.md) |
 | Stocks | [stocks.md](../docs/dev/architecture/stocks.md) |
+| Other deductions, yearly tax summary, CSV export | [tax-summary.md](../docs/dev/architecture/tax-summary.md) |
 | Pairing, devices, home-network listener | [pairing.md](../docs/dev/architecture/pairing.md) |
 | Phone sync (`/api/sync/*`) | [sync.md](../docs/dev/architecture/sync.md) and the [sync contract](../docs/api/sync-contract.md) |
 | Dashboard pages, CSRF token | [dashboard.md](../docs/dev/architecture/dashboard.md) |

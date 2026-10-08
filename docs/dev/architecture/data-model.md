@@ -17,7 +17,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) |
 | `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) |
 | `stock_sales` | one lot's part of an order: order_id (cascade delete), lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0); rebuilt with FIFO ([stocks.md](stocks.md)) |
-| `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description, date?, amount_cents (≥ 0), receipt_id? |
+| `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description? (enc), date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark, revoked, revoked_at, paired_at, last_sync_at |
 | `pairing_sessions` | id, code_hash, pair_pub, pair_sk (enc, erased when the session ends), created_at, exp, used_at, cancelled_at, wrong_attempts |
 | `pairing_nonces` | session_id, nonce (bytes); UNIQUE(session_id, nonce); replay cache for `/api/pair`, removed with the session |

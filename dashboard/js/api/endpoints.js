@@ -51,6 +51,14 @@ export const listDonations = (year) => api("GET", `${LOCAL}/donations?tax_year=$
 export const donationSummary = (year) => api("GET", `${LOCAL}/donations/summary/${year}`);
 export const createDonation = (json) => api("POST", `${LOCAL}/donations`, { json });
 
+// Other deductions and the yearly tax summary
+export const listDeductions = (year) => api("GET", `${LOCAL}/deductions?tax_year=${year}`);
+export const createDeduction = (json) => api("POST", `${LOCAL}/deductions`, { json });
+export const deleteDeduction = (id) => api("DELETE", `${LOCAL}/deductions/${id}`);
+export const taxSummary = (year) => api("GET", `${LOCAL}/tax-summary/${year}`);
+// A link target, not a fetch: the browser downloads the file itself.
+export const taxExportUrl = (year) => `${LOCAL}/tax-summary/${year}/export.csv`;
+
 // Stocks
 export const listLots = () => api("GET", `${LOCAL}/stocks/lots`);
 export const createLot = (json) => api("POST", `${LOCAL}/stocks/lots`, { json });
