@@ -12,9 +12,10 @@ import { centsOrThrow, formatCents } from "../money.js";
 import { charityCell } from "./give-to-charity.js";
 
 export async function render(root) {
-  const [accounts, categories] = await Promise.all([
+  const [accounts, firstCategories] = await Promise.all([
     listAccounts(), listCategories(),
   ]);
+  let categories = firstCategories;
   const list = h("div", {});
   const accountFilter = select(pickOptions(accounts, "All accounts"));
   const monthFilter = h("input", { type: "month", value: currentMonth() });
@@ -38,10 +39,12 @@ export async function render(root) {
       params.set("date_to", to);
     }
     try {
-      const page = await listTransactions(params);
+      // Categories again too: marking a gift can add "Charitable giving" or "Gifts".
+      let page;
+      [page, categories] = await Promise.all([listTransactions(params), listCategories()]);
       fill(list,
         page.items.length
-          ? table(["Date", "What", "Account", "Amount", "Category", "Charity"], page.items.map((t) =>
+          ? table(["Date", "What", "Account", "Amount", "Category", "Gift"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
                 categoryPicker(t), charityCell(t, refresh)]), [3])
           : empty("No transactions for this choice."),

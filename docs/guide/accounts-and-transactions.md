@@ -49,12 +49,17 @@ Lists all the money coming in and going out, and lets you add more.
 2. Click the "Category" dropdown and pick one
 3. It saves automatically — you'll see "Saved"
 
-### Sort a payment into charity
+### Mark a payment as a gift
 
-If a payment was a gift to a charity, click **Mark as gift** in its row. Check the charity's name, the date you
-gave it, and how much of the payment was the gift, then click **Save**. The gift is added to your
-[donations](donations.md) for that tax year, and the row now shows **Gift**. The payment still counts as spending
-in your budget. [Sort a payment into charity](donations.md#sort-a-payment-into-charity) has the details.
+If a payment was a gift, click **Mark as gift** in its row and pick the kind:
+
+- **To a charity:** check the charity's name, the date you gave it, and how much of the payment was the gift,
+  then click **Save**. The gift is added to your [donations](donations.md) for that tax year and the payment
+  moves to the **Charitable giving** category.
+- **A personal gift** (a present for someone): click **Save** and the payment moves to the **Gifts** category.
+  No tax record is made.
+
+Either way the payment still counts once as spending in your budget. [Sort a payment into charity](donations.md#sort-a-payment-into-charity) has the details.
 
 ## Something went wrong?
 

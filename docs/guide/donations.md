@@ -35,7 +35,7 @@ If you gave by card, check or bank transfer, the payment is probably already in 
 imported from your bank). You don't need to type it again:
 
 1. Click **Money** at the top, then the **Transactions** tab, and find the payment.
-2. Click **Mark as gift** in its row (the **Charity** column).
+2. Click **Mark as gift** in its row (the **Gift** column) and leave **Kind of gift** on **To a charity**.
 3. Check the charity's name. Budget Buddy fills in what your bank called it, like "FAKE FOOD BANK"; change it
    to the name on the charity's receipt.
 4. Check **Date you gave it**. It starts as the bank's date, but a gift counts on the day you mailed the check
@@ -53,18 +53,28 @@ A few things to know:
   balance adjustments don't have a **Mark as gift** button.
 - One payment can be one gift. Gifts of goods (clothes, furniture) aren't payments, so add them on the Donations
   tab instead.
-- The payment still counts as spending in its budget category. The gift is your tax record, not a second
-  expense.
+- The payment moves to the **Charitable giving** category (a "wants" category Budget Buddy adds the first time).
+  It still counts once as spending; the gift is your tax record, not a second expense. You can pick a
+  different category for it afterwards. Give **Charitable giving** (and **Gifts**) a monthly budget on the
+  Categories page, or let [the suggested budget](suggested-budget.md) pick one after a few months.
 - While a payment is a gift, you can't change its amount or type, or link it as a transfer. To do that, remove
   the gift first (below).
 - If you delete the payment, the gift stays in your donations.
 - If the charity gives you money back (a cancelled event, a double charge), Budget Buddy doesn't change the gift
   for you. Lower or remove it on the Donations tab.
 
+## A present for someone (a personal gift)
+
+For a birthday or holiday present, pick **A personal gift** under **Kind of gift** and click **Save**. The
+payment moves to the **Gifts** category so your budget shows what you spend on presents. Personal gifts aren't
+tax deductible, so nothing is added to your donations. If you already have an income category called
+**Gifts** (for presents you receive), Budget Buddy asks you to rename it first.
+
 ## Remove a gift
 
 On the Donations tab, click **Remove** next to the gift and confirm. If it came from a payment, the payment stays
-in your transactions and gets its **Mark as gift** button back.
+in your transactions and gets its **Mark as gift** button back. It stays in the **Charitable giving** category;
+change it on the Transactions page if you like.
 
 ## What proof to keep
 

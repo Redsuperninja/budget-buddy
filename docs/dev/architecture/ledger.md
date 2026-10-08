@@ -55,5 +55,6 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 - While linked, a transaction's account, amount, kind and category are locked and it can't be deleted: remove
   the link first.
 - A transaction that backs a paycheck has its own locks ([paychecks.md](paychecks.md)).
+- `POST /api/local/transactions/{id}/personal-gift` files a payment under "Gifts" ([donations.md](donations.md)).
 - A payment sorted into charity (`donation_id` in the transaction's JSON) keeps its amount and kind, and can't be
   linked as a transfer, until the donation is removed (409 `linked_to_donation`; [donations.md](donations.md)).

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Gift categories: **Mark as gift** now asks whether it's a gift to a charity or a personal gift (a present for someone). A charity gift moves the payment to a new **Charitable giving** category; a personal gift moves it to **Gifts** with no tax record. Both are "wants" categories Budget Buddy adds the first time.
 - Donations from payments: on the Transactions page, **Mark as gift** turns a payment into a cash gift to charity, with the charity's name, the day you gave it and how much of the payment was the gift (for example, a $100 gala ticket where $60 was the gift). The gift shows on the Donations page with the paperwork to keep, the payment still counts as spending in its budget, and gifts can now be removed. An estimate, not tax advice.
 - Tidier dashboard: five buttons along the top (Home, Money, Budget, Taxes, Phone) instead of twelve. Money, Budget and Taxes show their pages as tabs underneath, and old links to a page still work.
 - Charts: the Home page shows bars for spending against each budget (by group and by category) and lines for the last 12 months of money in, spending and saving, with exact numbers when you point at a month. Every chart can switch to a table, and the colors work in light and dark mode and for color-blind readers.

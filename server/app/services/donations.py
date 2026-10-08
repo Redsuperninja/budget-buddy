@@ -38,7 +38,13 @@ from app.schemas.donations import (
     ProofItem,
     ProofThresholds,
 )
-from app.services.donation_payments import check_payment, commit, part_gift_proof, payment_amounts
+from app.services.donation_payments import (
+    check_payment,
+    commit,
+    file_new_link,
+    part_gift_proof,
+    payment_amounts,
+)
 from app.tax_data import Charitable
 
 DISCLAIMER = (
@@ -106,6 +112,7 @@ def create_donation(session: Session, data: DonationCreate) -> DonationOut:
     values = data.model_dump(exclude={"amount"})
     _check_references(session, values)
     check_payment(session, values["transaction_id"], values["kind"], values["amount_cents"])
+    file_new_link(session, values["transaction_id"], None)
     donation = Donation(**values)
     session.add(donation)
     commit(session)
@@ -124,6 +131,8 @@ def update_donation(session: Session, donation_id: int, data: DonationUpdate) ->
         changes.get("amount_cents", donation.amount_cents),
         donation.id,
     )
+    if "transaction_id" in changes:
+        file_new_link(session, changes["transaction_id"], donation.transaction_id)
     for field, value in changes.items():
         setattr(donation, field, value)
     commit(session)
