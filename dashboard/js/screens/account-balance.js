@@ -6,11 +6,9 @@ import { today } from "../dates.js";
 import { h } from "../dom.js";
 import { accountField } from "../fields.js";
 import { form } from "../form.js";
-import { formatCents } from "../money.js";
+import { bankBalanceToCents, formatBalance } from "../money.js";
 import { reload } from "../router.js";
 import { card, empty } from "../widgets.js";
-
-const OWED_KINDS = new Set(["credit_card", "loan"]);
 
 // The last day of last year: the balance then is the balance at the start of this year.
 const startOfYear = () => `${Number(today().slice(0, 4)) - 1}-12-31`;
@@ -34,21 +32,21 @@ export function balanceCard(accounts, done) {
       accountField(accounts),
       { name: "when", label: "Balance on", options: [
         ["today", "Today (from your bank's website or app)"],
-        ["start", "The start of this year (your January statement's starting balance)"],
+        ["start", "The start of this year (your balance at the end of December 31)"],
         ["date", "Another day (pick below)"],
       ] },
       { name: "date", label: "The day, if another day", type: "date" },
-      { name: "balance", label: "Balance in dollars (card or loan: what you owe)", required: true, inputmode: "decimal" },
+      { name: "balance", required: true, inputmode: "decimal",
+        label: "Balance in dollars (card or loan: what you owe; a minus sign if it owes you)" },
     ], "Set balance", async (v) => {
-      const typed = v.balance.trim();
-      // What you owe on a card or loan is stored as a negative balance.
-      const owed = OWED_KINDS.has(kinds.get(v.account_id)) && !typed.startsWith("-");
+      const kind = kinds.get(v.account_id);
       const saved = await setAccountBalance(Number(v.account_id), {
-        date: chosenDate(v), balance: owed ? `-${typed}` : typed,
+        date: chosenDate(v), balance_cents: bankBalanceToCents(v.balance, kind),
       });
+      const now = `Your balance today is ${formatBalance(saved.balance_now_cents, kind)}.`;
       await reload({ balanceDone: saved.adjustment_cents
-        ? `Added a balance adjustment of ${formatCents(saved.adjustment_cents)} on ${saved.date}.`
-        : "It already matched. Nothing was added." });
+        ? `Done: the balance on ${saved.date} now matches your bank. ${now}`
+        : `It already matched, so nothing was added. ${now}` });
     }),
     done ? h("p", { class: "ok", role: "status" }, done) : null);
 }

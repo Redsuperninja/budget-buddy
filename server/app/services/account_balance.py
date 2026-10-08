@@ -56,4 +56,5 @@ def set_balance(session: Session, account_id: int, data: BalanceSet) -> BalanceS
         balance_cents=data.balance_cents,
         adjustment_cents=difference,
         transaction_id=adjustment.id if adjustment else None,
+        balance_now_cents=balance_on(session, account_id, dt.date.today()),
     )

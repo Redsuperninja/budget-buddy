@@ -39,6 +39,13 @@ export function parseDollars(text) {
   return negative ? -cents : cents;
 }
 
+// A balance typed as the bank shows it, to cents. Cards and loans are typed as what you owe (a minus sign
+// if the card owes you), stored as negative when owed. Throws a plain-English error if it isn't an amount.
+export function bankBalanceToCents(text, kind) {
+  const cents = centsOrThrow(text, "balance");
+  return (kind === "credit_card" || kind === "loan") ? -cents || 0 : cents;
+}
+
 // parseDollars for form handlers: a plain-English error instead of null.
 export function centsOrThrow(text, what = "amount") {
   const cents = parseDollars(text);

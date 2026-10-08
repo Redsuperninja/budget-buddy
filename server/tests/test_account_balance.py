@@ -59,3 +59,25 @@ def test_bad_input(client, checking):
     both = {"date": "2026-01-01", "balance": "1", "balance_cents": 100}
     assert client.post(url(checking), json=both).status_code == 422
     assert client.post(url(999), json={"date": "2026-01-01", "balance": "1"}).status_code == 404
+
+
+def test_future_transactions_are_left_out_and_today_is_reported(client, checking, add_txn):
+    today = dt.date.today()
+    add_txn(
+        checking, -1_000, date=(today + dt.timedelta(days=30)).isoformat()
+    )  # a bill set up ahead
+    result = client.post(url(checking), json={"date": today.isoformat(), "balance": "50.00"}).json()
+    assert (result["adjustment_cents"], result["balance_now_cents"]) == (5_000, 5_000)
+
+
+def test_changing_an_older_day_moves_todays_balance(client, checking):
+    today = dt.date.today().isoformat()
+    client.post(url(checking), json={"date": today, "balance": "100.00"})
+    older = client.post(url(checking), json={"date": "2020-01-01", "balance": "20.00"}).json()
+    assert older["balance_now_cents"] == 12_000  # tell people to check today's again
+
+
+def test_a_card_that_owes_you(client, make_account):
+    card = make_account(name="Fake Card", kind="credit_card")["id"]
+    client.post(url(card), json={"date": "2026-01-01", "balance_cents": 2_000})
+    assert balance(client, card) == 2_000

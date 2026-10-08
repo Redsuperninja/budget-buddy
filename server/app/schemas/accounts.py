@@ -82,3 +82,5 @@ class BalanceSetResult(Schema):
     # The balance adjustment added on that day to make it match (0: it already did, none added).
     adjustment_cents: int
     transaction_id: int | None
+    # The balance at the end of today after this, which a change to an older day also moves.
+    balance_now_cents: int
