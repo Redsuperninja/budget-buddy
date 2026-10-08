@@ -14,13 +14,33 @@ Lists all your bank and savings accounts, and their current balances.
 4. Bank name is optional
 5. Click **Add account**
 
-### Record a starting balance
+### Match your bank's balance
 
-When you add a new account, record its starting balance:
+So the balance in Budget Buddy is the one your bank shows, tell it the balance once, and your transactions do the
+rest. On the **Accounts** tab, under **Match your bank's balance**:
 
-1. Go to the **Transactions** tab
-2. Add a transaction with type "Balance adjustment" for the opening balance
-3. This doesn't count as income or spending
+1. Pick the account.
+2. Pick when the balance is from:
+   - **Today:** the balance your bank's website or app shows now. Use the posted balance, not the "available"
+     one, and if you've already entered today's purchases, pick yesterday's balance (**Another day**) instead.
+   - **The start of this year:** your balance at the end of December 31, from your bank's history. Then import
+     or enter every transaction since January 1. (A statement's starting balance usually isn't the January 1
+     balance, because statements rarely start on the 1st.)
+   - **Another day**, like a statement's closing date, and pick the day. Then enter every transaction after it.
+3. Type the balance. For a credit card or loan, type what you **owe**; if the card owes you money (a credit),
+   put a minus sign in front. "$" and commas are fine.
+4. Click **Set balance**.
+
+Budget Buddy adds up the account's transactions up to that day and adds one **balance adjustment** for the
+difference, so the balance matches, and shows your balance today. Balance adjustments aren't counted as income or
+spending.
+
+- If the balance drifts later (a missed transaction, say), do it again with today's balance: only what's left over
+  is added.
+- If you later import older transactions, set today's balance again.
+- Set the earliest day first. If you change an older day afterwards, today's balance moves too, so check it.
+- Transactions dated after today (a bill you entered ahead) aren't in the balance for today, but they are in the
+  balance shown in the accounts list.
 
 ## Your transactions
 

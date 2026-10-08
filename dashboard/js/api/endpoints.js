@@ -6,6 +6,7 @@ import { api } from "./client.js";
 const LOCAL = "/api/local";
 
 // Accounts
+export const setAccountBalance = (id, json) => api("POST", `${LOCAL}/accounts/${id}/balance`, { json });
 export const listAccounts = () => api("GET", `${LOCAL}/accounts`);
 export const createAccount = (json) => api("POST", `${LOCAL}/accounts`, { json });
 

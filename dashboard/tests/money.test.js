@@ -3,7 +3,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { centsOrThrow, centsToInput, formatBalance, formatCents, parseDollars } from "../js/money.js";
+import {
+  bankBalanceToCents, centsOrThrow, centsToInput, formatBalance, formatCents, parseDollars,
+} from "../js/money.js";
 
 test("formatCents shows dollars with two decimals and thousands separators", () => {
   assert.equal(formatCents(0), "$0.00");
@@ -54,4 +56,18 @@ test("shortDollars keeps chart axes short, in whole dollars", async () => {
   assert.equal(shortDollars(100000), "$1k");
   assert.equal(shortDollars(-250000), "-$2.5k");
   assert.equal(shortDollars(250000000), "$2.5M");
+});
+
+test("bankBalanceToCents: cards and loans are typed as what you owe", () => {
+  const cases = [
+    ["1,234.56", "checking", 123456],
+    [" $250 ", "checking", 25000],
+    ["-20", "checking", -2000],
+    ["250", "credit_card", -25000],
+    ["-20", "credit_card", 2000],
+    ["$1,000.00", "loan", -100000],
+    ["0", "credit_card", 0],
+  ];
+  for (const [typed, kind, cents] of cases) assert.equal(bankBalanceToCents(typed, kind), cents, `${typed} ${kind}`);
+  assert.throws(() => bankBalanceToCents("lots", "checking"), /balance as a number/);
 });

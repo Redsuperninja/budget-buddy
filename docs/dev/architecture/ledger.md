@@ -43,6 +43,11 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 - **Accounts:** `GET/POST /api/local/accounts`, `GET/PATCH/DELETE /api/local/accounts/{id}`.
   - `balance_cents` is the sum of the account's transactions; record a starting balance as an `adjustment`.
   - An account with transactions can't be deleted.
+  - `POST /api/local/accounts/{id}/balance` `{date, balance_cents | balance}`: the bank's balance at the end of
+    `date` (today or earlier). Adds one `adjustment` dated `date` for the difference from the sum of the account's
+    transactions up to that day; nothing when it already matches. Returns `adjustment_cents`, `transaction_id`
+    and `balance_now_cents` (end of today; an older day's change moves it too) (`services/account_balance.py`).
+    The accounts list's `balance_cents` includes future-dated transactions; this end-of-day sum doesn't.
 - **Transactions:** `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`, `date_from`,
   `date_to`, `kind`, `q`, `sorted_by` (`rule` or `you`, [category-rules.md](category-rules.md)), `limit`, `offset`;
   newest first), `GET/PATCH/DELETE /api/local/transactions/{id}`.
