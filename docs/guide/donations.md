@@ -4,10 +4,7 @@
 > charity. It doesn't decide what you can deduct. Tax rules have many exceptions. Before you file,
 > check IRS Publication 526, your tax software, or a tax professional.
 
-Budget Buddy keeps a list of the gifts you give to charities and, for each tax year, tells you
-what proof to keep. Today you add gifts through the Home Base on your computer (the
-`/api/local/donations` part of the app). A screen for this in the computer-side dashboard comes
-later.
+Budget Buddy keeps a list of the gifts you give to charities and, for each tax year, tells you what proof to keep. Add gifts in the Budget Buddy dashboard on your computer.
 
 ## Logging a gift
 
@@ -84,8 +81,7 @@ summary doesn't show the note because the rule doesn't exist for 2025.
 | "Enter a gift on the day you actually gave it. A pledge counts once you pay it." | The date is in the future. Use the day you paid. |
 | "A donation amount must be more than zero..." | Enter the amount you gave. To undo a refunded gift, edit or delete it. |
 | "The amount can't be zero." | Enter the amount you gave, more than zero. |
-| "Send either amount_cents or amount, not both." | Enter the amount only once. |
 | "That receipt doesn't exist. It may have been deleted." | Pick a receipt that's still saved, or leave the receipt empty. |
 | "That donation doesn't exist. It may have been deleted." | The gift was already removed. Refresh your list. |
 | "Budget Buddy doesn't have tax rules for [year] yet. Years it has: ..." | Summaries work only for years that have a tax data file. Your gifts are still saved, and the summary will work once that year is added. |
-| A "not_this_computer" error | Donations can only be viewed and changed on the computer running the Home Base, not from another device. |
+| This page only works on this computer | Donations can only be viewed and changed on the computer running Budget Buddy, not from another device. |

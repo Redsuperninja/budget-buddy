@@ -98,7 +98,7 @@ def test_separate_debit_and_credit_columns(client, checking):
 
 
 def test_flip_sign_for_card_that_exports_charges_as_positive(client, make_account):
-    """ARCHITECTURE "Signs and balances": card charges are negative, payments positive."""
+    """ledger.md "Signs and balances": card charges are negative, payments positive."""
     card = make_account(name="Fake Card", kind="credit_card")["id"]
     body = (
         "Transaction Date,Description,Amount\n"

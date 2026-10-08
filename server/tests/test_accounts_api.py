@@ -43,8 +43,8 @@ def test_balance_is_sum_of_transactions(client, add_txn, make_account):
     assert balances == {checking: 98_450, other: 700}
 
 
-# Credit card sign convention (docs/ARCHITECTURE.md, "Signs and balances"): a negative card
-# balance is money owed. Charges are negative; payments and refunds are positive.
+# Credit card sign convention (docs/dev/architecture/ledger.md, "Signs and balances"): a
+# negative card balance is money owed. Charges are negative; payments and refunds are positive.
 CARD_EXAMPLE = [
     # (account, amount_cents, kind, transfer link key)
     ("checking", 200_000, "adjustment", None),  # opening balance $2,000.00

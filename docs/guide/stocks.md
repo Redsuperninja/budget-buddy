@@ -6,10 +6,7 @@
 
 Budget Buddy can keep a record of stocks and funds you buy and sell in a regular (taxable)
 brokerage account. It works out how much you gained or lost on each sale, whether that counts as
-short term or long term, and adds it all up for each tax year.
-
-Right now this is done through the Home Base's local API (see `server/README.md`). Screens on the
-computer dashboard come later.
+short term or long term, and adds it all up for each tax year. Enter your purchases and sales in the Budget Buddy dashboard on your computer.
 
 ## Entering a purchase
 

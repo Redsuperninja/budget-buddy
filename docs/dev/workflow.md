@@ -2,14 +2,14 @@
 
 Budget Buddy is built by a small team of **specialized AI agents** (Claude Code subagents) with a human in charge.
 Each agent has one job, a written brief, and limited tools, so it's always clear who did what and why.
-Agent briefs live in [`.claude/agents/`](../.claude/agents). They are plain text, so you can read and edit them.
+Agent briefs live in [`.claude/agents/`](../../.claude/agents). They are plain text, so you can read and edit them.
 
 ## The team
 
 | Agent | Job | Can edit code? | Model |
 | --- | --- | --- | --- |
-| `architect` | Breaks features into small PRs, keeps ARCHITECTURE/ROADMAP/ADRs current | Docs only | Opus |
-| `backend-engineer` | Home Base server (Python/FastAPI/SQLite) | Yes (`server/`) | Sonnet |
+| `architect` | Breaks features into small PRs, keeps `docs/dev/` architecture, ROADMAP and ADRs current | Docs only | Opus |
+| `backend-engineer` | Home Base server (Python/FastAPI/SQLite) and the web dashboard | Yes (`server/`, `dashboard/`) | Sonnet |
 | `mobile-engineer` | Phone app (Expo/React Native) | Yes (`mobile/`) | Sonnet |
 | `finance-tax-expert` | Budget math, tax categories & rules, checks correctness | Yes (budget/tax modules + tests) | Opus |
 | `security-reviewer` | Reviews every PR touching data, sync, auth or storage | No, review only | Opus |
@@ -29,10 +29,11 @@ those commits and decides which ones become pull requests and get merged on GitH
 
 1. **Plan:** `architect` picks the next roadmap item and writes a short task (goal, files, acceptance criteria).
 2. **Build:** the owning engineer agent implements it on a branch `feat/<short-name>`, with tests and docs:
-   ARCHITECTURE.md and the server/mobile README for API or data changes, plus a plain-English guide in
-   `docs/guide/` for anything a user will see.
-3. **Check:** `test-engineer` runs the tests; `security-reviewer` reviews if data/sync/auth/storage is touched;
-   `finance-tax-expert` reviews if money math or tax logic is touched.
+   the matching `docs/dev/architecture/<topic>.md` and the part's README (`server/`, `dashboard/`, `mobile/`,
+   `scripts/`) for API or data changes, plus a plain-English guide in `docs/guide/` (listed in its README) for
+   anything a user will see.
+3. **Check:** `test-engineer` runs the tests ([testing.md](testing.md)); `security-reviewer` reviews if
+   data/sync/auth/storage is touched; `finance-tax-expert` reviews if money math or tax logic is touched.
 4. **Commit:** `release-manager` commits the work to its local branch (aim for < ~400 changed lines), ticks the
    roadmap box, and adds a changelog line. Nothing is pushed.
 5. **Owner review:** the project owner reviews the local branch and decides when it's pushed, opened as a PR, and merged
@@ -54,7 +55,7 @@ those commits and decides which ones become pull requests and get merged on GitH
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.
 - **Never commit real personal/financial data**, keys, tokens, or `.env` files. Test data is fake.
 - Money is integer cents. Dates are ISO `YYYY-MM-DD`.
-- Small files, no repetition ([CONVENTIONS.md](CONVENTIONS.md)): one job per file, shared helpers instead of copies,
+- Small files, no repetition ([conventions.md](conventions.md)): one job per file, shared helpers instead of copies,
   one topic per doc.
 - Every PR explains *what* and *why* in words a non-programmer can follow.
 - Big decisions get an ADR in `docs/adr/` (one page: context, decision, consequences).

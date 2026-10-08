@@ -1,6 +1,6 @@
 """Monthly income and spending, worked out from the transactions.
 
-Rules (docs/ARCHITECTURE.md, "Transaction kinds"):
+Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
 - Only ``normal`` and ``refund`` transactions count. Transfers and adjustments (including
   opening balances) change balances but are never income or spending.
 - A normal transaction's category group decides: ``income`` is income; ``needs``, ``wants`` and

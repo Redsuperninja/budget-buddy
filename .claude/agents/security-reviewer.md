@@ -18,6 +18,8 @@ Check:
 - Pairing/sync: one-time codes expire, tokens stored hashed, payloads encrypted and authenticated, replay protection,
   private-network-only, device revocation works.
 - Input: upload type/size limits, path traversal, ORM/parameterized SQL only, CSV injection on export.
+- Static file serving (dashboard): allowlist only, no symlinks, paths stay inside the folder, CSP and CSRF intact.
+- Reference: `docs/dev/architecture/security.md` and sync contract §11 (`docs/api/sync-contract/`).
 - Logs: never amounts with descriptions, tokens, keys, or file contents.
 - Dependencies: pinned, reputable, no unneeded network access.
 - Duplicated security logic (envelope checks, input validation, auth) copied instead of shared: report it, since

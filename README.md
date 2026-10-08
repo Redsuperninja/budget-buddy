@@ -29,7 +29,7 @@ A private, local-first budgeting and tax-prep helper.
 3. Open the dashboard in your browser: <http://127.0.0.1:8765/>.
 4. Add accounts, transactions, and connect your phone.
 
-See [docs/guide/using-the-dashboard.md](docs/guide/using-the-dashboard.md) for details.
+Step-by-step help for everything: [the user guide](docs/guide/README.md).
 
 ## How it's organized
 
@@ -38,15 +38,16 @@ budget-buddy/
 ├── server/        Home Base: Python (FastAPI) + SQLite, runs on your PC
 ├── dashboard/     Web page for the computer: plain HTML/CSS/JS, talks to the Home Base over HTTP
 ├── mobile/        Phone app: Expo (React Native), iPhone + Android
-├── docs/          Architecture, decisions (ADRs), user guides, workflow
-├── scripts/       Setup, testing and demo-data helpers (see docs/TESTING.md)
+├── docs/          User guides (guide/), developer docs (dev/), sync contract, decisions (ADRs), roadmap
+├── scripts/       Setup, testing and demo-data helpers (see scripts/README.md)
 └── .claude/agents Specialized AI agents that build & maintain this project
 ```
 
-- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- All the docs at a glance: [docs/README.md](docs/README.md)
+- How it's built (for developers): [docs/dev/README.md](docs/dev/README.md)
 - Roadmap and what's next: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Try it out (early preview, demo data only): [docs/TESTING.md](docs/TESTING.md)
-- How the project is built and managed (agents, PRs): [docs/WORKFLOW.md](docs/WORKFLOW.md)
+- Try it out (early preview, demo data only): [docs/guide/set-up-for-testing.md](docs/guide/set-up-for-testing.md)
+- How the project is built and managed (agents, PRs): [docs/dev/workflow.md](docs/dev/workflow.md)
 
 ## Status
 
@@ -56,7 +57,7 @@ Early development. See the roadmap for what's done and what's next.
 
 The code in Budget Buddy is built by [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant.
 The design and every review are done by the project's owner, a human who decides what gets built and approves
-each change before it's merged. See [docs/WORKFLOW.md](docs/WORKFLOW.md) for how Claude's specialized agents
+each change before it's merged. See [docs/dev/workflow.md](docs/dev/workflow.md) for how Claude's specialized agents
 split the work.
 
 ## License

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Docs reorganized: `docs/guide/` is now a step-by-step user guide for people (with an index, tester pages, keeping your data safe, moving your data folder), and developer docs live in `docs/dev/` as small topic files; `docs/README.md` maps both.
 - Project layout: the web dashboard now lives in its own top-level `dashboard/` folder, separate from the server and the phone app. The server serves it from a fixed list of files (or runs API-only without it), and it has its own tests and checks (ADR-0005).
 - Code tidy-up: the pairing, bank CSV import and stocks code and the longest test files are split into smaller files with one job each; shared test helpers and one local-API helper for the scripts replace copied code. No behavior change.
 - Project conventions: small single-purpose files and no copy-paste, for both code and docs (`docs/CONVENTIONS.md`); every agent brief now follows and checks them.

@@ -77,7 +77,14 @@ foreach ($name in $merged) {
     }
     Write-Host "Delete merged branch $name"
     if ($Apply) {
-        if ($worktrees[$name]) { RunGit worktree remove $worktrees[$name] }
+        if ($worktrees[$name]) {
+            & git worktree remove $worktrees[$name]
+            if ($LASTEXITCODE) {
+                # Usually Windows holding the folder open (a terminal or editor inside it). Close it and run again.
+                Write-Host "Couldn't remove the worktree folder for $name; close anything using it and run again." -ForegroundColor Yellow
+                continue
+            }
+        }
         RunGit branch -D $name
     }
 }

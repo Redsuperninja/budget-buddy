@@ -1,0 +1,50 @@
+# Security and privacy
+
+Decisions: [ADR-0003](../../adr/0003-encryption-at-rest.md) (at rest), [ADR-0002](../../adr/0002-wifi-qr-sync.md)
+and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist for reviewers: sync contract §11.
+
+## At rest
+
+- The master key lives in the OS password vault (Windows Credential Manager, macOS Keychain, Linux Secret
+  Service, via `keyring`), never in files. The data folder holds only a `key-fingerprint` to check the key
+  belongs to it. Only derived keys (fields, files, backup) are kept in memory.
+- Sensitive columns (account numbers, notes, device sync keys, pairing secret keys) use the encrypted column
+  types in `app/crypto/fields.py`. Never add plaintext copies.
+- Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
+  names. The plain photo is never written to disk.
+- **Recovery phrase:** `python -m app recovery-phrase show` prints it after the user types `SHOW` (terminal
+  only, never a file, after checking it matches the data folder); `restore` puts the key back.
+- The memory key store is for automated tests only and needs a second switch ([../testing.md](../testing.md)).
+- Backup copies `budget.db.bak-0001`/`-0002` predate encryption and are plaintext; the Home Base tells the user
+  so they can delete them.
+- Planned: an encrypted single-file backup export the user can copy to a USB drive.
+
+## What stays plain text in `budget.db`
+
+These stay readable so Budget Buddy can search, sort and add them up:
+
+- every amount and date, and each transaction's description
+- shop names on receipts (`receipts.merchant`)
+- employer names and gross/net pay on paychecks (`paychecks.employer`)
+- account names and banks (`accounts.name`, `accounts.institution`)
+- charity names on donations (`donations.organization`)
+- stock symbols and lots
+
+Encrypting more of them, or the whole database, is
+[issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28). Users are told to keep the data folder out
+of cloud-synced folders and to protect their Windows account with a password.
+
+## On the network
+
+| Routes | Who may call |
+| --- | --- |
+| `GET /api/health`, `POST /api/pair`, `POST /api/sync/*` | This computer and the home network (private addresses only; others get 403 `not_home_network`) |
+| Everything else (dashboard pages, `/api/local/...`) | This computer only (loopback peer; 403 `not_this_computer`) |
+
+Every route also checks the `Host` header, and dashboard writes check `Origin` and the CSRF token
+([server.md](server.md), [dashboard.md](dashboard.md)). The home-network listener is opened only while it's
+needed ([pairing.md](pairing.md)). Sync payloads are encrypted and replay-checked ([sync.md](sync.md)).
+
+## Logs
+
+Never log secrets, tokens, keys, file contents, pairing payloads, or amounts together with descriptions.

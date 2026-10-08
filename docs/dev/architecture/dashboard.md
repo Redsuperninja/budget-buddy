@@ -1,0 +1,53 @@
+# Dashboard (how the server serves it)
+
+The dashboard is its own part, [`dashboard/`](../../../dashboard/README.md): plain HTML, CSS and JavaScript, no
+build step, no internet requests (system fonts, local files only). It talks to the server only through the HTTP
+API ([ADR-0005](../../adr/0005-dashboard-own-folder.md)). Its screens cover accounts, transactions, categories,
+bank CSV import, paychecks, donations, stocks and connecting a phone. Its code layout and tests are in
+`dashboard/README.md`; this page is the server half.
+
+## Finding and serving the files (`app/dashboard_files.py`, `routers/dashboard.py`)
+
+- At startup the server looks for `BUDGET_BUDDY_DASHBOARD_DIR`, else `<repo>/dashboard` (worked out from the
+  code's location, not the current directory), and builds an **allowlist** once: `index.html`, top-level
+  `*.css` and `js/**/*.js`. No symlinks are followed, every resolved path must stay inside the folder,
+  dotfiles, `tests/` and `package.json` are never listed, and file count and size are capped. The check is
+  repeated when a file is read.
+- `GET /` serves `index.html`; `GET /static/{path}` serves the other allowlisted files. The page loads
+  `/static/js/main.js`.
+- **API-only mode.** If the folder is missing, isn't a folder, or has no `index.html`, the server logs one
+  plain-English warning, `/` returns a small 404 page ("the dashboard files weren't found") with the same
+  headers, `/static/*` returns 404, and every `/api/...` route works. A non-editable `pip install` doesn't
+  include `dashboard/`, so it runs API-only until the installer (roadmap #22) ships it.
+
+## Serving contract (both sides test their half)
+
+- `index.html` contains `<meta name="csrf-token" content="__CSRF_TOKEN__">`; the server swaps in this run's token.
+- Assets live under `/static/`. No inline script or style. Every request is same-origin.
+- Writes send the token back in `X-CSRF-Token`.
+
+## Headers
+
+Every page response carries a strict Content-Security-Policy (`default-src 'self'`, no inline script,
+`frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and the HTML is
+`Cache-Control: no-store`. There are no CORS headers, so other websites can't read anything.
+
+## CSRF and DNS rebinding (issue #4)
+
+Met by `LocalAccessMiddleware` (`app/network.py`) plus the CSP:
+
+- Host allowlist and loopback-only peer ([server.md](server.md)).
+- `Origin` must match on every write.
+- A per-run CSRF token (random, kept in `app.state`, never logged) must come back in `X-CSRF-Token`, compared
+  in constant time. Failure is 403 `bad_origin`.
+- The page gets the token from its meta tag; the helper scripts get it from `GET /api/local/csrf-token`
+  (this computer only).
+
+## Rules for dashboard code
+
+- Build the page with `textContent` only, never `innerHTML` with API data.
+- Every route string lives in `dashboard/js/api/endpoints.js`.
+- The pairing QR is drawn on the server (`segno`) and returned as SVG; the dashboard just shows it.
+
+Server tests use a fake dashboard folder (`fake_dashboard` in `server/tests/conftest.py`), never the real one
+([../testing.md](../testing.md)).
