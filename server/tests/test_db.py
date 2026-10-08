@@ -36,6 +36,7 @@ from app.models import (
 EXPECTED_TABLES = {
     "accounts",
     "categories",
+    "category_rules",
     "transactions",
     "csv_import_mappings",
     "paychecks",

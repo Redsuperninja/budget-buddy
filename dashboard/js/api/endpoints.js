@@ -15,6 +15,12 @@ export const createCategory = (json) => api("POST", `${LOCAL}/categories`, { jso
 export const updateCategory = (id, json) => api("PATCH", `${LOCAL}/categories/${id}`, { json });
 export const monthlySummary = (month) => api("GET", `${LOCAL}/summary/monthly?month=${month}`);
 
+// Auto-sort rules ("description contains ..." -> category)
+export const listRules = () => api("GET", `${LOCAL}/category-rules`);
+export const createRule = (json) => api("POST", `${LOCAL}/category-rules`, { json });
+export const deleteRule = (id) => api("DELETE", `${LOCAL}/category-rules/${id}`);
+export const applyRules = () => api("POST", `${LOCAL}/category-rules/apply`);
+
 // Transactions (params: URLSearchParams)
 export const listTransactions = (params) => api("GET", `${LOCAL}/transactions?${params}`);
 export const createTransaction = (json) => api("POST", `${LOCAL}/transactions`, { json });

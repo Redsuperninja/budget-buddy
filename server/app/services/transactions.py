@@ -17,6 +17,7 @@ from app.models import (
 )
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
+from app.services.category_rules import load_matcher
 
 # Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
 # so unlink first.
@@ -108,6 +109,8 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
 
 def create_transaction(session: Session, data: TransactionCreate) -> Transaction:
     values = data.model_dump(exclude={"amount"})
+    if "category_id" not in data.model_fields_set and values["kind"] == TransactionKind.NORMAL:
+        values["category_id"] = load_matcher(session)(values["description"])  # rules, if any
     _check_kind_rules(values["kind"], values["amount_cents"], values["category_id"])
     _check_references(session, values)
     transaction = Transaction(**values, source=TransactionSource.MANUAL)

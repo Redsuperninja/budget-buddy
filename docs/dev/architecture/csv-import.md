@@ -33,5 +33,6 @@ takes `save_mapping` and `skip_invalid_rows`.
 - **Limits:** 5 MB and 10,000 rows per file. UTF-8, UTF-16 and Windows-1252 are accepted.
 - **Formula guard:** a description starting with `=`, `+`, `-` or `@` gets a `'` in front, so a spreadsheet never
   runs it as a formula after export.
-- Imported rows are `normal` transactions with no category and `source = csv`. Transfers aren't detected
+- Imported rows are `normal` transactions with `source = csv`, sorted into a category by the
+  [auto-categorization rules](category-rules.md) where one matches (no category otherwise). Transfers aren't detected
   automatically; the user links them ([ledger.md](ledger.md)).

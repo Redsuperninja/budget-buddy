@@ -96,6 +96,8 @@ class ImportPreview(Schema):
 
 class ImportResult(Schema):
     imported: int
+    # Of the imported rows, how many an auto-categorization rule put in a category.
+    categorized: int
     skipped_duplicates: int
     skipped_invalid: int
     mapping_saved: bool

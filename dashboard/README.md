@@ -50,5 +50,5 @@ All under `js/` (each file starts with a one-line purpose):
 To add a screen: create `screens/<name>.js` with a `render` function and add one line to `main.js`. To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Import bank file, Connect phone,
+Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Auto-sort (rules), Import bank file, Connect phone,
 Paychecks, Donations, Stocks.

@@ -1,7 +1,8 @@
 """Bank CSV import: prepare the file, preview the rows, then add them.
 
-Imported rows are ordinary ("normal") transactions with ``source = "csv"``. Transfers aren't
-detected here; link them afterwards. Reading the file is in ``csv_parsing`` and column guessing
+Imported rows are ordinary ("normal") transactions with ``source = "csv"``, put in a category by
+the auto-categorization rules where one matches (``category_rules``). Transfers aren't detected
+here; link them afterwards. Reading the file is in ``csv_parsing`` and column guessing
 in ``csv_columns``. Nothing here logs file contents, descriptions or amounts.
 """
 
@@ -24,6 +25,7 @@ from app.schemas.csv_import import (
     PreviewRow,
 )
 from app.services.accounts import get_account
+from app.services.category_rules import load_matcher
 from app.services.csv_columns import build_mapping, columns_used, detect_columns
 from app.services.csv_parsing import (
     RowProblem,
@@ -165,18 +167,21 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
             "or choose to skip those rows.",
         )
     new = [(r, fp) for r, fp in p.rows if r.status == "new"]
-    session.add_all(
+    match = load_matcher(session)
+    added = [
         Transaction(
             account_id=account_id,
             date=r.date,
             amount_cents=r.amount_cents,
             description=r.description,
+            category_id=match(r.description),
             source=TransactionSource.CSV,
             kind=TransactionKind.NORMAL,
             import_fingerprint=fp,
         )
         for r, fp in new
-    )
+    ]
+    session.add_all(added)
     if choices.save_mapping:
         saved = session.get(CsvImportMapping, account_id) or CsvImportMapping(account_id=account_id)
         saved.mapping = p.mapping.model_dump_json()
@@ -193,6 +198,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
         ) from None
     return ImportResult(
         imported=len(new),
+        categorized=sum(t.category_id is not None for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),
         mapping_saved=choices.save_mapping,
