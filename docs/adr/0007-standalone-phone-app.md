@@ -1,6 +1,6 @@
 # ADR-0007: A fuller phone app that can work on its own
 
-**Status:** Proposed, 2026-10-07. Needs the owner's decision before any code.
+**Status:** Accepted, 2026-10-07 (the owner approved the two-step plan).
 
 ## Context
 Today the phone is a companion ([ADR-0002](0002-wifi-qr-sync.md), [ADR-0004](0004-sync-contract-v1.md)): it
@@ -15,7 +15,7 @@ Two shapes:
 2. **Standalone (phone can be the only device).** The phone has its own encrypted database and runs the budget
    and tax logic itself. A Home Base becomes optional: pair one later and the two sync both ways.
 
-## Decision (proposed)
+## Decision
 - **Do it in steps.** First Companion+ (shape 1), then Standalone (shape 2) on top of the same pieces, so each
   step ships something usable.
 - **Phone storage:** an on-device SQLite database (Expo SQLite), encrypted with a key kept in the phone's secure
