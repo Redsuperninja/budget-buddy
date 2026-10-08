@@ -8,6 +8,10 @@ Start here, then pick the section that fits what you're doing.
 
 Set up Budget Buddy on your Windows computer, then use the dashboard (web page) to enter your money.
 
+1. [Start Budget Buddy](start-budget-buddy.md) — For everyday use: double-click to start; how to stop it.
+
+**Trying it out with made-up data?**
+
 1. [Set up for testing](set-up-for-testing.md) — Install Python, Node and Expo Go; run the setup script; add a firewall rule (first time only).
 2. [Start a test session](start-a-test-session.md) — Open three windows; load demo data; start your phone app.
 3. [Open the dashboard](open-the-dashboard.md) — What you'll see; the tabs along the top; where to type the address.

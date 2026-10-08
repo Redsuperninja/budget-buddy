@@ -5,12 +5,7 @@
 #   - its own port (8766; the real Home Base uses 8765),
 # so demo data can never end up in your real data.
 
-$ErrorActionPreference = "Stop"
-
-$RepoRoot = Split-Path -Parent $PSScriptRoot
-$ServerDir = Join-Path $RepoRoot "server"
-$MobileDir = Join-Path $RepoRoot "mobile"
-$Python = Join-Path $ServerDir ".venv\Scripts\python.exe"
+. "$PSScriptRoot\paths.ps1"
 
 $TestDataDir = Join-Path $env:LOCALAPPDATA "BudgetBuddy-Test"
 $TestPort = 8766

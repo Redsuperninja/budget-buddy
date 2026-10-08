@@ -30,7 +30,7 @@ computer has no friendly screen and the phone only shows sample data.
    #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
 
 **D. Easy start (next).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
-1. **22a. One start script:** sets itself up on first run, starts the Home Base, opens the dashboard, and stops
+1. ~~**22a. One start script:**~~ sets itself up on first run, starts the Home Base, opens the dashboard, and stops
    cleanly; replaces the separate setup and start steps for everyday use.
 2. **22. One-click Windows start:** Start menu and desktop shortcut, a tray icon (open, stop), and an optional
    start-with-Windows setting.
@@ -96,7 +96,7 @@ items (20, 21).
   - Sync now button done (feat/phone-sync); reminders still to do
 
 ## Phase 6: Make it easy
-- [ ] 22a. One start script: first-run setup, start, open the dashboard, stop cleanly — *backend-engineer*
+- [x] 22a. One start script: first-run setup, start, open the dashboard, stop cleanly — *backend-engineer*
 - [ ] 22. One-click Windows start (shortcut / tray), auto-start option — *backend-engineer*
 - [ ] 23. Plain-English user guide with screenshots — *docs-writer*
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
