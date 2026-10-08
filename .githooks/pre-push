@@ -1,0 +1,16 @@
+#!/bin/sh
+# Refuse to push to main or delete it from this computer: changes reach main only through a pull request.
+# GitHub can't enforce this on a private repo without GitHub Pro, so this hook does it locally.
+# Turn it on once per clone: git config core.hooksPath .githooks
+zero=0000000000000000000000000000000000000000
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    if [ "$local_sha" = "$zero" ]; then
+      echo "Refusing to delete main." >&2
+    else
+      echo "Refusing to push to main directly. Push a branch and open a pull request instead." >&2
+    fi
+    exit 1
+  fi
+done
+exit 0

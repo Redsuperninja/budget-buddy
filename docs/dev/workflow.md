@@ -44,6 +44,25 @@ those commits and decides which ones become pull requests and get merged on GitH
    would do): it deletes local branches and agent worktrees whose PR merged, never anything unpushed, and moves
    any branches stacked on them onto the new `main`.
 
+### Rules for `main`
+- **Changes reach `main` only through a pull request.** The repo is private on GitHub's free plan, which has no
+  branch protection or rulesets, so this is enforced on each computer by the `.githooks/pre-push` hook (refuses
+  pushing to `main` and deleting it). Turn it on once per clone: `git config core.hooksPath .githooks`.
+  Moving to GitHub Pro (or a public repo) would let GitHub enforce it too, with the CI checks required.
+- **Coverage** can't drop below the floors in [testing.md](testing.md#coverage-rules); CI fails if it does.
+- **Merged branches are deleted** by GitHub automatically ("Automatically delete head branches" is on).
+
+### Merging a stack safely
+GitHub squash-merges a PR by replaying it onto `main`. If the next PR in a stack still contains the earlier
+PR's original commits, that replay can add the same lines twice. So for each PR, bottom first:
+1. Rebase what's left of the stack onto the new `main` (`git rebase --onto origin/main <merged branch> <top>
+   --update-refs`, or `scripts\dev\tidy-branches.ps1 -Apply`) and force-push those branches.
+2. Point the next PR at `main`, wait until GitHub says it can merge, then squash-merge it.
+3. Check `main` now has exactly the branch's content: `git rev-parse origin/main^{tree}` equals
+   `git rev-parse <branch>^{tree}`.
+Never use `gh pr merge --delete-branch` on a stack: deleting a branch yourself closes the PRs stacked on it
+(GitHub's automatic deletion moves them to `main` instead).
+
 ### Branches: independent first, stack only when needed
 - A feature that doesn't need unmerged work branches from `main`, so it can be reviewed and merged on its own.
 - Work that needs an unmerged branch is **stacked** on it. Its PR targets that branch; when the lower PR merges,
