@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, StringConstraints, model_validator
 
-from app.models import TransactionKind, TransactionSource
+from app.models import CategorySource, TransactionKind, TransactionSource
 from app.schemas.common import (
     Cents,
     DollarText,
@@ -80,6 +80,11 @@ class TransactionOut(Schema):
     transfer_pair_id: int | None
     # Set when this payment was sorted into charity as a donation.
     donation_id: int | None = None
+    # How the category was set: "rule" (auto-sorted, by ``sorted_by_rule_id``) or "you".
+    category_source: CategorySource | None = None
+    sorted_by_rule_id: int | None = None
+    # Only right after a pick by hand: the text of an auto-sort rule Budget Buddy just learned.
+    learned_rule: str | None = None
     notes: str | None
     created_at: dt.datetime
     updated_at: dt.datetime

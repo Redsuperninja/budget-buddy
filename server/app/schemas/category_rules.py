@@ -26,6 +26,10 @@ class RuleOut(Schema):
     id: int
     pattern: str
     category_id: int
+    # Made by Budget Buddy from categories you kept picking by hand.
+    learned: bool
+    # How many transactions this rule sorted that still have its sorting (list only).
+    sorted_count: int = 0
     created_at: dt.datetime
     updated_at: dt.datetime
 

@@ -44,7 +44,8 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   - `balance_cents` is the sum of the account's transactions; record a starting balance as an `adjustment`.
   - An account with transactions can't be deleted.
 - **Transactions:** `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`, `date_from`,
-  `date_to`, `kind`, `q`, `limit`, `offset`; newest first), `GET/PATCH/DELETE /api/local/transactions/{id}`.
+  `date_to`, `kind`, `q`, `sorted_by` (`rule` or `you`, [category-rules.md](category-rules.md)), `limit`, `offset`;
+  newest first), `GET/PATCH/DELETE /api/local/transactions/{id}`.
   - Send `amount_cents`, or `amount` as dollar text (`"-12.34"`).
   - Adjustments can't have a category. A `refund` must be a positive amount.
 

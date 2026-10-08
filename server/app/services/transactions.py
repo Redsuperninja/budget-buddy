@@ -10,6 +10,7 @@ from app.errors import ApiError, not_found
 from app.models import (
     Category,
     CategoryGroup,
+    CategorySource,
     Paycheck,
     Transaction,
     TransactionKind,
@@ -17,7 +18,8 @@ from app.models import (
 )
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
-from app.services.category_rules import load_matcher
+from app.services.category_learning import picked_by_hand
+from app.services.category_rules import load_matcher, rule_fields
 
 # Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
 # so unlink first.
@@ -44,6 +46,7 @@ class TransactionFilters:
     search: str | None = None
     limit: int = 100
     offset: int = 0
+    sorted_by: CategorySource | None = None  # "rule": auto-sorted; "you": picked by hand
 
 
 def get_transaction(session: Session, transaction_id: int) -> Transaction:
@@ -101,6 +104,8 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
         # SQLite's LIKE is case-insensitive for ASCII letters.
         pattern = f"%{_escape_like(filters.search)}%"
         query = query.where(Transaction.description.like(pattern, escape="\\"))
+    if filters.sorted_by is not None:
+        query = query.where(Transaction.category_source == filters.sorted_by.value)
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))
     items = session.scalars(
@@ -116,11 +121,13 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
 def create_transaction(session: Session, data: TransactionCreate) -> Transaction:
     values = data.model_dump(exclude={"amount"})
     if "category_id" not in data.model_fields_set and values["kind"] == TransactionKind.NORMAL:
-        values["category_id"] = load_matcher(session)(values["description"])  # rules, if any
+        values |= rule_fields(load_matcher(session)(values["description"]))  # rules, if any
     _check_kind_rules(values["kind"], values["amount_cents"], values["category_id"])
     _check_references(session, values)
     transaction = Transaction(**values, source=TransactionSource.MANUAL)
     session.add(transaction)
+    if "category_id" in data.model_fields_set:
+        transaction.learned_rule = picked_by_hand(session, transaction)
     session.commit()
     return transaction
 
@@ -153,6 +160,8 @@ def update_transaction(
     _check_references(session, changes)
     for field, value in changes.items():
         setattr(transaction, field, value)
+    if "category_id" in changes:
+        transaction.learned_rule = picked_by_hand(session, transaction)
     session.commit()
     return transaction
 

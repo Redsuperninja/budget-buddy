@@ -1,14 +1,13 @@
-// Transactions: filter by account and month, change a category, sort a payment into charity, add one by hand.
+// Transactions: filter by account, month and how they were sorted, change a category, mark a gift, add one by hand.
 
-import {
-  createTransaction, listAccounts, listCategories, listTransactions, updateTransaction,
-} from "../api/endpoints.js";
+import { createTransaction, listAccounts, listCategories, listTransactions } from "../api/endpoints.js";
 import { currentMonth, monthRange, today } from "../dates.js";
 import { fill, h, showError } from "../dom.js";
 import { accountField, categoryField, idOrNull, pickOptions } from "../fields.js";
-import { form, saveWithNote } from "../form.js";
+import { form } from "../form.js";
 import { card, empty, select, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
+import { categoryPicker } from "./category-picker.js";
 import { charityCell } from "./give-to-charity.js";
 
 export async function render(root) {
@@ -19,20 +18,13 @@ export async function render(root) {
   const list = h("div", {});
   const accountFilter = select(pickOptions(accounts, "All accounts"));
   const monthFilter = h("input", { type: "month", value: currentMonth() });
+  const sortedFilter = select([["", "Any way"], ["rule", "Auto-sorted"], ["you", "Picked by you"]]);
   const accountNames = new Map(accounts.map((a) => [a.id, a.name]));
-
-  const categoryPicker = (t) => {
-    const picker = select(pickOptions(categories, "(no category)"),
-      { value: t.category_id || "", "aria-label": "Category" });
-    const note = h("span", { class: "muted" });
-    picker.addEventListener("change", () => saveWithNote(note, () =>
-      updateTransaction(t.id, { category_id: idOrNull(picker.value) })));
-    return h("span", {}, picker, note);
-  };
 
   async function refresh() {
     const params = new URLSearchParams({ limit: "200" });
     if (accountFilter.value) params.set("account_id", accountFilter.value);
+    if (sortedFilter.value) params.set("sorted_by", sortedFilter.value);
     if (monthFilter.value) {
       const { from, to } = monthRange(monthFilter.value);
       params.set("date_from", from);
@@ -46,7 +38,7 @@ export async function render(root) {
         page.items.length
           ? table(["Date", "What", "Account", "Amount", "Category", "Gift"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
-                categoryPicker(t), charityCell(t, refresh)]), [3])
+                categoryPicker(t, categories), charityCell(t, refresh)]), [3])
           : empty("No transactions for this choice."),
         page.total > page.items.length
           ? empty(`Showing ${page.items.length} of ${page.total}. Pick a month to narrow it down.`) : null);
@@ -56,10 +48,12 @@ export async function render(root) {
   }
   accountFilter.addEventListener("change", refresh);
   monthFilter.addEventListener("change", refresh);
+  sortedFilter.addEventListener("change", refresh);
 
   fill(root,
     card("Transactions",
-      h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter)),
+      h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter),
+        h("label", {}, "Category set", sortedFilter)),
       list),
     accounts.length
       ? card("Add a transaction", form([

@@ -9,7 +9,11 @@ router = APIRouter(prefix="/api/local/category-rules", tags=["category rules"])
 
 @router.get("")
 def list_rules(session: SessionDep) -> list[RuleOut]:
-    return service.list_rules(session)
+    counts = service.sorted_counts(session)
+    return [
+        RuleOut.model_validate(rule).model_copy(update={"sorted_count": counts.get(rule.id, 0)})
+        for rule in service.list_rules(session)
+    ]
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
