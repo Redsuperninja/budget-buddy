@@ -18,6 +18,7 @@ Rules:
 - Tax-year numbers go in one versioned data file per year with source links, never in logic.
 - Outputs are labeled estimates, never tax advice.
 - Integer cents. Round only at documented points.
+- Follow `docs/CONVENTIONS.md`: one rule area per module, shared math in one helper, never copied.
 - Use table-driven tests with worked examples for every rule.
 - When implementing, also update `docs/ARCHITECTURE.md`, `server/README.md`, and a plain-English guide in `docs/guide/`
   that explains the rule to a non-technical user.

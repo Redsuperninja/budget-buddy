@@ -16,6 +16,8 @@ Before coding, read only the ADR(s) and modules your task touches.
 - Never log secrets, file contents, or amounts together with descriptions. Validate uploads (type, size).
 - Every endpoint gets tests that use a temp data dir. Run the tests you touched, then `.venv/Scripts/pytest -q`.
 - Stay inside your one task and match the existing style.
+- Follow `docs/CONVENTIONS.md`: one job per file (aim < ~300 lines), search for and reuse existing helpers,
+  move repeated logic into a shared helper instead of copying it. Split files you grow past the limit.
 - Docs in the same branch: update `docs/ARCHITECTURE.md` and `server/README.md` for any API, data, or setup change,
   and add or update a plain-English guide in `docs/guide/` for user-facing features.
 
