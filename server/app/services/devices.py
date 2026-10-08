@@ -1,20 +1,20 @@
 """Paired phones: look up by token, list, and remove (sync contract §3.10)."""
 
 import datetime as dt
-import hashlib
 import hmac
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.crypto.b64url import b64u_decode
+from app.crypto.hashing import hash_secret
 from app.errors import ApiError, not_found
 from app.models import Device, SeenNonce
 
 
 def hash_token(token: str) -> str:
     """``sha256`` of the token's ASCII text, lowercase hex. Only this is ever stored."""
-    return hashlib.sha256(token.encode("ascii")).hexdigest()
+    return hash_secret(token)
 
 
 def authenticate_token(session: Session, token: object) -> Device:

@@ -4,7 +4,6 @@ Nothing here logs or returns the code or keys except the payload that has to car
 Times are Unix seconds passed in by the caller (so tests can control the clock).
 """
 
-import hashlib
 import os
 from pathlib import Path
 
@@ -14,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.crypto._fs import write_private_bytes
 from app.crypto.b64url import b64u_decode, b64u_encode
+from app.crypto.hashing import hash_secret
 from app.models import Device, PairingNonce, PairingSession
 from app.services.envelope import CONTRACT
 
@@ -40,7 +40,7 @@ def load_server_id(data_dir: Path) -> str:
 
 
 def hash_code(code: str) -> str:
-    return hashlib.sha256(code.encode("ascii")).hexdigest()
+    return hash_secret(code)
 
 
 def end_session(session: Session, session_id: int, now: int, *, cancel: bool) -> None:

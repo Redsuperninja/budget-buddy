@@ -67,3 +67,9 @@ export const listLots = () => api("GET", `${LOCAL}/stocks/lots`);
 export const createLot = (json) => api("POST", `${LOCAL}/stocks/lots`, { json });
 export const createSale = (json) => api("POST", `${LOCAL}/stocks/sales`, { json });
 export const stockGains = (year) => api("GET", `${LOCAL}/stocks/gains/${year}`);
+
+// Other computers on the home network (ADR-0009)
+export const newJoinCode = () => api("POST", `${LOCAL}/remote-computers/join-code`);
+export const listComputers = () => api("GET", `${LOCAL}/remote-computers`);
+export const removeComputer = (id) => api("POST", `${LOCAL}/remote-computers/${id}/remove`);
+export const joinThisComputer = (json) => api("POST", "/api/remote/join", { json });

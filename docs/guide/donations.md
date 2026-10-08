@@ -134,4 +134,4 @@ summary doesn't show the note because the rule doesn't exist for 2025.
 | "This payment is recorded as a donation. Remove the donation first..." | Remove the gift on the Donations tab, change the payment, then sort it into charity again. |
 | "That donation doesn't exist. It may have been deleted." | The gift was already removed. Refresh your list. |
 | "Budget Buddy doesn't have tax rules for [year] yet. Years it has: ..." | Summaries work only for years that have a tax data file. Your gifts are still saved, and the summary will work once that year is added. |
-| This page only works on this computer | Donations can only be viewed and changed on the computer running Budget Buddy, not from another device. |
+| This page only works on this computer | Use the computer running Budget Buddy, or [connect this one](use-on-another-computer.md) first. |

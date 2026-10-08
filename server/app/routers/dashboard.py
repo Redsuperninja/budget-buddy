@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 
 from app.dashboard_files import CONTENT_TYPES
 from app.errors import not_found
+from app.remote_access import TOKEN_OK
 
 router = APIRouter(tags=["dashboard"], include_in_schema=False)
 
@@ -45,7 +46,10 @@ def index(request: Request) -> Response:
     headers = {**SECURITY_HEADERS, "Cache-Control": "no-store"}
     if html is None:  # API-only: no dashboard folder (ADR-0005)
         return Response(NO_DASHBOARD_PAGE, 404, media_type=HTML, headers=headers)
-    html = html.replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token)
+    # Only when the access rules said so (this computer, or a joined one): another computer that
+    # hasn't joined gets the page without a token, so it can only join.
+    token_ok = getattr(request.state, TOKEN_OK, False)
+    html = html.replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token if token_ok else "")
     return Response(html, media_type=HTML, headers=headers)
 
 

@@ -28,14 +28,16 @@ Add and track your accounts, spending, and income in the Budget Buddy dashboard.
 5. [Get a suggested budget](suggested-budget.md) — A 50/30/20 plan from your last three months; use it with one click.
 6. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
 
-## Your phone
+## Your phone and other computers
 
-Connect your phone to see your budget and send receipts to your computer.
+Connect your phone to see your budget and send receipts to your computer, or open Budget Buddy on another
+computer at home.
 
 1. [Connect your phone](connect-your-phone.md) — Pair once per phone; Wi-Fi requirements; what happens if it doesn't work.
 2. [Sync your phone](sync-your-phone.md) — What goes both ways; privacy; removing a phone.
 3. [Phone home screen](phone-home-screen.md) — What Budget Buddy shows on your phone.
 4. [Manage connected phones](manage-connected-phones.md) — See and remove phones that are connected.
+5. [Use Budget Buddy on another computer](use-on-another-computer.md) — Connect a laptop with a one-time code; what it can do; removing it.
 
 ## Taxes (estimates, not tax advice)
 

@@ -45,11 +45,15 @@ of cloud-synced folders and to protect their Windows account with a password.
 | Routes | Who may call |
 | --- | --- |
 | `GET /api/health`, `POST /api/pair`, `POST /api/sync/*` | This computer and the home network (private addresses only; others get 403 `not_home_network`) |
-| Everything else (dashboard pages, `/api/local/...`) | This computer only (loopback peer; 403 `not_this_computer`) |
+| Dashboard pages, `/static/*`, `POST /api/remote/join` | This computer, and the home network (the page has no CSRF token until a computer joins) |
+| `/api/local/...` | This computer, and computers joined with a one-time code, except pairing, joining and the scripts' token ([remote-computers.md](remote-computers.md); 403 `not_this_computer`) |
 
 Every route also checks the `Host` header, and dashboard writes check `Origin` and the CSRF token
 ([server.md](server.md), [dashboard.md](dashboard.md)). The home-network listener is opened only while it's
 needed ([pairing.md](pairing.md)). Sync payloads are encrypted and replay-checked ([sync.md](sync.md)).
+
+Joined computers talk plain HTTP on the home network (no app-level encryption, unlike phones), so the guide
+limits it to trusted home networks ([ADR-0009](../../adr/0009-other-computers.md)).
 
 ## Logs
 

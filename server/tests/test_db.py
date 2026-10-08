@@ -42,6 +42,7 @@ EXPECTED_TABLES = {
     "csv_import_mappings",
     "paychecks",
     "receipts",
+    "remote_computers",
     "donations",
     "stock_lots",
     "stock_sales",

@@ -235,11 +235,21 @@ def test_a_file_in_place_of_the_folder_means_api_only(tmp_path):
 
 # --- this computer only ---
 
-LOCAL_PATHS = ["/", "/static/js/main.js", "/static/app.css", "/api/local/csrf-token"]
+# Another computer that hasn't joined (ADR-0009) gets the page and its files, but no token and no
+# data; the scripts' token stays on this computer.
+PAGE_PATHS = ["/", "/static/js/main.js", "/static/app.css"]
 
 
-@pytest.mark.parametrize("path", LOCAL_PATHS)
-def test_dashboard_is_this_computer_only(make_client, path):
+@pytest.mark.parametrize("path", PAGE_PATHS)
+def test_other_computers_get_only_the_page(make_client, path):
+    lan = make_client("192.168.1.50", base_url="http://192.168.1.20:8765")
+    response = lan.get(path)
+    assert response.status_code == 200
+    assert lan.app.state.csrf_token not in response.text
+
+
+@pytest.mark.parametrize("path", ["/api/local/csrf-token", "/api/local/accounts"])
+def test_dashboard_api_is_this_computer_only(make_client, path):
     lan = make_client("192.168.1.50", base_url="http://192.168.1.20:8765")
     response = lan.get(path)
     assert response.status_code == 403

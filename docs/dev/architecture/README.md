@@ -53,6 +53,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [dashboard.md](dashboard.md) | How the server finds and serves the dashboard, headers, CSRF, API-only mode |
 | [phone-app.md](phone-app.md) | The phone app: offline snapshot, screens, reminders |
 | [pairing.md](pairing.md) | Pairing a phone: server side, devices, home-network listener, phone side |
+| [remote-computers.md](remote-computers.md) | Other computers on the home network: join codes, the cookie, what they may do |
 | [sync.md](sync.md) | Syncing: server side (§4.4 order, limits, receipts), routes, phone side |
 | [security.md](security.md) | Encryption at rest, what stays plain text, which routes face the network |
 | [data-model.md](data-model.md) | Tables and key fields |

@@ -20,6 +20,7 @@ from app.lan import LanAddress, detect_lan_ip, host_header
 from app.listeners import LanListener
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
+from app.remote_access import RemoteAccess
 from app.routers import (
     accounts,
     budget_plan,
@@ -34,6 +35,7 @@ from app.routers import (
     pairing,
     paychecks,
     receipts,
+    remote_computers,
     stocks,
     summary,
     sync,
@@ -42,6 +44,7 @@ from app.routers import (
 )
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
+from app.services.remote_computers import JoinCodes, authenticate
 
 
 def ensure_data_dir(path: Path) -> None:
@@ -94,12 +97,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.state.receipt_store = receipt_store
+    app.state.join_codes = JoinCodes()  # other computers' one-time codes, memory only (ADR-0009)
+    app.state.join_limiter = RateLimiter(limit=10, window_seconds=60)  # per address
+
+    def signed_in(token: str | None, address: str | None) -> bool:
+        with Session(engine) as session:
+            return authenticate(session, token, address)
+
     # Middleware added last runs first: the home-network check, then the Host rules.
     app.add_middleware(
         LocalAccessMiddleware,
         port=settings.port,
         lan_host=lambda: host_header(app.state.lan.ip, settings.port) if app.state.lan.ip else None,
         csrf_token=lambda: app.state.csrf_token,
+        remote=RemoteAccess(signed_in),
     )
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     install_error_handlers(app)
@@ -120,5 +131,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
     app.include_router(stocks.router)
+    app.include_router(remote_computers.router)
     app.include_router(dashboard.router)
     return app
