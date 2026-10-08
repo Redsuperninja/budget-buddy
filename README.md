@@ -16,6 +16,7 @@ A private, local-first budgeting and tax-prep helper.
 | --- | --- |
 | Money in | Paychecks (gross, taxes withheld, net, 401k/HSA) |
 | Accounts | Checking & savings — import bank CSV exports or enter manually |
+| Devices | Phone app over home Wi-Fi; the dashboard on other computers at home after a one-time code |
 | Spending | Receipts (photo + amount + category), auto-categorized transactions |
 | Budget | Suggested budget from your real income & spending, monthly targets vs. actual |
 | Taxes | Charitable donations (typed in, or sorted from a payment), stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |

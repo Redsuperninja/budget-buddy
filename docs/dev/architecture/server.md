@@ -39,7 +39,7 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | `routers/` | One per area; thin, no business logic |
 | `services/` | Business logic, one module per area |
 | `crypto/` | Keys, key stores, encrypted columns and files, recovery phrase, base64url |
-| `network.py`, `lan.py`, `listeners.py` | Access rules middleware, home-network address, the second listener |
+| `network.py`, `remote_access.py`, `lan.py`, `listeners.py` | Access rules middleware, what joined computers may do, home-network address, the second listener |
 | `bodylimit.py`, `ratelimit.py`, `errors.py` | Streaming body limits, per-address rate limit, error shape |
 | `money.py`, `shares.py` | Cents and share-quantity parsing |
 | `dashboard_files.py` | Finds the dashboard folder and lists the files it may serve |
@@ -53,8 +53,9 @@ own page ([ledger](ledger.md), [budget summary](budget-summary.md), [CSV import]
 [receipts](receipts.md), [paychecks](paychecks.md), [donations](donations.md), [stocks](stocks.md),
 [pairing](pairing.md)).
 
-- **This computer only.** Anything not from a loopback address gets 403 `not_this_computer`, except the phone's
-  routes: `/api/health`, `/api/pair` and `/api/sync/*` ([security.md](security.md)).
+- **This computer only,** unless it's a phone route (`/api/health`, `/api/pair`, `/api/sync/*`) or a computer
+  joined with a one-time code ([remote-computers.md](remote-computers.md)). Otherwise anything not from a
+  loopback address gets 403 `not_this_computer` ([security.md](security.md)).
 - **Host allowlist.** Requests must be addressed to `127.0.0.1:{port}`, `localhost:{port}` or `[::1]:{port}`
   (plus the home-network address for the phone routes), else 403 `bad_host`. This stops DNS-rebinding pages.
 - **Writes need a matching `Origin`** (`http://` plus one of those hosts) and the per-run CSRF token in

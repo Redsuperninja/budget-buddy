@@ -1,4 +1,5 @@
-// Starts the dashboard: the sections of the navigation bar and the pages inside each, in order.
+// Starts the dashboard: the sections of the navigation bar and the pages inside each, in order. Another
+// computer that hasn't joined yet (no CSRF token in the page) sees only the join page (ADR-0009).
 
 import { start } from "./router.js";
 import { addThemePicker } from "./theme-picker.js";
@@ -8,6 +9,8 @@ import * as connectPhone from "./screens/connect-phone.js";
 import * as donations from "./screens/donations.js";
 import * as home from "./screens/home.js";
 import * as importCsv from "./screens/import.js";
+import * as join from "./screens/join.js";
+import * as otherComputers from "./screens/other-computers.js";
 import * as paychecks from "./screens/paychecks.js";
 import * as plan from "./screens/plan.js";
 import * as rules from "./screens/rules.js";
@@ -15,7 +18,11 @@ import * as stocks from "./screens/stocks.js";
 import * as taxes from "./screens/taxes.js";
 import * as transactions from "./screens/transactions.js";
 
-start([
+// Connecting phones and computers only works on the Budget Buddy computer itself.
+const onThisComputer = ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname);
+const joinedOrLocal = document.querySelector('meta[name="csrf-token"]').content !== "";
+
+const sections = [
   { id: "home", label: "Home", pages: [{ id: "home", label: "Home", render: home.render }] },
   { id: "money", label: "Money", pages: [
     { id: "transactions", label: "Transactions", render: transactions.render },
@@ -33,9 +40,12 @@ start([
     { id: "paychecks", label: "Paychecks", render: paychecks.render },
     { id: "stocks", label: "Stocks", render: stocks.render },
   ] },
-  { id: "phone", label: "Phone", pages: [
+  { id: "devices", label: "Devices", pages: [
     { id: "phone", label: "Connect phone", render: connectPhone.render },
+    { id: "computers", label: "Other computers", render: otherComputers.render },
   ] },
-]);
+];
 
 addThemePicker();
+if (joinedOrLocal) start(onThisComputer ? sections : sections.filter((s) => s.id !== "devices"));
+else join.render(document.getElementById("view"));

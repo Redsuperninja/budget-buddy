@@ -78,4 +78,4 @@ The deposit you're trying to link isn't in your transactions. Make sure it's imp
 
 **This page only works on this computer**
 
-Paychecks can only be viewed and changed on the computer running Budget Buddy, not from another device.
+Use the computer running Budget Buddy, or [connect this one](use-on-another-computer.md) first.

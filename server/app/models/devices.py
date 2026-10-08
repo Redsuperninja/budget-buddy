@@ -37,6 +37,20 @@ class Device(TimestampMixin, Base):
     nonce_watermark: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
 
+class RemoteComputer(TimestampMixin, Base):
+    """Another computer allowed to use the dashboard over the home network (ADR-0009). Only a hash
+    of its cookie token is kept; removing it clears the hash, so the token stops working at once."""
+
+    __tablename__ = "remote_computers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
+    paired_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())
+    last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+    revoked_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+
+
 class PairingSession(Base):
     """One QR code's pairing attempt (sync contract §2.3). Times are Unix seconds.
 

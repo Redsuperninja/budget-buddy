@@ -6,7 +6,7 @@ Pairing connects your phone to Budget Buddy on this computer. You do it once per
 
 1. Make sure both your phone and computer are on the same home Wi-Fi (not a guest network)
 2. Open Budget Buddy on your computer (go to http://127.0.0.1:8765/)
-3. Click the **Phone** button at the top
+3. Click **Devices** at the top (the **Connect phone** tab opens first)
 4. Click **Show pairing code**
 5. Budget Buddy shows a one-time QR code that works for 10 minutes
 6. On your phone:

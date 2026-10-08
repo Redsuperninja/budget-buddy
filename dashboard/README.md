@@ -34,7 +34,7 @@ All under `js/` (each file starts with a one-line purpose):
 
 | File | Job |
 | --- | --- |
-| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Phone) and the pages in each, in order |
+| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order; the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
 | `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page), `reload()` and `onLeave()` for screens |
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |
@@ -56,5 +56,6 @@ server route, add a function to `api/endpoints.js`.
 
 Screens, by section: **Home** (monthly summary, charts and balances); **Money**: Transactions (with a Charity column to
 sort a payment into charity), Accounts, Import bank file, Auto-sort (rules); **Budget**: Categories, Suggested budget;
-**Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks; **Phone**:
-Connect phone.
+**Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks; **Devices**:
+Connect phone, Other computers (`other-computers.js`). `join.js` is the join page for another computer
+([ADR-0009](../docs/adr/0009-other-computers.md)).

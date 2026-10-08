@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Other computers: open Budget Buddy in a web browser on another computer at home. On the Budget Buddy computer, **Devices**, **Other computers**, **Allow another computer** shows an address and a one-time code; the other computer types the code once and can then use the whole dashboard, except connecting phones or more computers. Remove a computer at any time. For home networks you trust only (ADR-0009).
 - Gift categories: **Mark as gift** now asks whether it's a gift to a charity or a personal gift (a present for someone). A charity gift moves the payment to a new **Charitable giving** category; a personal gift moves it to **Gifts** with no tax record. Both are "wants" categories Budget Buddy adds the first time.
 - Donations from payments: on the Transactions page, **Mark as gift** turns a payment into a cash gift to charity, with the charity's name, the day you gave it and how much of the payment was the gift (for example, a $100 gala ticket where $60 was the gift). The gift shows on the Donations page with the paperwork to keep, the payment still counts as spending in its budget, and gifts can now be removed. An estimate, not tax advice.
 - Tidier dashboard: five buttons along the top (Home, Money, Budget, Taxes, Phone) instead of twelve. Money, Budget and Taxes show their pages as tabs underneath, and old links to a page still work.

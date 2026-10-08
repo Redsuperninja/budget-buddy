@@ -35,8 +35,8 @@ The phone keeps both in secure storage. The dashboard immediately shows "New pho
 
 ## Home-network listener (`app/listeners.py`, `app/lan.py`)
 
-- The main server listens on `127.0.0.1` only. While a pairing session is live, or while at least one phone is
-  paired, `python -m app` also opens a second listener on this computer's own home-network address
+- The main server listens on `127.0.0.1` only. While a pairing session or a computer join code is live, or while
+  at least one phone is paired or computer joined ([remote-computers.md](remote-computers.md)), `python -m app` also opens a second listener on this computer's own home-network address
   (`BUDGET_BUDDY_LAN_IP`, or detected), **never `0.0.0.0`**, and closes it when neither is true.
 - It is re-checked when pairing starts, a phone is removed, and the device list is read. There is no timer: a
   listener for an expired, unused QR is closed at the next check.

@@ -7,6 +7,8 @@ from collections.abc import Callable
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.remote_access import JOIN_PATH
+
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(net)
     for net in (
@@ -172,6 +174,7 @@ class LocalAccessMiddleware:
         port: int,
         lan_host: Callable[[], str | None] | None = None,
         csrf_token: Callable[[], str] | None = None,
+        remote=None,
     ) -> None:
         self.app = app
         self.hosts = allowed_hosts(port)
@@ -182,6 +185,9 @@ class LocalAccessMiddleware:
         # The per-run CSRF token the dashboard page sends back on every write. No token means
         # no dashboard write can ever pass.
         self.csrf_token = csrf_token or (lambda: "")
+        # Other computers on the home network (``app.remote_access.RemoteAccess``, ADR-0009).
+        # None: this computer only.
+        self.remote = remote
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in ("http", "websocket"):
@@ -197,19 +203,32 @@ class LocalAccessMiddleware:
             await self.app(scope, receive, send)
             return
 
+        origins = self.origins
         client = scope.get("client")
         if not is_loopback_address(client[0] if client else None):
-            await _refuse(scope, receive, send, "not_this_computer", NOT_THIS_COMPUTER_MESSAGE)
-            return
+            lan_host = self.lan_host()
+            refusal = (
+                self.remote.refusal(scope, host.lower(), lan_host)
+                if self.remote is not None
+                else ("not_this_computer", NOT_THIS_COMPUTER_MESSAGE)
+            )
+            if refusal is not None:
+                await _refuse(scope, receive, send, *refusal)
+                return
+            origins = frozenset({f"http://{lan_host}"})
 
         if scope.get("method", "GET") not in SAFE_METHODS:
             origin = _header(scope, b"origin")
-            if origin is None or origin.lower() not in self.origins:
+            if origin is None or origin.lower() not in origins:
                 await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
                 return
             sent = _header(scope, b"x-csrf-token") or ""
             expected = self.csrf_token()
-            if not expected or not hmac.compare_digest(sent.encode(), expected.encode()):
+            # Joining is the one write with no token yet: the page only gets one after joining.
+            joining = scope["path"] == JOIN_PATH
+            if not joining and (
+                not expected or not hmac.compare_digest(sent.encode(), expected.encode())
+            ):
                 await _refuse(scope, receive, send, "bad_origin", BAD_ORIGIN_MESSAGE)
                 return
 

@@ -7,9 +7,10 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 1. Start Budget Buddy on your computer (the Home Base server)
 2. Open a web browser (Chrome, Edge, Firefox, Safari — any browser works)
 3. Go to http://127.0.0.1:8765/ or type that address in the address bar
-4. You'll see the Budget Buddy dashboard with five buttons at the top: **Home**, **Money**, **Budget**, **Taxes** and **Phone**
+4. You'll see the Budget Buddy dashboard with five buttons at the top: **Home**, **Money**, **Budget**, **Taxes** and **Devices**
 
-**Your data stays on this computer.** The dashboard only works when you open it from this computer. You can't access it from other computers or your phone.
+**Your data stays on this computer.** The dashboard works on this computer, and on other computers at home only
+after you connect them with a one-time code ([use Budget Buddy on another computer](use-on-another-computer.md)).
 
 ## Charts
 
@@ -29,7 +30,7 @@ right: **Match my computer**, **Light** or **Dark**. Your choice is remembered o
 
 ## Finding your way around
 
-The five buttons at the top each open a section. **Money**, **Budget** and **Taxes** have a few pages each: when
+The buttons at the top each open a section. **Money**, **Budget** and **Taxes** have a few pages each: when
 you open one, a row of tabs appears just below the buttons. Click a tab to switch pages.
 
 - **Home:** your monthly budget: money in, money spent, money saved, how much of each budget you've used, what
@@ -47,7 +48,9 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   - **Donations:** gifts to charity and the proof to keep
   - **Paychecks:** pay stubs and year-to-date totals
   - **Stocks:** purchases and sales; gains and losses
-- **Phone:** pair your phone so it can see your budget
+- **Devices** (only on the Budget Buddy computer)
+  - **Connect phone:** pair your phone so it can see your budget
+  - **Other computers:** let another computer at home open Budget Buddy
 
 Receipts are added from your phone.
 
@@ -55,7 +58,9 @@ Receipts are added from your phone.
 
 **"This page only works on this computer"**
 
-The dashboard only works when you open it from this computer. You can't use it from your phone, another computer, or over the internet. Open http://127.0.0.1:8765/ in a browser on the same computer where Budget Buddy is running.
+Open http://127.0.0.1:8765/ in a browser on the computer where Budget Buddy is running. To use another computer,
+connect it first ([use Budget Buddy on another computer](use-on-another-computer.md)). It never works over the
+internet.
 
 **The page won't load**
 

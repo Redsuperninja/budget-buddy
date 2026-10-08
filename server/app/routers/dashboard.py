@@ -45,7 +45,9 @@ def index(request: Request) -> Response:
     headers = {**SECURITY_HEADERS, "Cache-Control": "no-store"}
     if html is None:  # API-only: no dashboard folder (ADR-0005)
         return Response(NO_DASHBOARD_PAGE, 404, media_type=HTML, headers=headers)
-    html = html.replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token)
+    # Another computer that hasn't joined yet gets the page without a token: it can only join.
+    joined = getattr(request.state, "remote_signed_in", True)
+    html = html.replace(TOKEN_PLACEHOLDER, request.app.state.csrf_token if joined else "")
     return Response(html, media_type=HTML, headers=headers)
 
 

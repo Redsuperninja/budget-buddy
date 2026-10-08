@@ -67,12 +67,14 @@ The full module map is in [server.md](../docs/dev/architecture/server.md).
 
 ## API by area
 
-Every `/api/local/...` route answers this computer only; common rules are in
+Every `/api/local/...` route answers this computer, and joined computers on the home network (ADR-0009) except
+for pairing and joining; common rules are in
 [server.md](../docs/dev/architecture/server.md). With `BUDGET_BUDDY_DEV_MODE=true`, `/docs` lists every route.
 
 | Area | Routes and rules |
 | --- | --- |
 | Accounts, transactions, transfers | [ledger.md](../docs/dev/architecture/ledger.md) |
+| Other computers (join codes, `/api/remote/join`) | [remote-computers.md](../docs/dev/architecture/remote-computers.md) |
 | Categories, monthly summary, budget plan | [budget-summary.md](../docs/dev/architecture/budget-summary.md) |
 | Suggested budget | [budget-engine.md](../docs/dev/architecture/budget-engine.md) |
 | Auto-categorization rules | [category-rules.md](../docs/dev/architecture/category-rules.md) |

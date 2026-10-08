@@ -121,12 +121,15 @@ class LanListener:
             self._start(ip)
 
     def sync_from_database(self) -> None:
-        """Re-check whether the listener is wanted (a live pairing or a paired phone)."""
+        """Re-check whether the listener is wanted: a live pairing or join code, a paired phone,
+        or a joined computer."""
         from app.services.pairing_sessions import lan_wanted
+        from app.services.remote_computers import network_wanted
 
         state = self._app.state
+        now = state.clock()
         with Session(state.engine) as session:
-            wanted = lan_wanted(session, state.clock())
+            wanted = lan_wanted(session, now) or network_wanted(session, state.join_codes, now)
         self.sync(wanted, state.lan.refresh() if wanted else state.lan.ip)
 
     def _start(self, ip: str) -> None:
