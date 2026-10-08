@@ -39,7 +39,16 @@ those commits and decides which ones become pull requests and get merged on GitH
    (after CI passes). Agents only push or merge when the owner asks.
 6. **Clean up:** PRs are squash-merged, and GitHub deletes the branch automatically after the merge. The merged
    PR keeps the full record (commits, description, reviews, checks), and its branch can be restored from the PR
-   page if ever needed. Local branches and agent workspaces are removed once their PR has merged.
+   page if ever needed. Then run `scripts\dev\tidy-branches.ps1 -Apply` (without `-Apply` it only shows what it
+   would do): it deletes local branches and agent worktrees whose PR merged, never anything unpushed, and moves
+   any branches stacked on them onto the new `main`.
+
+### Branches: independent first, stack only when needed
+- A feature that doesn't need unmerged work branches from `main`, so it can be reviewed and merged on its own.
+- Work that needs an unmerged branch is **stacked** on it. Its PR targets that branch; when the lower PR merges,
+  GitHub retargets the next one to `main`. Merge stacks bottom-first.
+- The repo sets `rebase.updateRefs`, so one `git rebase` moves a whole stack and every branch label in it
+  follows. After the bottom PR is squash-merged, `tidy-branches.ps1` does this for you.
 
 ## Rules every agent follows
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.
