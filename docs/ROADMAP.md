@@ -32,8 +32,10 @@ computer has no friendly screen and the phone only shows sample data.
 **D. Easy start (next).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
 1. ~~**22a. One start script:**~~ sets itself up on first run, starts the Home Base, opens the dashboard, and stops
    cleanly; replaces the separate setup and start steps for everyday use.
-2. **22. One-click Windows start:** Start menu and desktop shortcut, a tray icon (open, stop), and an optional
-   start-with-Windows setting.
+2. **22. Desktop app ([ADR-0008](adr/0008-desktop-app.md), proposed):** `Budget Buddy.exe` with its own window
+   showing the dashboard, no Python install needed; Start menu and desktop shortcut.
+3. **22b. Light start at login:** an optional tray icon that starts with Windows and only fully starts Budget
+   Buddy when you open it.
 
 **E. Bank data, free and open source first ([ADR-0006](adr/0006-bank-connections.md)).** Checking, savings and
 investment data from banks like Chase and Wells Fargo without hand-mapping CSV files.
@@ -97,7 +99,8 @@ items (20, 21).
 
 ## Phase 6: Make it easy
 - [x] 22a. One start script: first-run setup, start, open the dashboard, stop cleanly — *backend-engineer*
-- [ ] 22. One-click Windows start (shortcut / tray), auto-start option — *backend-engineer*
+- [ ] 22. Desktop app: `Budget Buddy.exe` with its own window (pywebview + PyInstaller), shortcuts — *backend-engineer* + *security-reviewer*
+- [ ] 22b. Light start at login: tray icon, full start on open, start-with-Windows setting — *backend-engineer* + *security-reviewer*
 - [ ] 23. Plain-English user guide with screenshots — *docs-writer*
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
