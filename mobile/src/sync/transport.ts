@@ -53,7 +53,7 @@ const utf8Length = (text: string): number => new TextEncoder().encode(text).leng
 /**
  * Read the body while counting real bytes, and stop (abort) as soon as it is over the limit.
  * Uses the streaming reader when this fetch has one. React Native's built-in fetch may not, in which case
- * we fall back to reading the whole text and then measuring its UTF-8 size (see mobile/README.md).
+ * we fall back to reading the whole text and then measuring its UTF-8 size (see docs/dev/architecture/sync.md).
  */
 async function readCapped(res: Response, controller: AbortController, maxBytes: number): Promise<string> {
   const declared = Number(res.headers?.get?.('content-length'));

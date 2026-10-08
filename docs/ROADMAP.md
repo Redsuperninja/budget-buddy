@@ -1,7 +1,7 @@
 # Roadmap
 
 Each line is planned as **one small pull request**. Owner = the specialized agent that leads it
-(see [WORKFLOW.md](WORKFLOW.md)).
+(see [dev/workflow.md](dev/workflow.md)).
 
 ## What's next (milestones)
 
@@ -44,7 +44,7 @@ computer has no friendly screen and the phone only shows sample data.
 - [x] 5. Accounts + transactions API (manual entry) — *backend-engineer*
 - [x] 5b. Categories API (list, add, rename, monthly budget) + monthly income/spending summary — *backend-engineer* + *finance-tax-expert*
   - Adjustments (including opening balances) change balances but are never counted as income or spending.
-    Transfers are excluded too (see "Transaction kinds" in ARCHITECTURE.md).
+    Transfers are excluded too (see "Transaction kinds" in [dev/architecture/ledger.md](dev/architecture/ledger.md)).
 - [x] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*

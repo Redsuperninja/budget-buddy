@@ -66,7 +66,7 @@ deductions.
 
 It also checks **Social Security**. Social Security tax is only charged on wages up to a yearly
 limit ($184,500 in 2026, so at most $11,439.00 of tax). The numbers come from the tax-year files
-(see [tax-data.md](tax-data.md)).
+(see [dev/tax-data.md](dev/tax-data.md)).
 
 - **More than one job, too much in total:** each employer withholds on its own, so together they
   can take out more than the maximum. You can usually get the extra back as a credit on your

@@ -19,7 +19,7 @@ export function accountKindLabel(kind: AccountKind): string {
   return KIND_LABELS[kind];
 }
 
-/** Cards and loans: negative means money owed (docs/ARCHITECTURE.md, "Signs and balances"). */
+/** Cards and loans: negative means money owed (docs/dev/architecture/ledger.md, "Signs and balances"). */
 export function isDebtKind(kind: AccountKind): boolean {
   return kind === 'credit_card' || kind === 'loan';
 }

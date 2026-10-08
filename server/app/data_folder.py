@@ -40,7 +40,7 @@ _SYNC_FOLDER_NAMES = {
 _MACOS_ICLOUD_OPTIONAL = ("Desktop", "Documents")
 
 MOVE_HELP = (
-    'See "Moving your data folder" in the Home Base guide (server/README.md) for how to move it.'
+    'See "Moving your data folder" in docs/dev/settings.md for how to move it.'
 )
 
 

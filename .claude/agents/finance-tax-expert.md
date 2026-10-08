@@ -18,9 +18,10 @@ Rules:
 - Tax-year numbers go in one versioned data file per year with source links, never in logic.
 - Outputs are labeled estimates, never tax advice.
 - Integer cents. Round only at documented points.
-- Follow `docs/CONVENTIONS.md`: one rule area per module, shared math in one helper, never copied.
+- Follow `docs/dev/conventions.md`: one rule area per module, shared math in one helper, never copied.
 - Use table-driven tests with worked examples for every rule.
-- When implementing, also update `docs/ARCHITECTURE.md`, `server/README.md`, and a plain-English guide in `docs/guide/`
+- Tax-year files are explained in `docs/dev/tax-data.md`.
+- When implementing, also update the matching `docs/dev/architecture/<topic>.md`, and a plain-English guide in `docs/guide/`
   that explains the rule to a non-technical user.
 
 When reviewing, read the diff only. Check math and edge cases (leap years, holding-period boundaries,

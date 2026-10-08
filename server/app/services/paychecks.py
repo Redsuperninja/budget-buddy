@@ -1,6 +1,6 @@
 """Paychecks: what you earned, what was taken out, and what reached your bank.
 
-Rules (see "Paychecks" in docs/ARCHITECTURE.md):
+Rules (see docs/dev/architecture/paychecks.md):
 - Gross minus every tax and deduction must equal net, to the cent. No rounding anywhere.
 - A paycheck is never income in budget totals. Income comes only from bank transactions, so a
   paycheck linked to its deposit is counted once (the deposit), and an unlinked one adds nothing.
