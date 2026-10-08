@@ -26,9 +26,13 @@ const scripts = served.filter((f) => f.endsWith(".js"));
 const read = (file) => readFileSync(file, "utf8");
 const name = (file) => relative(ROOT, file).replaceAll("\\", "/");
 
+// SVG elements need the SVG namespace, a fixed name that is never fetched; only js/charts/svg.js has it.
+const SVG_NAMESPACE = '"http://www.w3.org/2000/svg"';
+
 test("no file asks the internet for anything", () => {
   for (const file of served) {
-    assert.doesNotMatch(read(file), /https?:\/\/|@import|url\(|["'`(=]\/\/[\w.-]/, name(file));
+    const text = name(file) === "js/charts/svg.js" ? read(file).replace(SVG_NAMESPACE, "") : read(file);
+    assert.doesNotMatch(text, /https?:\/\/|@import|url\(|["'`(=]\/\/[\w.-]/, name(file));
   }
 });
 

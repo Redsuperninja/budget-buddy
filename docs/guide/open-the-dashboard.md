@@ -11,6 +11,17 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 
 **Your data stays on this computer.** The dashboard only works when you open it from this computer. You can't access it from other computers or your phone.
 
+## Charts
+
+The **Home** page has charts:
+
+- **Needs, wants and savings** and **Budget and actual by category:** a bar for what you've spent this month,
+  and a short upright line where your budget is. If the bar goes past the line, you're over budget (the amount
+  on the right also says "over").
+- **The last 12 months:** lines for money in, spending and saving. Point at a month to see its exact numbers.
+
+Click **Show as table** on any chart to see the same numbers as a list.
+
 ## Light or dark
 
 Budget Buddy follows your computer's light or dark setting. To pick one yourself, use **Colors** at the top

@@ -14,6 +14,7 @@ export const listCategories = () => api("GET", `${LOCAL}/categories`);
 export const createCategory = (json) => api("POST", `${LOCAL}/categories`, { json });
 export const updateCategory = (id, json) => api("PATCH", `${LOCAL}/categories/${id}`, { json });
 export const monthlySummary = (month) => api("GET", `${LOCAL}/summary/monthly?month=${month}`);
+export const monthlyTrend = (end) => api("GET", `${LOCAL}/summary/trend?end=${end}&months=12`);
 export const getBudgetPlan = () => api("GET", `${LOCAL}/budget/plan`);
 export const saveBudgetPlan = (json) => api("PUT", `${LOCAL}/budget/plan`, { json });
 export const budgetSuggestion = (month) => api("GET", `${LOCAL}/budget/suggestion?month=${month}`);

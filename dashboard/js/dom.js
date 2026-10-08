@@ -18,7 +18,7 @@ export function h(tag, attrs, ...children) {
 }
 
 // Adds children (strings, nodes, nested lists); null, undefined and false are skipped.
-function append(el, children) {
+export function append(el, children) {
   for (const child of children.flat(Infinity)) {
     if (child === null || child === undefined || child === false) continue;
     el.append(child instanceof Node ? child : document.createTextNode(String(child)));

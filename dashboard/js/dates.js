@@ -18,3 +18,11 @@ export function monthRange(month) {
   const [year, m] = month.split("-").map(Number);
   return { from: `${month}-01`, to: `${month}-${pad(new Date(year, m, 0).getDate())}` };
 }
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// "2026-02" -> "Feb" (chart labels); January also shows its year: "Jan 2026".
+export function monthLabel(month) {
+  const [year, m] = month.split("-");
+  return m === "01" ? `Jan ${year}` : MONTHS[Number(m) - 1];
+}

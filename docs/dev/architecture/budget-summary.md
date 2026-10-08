@@ -7,6 +7,8 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
 
 - `GET/POST /api/local/categories`, `GET/PATCH /api/local/categories/{id}`.
 - `GET /api/local/summary/monthly?month=YYYY-MM`: income, spending and savings for that month.
+- `GET /api/local/summary/trend?end=YYYY-MM&months=N` (1 to 24, default 12): income, spending and saved for each
+  month up to and including `end`, oldest first, by the same rules (`services/trend.py`). Used by the charts.
 - `GET/PUT /api/local/budget/plan`: `{"planned_income_cents": int | null}`, the planned monthly income that
   percentage budgets are shares of (one row in `budget_plan`).
 

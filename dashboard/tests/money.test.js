@@ -45,3 +45,13 @@ test("centsOrThrow explains a bad amount in plain English", () => {
   assert.throws(() => centsOrThrow("lots"), /Please enter the amount as a number, like 12.50\./);
   assert.throws(() => centsOrThrow("x", "budget"), /Please enter the budget as a number/);
 });
+
+test("shortDollars keeps chart axes short, in whole dollars", async () => {
+  const { shortDollars } = await import("../js/money.js");
+  assert.equal(shortDollars(0), "$0");
+  assert.equal(shortDollars(95000), "$950");
+  assert.equal(shortDollars(123456), "$1.2k");
+  assert.equal(shortDollars(100000), "$1k");
+  assert.equal(shortDollars(-250000), "-$2.5k");
+  assert.equal(shortDollars(250000000), "$2.5M");
+});

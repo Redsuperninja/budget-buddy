@@ -32,7 +32,7 @@ a reason in the PR.
 | Part | Floor | Where it's set | Check locally |
 | --- | --- | --- | --- |
 | Server | 94% of lines in `app/` (96% when set) | `[tool.coverage.report] fail_under` in `server/pyproject.toml` | `.venv\Scripts\pytest --cov` |
-| Dashboard | 100% of lines, branches and functions in the logic modules `money.js`, `dates.js`, `percent.js` (screens need a browser, so they're checked by the static rules instead) | `coverage` script in `dashboard/package.json` | `npm run coverage` |
+| Dashboard | 100% of lines, branches and functions in the logic modules `money.js`, `dates.js`, `percent.js`, `theme.js`, `charts/scale.js` (screens need a browser, so they're checked by the static rules instead) | `coverage` script in `dashboard/package.json` | `npm run coverage` |
 | Desktop | 95% of lines in `budget_buddy_desktop/` (98% when set; the on-screen tray loop is checked by hand) | `[tool.coverage.report] fail_under` in `desktop/pyproject.toml` | `.venv\Scripts\pytest --cov` |
 | Phone | statements 90%, branches 80%, functions 90%, lines 92% | `jest.coverageThreshold` in `mobile/package.json` | `npm test -- --coverage` |
 

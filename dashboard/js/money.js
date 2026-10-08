@@ -13,6 +13,15 @@ export function formatBalance(cents, kind) {
   return formatCents(cents);
 }
 
+// For chart axes, in whole dollars: 95000 -> "$950", 123456 -> "$1.2k", 250000000 -> "$2.5M".
+export function shortDollars(cents) {
+  const sign = cents < 0 ? "-" : "";
+  const dollars = Math.round(Math.abs(cents) / 100);
+  if (dollars < 1000) return `${sign}$${dollars}`;
+  const [value, unit] = dollars < 1e6 ? [dollars / 1e3, "k"] : [dollars / 1e6, "M"];
+  return `${sign}$${Number(value.toFixed(1))}${unit}`;
+}
+
 // For text boxes: 25000 -> "250.00".
 export function centsToInput(cents) {
   return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;

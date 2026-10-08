@@ -19,7 +19,7 @@ node --test
 Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no packages):
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
-`money.test.js` and `dates.test.js` cover the money and date logic.
+`money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js` and `charts.test.js` cover the logic.
 
 ## What the server expects
 
@@ -46,6 +46,7 @@ All under `js/` (each file starts with a one-line purpose):
 | `dates.js` | Today, current month, month ranges |
 | `labels.js` | Plain-English names for account types, groups and so on |
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
+| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
 | `theme.js`, `theme-picker.js` | Light, dark or match the computer: the saved choice (pure, tested) and the header picker. Colors live in `app.css` as `light-dark()` pairs |
 | `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js` and `phone-list.js` are parts of the Import and Connect phone screens |
 

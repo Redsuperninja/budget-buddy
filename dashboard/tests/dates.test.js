@@ -18,3 +18,10 @@ test("today and currentMonth use the shapes the server expects", () => {
   assert.ok(today().startsWith(currentMonth()));
   assert.equal(Number(currentMonth().slice(0, 4)), thisYear());
 });
+
+test("monthLabel gives short chart labels, with the year on January", async () => {
+  const { monthLabel } = await import("../js/dates.js");
+  assert.equal(monthLabel("2026-02"), "Feb");
+  assert.equal(monthLabel("2026-12"), "Dec");
+  assert.equal(monthLabel("2027-01"), "Jan 2027");
+});
