@@ -3,6 +3,8 @@
 - One SQLite file, `budget.db`, in the data folder ([server.md](server.md)). Tables: [data-model.md](data-model.md).
 - The schema is managed by Alembic (`server/app/migrations/`) and **upgraded automatically when the Home Base
   starts**, under a lock file so only one copy migrates at a time. Nobody runs migrations by hand.
+  A database already at a revision this copy doesn't know (a newer Budget Buddy opened it) is left alone, with a
+  plain message to update this copy (for example an older built desktop app).
 - Before upgrading an existing database, a copy `budget.db.bak-<revision>` is saved next to it. Users may delete
   old copies once Budget Buddy works (the ones from before migration 0003 are not encrypted;
   [security.md](security.md)).

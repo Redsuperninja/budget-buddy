@@ -208,3 +208,16 @@ def test_migration_0007_turns_existing_stock_sales_into_orders(tmp_path):
             assert "order_id" not in columns
     finally:
         engine.dispose()
+
+
+def test_a_newer_database_gets_a_clear_message(tmp_path):
+    engine = create_db_engine(tmp_path)
+    try:
+        run_migrations(engine)
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE alembic_version SET version_num = '9999'"))
+        with pytest.raises(DatabaseUpgradeError, match="newer version of Budget Buddy"):
+            run_migrations(engine)
+        assert _revision(engine) == "9999"  # nothing was changed
+    finally:
+        engine.dispose()
