@@ -57,7 +57,8 @@ Receipts are added from your phone.
 
 ## Something went wrong?
 
-**"This page only works on this computer"**
+**"This only works on the computer where Budget Buddy is running"** or **"This computer isn't connected to
+Budget Buddy yet"**
 
 Open http://127.0.0.1:8765/ in a browser on the computer where Budget Buddy is running. To use another computer,
 connect it first ([use Budget Buddy on another computer](use-on-another-computer.md)). It never works over the

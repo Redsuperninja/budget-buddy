@@ -9,7 +9,7 @@
 
 ## Checklist
 
-Open http://127.0.0.1:8766/ on your computer and use the buttons along the top (Home, Money, Budget, Taxes, Phone) and the tabs under them.
+Open http://127.0.0.1:8766/ on your computer and use the buttons along the top (Home, Money, Budget, Taxes, Devices) and the tabs under them.
 
 - [ ] **Monthly summary:** on **Home**, pick this month. Do income and spending look right? Is the "not sorted yet" money clear?
 - [ ] **Categories:** add one, rename it, give it a budget. Try a name that already exists. Type `15%` as a budget, and set a planned monthly income.

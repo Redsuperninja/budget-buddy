@@ -1,6 +1,8 @@
 # Charitable donations (roadmap #11)
 
-Code: `services/donations.py`, `schemas/donations.py`, `routers/donations.py`. Estimates, not tax advice.
+Code: `services/donations.py`, `services/donation_proof.py` (paperwork rules), `services/donation_payments.py`
+(gifts from payments), `services/gift_categories.py`, `schemas/donations.py`, `routers/donations.py`. Estimates,
+not tax advice.
 User guide: [docs/guide/donations.md](../../guide/donations.md).
 
 ## Routes (this computer only)
