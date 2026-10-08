@@ -9,7 +9,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 
-from app import __version__
+from app import __version__, instance_proof
 from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, load_keys
 from app.dashboard_files import default_dashboard_dir, load_dashboard
@@ -31,6 +31,7 @@ from app.routers import (
     deductions,
     donations,
     health,
+    instance,
     pair,
     pairing,
     paychecks,
@@ -80,7 +81,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         with Session(engine) as session:
             purge_ended_sessions(session, app.state.clock())  # erase keys of old QR codes
+        # So the desktop app can check this is really Budget Buddy before showing it.
+        instance_proof.write(settings.data_dir, settings.port, app.state.instance_key)
         yield
+        instance_proof.remove(settings.data_dir, app.state.instance_key)
         app.state.listener.close()
         engine.dispose()
 
@@ -95,6 +99,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.pair_limiter = RateLimiter(limit=10, window_seconds=60)  # per address, §2.3
     app.state.dashboard = load_dashboard(settings.dashboard_dir or default_dashboard_dir())
     app.state.csrf_token = secrets.token_urlsafe(32)  # per run; the dashboard sends it on writes
+    app.state.instance_key = instance_proof.new_key()  # see app/instance_proof.py
     app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.state.receipt_store = receipt_store
@@ -134,5 +139,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(stocks.router)
     app.include_router(retirement.router)
     app.include_router(remote_computers.router)
+    app.include_router(instance.router)
     app.include_router(dashboard.router)
     return app

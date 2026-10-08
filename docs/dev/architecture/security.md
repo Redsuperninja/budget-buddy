@@ -19,6 +19,12 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   so they can delete them.
 - Planned: an encrypted single-file backup export the user can copy to a USB drive.
 
+## The desktop app and a Home Base already running
+
+The window shows a Home Base it didn't start only after a challenge-response with a per-run key kept in the
+private data folder (`home-base-running.json`, removed on shutdown; [desktop.md](desktop.md)). The key is never
+logged or sent; the proof route answers this computer only.
+
 ## Never cached
 
 Every `/api/*` reply carries `Cache-Control: no-store` (`app/network.py`), so neither a browser nor the desktop

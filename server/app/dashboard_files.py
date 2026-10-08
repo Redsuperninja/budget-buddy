@@ -11,12 +11,14 @@ import logging
 import os
 import stat
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 log = logging.getLogger("app.dashboard")
 
 MAX_FILES = 200
+RESCAN_SECONDS = 2.0  # a missing file triggers at most one rescan this often
 MAX_FILE_BYTES = 1_000_000
 CONTENT_TYPES = {".js": "text/javascript", ".css": "text/css"}
 
@@ -32,17 +34,36 @@ def default_dashboard_dir() -> Path:
     return Path(__file__).resolve().parents[2] / "dashboard"
 
 
-@dataclass(frozen=True)
+@dataclass
 class DashboardFiles:
     folder: Path  # resolved
     assets: dict[str, Path]  # URL path such as "js/main.js" -> file
+    _rescanned_at: float = 0.0
 
     def read_index(self) -> str | None:
         return self._read(self.folder / "index.html")
 
     def read_asset(self, name: str) -> str | None:
         path = self.assets.get(name)
+        if path is None and self._rescan():
+            path = self.assets.get(name)
         return self._read(path) if path else None
+
+    def _rescan(self) -> bool:
+        """Build the list again (same rules), at most every few seconds. An update can add files
+        while Budget Buddy runs; without this, the new page would fail to load until a restart."""
+        now = time.monotonic()
+        if now - self._rescanned_at < RESCAN_SECONDS:
+            return False
+        self._rescanned_at = now
+        try:
+            assets = _find_assets(self.folder)
+        except OSError:
+            return False
+        if len(assets) > MAX_FILES:
+            return False
+        self.assets = assets
+        return True
 
     def _read(self, path: Path) -> str | None:
         # Checked again at request time, in case a file was swapped for a link since startup.

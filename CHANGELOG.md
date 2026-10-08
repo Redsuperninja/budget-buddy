@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fixed: the desktop app opens even when Budget Buddy is already running from the launch folder (it checks it's really Budget Buddy first), and the dashboard no longer shows a blank page after an update while Budget Buddy is running: new page files are picked up without a restart, and if the page can't load it says to restart.
 - Docs and code tidy-up: guides quote the real "only works on the computer where Budget Buddy is running" message, the paychecks guide says how the 401(k) line counts toward limits, and the donation paperwork rules have their own file. No behavior change.
 - Match your bank's balance: on the Accounts page, type today's balance from your bank (or the balance at the start of the year, or on any day) and Budget Buddy adds one balance adjustment for the difference, so the balance shown is the one in your bank. Adjustments aren't income or spending.
 - Investments: stocks can be linked to any account, including an IRA, 401(k) or HSA (sales there aren't counted as taxable gains, but purchases there still count for wash sales). A new Investments page shows what you hold in each account, what it cost, and its value and gain at prices you type in, plus this year's 401(k), IRA and HSA contributions against the IRS limits. An estimate, not tax advice.

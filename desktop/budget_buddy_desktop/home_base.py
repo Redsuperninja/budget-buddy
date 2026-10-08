@@ -12,7 +12,7 @@ import threading
 import time
 from collections import deque
 
-from budget_buddy_desktop import probe
+from budget_buddy_desktop import genuine, probe
 from budget_buddy_desktop.commands import home_base_command
 
 START_TIMEOUT_SECONDS = 60
@@ -44,14 +44,20 @@ class HomeBase:
         self.url = probe.local_url(port)
         self.output: deque[str] = deque(maxlen=20)
         self.process: subprocess.Popen | None = None
+        # True when Budget Buddy was already running (say, from the launch folder) and this window
+        # uses it. It keeps running after the window closes.
+        self.reused = False
 
     def start(self) -> None:
-        # Never show whatever else answers on the port: it could be a look-alike collecting data.
         if probe.is_running(self.port, timeout=0.5):
+            # Only a Home Base that proves it's Budget Buddy is shown: anything else on the port
+            # could be a look-alike collecting data.
+            if genuine.is_budget_buddy(self.port):
+                self.reused = True
+                return
             raise StartFailed(
-                f"Something is already using port {self.port}, so Budget Buddy can't start safely. "
-                "If Budget Buddy is already open (for example from the launch folder), close it "
-                "and try again."
+                f"Something else is using port {self.port}, so Budget Buddy can't start safely. "
+                "Close the program using it, or restart the computer, and try again."
             )
         env = {**os.environ, "BUDGET_BUDDY_STOP_WITH_PID": str(os.getpid())}
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0

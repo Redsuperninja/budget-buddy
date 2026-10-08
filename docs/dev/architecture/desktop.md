@@ -17,10 +17,13 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 - **Tray** (`--background`, or no options): one at a time (mutex `Local\\BudgetBuddyTray`). Loads no window
   library and starts nothing until opened. Opening starts a window process; if one it started is still open, it
   shows a "already open" note instead.
-- **Window** (`--window`): always starts its own Home Base and waits up to 60 seconds until that process is
-  running and `/api/health` answers on the port (`BUDGET_BUDDY_PORT`, default 8765). If something already answers
-  on the port, it refuses with a plain message instead of showing it: a look-alike program could collect data
-  (security review). Close a Budget Buddy started from `launch\Start Budget Buddy.bat` first.
+- **Window** (`--window`): starts its own Home Base and waits up to 60 seconds until that process is running and
+  `/api/health` answers on the port (`BUDGET_BUDDY_PORT`, default 8765). If something already answers on the port,
+  it shows it only if it proves it's Budget Buddy (`genuine.py`): the running Home Base keeps a random key in
+  `home-base-running.json` in the private data folder (`server/app/instance_proof.py`), and the window sends a
+  fresh nonce to `GET /api/local/instance/proof` (this computer only) and checks the HMAC-SHA256 answer. A
+  look-alike can't read the data folder, so it's refused with a plain message. A reused Home Base (for example
+  from `launch\Start Budget Buddy.bat`) keeps running when the window closes.
 - **Home Base**: `server/.venv` `python -m app` from source, or `home-base\Budget Buddy Home Base.exe` beside the
   app. With `BUDGET_BUDDY_STOP_WITH_PID` it watches that process (`server/app/parent_watch.py`, through a handle
   opened at start-up, so a reused process ID can't fool it) and stops cleanly when it ends. Its output goes to the

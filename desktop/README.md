@@ -40,8 +40,9 @@ with Windows on the tray icon and sign out and in again.
 | `__main__.py`, `launcher.py` | Entry point; picks tray, window, or both (`--background`, `--window`) |
 | `tray.py` | The tray icon and its menu. Imports no window library and starts nothing until opened |
 | `window.py` | The pywebview window showing the dashboard, and the start-up problem window |
-| `home_base.py` | Starts the Home Base as its own program with `BUDGET_BUDDY_STOP_WITH_PID`, waits for it, explains failures |
+| `home_base.py` | Starts the Home Base as its own program with `BUDGET_BUDDY_STOP_WITH_PID`, waits for it, reuses a running Budget Buddy that proves itself, explains failures |
 | `probe.py` | Is a Home Base answering? (`/api/health`), and which port (`BUDGET_BUDDY_PORT`) |
+| `genuine.py` | Is the Home Base already on the port really Budget Buddy? (challenge-response with the key in the data folder) |
 | `commands.py` | Where this app and the Home Base are, from source or inside the `.exe` |
 | `autostart.py` | Start with Windows (current user's Run key, no admin rights) |
 | `single_instance.py` | One tray icon at a time (a named Windows mutex) |
