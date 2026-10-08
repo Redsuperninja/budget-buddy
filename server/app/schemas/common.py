@@ -63,11 +63,16 @@ def _check_dollars(text: str) -> str:
 DollarText = Annotated[str, Field(strict=True, max_length=40), AfterValidator(_check_dollars)]
 
 
+def pick_cents(cents: int | None, dollars: str | None, what: str = "amount") -> int | None:
+    """Take the amount from ``<what>_cents`` or ``<what>`` (dollars text). Not both."""
+    if cents is not None and dollars is not None:
+        raise ValueError(f"Send either {what}_cents or {what}, not both.")
+    return parse_dollars(dollars) if dollars is not None else cents
+
+
 def resolve_amount(amount_cents: int | None, amount: str | None) -> int | None:
-    """Pick the amount from ``amount_cents`` or ``amount`` (dollars). Not both."""
-    if amount_cents is not None and amount is not None:
-        raise ValueError("Send either amount_cents or amount, not both.")
-    cents = parse_dollars(amount) if amount is not None else amount_cents
+    """Pick the amount from ``amount_cents`` or ``amount`` (dollars). Not both, never zero."""
+    cents = pick_cents(amount_cents, amount)
     if cents == 0:
         raise ValueError("The amount can't be zero.")
     return cents

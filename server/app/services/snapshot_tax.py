@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Deduction, Donation
-from app.services import stocks as stock_service
+from app.services import stock_sales
 
 TAX_DISCLAIMER = "These totals help you get ready for tax time. They aren't tax advice."
 _DEDUCTION_LABELS = {
@@ -31,7 +31,7 @@ def tax_summary(session: Session, year: int) -> dict:
             Donation.date >= start, Donation.date <= end
         )
     )
-    gains = stock_service.gains_summary(session, year)
+    gains = stock_sales.gains_summary(session, year)
     by_kind = session.execute(
         select(Deduction.kind, func.sum(Deduction.amount_cents))
         .where(Deduction.tax_year == year)

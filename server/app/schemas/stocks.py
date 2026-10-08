@@ -10,7 +10,7 @@ from typing import Annotated
 from pydantic import AfterValidator, Field, model_validator
 
 from app.money import MAX_ABS_CENTS
-from app.schemas.common import DollarText, Id, Schema, parse_dollars
+from app.schemas.common import DollarText, Id, Schema, pick_cents
 from app.services.stock_gains import Term
 from app.shares import MAX_SHARES_MICRO, shares_to_micro
 
@@ -65,10 +65,7 @@ def _resolve_shares(shares_micro: int | None, shares: str | None) -> int:
 
 
 def _resolve_money(cents: int | None, dollars: str | None, what: str) -> int:
-    if cents is not None and dollars is not None:
-        raise ValueError(f"Send either {what}_cents or {what}, not both.")
-    if dollars is not None:
-        cents = parse_dollars(dollars)
+    cents = pick_cents(cents, dollars, what)
     if cents is None:
         raise ValueError(f"The {what.replace('_', ' ')} is required: send {what}_cents or {what}.")
     if cents < 0:

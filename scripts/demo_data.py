@@ -8,50 +8,12 @@ Only talks to 127.0.0.1 on the test port (8766 by default), never the real Home 
 
 import argparse
 import datetime as dt
-import json
 import sys
-import urllib.error
-import urllib.request
 
-from _testguard import csrf_token, refuse_unless_test_server
+from _local_api import ApiError, LocalApi
+from _testguard import refuse_unless_test_server
 
 DEMO_CHECKING = "Demo Everyday Checking"
-
-
-class ApiError(Exception):
-    pass
-
-
-class Api:
-    def __init__(self, port: int) -> None:
-        self.base = f"http://127.0.0.1:{port}"
-
-    def call(self, method: str, path: str, body: dict | None = None):
-        data = None if body is None else json.dumps(body).encode()
-        request = urllib.request.Request(self.base + path, data=data, method=method)
-        request.add_header("Content-Type", "application/json")
-        request.add_header("Origin", self.base)  # local API: same-origin requests only
-        if method != "GET":
-            request.add_header("X-CSRF-Token", csrf_token(self.base))
-        try:
-            with urllib.request.urlopen(request, timeout=15) as response:
-                raw = response.read()
-        except urllib.error.HTTPError as exc:
-            try:
-                payload = json.loads(exc.read())
-                message = (payload.get("error") or {}).get("message") or exc.reason
-            except (ValueError, AttributeError):
-                message = exc.reason
-            raise ApiError(f"{method} {path}: {message}") from None
-        return json.loads(raw) if raw else None
-
-    def items(self, path: str) -> list:
-        result = self.call("GET", path)
-        return (
-            result["items"]
-            if isinstance(result, dict) and "items" in result
-            else result
-        )
 
 
 def months_back(today: dt.date, n: int) -> dt.date:
@@ -71,10 +33,10 @@ def main() -> int:
         print(reason)
         return 2
 
-    api = Api(port)
+    api = LocalApi(f"http://127.0.0.1:{port}")
     try:
         api.call("GET", "/api/health")
-    except (urllib.error.URLError, ApiError, OSError):
+    except ApiError:
         print(f"The test Home Base isn't running on port {port}.")
         print("Start it first with scripts\\start-test-server.ps1 (in its own window).")
         return 1
@@ -96,13 +58,13 @@ def main() -> int:
             return 0
         load(api, dt.date.today())  # noqa: DTZ011 -- the tester's local calendar date is what we want
     except ApiError as exc:
-        print(f"Something went wrong loading demo data: {exc}")
+        print(f"Something went wrong loading demo data: {exc.method} {exc.path}: {exc}")
         return 1
     print(f"Done. Open http://127.0.0.1:{port}/ in your browser to look around.")
     return 0
 
 
-def load(api: Api, today: dt.date) -> None:
+def load(api: LocalApi, today: dt.date) -> None:
     print("Adding demo accounts...")
     acct = {}
     for name, kind in [

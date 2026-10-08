@@ -122,7 +122,7 @@ class LanListener:
 
     def sync_from_database(self) -> None:
         """Re-check whether the listener is wanted (a live pairing or a paired phone)."""
-        from app.services.pairing import lan_wanted
+        from app.services.pairing_sessions import lan_wanted
 
         state = self._app.state
         with Session(state.engine) as session:

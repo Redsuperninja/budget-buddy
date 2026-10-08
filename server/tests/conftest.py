@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from fake_phone import NOW, Phone, lan_client, pair_phone
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -103,3 +104,42 @@ def add_txn(client: TestClient):
         return response.json()
 
     return add
+
+
+@pytest.fixture
+def app_client(make_client):
+    """The local dashboard client plus a phone-side client (home network) for the same app."""
+    dashboard = make_client()
+    dashboard.app.state.clock = lambda: NOW
+    return dashboard, lan_client(dashboard.app)
+
+
+@pytest.fixture
+def start(app_client):
+    """Start pairing from the dashboard; returns the response JSON (with the QR payload)."""
+    dashboard, _ = app_client
+
+    def go() -> dict:
+        response = dashboard.post("/api/local/pairing")
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    return go
+
+
+@pytest.fixture
+def dashboard(make_client) -> TestClient:
+    """The local dashboard client, for tests that also use a fake phone."""
+    return make_client()
+
+
+@pytest.fixture
+def phone(dashboard) -> Phone:
+    """A fake phone paired with ``dashboard`` through the real flow, ready to sync."""
+    return pair_phone(dashboard)
+
+
+@pytest.fixture
+def checking(make_account) -> int:
+    """The ID of a fake checking account."""
+    return make_account()["id"]

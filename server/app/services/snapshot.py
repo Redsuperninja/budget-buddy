@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from app.models import CategoryGroup, Paycheck, Transaction
 from app.schemas.summary import MonthlySummary
 from app.services import accounts as account_service
-from app.services.pairing import CONTRACT
+from app.services.envelope import CONTRACT
 from app.services.snapshot_tax import tax_summary
 from app.services.summary import monthly_summary
 

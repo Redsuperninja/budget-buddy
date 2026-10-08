@@ -6,17 +6,15 @@ Enter or the code expires, whichever comes first.
 """
 
 import argparse
-import json
 import os
 import sys
 import tempfile
 import threading
 import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 
-from _testguard import csrf_token, refuse_unless_test_server
+from _local_api import ApiError, LocalApi, NotRunning
+from _testguard import refuse_unless_test_server
 
 
 def main() -> int:
@@ -27,27 +25,15 @@ def main() -> int:
     if reason:
         print(reason)
         return 2
-    base = f"http://127.0.0.1:{port}"
-
-    request = urllib.request.Request(
-        f"{base}/api/local/pairing", data=b"", method="POST"
-    )
-    request.add_header("Origin", base)
+    api = LocalApi(f"http://127.0.0.1:{port}")
     try:
-        request.add_header("X-CSRF-Token", csrf_token(base))
-        with urllib.request.urlopen(request, timeout=15) as response:
-            started = json.loads(response.read())
-    except urllib.error.HTTPError as exc:
-        try:
-            print(
-                (json.loads(exc.read()).get("error") or {}).get("message") or exc.reason
-            )
-        except (ValueError, AttributeError):
-            print(exc.reason)
-        return 1
-    except (urllib.error.URLError, OSError):
+        started = api.call("POST", "/api/local/pairing")
+    except NotRunning:
         print(f"The test Home Base isn't running on port {port}.")
         print("Start it first with scripts\\start-test-server.ps1 (in its own window).")
+        return 1
+    except ApiError as exc:
+        print(exc)
         return 1
 
     if not started.get("phone_can_connect", False):
