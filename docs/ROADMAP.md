@@ -35,15 +35,15 @@ computer has no friendly screen and the phone only shows sample data.
 2. **22. One-click Windows start:** Start menu and desktop shortcut, a tray icon (open, stop), and an optional
    start-with-Windows setting.
 
-**E. Bank connections (opt-in, [ADR-0006](adr/0006-bank-connections.md), proposed).** Live checking, savings
-and investment balances and transactions from banks like Chase and Wells Fargo. Waits for the owner's decision
-on the ADR.
-1. **26. Connect a bank through SimpleFIN** (setup token, encrypted credential, remove connection).
-2. **27. Update from bank:** fetch transactions and balances, deduplicate, auto-sort, optional daily update.
-3. **28. Investment balances** (holdings only if reliable).
+**E. Bank data, free and open source first ([ADR-0006](adr/0006-bank-connections.md)).** Checking, savings and
+investment data from banks like Chase and Wells Fargo without hand-mapping CSV files.
+1. **26. Bank-file import (OFX/QFX):** balances, the bank's own transaction IDs, brokerage holdings.
+2. **27. Auto-import folder:** new bank files in a chosen folder (like Downloads) are imported automatically.
+3. **28. Optional live connection, bring your own free developer key** (Teller first, Plaid if needed); test
+   with the owner's own banks before building.
 
-**F. Fuller phone app ([ADR-0007](adr/0007-standalone-phone-app.md), proposed).** After milestone B's phone
-items (20, 21). Waits for the owner's decision on the ADR.
+**F. Fuller phone app ([ADR-0007](adr/0007-standalone-phone-app.md), accepted).** After milestone B's phone
+items (20, 21).
 1. **29. Phone database** (encrypted on-device SQLite) and shared budget-math test vectors.
 2. **30. Sync contract v2:** two-way changes with conflict rules.
 3. **31. Edit on the phone:** transactions, categories, budgets, suggested budget.
@@ -102,12 +102,12 @@ items (20, 21). Waits for the owner's decision on the ADR.
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
 
-## Phase 7: Bank connections (opt-in, ADR-0006 proposed)
-- [ ] 26. Connect a bank through SimpleFIN: setup token, encrypted credential, remove — *backend-engineer* + *security-reviewer*
-- [ ] 27. Update from bank: transactions and balances, dedupe, auto-sort, optional daily update — *backend-engineer* + *security-reviewer*
-- [ ] 28. Investment balances (holdings if reliable) — *backend-engineer* + *finance-tax-expert*
+## Phase 7: Bank data (ADR-0006: free and open source first)
+- [ ] 26. Bank-file import (OFX/QFX): balances, bank transaction IDs, brokerage holdings — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
+- [ ] 27. Auto-import folder for new bank files — *backend-engineer* + *security-reviewer*
+- [ ] 28. Optional live connection with your own free developer key (Teller, then Plaid) — *backend-engineer* + *security-reviewer*
 
-## Phase 8: Fuller phone app (ADR-0007 proposed)
+## Phase 8: Fuller phone app (ADR-0007 accepted)
 - [ ] 29. Encrypted phone database + shared budget-math test vectors — *mobile-engineer* + *security-reviewer* + *finance-tax-expert*
 - [ ] 30. Sync contract v2: two-way changes, conflict rules — *architect* + *backend-engineer* + *mobile-engineer*
 - [ ] 31. Edit on the phone: transactions, categories, budgets, suggested budget — *mobile-engineer*
