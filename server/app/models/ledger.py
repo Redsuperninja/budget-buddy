@@ -65,20 +65,6 @@ class CategoryRule(TimestampMixin, Base):
     )
 
 
-class CategoryRule(TimestampMixin, Base):
-    """Auto-categorization: a transaction whose description contains ``pattern`` (ignoring upper
-    and lower case) gets ``category_id``. See app/services/category_rules.py for which rule wins."""
-
-    __tablename__ = "category_rules"
-    __table_args__ = (UniqueConstraint("pattern"),)
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    pattern: Mapped[str] = mapped_column(String(100))
-    category_id: Mapped[int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE"), index=True
-    )
-
-
 class Transaction(TimestampMixin, Base):
     __tablename__ = "transactions"
 
