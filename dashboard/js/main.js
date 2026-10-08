@@ -9,6 +9,7 @@ import * as connectPhone from "./screens/connect-phone.js";
 import * as donations from "./screens/donations.js";
 import * as home from "./screens/home.js";
 import * as importCsv from "./screens/import.js";
+import * as investments from "./screens/investments.js";
 import * as join from "./screens/join.js";
 import * as otherComputers from "./screens/other-computers.js";
 import * as paychecks from "./screens/paychecks.js";
@@ -27,6 +28,7 @@ const sections = [
   { id: "money", label: "Money", pages: [
     { id: "transactions", label: "Transactions", render: transactions.render },
     { id: "accounts", label: "Accounts", render: accounts.render },
+    { id: "investments", label: "Investments", render: investments.render },
     { id: "import", label: "Import bank file", render: importCsv.render },
     { id: "rules", label: "Auto-sort", render: rules.render },
   ] },

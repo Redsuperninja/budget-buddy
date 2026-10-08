@@ -45,6 +45,10 @@ shares, that lot's share of the proceeds); deleting an order deletes its parts (
   - Year: a sale counts in the year of its sale date.
 - **Statutory constants** (one year, 30 days) live in `stock_gains.py` with sources, not in the per-year tax data
   files: they don't change by year.
-- **Accounts.** Retirement and HSA accounts can't hold tracked purchases or sales (sales there aren't taxed). An
-  account with stock records can't be deleted or changed to one of those kinds.
+- **Accounts.** Any account can hold purchases and sales. Sales in a retirement account or HSA (`TAX_FREE_KINDS`)
+  aren't taxed: `SaleOut.taxed` is false, they have no wash-sale flag, and the gains summary leaves them out.
+  Purchases there still count when checking someone else's loss for a possible wash sale (any account entered
+  here). An account's kind can change at any time (the summary follows the current kind); an account with
+  stock records can't be deleted.
+- **Holdings and prices** are on [investments.md](investments.md).
 - Every result is labeled an estimate, not tax advice.

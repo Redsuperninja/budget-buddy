@@ -16,9 +16,9 @@ from app.shares import MAX_SHARES_MICRO, shares_to_micro
 
 # Shown with the wash-sale flag and when a retirement account or HSA is refused.
 WASH_SALE_LIMITS = (
-    "We only compare purchases of the same symbol entered here. Buying the same stock in an IRA "
-    "or HSA, or a spouse buying it, within 30 days of a sale at a loss can also cause a wash "
-    "sale. We don't check those purchases."
+    "We compare purchases of the same symbol entered here, in any account, including an IRA or "
+    "HSA. A spouse buying it within 30 days of a sale at a loss can also cause a wash sale; we "
+    "don't know about those purchases."
 )
 ESTIMATE_NOTE = (
     "This is an estimate, not tax advice. Check it against the Form 1099-B from your broker. "
@@ -151,6 +151,8 @@ class SaleOut(Schema):
     cost_basis_cents: int
     gain_cents: int
     possible_wash_sale: bool
+    # False inside a retirement account or HSA: not taxed, left out of the gains summary.
+    taxed: bool = True
     lots: list[RealizedOut]  # which purchases the shares came from (oldest first: FIFO)
     note: str = ESTIMATE_NOTE
     created_at: dt.datetime

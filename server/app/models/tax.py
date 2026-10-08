@@ -91,6 +91,18 @@ class StockSale(TimestampMixin, Base):
     proceeds_cents: Mapped[int]  # this lot's share of the order's proceeds
 
 
+class StockPrice(TimestampMixin, Base):
+    """The latest price you typed in for a symbol (never fetched from the internet), used to show
+    what your holdings are worth. One row per symbol."""
+
+    __tablename__ = "stock_prices"
+    __table_args__ = (CheckConstraint("price_cents >= 0", name="price_not_negative"),)
+
+    symbol: Mapped[str] = mapped_column(String(16), primary_key=True)
+    price_cents: Mapped[int]  # per share
+    as_of: Mapped[dt.date] = mapped_column(Date)
+
+
 class Deduction(TimestampMixin, Base):
     __tablename__ = "deductions"
     __table_args__ = (

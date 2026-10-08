@@ -43,6 +43,7 @@ EXPECTED_TABLES = {
     "paychecks",
     "receipts",
     "remote_computers",
+    "stock_prices",
     "donations",
     "stock_lots",
     "stock_sales",

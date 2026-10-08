@@ -12,8 +12,7 @@ from app.errors import ApiError, not_found
 from app.models import Account, AccountKind, StockLot, StockSaleOrder, Transaction
 from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
 
-# Selling inside these accounts isn't taxed, so they can't hold tracked stock purchases or
-# sales.
+# Selling inside these accounts isn't taxed: their stock sales are left out of the gains summary.
 TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}
 
 
@@ -78,18 +77,6 @@ def _has_stocks(session: Session, account_id: int) -> bool:
 def update_account(session: Session, account_id: int, data: AccountUpdate) -> AccountOut:
     account = get_account(session, account_id)
     changes = data.changes()
-    if (
-        changes.get("kind") in TAX_FREE_KINDS
-        and changes["kind"] != account.kind
-        and _has_stocks(session, account_id)
-    ):
-        raise ApiError(
-            409,
-            "account_has_stocks",
-            "This account has stock purchases or sales, so it can't become a retirement account "
-            "or HSA: sales there aren't taxed, so the gains summary would be wrong. Delete those "
-            "purchases and sales first, or add a separate account.",
-        )
     for field, value in changes.items():
         setattr(account, field, value)
     session.commit()

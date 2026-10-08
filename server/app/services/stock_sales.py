@@ -25,6 +25,7 @@ from app.services.stock_records import (
     rematch,
     to_gains_lot,
     to_gains_sale,
+    untaxed_account_ids,
 )
 from app.shares import micro_to_text
 
@@ -50,7 +51,9 @@ def _realized(session: Session, symbols: set[str]) -> dict[int, list[gains.Reali
     return by_sale
 
 
-def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized]) -> SaleOut:
+def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool) -> SaleOut:
+    """``taxed`` False for a sale inside a retirement account or HSA: no gain to report, so no
+    wash-sale flag either."""
     return SaleOut(
         id=order.id,
         account_id=order.account_id,
@@ -61,7 +64,8 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized]) -> SaleOut:
         proceeds_cents=order.proceeds_cents,
         cost_basis_cents=sum(p.cost_basis_cents for p in pieces),
         gain_cents=sum(p.gain_cents for p in pieces),
-        possible_wash_sale=any(p.possible_wash_sale for p in pieces),
+        possible_wash_sale=taxed and any(p.possible_wash_sale for p in pieces),
+        taxed=taxed,
         lots=[
             RealizedOut(
                 lot_id=p.lot_id,
@@ -72,7 +76,7 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized]) -> SaleOut:
                 cost_basis_cents=p.cost_basis_cents,
                 gain_cents=p.gain_cents,
                 term=p.term,
-                possible_wash_sale=p.possible_wash_sale,
+                possible_wash_sale=taxed and p.possible_wash_sale,
             )
             for p in pieces
         ],
@@ -83,7 +87,8 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized]) -> SaleOut:
 
 def _sales_out(session: Session, orders: list[StockSaleOrder]) -> list[SaleOut]:
     realized = _realized(session, {o.symbol for o in orders})
-    return [_sale_out(o, realized.get(o.id, [])) for o in orders]
+    untaxed = untaxed_account_ids(session)
+    return [_sale_out(o, realized.get(o.id, []), o.account_id not in untaxed) for o in orders]
 
 
 def list_sales(
@@ -149,14 +154,18 @@ def delete_sale(session: Session, sale_id: int) -> None:
 
 
 def gains_summary(session: Session, tax_year: int) -> GainsSummaryOut:
-    """Short- and long-term totals for sales dated in ``tax_year``."""
-    orders = list(
-        session.scalars(
+    """Short- and long-term totals for taxed sales dated in ``tax_year`` (not those inside a
+    retirement account or HSA)."""
+    untaxed = untaxed_account_ids(session)
+    orders = [
+        o
+        for o in session.scalars(
             select(StockSaleOrder)
             .where(in_year(tax_year))
             .order_by(StockSaleOrder.sold_on, StockSaleOrder.id)
-        ).all()
-    )
+        )
+        if o.account_id not in untaxed
+    ]
     realized = _realized(session, {o.symbol for o in orders})
     summary = gains.summarize((item for o in orders for item in realized.get(o.id, [])), tax_year)
     return GainsSummaryOut(
@@ -165,5 +174,5 @@ def gains_summary(session: Session, tax_year: int) -> GainsSummaryOut:
         long_term=TermTotalsOut(**asdict(summary.long_term)),
         total_gain_cents=summary.total_gain_cents,
         possible_wash_sale_count=summary.possible_wash_sale_count,
-        sales=[_sale_out(o, realized.get(o.id, [])) for o in orders],
+        sales=[_sale_out(o, realized.get(o.id, []), True) for o in orders],
     )

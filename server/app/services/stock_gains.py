@@ -20,7 +20,8 @@ Rules (statutory, not tax-year numbers, so they live here rather than in ``app/t
   (26 U.S.C. 1091; Publication 550, "Wash Sales"). We only *flag* a possible wash sale; the loss
   and the replacement shares' cost are not adjusted. The rest of the same purchase as the losing
   shares doesn't count as a replacement (Rev. Rul. 56-602); another purchase this sale only
-  partly used does. Only purchases entered in Budget Buddy are checked.
+  partly used does. Only purchases entered in Budget Buddy are checked, in any account; a
+  replacement bought in an IRA makes the loss lost for good, not postponed (Rev. Rul. 2008-5).
   https://www.law.cornell.edu/uscode/text/26/1091
 """
 
@@ -138,7 +139,7 @@ def holding_term(acquired_on: dt.date, sold_on: dt.date) -> Term:
     return Term.LONG if sold_on >= long_term_from(acquired_on) else Term.SHORT
 
 
-def _share_of(total: int, part: int, whole: int) -> int:
+def share_of(total: int, part: int, whole: int) -> int:
     """``total * part / whole`` rounded half up. All three are >= 0 and ``whole`` > 0."""
     return (2 * total * part + whole) // (2 * whole)
 
@@ -185,7 +186,7 @@ def match_fifo(lots: Iterable[Lot], sales: Iterable[Sale]) -> list[Piece]:
         for lot_id, shares in taken:
             remaining[lot_id] -= shares
             done += shares
-            proceeds = _share_of(sale.proceeds_cents, done, sale.shares_micro) - given
+            proceeds = share_of(sale.proceeds_cents, done, sale.shares_micro) - given
             given += proceeds
             pieces.append(Piece(sale.id, lot_id, shares, proceeds))
     return pieces
@@ -219,7 +220,7 @@ def realize(lots: Iterable[Lot], sales: Iterable[Sale], pieces: Iterable[Piece])
         lot, sale = lots_by_id[piece.lot_id], sales_by_id[piece.sale_id]
         sold_from_lot[lot.id] += piece.shares_micro
         cost = (
-            _share_of(lot.cost_basis_cents, sold_from_lot[lot.id], lot.shares_micro)
+            share_of(lot.cost_basis_cents, sold_from_lot[lot.id], lot.shares_micro)
             - costed_from_lot[lot.id]
         )
         costed_from_lot[lot.id] += cost

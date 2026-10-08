@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Query, status
 
 from app.deps import PathId, QueryId, SessionDep
+from app.schemas.stock_holdings import HoldingsOut, PriceIn
 from app.schemas.stocks import GainsSummaryOut, LotCreate, LotOut, SaleCreate, SaleOut
-from app.services import stock_lots, stock_sales
+from app.services import stock_holdings, stock_lots, stock_sales
 
 router = APIRouter(prefix="/api/local/stocks", tags=["stocks"])
 
@@ -63,3 +64,15 @@ def delete_sale(sale_id: PathId, session: SessionDep) -> None:
 def gains_summary(tax_year: TaxYear, session: SessionDep) -> GainsSummaryOut:
     """Estimated realized gains for sales dated in one tax year, split short / long term."""
     return stock_sales.gains_summary(session, tax_year)
+
+
+@router.get("/holdings")
+def holdings(session: SessionDep) -> HoldingsOut:
+    """Shares held now in each account, what they cost, and their value at your latest prices."""
+    return stock_holdings.holdings(session)
+
+
+@router.post("/prices", status_code=status.HTTP_204_NO_CONTENT)
+def set_price(data: PriceIn, session: SessionDep) -> None:
+    """Save the latest price of a symbol (per share), replacing the one before."""
+    stock_holdings.set_price(session, data)
