@@ -42,8 +42,7 @@ under an income category. Give those transactions a category and they move into 
 
 - **"You already have a category with that name."** Pick a different name.
 - **"The budget can't be negative."** Enter zero or more.
-- **"Enter the budget in whole cents."** Use a whole number of cents, like 25000 for $250.00.
+- **"Please enter the budget as a number, like 250.00."** Use a number format, like 250.00 for $250.
 - **"A category's group can't be changed."** Make a new category in the group you want.
 - **"Transfer is a built-in category."** Pick Needs, Wants, Savings, or Income.
-- **"Enter the month as year-month, like 2026-01."** Type the month in that form.
 - **"That category doesn't exist."** It may have been deleted. Refresh the list.

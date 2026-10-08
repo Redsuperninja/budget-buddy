@@ -21,4 +21,4 @@ The Python helpers talk only to `127.0.0.1` on the test port (8766) and refuse t
 real Home Base (port 8765). They also refuse unless `start-test-server.ps1` has made its marker file
 (`.budget-buddy-test-folder`) in the test data folder, so made-up data can't end up in real data.
 
-Step-by-step instructions for testers are in `docs/TESTING.md`.
+Step-by-step instructions for testers are in `docs/guide/set-up-for-testing.md` and `docs/guide/start-a-test-session.md`.

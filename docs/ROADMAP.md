@@ -8,7 +8,7 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom.
 
 **A. Tester preview** (now): people can try the Home Base with demo data and connect a phone.
-- [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [TESTING.md](TESTING.md).
+- [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [testing guide](guide/set-up-for-testing.md).
 
 **B. Alpha: the whole loop works for a non-technical tester.** The biggest gap today is that the
 computer has no friendly screen and the phone only shows sample data.
