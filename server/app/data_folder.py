@@ -40,7 +40,7 @@ _SYNC_FOLDER_NAMES = {
 _MACOS_ICLOUD_OPTIONAL = ("Desktop", "Documents")
 
 MOVE_HELP = (
-    'See "Moving your data folder" in docs/dev/settings.md for how to move it.'
+    'See "Moving your data folder" in docs/guide/move-your-data-folder.md for how to move it.'
 )
 
 
