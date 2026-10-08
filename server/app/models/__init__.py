@@ -5,6 +5,7 @@ from app.models.devices import Device, PairingNonce, PairingSession, RemoteCompu
 from app.models.enums import (
     AccountKind,
     CategoryGroup,
+    CategorySource,
     DeductionKind,
     DonationKind,
     TransactionKind,
@@ -29,6 +30,7 @@ __all__ = [
     "BudgetPlan",
     "Category",
     "CategoryGroup",
+    "CategorySource",
     "CategoryRule",
     "CsvImportMapping",
     "Deduction",

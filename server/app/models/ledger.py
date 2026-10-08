@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.crypto.fields import EncryptedString
@@ -63,6 +63,8 @@ class CategoryRule(TimestampMixin, Base):
     category_id: Mapped[int] = mapped_column(
         ForeignKey("categories.id", ondelete="CASCADE"), index=True
     )
+    # Made by Budget Buddy from the categories you kept picking (services/category_learning.py).
+    learned: Mapped[bool] = mapped_column(default=False, server_default="0")
 
 
 class Transaction(TimestampMixin, Base):
@@ -93,6 +95,12 @@ class Transaction(TimestampMixin, Base):
     # CSV import only: a hash of (account, date, amount, description, occurrence) so importing
     # an overlapping statement again doesn't add the same rows twice. See services/csv_import.py.
     import_fingerprint: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+    # How the category was set: "rule" (auto-sort) or "you" (picked by hand); None for older rows
+    # and categories set by Budget Buddy itself (transfers). See enums.CategorySource.
+    category_source: Mapped[str | None] = mapped_column(String(8))
+    # The rule that sorted it. No foreign key (adding one would mean rebuilding this table, which
+    # other tables point at); deleting a rule clears it in services/category_rules.py.
+    sorted_by_rule_id: Mapped[int | None] = mapped_column(Integer, index=True)
     # The charitable gift this payment is, if it was sorted into charity (Donation.transaction_id).
     donation = relationship(
         "Donation",

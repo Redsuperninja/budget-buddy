@@ -12,7 +12,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError
-from app.models import Category, CategoryGroup, Donation, Transaction, TransactionKind
+from app.models import (
+    Category,
+    CategoryGroup,
+    CategorySource,
+    Donation,
+    Transaction,
+    TransactionKind,
+)
 from app.services.transactions import get_transaction
 
 CHARITY = "Charitable giving"
@@ -43,6 +50,8 @@ def file_under(session: Session, payment: Transaction, name: str) -> bool:
     if category_id is None:
         return False
     payment.category_id = category_id
+    payment.category_source = CategorySource.YOU.value  # a choice you made, not a rule
+    payment.sorted_by_rule_id = None
     return True
 
 

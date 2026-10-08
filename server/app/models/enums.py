@@ -51,3 +51,10 @@ class DeductionKind(StrEnum):
     IRA = "ira"
     CHILDCARE = "childcare"
     OTHER = "other"
+
+
+class CategorySource(StrEnum):
+    """How a transaction's category was set (plain text in transactions.category_source)."""
+
+    RULE = "rule"  # an auto-sort rule
+    YOU = "you"  # picked by hand

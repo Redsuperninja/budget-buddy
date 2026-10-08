@@ -25,7 +25,7 @@ from app.schemas.csv_import import (
     PreviewRow,
 )
 from app.services.accounts import get_account
-from app.services.category_rules import load_matcher
+from app.services.category_rules import load_matcher, rule_fields
 from app.services.csv_columns import build_mapping, columns_used, detect_columns
 from app.services.csv_parsing import (
     RowProblem,
@@ -174,7 +174,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
             date=r.date,
             amount_cents=r.amount_cents,
             description=r.description,
-            category_id=match(r.description),
+            **rule_fields(match(r.description)),
             source=TransactionSource.CSV,
             kind=TransactionKind.NORMAL,
             import_fingerprint=fp,
