@@ -51,4 +51,4 @@ To add a screen: create `screens/<name>.js` with a `render` function and add one
 server route, add a function to `api/endpoints.js`.
 
 Screens: Home (monthly summary and balances), Accounts, Transactions, Categories, Suggested budget, Auto-sort (rules), Import bank file, Connect phone,
-Paychecks, Donations, Stocks.
+Paychecks, Donations, Stocks, Tax summary (with a CSV download, and print styles in `app.css`).

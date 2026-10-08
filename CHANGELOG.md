@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Tax summary: record other deductions (medical bills, mortgage interest, property tax, IRA and HSA contributions, student loan interest, childcare and more), and see one page per tax year with your pay-stub totals, donations, stock gains and losses, and deductions by kind, each with a plain-English note on where it usually goes. Download it as a spreadsheet (CSV) for a tax preparer, or print it or save it as a PDF. An estimate, not tax advice.
 - Suggested budget: a new dashboard page builds a 50/30/20 plan from your last three months. Needs keep what you really spend, savings aim for 20% (or what you already save), wants get what's left up to 30%, with plain-English notes when your numbers don't fit the guide. One click uses it as dollar amounts or as percentages of income.
 - Saving by transfer: money you move from an everyday account into your own savings, investment, retirement or HSA account now counts as saved (once linked as a transfer), on the dashboard and on the phone. Moving it back out lowers the total; card and loan payments don't count.
 - Percentage budgets: a category's budget can be a share of your income, like 15%, instead of a dollar amount. Percentages are worked out from a planned monthly income you can set (or from what actually came in that month), the Home page shows how much of each budget is used and what share of your income went to needs, wants and savings, and the phone gets the worked-out amounts.

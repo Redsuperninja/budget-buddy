@@ -64,5 +64,6 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [paychecks.md](paychecks.md) | Paychecks, the adds-up rule, deposit links, year-to-date summary |
 | [donations.md](donations.md) | Charitable donations and the yearly summary |
 | [stocks.md](stocks.md) | Stock lots, sales, FIFO, gains |
+| [tax-summary.md](tax-summary.md) | Other deductions, the yearly tax summary and its CSV export |
 
 Wire format for the phone: [docs/api/sync-contract.md](../../api/sync-contract.md). Decisions: [docs/adr/](../../adr/).

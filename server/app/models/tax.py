@@ -96,7 +96,8 @@ class Deduction(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     tax_year: Mapped[int] = mapped_column(index=True)
     kind: Mapped[DeductionKind] = mapped_column(str_enum(DeductionKind, "deduction_kind"))
-    description: Mapped[str | None] = mapped_column(String(200))
+    # Encrypted: it can hold health details (migration 0011).
+    description: Mapped[str | None] = mapped_column(EncryptedString("deductions.description"))
     date: Mapped[dt.date | None] = mapped_column(Date)
     amount_cents: Mapped[int]
     receipt_id: Mapped[int | None] = mapped_column(ForeignKey("receipts.id", ondelete="SET NULL"))

@@ -21,11 +21,10 @@ from collections import Counter
 from app.errors import ApiError
 from app.money import dollars_to_cents
 from app.schemas.csv_import import DATE_FORMATS, CsvMapping
+from app.spreadsheet import formula_safe
 
 MAX_ROWS = 10_000
 MAX_DESCRIPTION = 500
-# A spreadsheet treats a cell starting with one of these as a formula ("CSV injection").
-FORMULA_STARTS = ("=", "+", "-", "@")
 DELIMITERS = (",", ";", "\t", "|")
 
 _THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]+)?")
@@ -122,9 +121,7 @@ def parse_date(text: str, date_format: str) -> dt.date:
 def clean_description(text: str) -> str:
     """One line, at most 500 characters. Text that a spreadsheet would run as a formula gets a
     leading apostrophe, so it's shown as text if it's ever exported and opened again."""
-    text = SPACES.sub(" ", _CONTROL.sub(" ", text)).strip()
-    if text.startswith(FORMULA_STARTS):
-        text = "'" + text
+    text = formula_safe(SPACES.sub(" ", _CONTROL.sub(" ", text)).strip())
     return text[:MAX_DESCRIPTION]
 
 

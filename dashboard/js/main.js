@@ -11,6 +11,7 @@ import * as paychecks from "./screens/paychecks.js";
 import * as plan from "./screens/plan.js";
 import * as rules from "./screens/rules.js";
 import * as stocks from "./screens/stocks.js";
+import * as taxes from "./screens/taxes.js";
 import * as transactions from "./screens/transactions.js";
 
 start([
@@ -25,4 +26,5 @@ start([
   { id: "paychecks", label: "Paychecks", render: paychecks.render },
   { id: "donations", label: "Donations", render: donations.render },
   { id: "stocks", label: "Stocks", render: stocks.render },
+  { id: "taxes", label: "Tax summary", render: taxes.render },
 ]);

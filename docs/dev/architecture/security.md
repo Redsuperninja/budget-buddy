@@ -24,6 +24,7 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 These stay readable so Budget Buddy can search, sort and add them up:
 
 - every amount and date, and each transaction's description
+- auto-sort rule text (`category_rules.pattern`), which is copied from transaction descriptions
 - shop names on receipts (`receipts.merchant`)
 - employer names and gross/net pay on paychecks (`paychecks.employer`)
 - account names and banks (`accounts.name`, `accounts.institution`)
