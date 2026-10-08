@@ -70,7 +70,8 @@ Every `/api/local/...` route answers this computer only; common rules are in
 | Area | Routes and rules |
 | --- | --- |
 | Accounts, transactions, transfers | [ledger.md](../docs/dev/architecture/ledger.md) |
-| Categories, monthly summary | [budget-summary.md](../docs/dev/architecture/budget-summary.md) |
+| Categories, monthly summary, budget plan | [budget-summary.md](../docs/dev/architecture/budget-summary.md) |
+| Suggested budget | [budget-engine.md](../docs/dev/architecture/budget-engine.md) |
 | Auto-categorization rules | [category-rules.md](../docs/dev/architecture/category-rules.md) |
 | Bank CSV import | [csv-import.md](../docs/dev/architecture/csv-import.md) |
 | Receipts and photos | [receipts.md](../docs/dev/architecture/receipts.md) |

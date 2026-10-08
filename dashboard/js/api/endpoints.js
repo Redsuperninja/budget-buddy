@@ -16,6 +16,8 @@ export const updateCategory = (id, json) => api("PATCH", `${LOCAL}/categories/${
 export const monthlySummary = (month) => api("GET", `${LOCAL}/summary/monthly?month=${month}`);
 export const getBudgetPlan = () => api("GET", `${LOCAL}/budget/plan`);
 export const saveBudgetPlan = (json) => api("PUT", `${LOCAL}/budget/plan`, { json });
+export const budgetSuggestion = (month) => api("GET", `${LOCAL}/budget/suggestion?month=${month}`);
+export const applySuggestion = (json) => api("POST", `${LOCAL}/budget/suggestion/apply`, { json });
 
 // Auto-sort rules ("description contains ..." -> category)
 export const listRules = () => api("GET", `${LOCAL}/category-rules`);
