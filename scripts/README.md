@@ -5,13 +5,15 @@ files are small clients of the Home Base's this-computer-only API and never impo
 
 | Script | For | What it does |
 | --- | --- | --- |
-| `setup.ps1` | testers | One-time install of the Home Base and the phone app's tools. |
+| `start.ps1` | everyone | Everyday start (what `Start Budget Buddy.bat` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `-NoBrowser` skips opening the browser. |
+| `paths.ps1` | all | Shared paths, `Assert-Python` (3.12+), and `Install-HomeBase [-Dev]`, which installs only when `server/pyproject.toml` changed (stamp in `server/.venv`). |
+| `setup.ps1` | testers | One-time install of the Home Base (with developer tools) and the phone app's tools. |
 | `start-test-server.ps1` | testers | Starts a TEST Home Base on port 8766 with its own data folder (`-Reset` starts over). |
 | `start-phone-app.ps1` | testers | Starts the phone app for Expo Go. |
 | `load-demo-data.ps1` (`demo_data.py`) | testers | Fills the empty test Home Base with made-up accounts, spending and paychecks. |
 | `import-csv.ps1` (`import_csv.py`) | testers | Previews a bank CSV (try `sample-bank-statement.csv`), then imports it after you confirm. |
 | `pair-phone.ps1` (`pair_phone.py`) | testers | Starts pairing and shows the QR code for the phone to scan. |
-| `test-settings.ps1` | all | Shared test settings (port, data folder) used by the other `.ps1` files. |
+| `test-settings.ps1` | testers | Test settings (port 8766, test data folder) on top of `paths.ps1`. |
 | `_local_api.py` | developers | `LocalApi(base).call(method, path, json=, body=, content_type=)`: sends the Origin header and write token, fetches the token once, raises `ApiError` with a plain-English reason (`NotRunning` if nothing answers). |
 | `_testguard.py` | developers | The test-only guard (below). |
 

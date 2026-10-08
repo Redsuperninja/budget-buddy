@@ -24,10 +24,12 @@ A private, local-first budgeting and tax-prep helper.
 
 **On your computer:**
 
-1. Set up Home Base (the Python server): from the `server/` folder, run `python -m venv .venv` and `.venv\Scripts\pip install -e ".[dev]"` (Windows) or use `.venv/bin/...` on macOS/Linux.
-2. Start it: `.venv\Scripts\python -m app` (Windows) or `.venv/bin/python -m app` (macOS/Linux).
-3. Open the dashboard in your browser: <http://127.0.0.1:8765/>.
-4. Add accounts, transactions, and connect your phone.
+1. Install Python 3.12 or newer.
+2. **Windows:** double-click **Start Budget Buddy** in this folder. It sets itself up the first time, starts the
+   Home Base, and opens the dashboard ([guide](docs/guide/start-budget-buddy.md)).
+   **macOS/Linux:** from `server/`, run `python3 -m venv .venv`, `.venv/bin/pip install -e .`, then
+   `.venv/bin/python -m app`, and open <http://127.0.0.1:8765/>.
+3. Add accounts, transactions, and connect your phone.
 
 Step-by-step help for everything: [the user guide](docs/guide/README.md).
 
