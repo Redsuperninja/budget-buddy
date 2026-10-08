@@ -29,5 +29,5 @@ jobs:
         with:
           node-version: 22
 
-      - name: Tests (no dependencies to install)
-        run: node --test
+      - name: Tests and coverage (no dependencies to install)
+        run: npm run coverage

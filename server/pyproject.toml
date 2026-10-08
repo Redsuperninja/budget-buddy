@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",
+    "pytest-cov>=7.0",
     "httpx2>=2.13",
     "ruff>=0.8",
 ]
@@ -48,3 +49,12 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
+
+# CI runs `pytest --cov` and fails below this line coverage (docs/dev/testing.md, "Coverage rules").
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+fail_under = 94
+skip_covered = true
+show_missing = true

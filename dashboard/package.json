@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Budget Buddy computer dashboard: plain HTML, CSS and JavaScript. No dependencies, no build step.",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include=js/money.js --test-coverage-include=js/dates.js --test-coverage-include=js/percent.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100"
   }
 }

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Project rules: CI fails if test coverage drops (server 94%, dashboard logic 100%, phone 90/80/90/92%), a git hook stops pushes to `main` and its deletion from each computer, and the workflow guide explains how to merge stacked pull requests safely.
 - Plans: Budget Buddy becomes a Windows app with its own window (no browser or Python install needed), with an optional light start at login that only fully starts when you open it (ADR-0008, proposed).
 - Easy start on Windows: double-click **Start Budget Buddy** in the Budget Buddy folder. The first time it sets itself up; after that it starts in seconds and opens the dashboard, and if it's already running it just opens the dashboard. Close the window to stop.
 - Plans: easy start (one start script, then a Windows shortcut and tray icon) moves up to next. Bank data goes free and open source first (ADR-0006): bank-file (OFX/QFX) import, then an auto-import folder, then an optional live connection using your own free developer account. A fuller phone app is planned in two steps, editing on the phone and then working without a computer (ADR-0007).
