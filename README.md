@@ -25,8 +25,10 @@ A private, local-first budgeting and tax-prep helper.
 **On your computer:**
 
 1. Install Python 3.12 or newer.
-2. **Windows:** double-click **Start Budget Buddy** in this folder. It sets itself up the first time, starts the
-   Home Base, and opens the dashboard ([guide](docs/guide/start-budget-buddy.md)).
+2. **Windows:** open the **launch** folder and double-click **Start Budget Buddy**. It sets itself up the first
+   time, starts the Home Base, and opens the dashboard ([guide](docs/guide/start-budget-buddy.md)). For Budget
+   Buddy as its own app with a tray icon, double-click **Build desktop app**, then **Install desktop app**
+   ([guide](docs/guide/desktop-app.md)).
    **macOS/Linux:** from `server/`, run `python3 -m venv .venv`, `.venv/bin/pip install -e .`, then
    `.venv/bin/python -m app`, and open <http://127.0.0.1:8765/>.
 3. Add accounts, transactions, and connect your phone.
@@ -40,6 +42,8 @@ budget-buddy/
 ├── server/        Home Base: Python (FastAPI) + SQLite, runs on your PC
 ├── dashboard/     Web page for the computer: plain HTML/CSS/JS, talks to the Home Base over HTTP
 ├── mobile/        Phone app: Expo (React Native), iPhone + Android
+├── desktop/       Windows app: the dashboard in its own window, and a light tray icon
+├── launch/        What you double-click: start, build and install the desktop app (and the built app)
 ├── docs/          User guides (guide/), developer docs (dev/), sync contract, decisions (ADRs), roadmap
 ├── scripts/       Setup, testing and demo-data helpers (see scripts/README.md)
 └── .claude/agents Specialized AI agents that build & maintain this project

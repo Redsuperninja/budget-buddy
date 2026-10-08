@@ -26,7 +26,8 @@ How Budget Buddy is put together. Each topic has its own page (below); this page
 | Home Base | `server/` | Python + FastAPI HTTP API, SQLite database, encrypted receipt files | (it is the hub) |
 | Dashboard | `dashboard/` | Web page for the computer: plain HTML, CSS and JS, no build step | The server's HTTP API only ([ADR-0005](../../adr/0005-dashboard-own-folder.md)) |
 | Phone app | `mobile/` | Expo (React Native + TypeScript), runs in Expo Go | The [sync contract](../../api/sync-contract.md) only ([ADR-0004](../../adr/0004-sync-contract-v1.md)) |
-| Scripts | `scripts/` | Tester and developer helpers | The server's HTTP API only |
+| Desktop app | `desktop/` | Windows app: the dashboard in a pywebview window, a light tray icon | Starts the Home Base as its own program; its HTTP API only ([ADR-0008](../../adr/0008-desktop-app.md)) |
+| Scripts | `scripts/` | Tester and developer helpers (people double-click the wrappers in `launch/`) | The server's HTTP API only |
 
 Parts never import each other's code. When two parts need the same small helper (for example money
 formatting), each keeps its own copy with its own tests, so one part can change without touching the others.
@@ -48,6 +49,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | Page | What it covers |
 | --- | --- |
 | [server.md](server.md) | Stack, data folder, startup, module map, the Local API's common rules |
+| [desktop.md](desktop.md) | The Windows app: processes, light start, building the `.exe` |
 | [dashboard.md](dashboard.md) | How the server finds and serves the dashboard, headers, CSRF, API-only mode |
 | [phone-app.md](phone-app.md) | The phone app: offline snapshot, screens, reminders |
 | [pairing.md](pairing.md) | Pairing a phone: server side, devices, home-network listener, phone side |

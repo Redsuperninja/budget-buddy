@@ -10,6 +10,7 @@ How to check your work in each part, and what CI runs. (Testers trying Budget Bu
 | Server | `cd server`, `python -m venv .venv`, `.venv\Scripts\pip install -e ".[dev]"` | `.venv\Scripts\ruff check .`, `.venv\Scripts\ruff format --check .`, `.venv\Scripts\pytest` |
 | Dashboard | Node 22+, nothing to install | `cd dashboard`, `node --test` |
 | Phone | `cd mobile`, `npm install` | `npx tsc --noEmit` (or `npm run typecheck`), `npm test` |
+| Desktop (Windows) | `cd desktop`, `py -3 -m venv .venv`, `.venv\Scripts\pip install -e ".[dev]"` | `.venv\Scripts\ruff check .`, `.venv\Scripts\pytest --cov` |
 
 On macOS/Linux use `.venv/bin/...`. Run the tests you touched first (`pytest -q path::test`,
 `npm test -- <pattern>`), then the full suite.
@@ -21,6 +22,7 @@ Each part has its own workflow, triggered only by changes to that part's folder 
 - `server-ci.yml`: Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
 - `dashboard-ci.yml`: Node 22; `npm run coverage` (`node --test` with coverage; no dependencies to install).
 - `mobile-ci.yml`: Node 22; `npm ci`, `npx tsc --noEmit`, `npm test -- --ci --coverage`.
+- `desktop-ci.yml`: Windows, Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
 
 ## Coverage rules
 
@@ -31,6 +33,7 @@ a reason in the PR.
 | --- | --- | --- | --- |
 | Server | 94% of lines in `app/` (96% when set) | `[tool.coverage.report] fail_under` in `server/pyproject.toml` | `.venv\Scripts\pytest --cov` |
 | Dashboard | 100% of lines, branches and functions in the logic modules `money.js`, `dates.js`, `percent.js` (screens need a browser, so they're checked by the static rules instead) | `coverage` script in `dashboard/package.json` | `npm run coverage` |
+| Desktop | 95% of lines in `budget_buddy_desktop/` (98% when set; the on-screen tray loop is checked by hand) | `[tool.coverage.report] fail_under` in `desktop/pyproject.toml` | `.venv\Scripts\pytest --cov` |
 | Phone | statements 90%, branches 80%, functions 90%, lines 92% | `jest.coverageThreshold` in `mobile/package.json` | `npm test -- --coverage` |
 
 A new logic module in the dashboard joins the `--test-coverage-include` list in the same PR.

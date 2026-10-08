@@ -49,7 +49,8 @@ Changing tables: [docs/dev/architecture/database.md](../docs/dev/architecture/da
 
 | Path | Job |
 | --- | --- |
-| `main.py`, `__main__.py`, `cli.py` | Build the app, run it, recovery-phrase command line |
+| `main.py`, `__main__.py`, `cli.py`, `serving.py` | Build the app, run it, recovery-phrase command line |
+| `parent_watch.py` | Stop when the program that started us ends (`BUDGET_BUDDY_STOP_WITH_PID`, used by the desktop app) |
 | `config.py` | Settings from environment variables |
 | `routers/` | One per area, thin |
 | `services/` | Business logic, one module per area |
@@ -59,6 +60,8 @@ Changing tables: [docs/dev/architecture/database.md](../docs/dev/architecture/da
 | `network.py`, `lan.py`, `listeners.py` | Access rules, home-network address and listener |
 | `dashboard_files.py` | Finds the dashboard folder and its allowlist |
 | `tax_data/` | Per-year tax numbers ([docs/dev/tax-data.md](../docs/dev/tax-data.md)) |
+
+`packaging/home-base.spec` builds the packaged Home Base for the desktop app ([desktop.md](../docs/dev/architecture/desktop.md)).
 
 The full module map is in [server.md](../docs/dev/architecture/server.md).
 

@@ -30,6 +30,8 @@ venv/
 htmlcov/
 dist/
 build/
+# The built desktop app (scripts/build-desktop.ps1)
+launch/Budget Buddy/
 
 # --- Node / Expo ---
 node_modules/

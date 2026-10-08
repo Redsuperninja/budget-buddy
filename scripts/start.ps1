@@ -1,7 +1,7 @@
 # Start Budget Buddy for everyday use: sets itself up the first time, starts the Home Base, and opens
 # the dashboard in your browser. Close this window (or press Ctrl+C) to stop Budget Buddy.
 #
-#   Double-click "Start Budget Buddy.bat" in the Budget Buddy folder, or run:
+#   Double-click "Start Budget Buddy" in the launch folder, or run:
 #   powershell -ExecutionPolicy Bypass -File scripts\start.ps1 [-NoBrowser]
 #
 # Uses your real data folder and port 8765 (or BUDGET_BUDDY_DATA_DIR / BUDGET_BUDDY_PORT if you set them).

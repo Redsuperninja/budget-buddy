@@ -1,12 +1,15 @@
-# Where things are, and installing the Home Base. Dot-source it: . "$PSScriptRoot\paths.ps1"
+# Where things are, and installing the Home Base and the desktop app. Dot-source it:
+#   . "$PSScriptRoot\paths.ps1"
 
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $ServerDir = Join-Path $RepoRoot "server"
 $MobileDir = Join-Path $RepoRoot "mobile"
+$DesktopDir = Join-Path $RepoRoot "desktop"
+$LaunchDir = Join-Path $RepoRoot "launch"
 $Python = Join-Path $ServerDir ".venv\Scripts\python.exe"
-$InstallStamp = Join-Path $ServerDir ".venv\budget-buddy-install.txt"
+$DesktopPython = Join-Path $DesktopDir ".venv\Scripts\python.exe"
 
 # Python 3.12 or newer, through the Windows "py" launcher. Exits with a plain-English message if missing.
 function Assert-Python {
@@ -20,24 +23,32 @@ function Assert-Python {
     }
 }
 
-# Install the Home Base into server\.venv, or update it when its requirements changed since last time.
-# -Dev adds the developer tools (tests, linter) that testers' setup uses.
-function Install-HomeBase([switch]$Dev) {
-    $hash = (Get-FileHash (Join-Path $ServerDir "pyproject.toml") -Algorithm SHA256).Hash
-    $mode = if ($Dev) { "dev" } else { "app" }
-    if ((Test-Path $Python) -and (Test-Path $InstallStamp)) {
-        $was = (Get-Content $InstallStamp -Raw).Trim() -split " "
-        if ($was[0] -eq $hash -and ($was[1] -eq "dev" -or $mode -eq "app")) { return }
+# Install a part (server or desktop) into its own .venv, or update it when its pyproject.toml changed
+# since last time. $Extras: "" for the app only, or e.g. "dev" / "build" (a stamp in .venv remembers).
+function Install-Part($Dir, $Extras, $Label) {
+    $venvPython = Join-Path $Dir ".venv\Scripts\python.exe"
+    $stamp = Join-Path $Dir ".venv\budget-buddy-install.txt"
+    $hash = (Get-FileHash (Join-Path $Dir "pyproject.toml") -Algorithm SHA256).Hash
+    if ((Test-Path $venvPython) -and (Test-Path $stamp)) {
+        $was = (Get-Content $stamp -Raw).Trim() -split " ", 2
+        $had = if ($was.Count -gt 1) { $was[1] -split "," } else { @() }
+        $want = if ($Extras) { $Extras -split "," } else { @() }
+        if ($was[0] -eq $hash -and -not ($want | Where-Object { $had -notcontains $_ })) { return }
     }
     Assert-Python
-    Write-Host "Installing the Home Base (this can take a few minutes the first time)..."
-    Push-Location $ServerDir
+    Write-Host "Installing $Label (this can take a few minutes the first time)..."
+    Push-Location $Dir
     try {
-        if (-not (Test-Path $Python)) { py -3 -m venv .venv }
-        & $Python -m pip install --quiet --upgrade pip
-        $target = if ($Dev) { ".[dev]" } else { "." }
-        & $Python -m pip install --quiet -e $target
-        if ($LASTEXITCODE -ne 0) { throw "Installing the Home Base failed." }
-        Set-Content -Path $InstallStamp -Encoding ASCII -Value "$hash $mode"
+        if (-not (Test-Path $venvPython)) { py -3 -m venv .venv }
+        & $venvPython -m pip install --quiet --upgrade pip
+        $target = if ($Extras) { ".[$Extras]" } else { "." }
+        & $venvPython -m pip install --quiet -e $target
+        if ($LASTEXITCODE -ne 0) { throw "Installing $Label failed." }
+        Set-Content -Path $stamp -Encoding ASCII -Value "$hash $Extras"
     } finally { Pop-Location }
+}
+
+# The Home Base. -Dev adds the developer tools (tests, linter) that testers' setup uses.
+function Install-HomeBase([switch]$Dev) {
+    Install-Part $ServerDir $(if ($Dev) { "dev" } else { "" }) "the Home Base"
 }

@@ -9,6 +9,7 @@ Start here, then pick the section that fits what you're doing.
 Set up Budget Buddy on your Windows computer, then use the dashboard (web page) to enter your money.
 
 1. [Start Budget Buddy](start-budget-buddy.md) — For everyday use: double-click to start; how to stop it.
+2. [The desktop app](desktop-app.md) — Budget Buddy in its own window, with a tray icon; ready when Windows starts.
 
 **Trying it out with made-up data?**
 
