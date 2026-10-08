@@ -59,11 +59,18 @@ def test_an_existing_category_is_reused_whatever_its_case(client, payment):
     assert client.get(f"{TXN}/{payment['id']}").json()["category_id"] == mine["id"]
 
 
-def test_an_income_category_of_that_name_is_never_used(client, payment):
+def test_an_income_category_of_that_name_is_never_used(client, payment, add_txn, checking):
     client.post(CATEGORIES, json={"name": "Gifts", "group": "income"})
     response = client.post(f"{TXN}/{payment['id']}/personal-gift")
-    assert response.status_code == 200
-    assert response.json()["category_id"] is None
+    assert response.status_code == 409
+    assert "Rename" in response.json()["error"]["message"]
+    assert client.get(f"{TXN}/{payment['id']}").json()["category_id"] is None
+    # A charity gift is still recorded; the payment just keeps its category.
+    client.post(CATEGORIES, json={"name": "Charitable giving", "group": "income"})
+    other = add_txn(checking, -4_000)
+    created = client.post(DONATIONS, json=gift(other["id"]))
+    assert created.status_code == 201
+    assert client.get(f"{TXN}/{other['id']}").json()["category_id"] is None
 
 
 def test_personal_gift_files_under_gifts_with_no_tax_record(client, payment):

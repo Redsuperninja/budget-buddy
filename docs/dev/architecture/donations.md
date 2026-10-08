@@ -33,7 +33,9 @@ dollar text; for goods, the items' fair market value), and optionally a `receipt
 - A newly linked payment is filed under the "Charitable giving" category;
   `POST /api/local/transactions/{id}/personal-gift` files a payment under "Gifts" with no donation (409 if it's already a charity gift). Both are
   wants-group categories found by name (case ignored) or made on first use; a same-named income or transfer
-  category is never used (`services/gift_categories.py`).
+  category is never used: a charity link still saves (the payment keeps its category), a personal gift is
+  409 `name_taken` (`services/gift_categories.py`). Unlinking or re-pointing a gift leaves the old payment in
+  "Charitable giving"; it isn't moved back.
 - Transactions show the link as `donation_id`. The payment still counts once as spending; the gift is a tax
   record, not a second expense.
 

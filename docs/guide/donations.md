@@ -55,7 +55,8 @@ A few things to know:
   tab instead.
 - The payment moves to the **Charitable giving** category (a "wants" category Budget Buddy adds the first time).
   It still counts once as spending; the gift is your tax record, not a second expense. You can pick a
-  different category for it afterwards.
+  different category for it afterwards. Give **Charitable giving** (and **Gifts**) a monthly budget on the
+  Categories page, or let [the suggested budget](suggested-budget.md) pick one after a few months.
 - While a payment is a gift, you can't change its amount or type, or link it as a transfer. To do that, remove
   the gift first (below).
 - If you delete the payment, the gift stays in your donations.
@@ -66,12 +67,14 @@ A few things to know:
 
 For a birthday or holiday present, pick **A personal gift** under **Kind of gift** and click **Save**. The
 payment moves to the **Gifts** category so your budget shows what you spend on presents. Personal gifts aren't
-tax deductible, so nothing is added to your donations.
+tax deductible, so nothing is added to your donations. If you already have an income category called
+**Gifts** (for presents you receive), Budget Buddy asks you to rename it first.
 
 ## Remove a gift
 
 On the Donations tab, click **Remove** next to the gift and confirm. If it came from a payment, the payment stays
-in your transactions and gets its **Mark as gift** button back.
+in your transactions and gets its **Mark as gift** button back. It stays in the **Charitable giving** category;
+change it on the Transactions page if you like.
 
 ## What proof to keep
 
