@@ -73,7 +73,8 @@ flag, check your broker's Form 1099-B or ask a tax professional.
 
 We compare purchases of the same symbol entered here, in any account, including an IRA or HSA. A
 spouse buying it within 30 days of a sale at a loss can also cause a wash sale; Budget Buddy doesn't
-know about those purchases.
+know about those purchases. If the shares you bought back are in an IRA or other retirement account,
+the loss isn't just postponed: it's lost for good (IRS Revenue Ruling 2008-5).
 
 ## Something went wrong?
 
@@ -90,5 +91,7 @@ know about those purchases.
 - **A sale doesn't show in the gains**: sales inside a retirement account or HSA aren't taxed, so
   they're left out. Check the sale's account.
 - **An account can't be deleted**: it still has stock purchases or sales. Delete those first.
+- **Past years' gains changed**: changing an account's type to or from Retirement or HSA moves all
+  its sales out of or into the gains, for every year. If you already filed, change it back.
 - **The numbers don't match your broker**: your broker may use a different method than "oldest
   first", or may have adjusted a wash sale. Your Form 1099-B is the official record.

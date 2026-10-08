@@ -12,6 +12,8 @@ class LimitOut(Schema):
     left_cents: int  # room left under the limit (0 when at or over)
     over_cents: int  # how much is over the limit (0 when under)
     catch_up_cents: list[int]  # extra allowed by age; not added (age isn't known)
+    catch_up_ages: list[str]  # who may add each one, like "age 50 or older"
+
     note: str
 
 

@@ -39,14 +39,23 @@ function priceForm(year) {
     }));
 }
 
+// Over the limit: red, unless an age catch-up could cover it.
+function overText(l) {
+  if (!l.over_cents) return formatCents(l.left_cents);
+  const over = `${formatCents(l.over_cents)} over`;
+  return l.over_cents <= Math.max(0, ...l.catch_up_cents)
+    ? h("span", {}, `${over}, fine if the age catch-up applies to you`)
+    : h("span", { class: "bad" }, over);
+}
+
 function limitsCard(r) {
   return card(`Retirement and HSA contributions in ${r.tax_year}`,
     taxYearHeader(r.tax_year, r.note),
     table(["Account", "Put in", "Limit", "Room left", "Age catch-up (extra)"], r.limits.map((l) => [
       h("span", {}, l.name, h("br"), h("span", { class: "muted" }, l.note)),
       formatCents(l.contributed_cents), formatCents(l.limit_cents),
-      l.over_cents ? h("span", { class: "bad" }, `${formatCents(l.over_cents)} over`) : formatCents(l.left_cents),
-      l.catch_up_cents.map(formatCents).join(" or "),
+      overText(l),
+      l.catch_up_cents.map((c, i) => `${formatCents(c)} (${l.catch_up_ages[i]})`).join(" or "),
     ]), [1, 2, 3]),
     empty(`Tax data last reviewed ${r.tax_data_last_reviewed}.`));
 }

@@ -13,8 +13,9 @@ For each account it lists every stock or fund you still hold:
 
 - **Shares** still held, and what they **cost** you (including fees).
 - **Price**: the latest price you typed in for it, and the date.
-- **Value** at that price, and the **gain or loss** you'd have if you sold now. Nothing is taxed until you sell,
-  and never inside a retirement account or HSA.
+- **Value** at that price, and the **gain or loss** you'd have if you sold now. Nothing is taxed until you sell.
+  Selling inside a retirement account or HSA isn't taxed; money you take out later may be, depending on the
+  account.
 
 Shares in a retirement account or HSA are listed too, marked *Not taxed when you sell inside this account*.
 
@@ -23,7 +24,8 @@ Shares in a retirement account or HSA are listed too, marked *Not taxed when you
 When you add a purchase or sale on the **Stocks** page, pick the **Account** it's in: a brokerage account, an IRA
 or 401(k) (account type **Retirement**), or an **HSA**. Add the account first on the **Accounts** page if it isn't
 there. Sales inside a retirement account or HSA aren't counted in your taxable gains, but buying a stock there can
-still make a loss you took elsewhere a possible wash sale, so enter those purchases too.
+still make a loss you took elsewhere a possible wash sale, so enter those purchases too. In that case the loss
+isn't just postponed: it's lost for good.
 
 ### Update a price
 
@@ -37,17 +39,23 @@ This part shows, for the year you pick, how much you've put in and how much room
 
 | Line | What's counted | Limit |
 | --- | --- | --- |
-| 401(k), 403(b) or 457 | Your own contributions on your pay stubs, traditional and Roth together | $24,500 in 2026 |
+| 401(k) or 403(b) | Your own contributions on your pay stubs, traditional and Roth together | $24,500 in 2026 |
 | IRA | The **IRA contribution** deductions you entered on the Tax summary page | $7,500 in 2026 |
-| HSA | Pay-stub HSA amounts plus **HSA contribution** deductions | $4,400 for just you, $8,750 for a family, in 2026 |
+| HSA | Pay-stub HSA amounts plus **HSA contribution** deductions | $4,400 for just you, $8,750 for a family (shared by spouses), in 2026 |
 
 - **Age catch-up:** at 50 or older you can put in more (and more again from 60 to 63 for a 401(k); at 55 or older
   for an HSA). Budget Buddy doesn't know your age, so it shows the extra amount without adding it.
+- **A 457(b) plan** (common for government jobs) has its own separate limit, so leave its amounts out of the
+  401(k) line.
+- **Each person has their own 401(k) and IRA limit.** The totals add up every pay stub and deduction you entered,
+  so if you entered a spouse's too, compare each person separately.
+- **HSA:** don't also enter pay-stub HSA amounts as an HSA deduction (that counts them twice). If you weren't
+  covered all year, your limit may be lower.
 - **Not included:** employer matches (they don't count toward your own 401(k) limit), Roth IRA contributions
   (they aren't deductions, so Budget Buddy doesn't see them; the IRA limit is shared with them), and money your
   employer puts in your HSA if it isn't on your pay stub (it does count toward the HSA limit).
-- If you're over a limit, the line says how much in red. Talk to your plan or a tax professional about fixing an
-  excess contribution.
+- If you're over a limit, the line says how much, in red unless an age catch-up could cover it. Talk to your plan
+  or a tax professional about fixing an excess contribution.
 
 ## Something went wrong?
 

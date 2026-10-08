@@ -107,6 +107,8 @@ def test_retirement_contributions_against_limits(client):
         2_410_000,
     )
     assert k401["catch_up_cents"] == [800_000, 1_125_000]
+    assert k401["catch_up_ages"] == ["age 50 or older", "ages 60 to 63"]
+    assert "457(b)" in k401["note"] and "each person" in body["note"]
     assert (ira["contributed_cents"], ira["over_cents"], ira["left_cents"]) == (760_000, 10_000, 0)
     assert hsa_self["contributed_cents"] == 10_000 + 10_000
     assert (hsa_self["limit_cents"], hsa_family["limit_cents"]) == (440_000, 875_000)

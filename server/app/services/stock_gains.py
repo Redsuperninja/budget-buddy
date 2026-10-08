@@ -20,7 +20,8 @@ Rules (statutory, not tax-year numbers, so they live here rather than in ``app/t
   (26 U.S.C. 1091; Publication 550, "Wash Sales"). We only *flag* a possible wash sale; the loss
   and the replacement shares' cost are not adjusted. The rest of the same purchase as the losing
   shares doesn't count as a replacement (Rev. Rul. 56-602); another purchase this sale only
-  partly used does. Only purchases entered in Budget Buddy are checked.
+  partly used does. Only purchases entered in Budget Buddy are checked, in any account; a
+  replacement bought in an IRA makes the loss lost for good, not postponed (Rev. Rul. 2008-5).
   https://www.law.cornell.edu/uscode/text/26/1091
 """
 

@@ -24,7 +24,8 @@ from app.shares import micro_to_text
 NO_ACCOUNT = "Not in an account"
 NOTE = (
     "Values use the prices you typed in, so they're only as current as those. Gains on shares "
-    "you still hold aren't taxed until you sell, and never inside a retirement account or HSA."
+    "you still hold aren't taxed until you sell. Selling inside a retirement account or HSA isn't "
+    "taxed; money you take out later may be, depending on the account."
 )
 
 
