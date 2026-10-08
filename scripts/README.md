@@ -1,12 +1,14 @@
 # scripts/
 
-Helpers for testers and developers. The PowerShell scripts are for Windows testers; the Python
+Helpers for testers and developers. People double-click the wrappers in [`launch/`](../launch/). The PowerShell scripts are for Windows testers; the Python
 files are small clients of the Home Base's this-computer-only API and never import the server.
 
 | Script | For | What it does |
 | --- | --- | --- |
-| `start.ps1` | everyone | Everyday start (what `Start Budget Buddy.bat` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `-NoBrowser` skips opening the browser. |
-| `paths.ps1` | all | Shared paths, `Assert-Python` (3.12+), and `Install-HomeBase [-Dev]`, which installs only when `server/pyproject.toml` changed (stamp in `server/.venv`). |
+| `start.ps1` | everyone | Everyday start (what `launch\Start Budget Buddy.bat` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `-NoBrowser` skips opening the browser. |
+| `paths.ps1` | all | Shared paths, `Assert-Python` (3.12+), `Install-Part <dir> <extras>` (installs a part into its `.venv` only when its `pyproject.toml` or the extras changed; stamp in `.venv`) and `Install-HomeBase [-Dev]`. |
+| `build-desktop.ps1` | everyone | Builds the desktop app into `launch\Budget Buddy\` ([desktop architecture](../docs/dev/architecture/desktop.md)). |
+| `install-desktop.ps1` | everyone | Copies the built app to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start menu and desktop shortcuts. |
 | `setup.ps1` | testers | One-time install of the Home Base (with developer tools) and the phone app's tools. |
 | `start-test-server.ps1` | testers | Starts a TEST Home Base on port 8766 with its own data folder (`-Reset` starts over). |
 | `start-phone-app.ps1` | testers | Starts the phone app for Expo Go. |

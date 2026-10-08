@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "budget-buddy-desktop"
+description = "Budget Buddy for Windows: the dashboard in its own window, and a light tray icon."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dynamic = ["version"]
+dependencies = [
+    "pywebview>=6.0",  # BSD: the window, using Windows' built-in Edge WebView2
+    "pystray>=0.19",  # LGPL-3.0, used unchanged as a separate package: the tray icon
+    "pillow>=11",  # MIT-CMU: draws the icon (pystray needs it too)
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=7.0",
+    "ruff>=0.8",
+]
+# Makes "Budget Buddy.exe". GPL with an exception that allows building apps like this one.
+build = ["pyinstaller>=6.10"]
+
+[tool.setuptools.dynamic]
+version = { attr = "budget_buddy_desktop.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["budget_buddy_desktop*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+# CI runs `pytest --cov` and fails below this line coverage (docs/dev/testing.md, "Coverage rules").
+# The parts that only draw on screen (the real window and tray loop) are checked by hand.
+[tool.coverage.run]
+source = ["budget_buddy_desktop"]
+
+[tool.coverage.report]
+fail_under = 95
+skip_covered = true
+show_missing = true

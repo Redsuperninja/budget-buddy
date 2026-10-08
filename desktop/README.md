@@ -1,0 +1,48 @@
+# Desktop app (Windows)
+
+Budget Buddy as a Windows app: the dashboard in its own window, and an optional light tray icon that starts
+with Windows ([ADR-0008](../docs/adr/0008-desktop-app.md)). This part never imports the server's code: it starts
+the Home Base as its own program and talks to it over its local address, like a browser does.
+
+## Run it from source
+
+```powershell
+cd desktop
+py -3 -m venv .venv
+.venv\Scripts\pip install -e ".[dev]"
+.venv\Scripts\python -m budget_buddy_desktop            # tray icon + window
+.venv\Scripts\python -m budget_buddy_desktop --window   # just the window
+```
+
+It starts the server from `server\.venv`, so set that up first ([server/README.md](../server/README.md)).
+
+## Build the .exe
+
+Double-click **Build desktop app** in the [launch](../launch/) folder (or run `scripts\build-desktop.ps1`). It makes
+`launch\Budget Buddy\Budget Buddy.exe` plus `home-base\` (the packaged Home Base from
+`server/packaging/home-base.spec`). **Install desktop app** copies it to `%LOCALAPPDATA%\Programs\Budget Buddy` and
+adds Start menu and desktop shortcuts.
+
+## Check it
+
+```powershell
+.venv\Scripts\ruff check . ; .venv\Scripts\ruff format --check . ; .venv\Scripts\pytest --cov
+```
+
+Coverage must stay at 95% or more (`pyproject.toml`). The real window and tray loop are checked by hand: open the
+app, switch Colors, download the tax CSV, close the window (the Home Base stops within about a second), tick Start
+with Windows on the tray icon and sign out and in again.
+
+## Layout (`budget_buddy_desktop/`)
+
+| File | Job |
+| --- | --- |
+| `__main__.py`, `launcher.py` | Entry point; picks tray, window, or both (`--background`, `--window`) |
+| `tray.py` | The tray icon and its menu. Imports no window library and starts nothing until opened |
+| `window.py` | The pywebview window showing the dashboard, and the start-up problem window |
+| `home_base.py` | Starts the Home Base as its own program with `BUDGET_BUDDY_STOP_WITH_PID`, waits for it, explains failures |
+| `probe.py` | Is a Home Base answering? (`/api/health`), and which port (`BUDGET_BUDDY_PORT`) |
+| `commands.py` | Where this app and the Home Base are, from source or inside the `.exe` |
+| `autostart.py` | Start with Windows (current user's Run key, no admin rights) |
+| `single_instance.py` | One tray icon at a time (a named Windows mutex) |
+| `icon.py` | The icon, drawn in code (`python -m budget_buddy_desktop.icon file.ico` saves the `.ico`) |

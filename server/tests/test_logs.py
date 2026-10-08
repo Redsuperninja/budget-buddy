@@ -6,6 +6,7 @@ import logging.config
 import sys
 
 import pytest
+import uvicorn
 
 import app.__main__ as entry
 from app.logs import NoQueryStringFilter, log_config
@@ -61,12 +62,13 @@ def test_log_config_filters_the_access_logger():
 
 
 def test_server_starts_with_the_filtered_log_config(data_dir, monkeypatch):
-    calls = {}
-    monkeypatch.setattr(entry.uvicorn, "run", lambda app, **kwargs: calls.update(kwargs))
+    configs = []
+    monkeypatch.setattr(uvicorn.Server, "run", lambda self: configs.append(self.config))
     # `python -m app` with no arguments starts the server (see app/cli.py).
     monkeypatch.setattr(sys, "argv", ["app"])
     with pytest.raises(SystemExit) as exited:
         entry.main()
     assert exited.value.code == 0
-    assert calls["log_config"]["loggers"]["uvicorn.access"]["filters"] == ["no_query_string"]
-    assert calls["proxy_headers"] is False
+    (config,) = configs
+    assert config.log_config["loggers"]["uvicorn.access"]["filters"] == ["no_query_string"]
+    assert config.proxy_headers is False

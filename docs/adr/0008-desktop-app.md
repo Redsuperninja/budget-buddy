@@ -1,6 +1,6 @@
 # ADR-0008: A desktop app: its own window, a light start at login
 
-**Status:** Proposed, 2026-10-07. Direction from the owner; the library choices need a check before building.
+**Status:** Accepted, 2026-10-08 (built in roadmap 22 and 22b).
 
 ## Context
 Today Budget Buddy runs as a server in a console window, and you use it in your web browser
@@ -18,28 +18,33 @@ Ways to get a window of its own:
 | Electron | Bundles a whole Chromium | Yes | Large download (100+ MB) | MIT |
 | Native toolkit (Qt / PySide, Tkinter) | Rebuild every screen | No, everything twice | Large; two UIs to keep in step | LGPL (Qt) / PSF |
 
-## Decision (proposed)
-- **One app, `Budget Buddy.exe`, built with PyInstaller.** It contains the Home Base and the dashboard files. Nobody
-  needs Python installed. The browser keeps working too (same address) for anyone who prefers it.
-- **Its own window through pywebview.** It shows the existing dashboard, so there is one UI to maintain. The
-  dashboard's safety rules (CSP, CSRF token, this-computer-only) stay as they are, since the window loads the
-  same local address.
-- **Light start at login (optional, off by default):** a tray icon starts with Windows. Until you open it, it does
-  almost nothing: **no database, no encryption key loaded, no web server, no home-network listener.** Clicking the
-  icon (or opening the app) starts the Home Base, which takes a second or two, then shows the window. Closing the
-  window keeps it running in the tray, or quits, whichever the user picks in Settings. The tray menu has Open,
-  Connect phone, Start with Windows (on/off) and Quit.
-- **Phones:** a phone can only sync while the Home Base is fully running. The phone already says when it can't
-  reach the computer; the tray shows a "Phones can sync now" state when it's running. An "always ready for my
-  phone" setting can start everything at login for people who want that.
-- **Start with Windows** uses the current user's Startup entry (no admin rights, no service).
+## Decision
+- **Its own part, `desktop/`** (the owner's call: it isn't part of the server). Like every part, it never
+  imports another part's code. The window process starts the **Home Base as its own program** and uses it over
+  `http://127.0.0.1:<port>`, exactly like a browser. It passes its process ID in `BUDGET_BUDDY_STOP_WITH_PID`, and
+  the Home Base shuts itself down cleanly about a second after the app ends, even after a crash.
+- **Two programs, one install folder**, built with PyInstaller: `Budget Buddy.exe` (desktop: window and tray)
+  and `home-base\Budget Buddy Home Base.exe` (server, with the dashboard files bundled). Nobody needs Python. The
+  browser keeps working too (same address).
+- **Its own window through pywebview** (Edge WebView2, built into Windows), showing the existing dashboard, so
+  there is one UI. The CSP, CSRF token and this-computer-only rules are unchanged. Downloads are allowed (the
+  tax CSV). The window's own storage (the light/dark choice) is in `%LOCALAPPDATA%\BudgetBuddy-Window`; every
+  API reply is `no-store`, so no financial data is cached there.
+- **The window only shows its own Home Base.** If something else already answers on the port, it refuses rather
+  than show a possible look-alike.
+- **Light start at login (optional, off by default):** `Budget Buddy.exe --background` shows only the tray icon.
+  It starts no Home Base, no database, no key and no window library until opened (about 50 MB, mostly Python
+  itself). One tray at a time (a named mutex). Menu: Open, a status line (whether phones can sync now), Start
+  with Windows, Quit. Closing the window stops the Home Base; the tray stays.
+- **Start with Windows** is the current user's Run key (`HKCU\...\Run`, "Startup apps" in Settings): no admin
+  rights, no service.
+- **Everything people double-click lives in the top-level `launch/` folder** (start, build, install, and the
+  built app in `launch\Budget Buddy\`). The PowerShell behind them stays in `scripts/`.
 
 ## Consequences
-- Replaces the console window from 22a for everyday users. `Start Budget Buddy.bat` stays for developers and
-  testers.
-- New dependencies (pywebview, a tray library such as pystray, PyInstaller) need a `security-reviewer` pass and
-  pinned versions (issue #6). Check each license before adding it (pystray is LGPL, which is fine for a separate
-  Python package but should be noted).
-- An unsigned `.exe` triggers Windows SmartScreen warnings. Code signing is part of public release prep (#25).
-- The light state must be tested so that a locked, idle tray icon never holds the decrypted key.
+- `launch\Start Budget Buddy.bat` (22a) stays: it runs from source and uses the browser.
+- New dependencies (pywebview, pystray, Pillow; PyInstaller to build) passed a `security-reviewer` review. They
+  are version ranges for now; lock files are issue #6. pystray is LGPL-3.0, used unchanged as a separate package.
+- An unsigned `.exe` triggers Windows SmartScreen. Code signing is part of public release prep (#25).
+- Phones sync only while the window is open. An "always ready for my phone" option could come later.
 - macOS/Linux keep the browser route for now.

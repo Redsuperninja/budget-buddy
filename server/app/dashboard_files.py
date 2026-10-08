@@ -10,6 +10,7 @@ API-only.
 import logging
 import os
 import stat
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,7 +22,13 @@ CONTENT_TYPES = {".js": "text/javascript", ".css": "text/css"}
 
 
 def default_dashboard_dir() -> Path:
-    """``<repo>/dashboard``, found from this file (so it doesn't depend on the current folder)."""
+    """``<repo>/dashboard``, found from this file (so it doesn't depend on the current folder).
+
+    The packaged Home Base (``server/packaging/home-base.spec``) has the dashboard bundled in.
+    """
+    bundle = getattr(sys, "_MEIPASS", None)
+    if getattr(sys, "frozen", False) and bundle:
+        return Path(bundle) / "dashboard"
     return Path(__file__).resolve().parents[2] / "dashboard"
 
 

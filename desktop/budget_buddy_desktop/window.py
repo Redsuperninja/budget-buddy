@@ -1,0 +1,33 @@
+"""The app window: the dashboard shown in a native window (pywebview, using Windows' built-in Edge
+WebView2), and a plain message window when something goes wrong."""
+
+import html
+from pathlib import Path
+
+TITLE = "Budget Buddy"
+
+
+def show_dashboard(url: str, storage_dir: Path) -> None:
+    """Open the window on ``url`` and return when the user closes it.
+
+    ``storage_dir`` keeps the window's own browser storage (the light/dark choice) between runs. The
+    dashboard asks for nothing to be cached, so no financial data is written there.
+    """
+    import webview
+
+    webview.settings["ALLOW_DOWNLOADS"] = True  # the tax summary's CSV download
+    webview.create_window(TITLE, url, width=1200, height=820, min_size=(720, 520))
+    webview.start(private_mode=False, storage_path=str(storage_dir))
+
+
+def show_problem(message: str) -> None:
+    """A small window with a plain-English message, for when Budget Buddy can't start."""
+    import webview
+
+    body = (
+        "<body style='font-family:system-ui,sans-serif;padding:1.5rem;line-height:1.5'>"
+        f"<h2>Budget Buddy couldn't start</h2><p>{html.escape(message)}</p>"
+        "<p>Close this window to try again later.</p></body>"
+    )
+    webview.create_window(TITLE, html=body, width=560, height=320)
+    webview.start()

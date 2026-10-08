@@ -19,6 +19,11 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   so they can delete them.
 - Planned: an encrypted single-file backup export the user can copy to a USB drive.
 
+## Never cached
+
+Every `/api/*` reply carries `Cache-Control: no-store` (`app/network.py`), so neither a browser nor the desktop
+app's window keeps financial data in its disk cache.
+
 ## What stays plain text in `budget.db`
 
 These stay readable so Budget Buddy can search, sort and add them up:

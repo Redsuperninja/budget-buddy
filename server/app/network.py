@@ -62,12 +62,18 @@ ALWAYS_HEADERS = (
 )
 
 
-def _with_always_headers(send: Send) -> Send:
+# API replies hold financial data: no browser (or the desktop app's window) may keep a copy on disk.
+API_HEADERS = ((b"cache-control", b"no-store"),)
+
+
+def _with_always_headers(send: Send, path: str) -> Send:
+    extra = ALWAYS_HEADERS + (API_HEADERS if path.startswith("/api/") else ())
+
     async def wrapped(message):
         if message["type"] == "http.response.start":
             headers = list(message.get("headers", []))
             present = {k.lower() for k, _ in headers}
-            headers += [(k, v) for k, v in ALWAYS_HEADERS if k not in present]
+            headers += [(k, v) for k, v in extra if k not in present]
             message = {**message, "headers": headers}
         await send(message)
 
@@ -90,7 +96,8 @@ class PrivateNetworkOnlyMiddleware:
             return
 
         if scope["type"] == "http":
-            send = _with_always_headers(send)  # outermost middleware: covers every response
+            # Outermost middleware: covers every response.
+            send = _with_always_headers(send, scope.get("path", ""))
 
         client = scope.get("client")
         if is_private_address(client[0] if client else None):

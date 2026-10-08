@@ -29,6 +29,9 @@ dev = [
     "httpx2>=2.13",
     "ruff>=0.8",
 ]
+# Makes the packaged Home Base that the desktop app starts (packaging/home-base.spec).
+# PyInstaller: GPL with an exception that allows building apps like this one.
+package = ["pyinstaller>=6.10"]
 
 [tool.setuptools.dynamic]
 version = { attr = "app.__version__" }

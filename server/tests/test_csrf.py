@@ -72,6 +72,20 @@ def test_every_response_has_nosniff_and_same_origin_resource_policy(client, path
     assert response.headers["cross-origin-resource-policy"] == "same-origin"
 
 
+@pytest.mark.parametrize(
+    "path",
+    [ACCOUNTS, "/api/local/transactions", "/api/local/summary/monthly?month=2026-01", "/api/x"],
+)
+def test_api_replies_are_never_stored(client, path):
+    """Financial data must not be kept in a browser's (or the desktop window's) disk cache."""
+    assert client.get(path).headers["cache-control"] == "no-store"
+
+
+def test_dashboard_files_keep_their_own_cache_rule(client):
+    assert client.get("/").headers["cache-control"] == "no-store"
+    assert client.get("/static/app.css").headers["cache-control"] == "no-cache"
+
+
 def test_refusals_have_the_headers_too(make_client):
     response = make_client().get("/api/health", headers={"Host": "attacker.example:8765"})
     assert response.status_code == 403

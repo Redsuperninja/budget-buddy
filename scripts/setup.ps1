@@ -1,6 +1,6 @@
 # One-time setup for testing Budget Buddy on Windows.
 # Installs the Home Base (Python) and the phone app's tools (Node.js). Safe to run again.
-# For everyday use you don't need this: "Start Budget Buddy.bat" sets itself up.
+# For everyday use you don't need this: "launch\Start Budget Buddy.bat" sets itself up.
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 

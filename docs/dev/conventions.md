@@ -10,8 +10,9 @@ reviewers check them.
   under ~300 lines. When a file grows past that, split it along its jobs as part of the change.
 - **Don't repeat yourself.** Before writing a helper, search for an existing one and reuse it. When the
   same logic or UI shows up a second time, move it into a shared helper instead of copying it.
-- **Parts never import each other.** `server/`, `dashboard/`, `mobile/` and `scripts/` talk over HTTP (the
-  dashboard and scripts through the server's API, the phone through the sync contract). When two parts need the
+- **Parts never import each other.** `server/`, `dashboard/`, `mobile/`, `desktop/` and `scripts/` talk over
+  HTTP (the dashboard, desktop app and scripts through the server's API, the phone through the sync contract; the
+  desktop app starts the Home Base as its own program). When two parts need the
   same small helper, each keeps its own copy with its own tests; the no-repetition rule applies inside a part.
 - **Shared code lives in one obvious place:**
   - Server: business logic in `services/` (one module per area), request/response shapes in `schemas/`,
@@ -20,7 +21,10 @@ reviewers check them.
     (`api/endpoints.js` holds every route string), building the page, money, dates and labels.
   - Phone (`mobile/src/`): screens in `app/`, reusable UI in `components/`, pure logic in `lib/`,
     sync in `sync/`.
-  - Scripts: the shared local-API client is `scripts/_local_api.py`.
+  - Desktop (`desktop/budget_buddy_desktop/`): one module per job (tray, window, starting the Home Base,
+    start with Windows); the tray's modules never load the window library.
+  - Scripts: the shared local-API client is `scripts/_local_api.py`; shared PowerShell is `scripts/paths.ps1`.
+    What people double-click lives in `launch/` as thin `.bat` files that call `scripts/`.
 - **Short functions with clear names** over comments explaining long ones. A file starts with a one-line
   comment saying what it's for.
 - **Refactor as you go, in scope.** Tidy the code you touch. Large clean-ups of unrelated code go in their

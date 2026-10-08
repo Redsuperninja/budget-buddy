@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     Override with env vars: ``BUDGET_BUDDY_DATA_DIR``, ``BUDGET_BUDDY_HOST``, ``BUDGET_BUDDY_PORT``,
     ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``, ``BUDGET_BUDDY_INSECURE_TEST_KEYSTORE``,
-    ``BUDGET_BUDDY_DASHBOARD_DIR``.
+    ``BUDGET_BUDDY_DASHBOARD_DIR``, ``BUDGET_BUDDY_STOP_WITH_PID``.
     """
 
     model_config = SettingsConfigDict(env_prefix="BUDGET_BUDDY_")
@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     # Folder with the web dashboard. Empty means ``<repo>/dashboard``. If it isn't there, the Home
     # Base runs API-only (ADR-0005).
     dashboard_dir: Path | None = None
+    # Set by the desktop app: stop the Home Base when the process with this ID ends.
+    stop_with_pid: int | None = Field(default=None, ge=1)
     # Friendly name the phone shows for this computer (at most 50 characters).
     server_name: str = Field(default="Home Base", min_length=1, max_length=50)
     # Developer extras such as the /docs API explorer. Off for normal use.

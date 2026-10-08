@@ -11,6 +11,7 @@ User guides never name them; they say "ask whoever set up Budget Buddy" and link
 | `BUDGET_BUDDY_SERVER_NAME` | `Home Base` | The name the phone shows for this computer (50 characters at most). |
 | `BUDGET_BUDDY_PORT` | `8765` | Port to listen on. The test server uses `8766`. |
 | `BUDGET_BUDDY_DASHBOARD_DIR` | `<repo>/dashboard` | Folder with the web dashboard files. If it isn't there, the server runs API-only ([architecture/dashboard.md](architecture/dashboard.md)). |
+| `BUDGET_BUDDY_STOP_WITH_PID` | unset | Set by the desktop app: the Home Base stops cleanly when the process with this ID ends ([architecture/desktop.md](architecture/desktop.md)). |
 | `BUDGET_BUDDY_DEV_MODE` | `false` | `true` turns on the API explorer at `/docs`. |
 | `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. `memory` is for automated tests only and also needs `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1` ([testing.md](testing.md)). |
 | `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE` | unset | Test-only switch that allows the memory key store. Never use it for real data. |
