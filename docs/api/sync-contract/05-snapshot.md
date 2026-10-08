@@ -117,8 +117,9 @@ Money rules (how the server fills the totals; the phone trusts them and never re
   refund-heavy month can make them negative. They exclude transfers between the user's own accounts and
   balance adjustments.
 - The savings `actual_cents` is money moved into savings this month **minus withdrawals**, so it can be
-  negative when more came out than went in. Money moved into the user's own savings account (a transfer)
-  isn't counted as saved yet (roadmap 10b).
+  negative when more came out than went in. It includes linked transfers from an everyday account into the
+  user's own savings, brokerage, retirement or HSA account (minus transfers back out), which belong to no
+  category, so the savings group's `actual_cents` can be more than its categories add up to.
 - `transactions` still lists transfers, refunds and adjustments as they happened (sign = direction of
   money); they are for display only.
 - `accounts[].balance_cents` is the account balance as of `balance_as_of`: transactions dated after today

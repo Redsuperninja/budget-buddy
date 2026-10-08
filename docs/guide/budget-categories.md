@@ -30,7 +30,9 @@ For the month you pick, the summary shows income, spending, and savings.
 - **Savings** is the Savings categories, counted the same way.
 - Moving money between your own accounts is not income or spending.
 - Fixing a balance, including the opening balance of a new account, is not income or spending either.
-- Money you move into your own savings account isn't counted as saved yet.
+- Money you move from an everyday account into your own savings, investment, retirement or HSA account counts
+  as **saved**, once the two sides are linked as a transfer. Moving it back out lowers what you saved.
+  Paying a credit card or loan doesn't count as saving.
 
 ## Why some money shows as "not sorted yet"
 
