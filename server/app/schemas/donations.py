@@ -30,6 +30,10 @@ _DATE_HELP = (
     "Use the date you paid: the day you mailed a check or the day the card was charged, even if "
     "the card is paid off later."
 )
+_PAYMENT_HELP = (
+    "The bank or card payment this gift was, from your transactions. It must be money going out, "
+    "and the gift can't be more than the payment."
+)
 # A phone a time zone ahead of the Home Base may already be on tomorrow's date.
 _FUTURE_GRACE = dt.timedelta(days=1)
 
@@ -68,6 +72,7 @@ class DonationCreate(Schema):
     amount_cents: Cents | None = Field(default=None, description=_AMOUNT_HELP)
     amount: DollarText | None = None
     receipt_id: Id | None = None
+    transaction_id: Id | None = Field(default=None, description=_PAYMENT_HELP)
     notes: Notes = None
 
     @model_validator(mode="after")
@@ -89,6 +94,7 @@ class DonationUpdate(UpdateSchema):
     amount_cents: Cents | None = Field(default=None, description=_AMOUNT_HELP)
     amount: DollarText | None = None
     receipt_id: Id | None = None
+    transaction_id: Id | None = Field(default=None, description=_PAYMENT_HELP)
     notes: Notes = None
 
     @model_validator(mode="after")
@@ -111,6 +117,7 @@ class DonationOut(Schema):
     kind: DonationKind
     amount_cents: int
     receipt_id: int | None
+    transaction_id: int | None
     notes: str | None
     created_at: dt.datetime
     updated_at: dt.datetime

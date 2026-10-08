@@ -26,6 +26,12 @@ _DEPOSIT_LOCKED_MESSAGE = (
     "This deposit is linked to a paycheck. Remove that link before changing its account, amount, "
     "or kind, or making it part of a transfer."
 )
+# A payment sorted into charity backs a donation, so its amount and kind stay put while linked.
+_DONATION_LOCKED_FIELDS = {"amount_cents", "kind"}
+_DONATION_LOCKED_MESSAGE = (
+    "This payment is recorded as a donation. Remove the gift on the Donations page first to change "
+    "its amount or type, or to make it part of a transfer."
+)
 
 
 @dataclass(frozen=True)
@@ -137,6 +143,8 @@ def update_transaction(
         )
     if _TRANSFER_LOCKED_FIELDS & changes.keys() and _is_paycheck_deposit(session, transaction):
         raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
+    if _DONATION_LOCKED_FIELDS & changes.keys() and transaction.donation is not None:
+        raise ApiError(409, "linked_to_donation", _DONATION_LOCKED_MESSAGE)
     _check_kind_rules(
         changes.get("kind", transaction.kind),
         changes.get("amount_cents", transaction.amount_cents),
@@ -215,6 +223,8 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
         )
     if _is_paycheck_deposit(session, first) or _is_paycheck_deposit(session, second):
         raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
+    if first.donation is not None or second.donation is not None:
+        raise ApiError(409, "linked_to_donation", _DONATION_LOCKED_MESSAGE)
     if first.kind != TransactionKind.NORMAL or second.kind != TransactionKind.NORMAL:
         # Linking would hide what a refund or an opening-balance adjustment was, and unlinking
         # couldn't bring it back.

@@ -13,7 +13,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `category_rules` | id, pattern (unique, "description contains"), category_id (deleted with its category) |
 | `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, notes (enc), client_id? (unique), deduction_kind?, device_id? (phone uploads) |
-| `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, notes (enc) |
+| `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) |
 | `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) |
 | `stock_sales` | one lot's part of an order: order_id (cascade delete), lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0); rebuilt with FIFO ([stocks.md](stocks.md)) |

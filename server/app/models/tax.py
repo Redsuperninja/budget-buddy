@@ -25,6 +25,11 @@ class Donation(TimestampMixin, Base):
     amount_cents: Mapped[int]  # for goods: fair market value
     kind: Mapped[DonationKind] = mapped_column(str_enum(DonationKind, "donation_kind"))
     receipt_id: Mapped[int | None] = mapped_column(ForeignKey("receipts.id", ondelete="SET NULL"))
+    # The bank or card payment this gift was (a charity transaction). One payment backs at most
+    # one gift; deleting the payment keeps the gift.
+    transaction_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transactions.id", ondelete="SET NULL"), index=True, unique=True
+    )
     notes: Mapped[str | None] = mapped_column(EncryptedString("donations.notes"))
 
 

@@ -35,7 +35,7 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
 - **Home:** your monthly budget: money in, money spent, money saved, how much of each budget you've used, what
   share of your income went to needs, wants and savings, and your account balances
 - **Money**
-  - **Transactions:** money coming in and going out; add more
+  - **Transactions:** money coming in and going out; add more; sort a payment into charity
   - **Accounts:** your bank and savings accounts; record starting balances
   - **Import bank file:** download a CSV from your bank and import it
   - **Auto-sort:** rules that put transactions in the right category for you

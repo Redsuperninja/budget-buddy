@@ -3,7 +3,7 @@
 import datetime as dt
 
 from sqlalchemy import CheckConstraint, Date, ForeignKey, String, Text, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.crypto.fields import EncryptedString
 from app.models.base import Base, TimestampMixin, str_enum
@@ -93,6 +93,18 @@ class Transaction(TimestampMixin, Base):
     # CSV import only: a hash of (account, date, amount, description, occurrence) so importing
     # an overlapping statement again doesn't add the same rows twice. See services/csv_import.py.
     import_fingerprint: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+    # The charitable gift this payment is, if it was sorted into charity (Donation.transaction_id).
+    donation = relationship(
+        "Donation",
+        primaryjoin="Transaction.id == foreign(Donation.transaction_id)",
+        uselist=False,
+        viewonly=True,
+        lazy="selectin",
+    )
+
+    @property
+    def donation_id(self) -> int | None:
+        return self.donation.id if self.donation is not None else None
 
 
 class CsvImportMapping(TimestampMixin, Base):

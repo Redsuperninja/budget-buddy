@@ -17,6 +17,22 @@ dollar text; for goods, the items' fair market value), and optionally a `receipt
 - The amount must be more than zero.
 - The date can't be more than one day after the Home Base's date (pledges count once paid).
 
+## A gift from a payment (sorting a transaction into charity)
+
+`transaction_id` links a gift to the bank or card payment it was (migration 0012; rules in
+`services/donation_payments.py`, checked on the final values of a create or PATCH):
+
+- The payment must be a regular (`normal`) transaction with money going out; otherwise 422 `invalid_payment`.
+- The gift must be `cash`, and no more than the payment (the rest may have bought something, like a dinner).
+- One payment backs one gift (unique column; a second link is 409 `already_linked`, also when two saves race).
+- Deleting the payment keeps the gift and clears the link (`ON DELETE SET NULL`). While linked, the payment's
+  amount and kind are locked and it can't become a transfer ([ledger.md](ledger.md)).
+- The gift keeps its own date: the dashboard starts it at the payment's date but lets people change it, since a
+  bank may show when a check cleared rather than when it was mailed. Don't tie the two dates together.
+- A gift smaller than its payment (something came back) adds the `quid_pro_quo_statement` paperwork item.
+- Transactions show the link as `donation_id`. The payment still counts as spending in its category; the gift
+  is a tax record, not a second expense.
+
 ## Yearly summary
 
 - Totals what was given that calendar year (cash, goods, overall) and lists the proof each gift needs.

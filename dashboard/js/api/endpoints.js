@@ -51,6 +51,7 @@ export const createPaycheck = (json) => api("POST", `${LOCAL}/paychecks`, { json
 export const listDonations = (year) => api("GET", `${LOCAL}/donations?tax_year=${year}`);
 export const donationSummary = (year) => api("GET", `${LOCAL}/donations/summary/${year}`);
 export const createDonation = (json) => api("POST", `${LOCAL}/donations`, { json });
+export const deleteDonation = (id) => api("DELETE", `${LOCAL}/donations/${id}`);
 
 // Other deductions and the yearly tax summary
 export const listDeductions = (year) => api("GET", `${LOCAL}/deductions?tax_year=${year}`);

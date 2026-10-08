@@ -18,7 +18,7 @@ A private, local-first budgeting and tax-prep helper.
 | Accounts | Checking & savings — import bank CSV exports or enter manually |
 | Spending | Receipts (photo + amount + category), auto-categorized transactions |
 | Budget | Suggested budget from your real income & spending, monthly targets vs. actual |
-| Taxes | Charitable donations, stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |
+| Taxes | Charitable donations (typed in, or sorted from a payment), stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |
 
 ## Quick start
 
