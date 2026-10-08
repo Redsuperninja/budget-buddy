@@ -258,6 +258,27 @@ These routes answer this computer only (the phone uses `POST /api/pair`):
 - `POST /api/local/devices/{id}/revoke`: removes a phone.
 - `POST /api/pair` (phone, home network): the encrypted pairing request. Errors use the codes in
   `docs/api/sync-contract.md`.
+
+### Phone sync endpoints (roadmap #15)
+
+These answer the home network (and this computer). Each needs `Authorization: Bearer <device token>`
+and a JSON body in the encrypted envelope of `docs/api/sync-contract.md` section 4. Replies are
+encrypted too, including errors once the message has been opened; before that, errors are plain
+`{"error": {"code", "message"}}` (for example `not_paired`, `device_revoked`, `clock_skew`,
+`decrypt_failed`, `too_large`). A request can only be used once, and a removed phone is refused at once.
+
+- `POST /api/sync/snapshot` (body up to 16 KiB): this month's budget by group and category (plus money
+  not yet in a category), the last 60 days of transactions (at most 500), every account's balance up to
+  today, income received and expected, and tax totals. No account numbers,
+  notes, receipt photos, or employer names.
+- `POST /api/sync/receipts` (body up to 12 MiB): 1 to 5 receipts, each with a JPEG photo
+  (up to 3 MiB, 4096 pixels a side, 16 megapixels). The answer has one result per receipt:
+  `accepted`, `duplicate` (this phone already sent that `client_id`; nothing new is stored; another phone's ID is `rejected`) or `rejected`
+  with a reason. Photos are stored encrypted, like receipts added on the computer.
+- `POST /api/sync/ack` (body up to 16 KiB): the phone finished a sync; sets the phone's "last synced".
+
+The database gets a `seen_nonces` table, `devices.nonce_watermark`, and `receipts.client_id` /
+`receipts.deduction_kind` / `receipts.device_id` (migration 0008); the app upgrades itself on start.
 - Stocks (estimates, not tax advice; plain-English guide in
   [docs/guide/stocks.md](../docs/guide/stocks.md)):
   - `GET/POST /api/local/stocks/lots` and `GET/DELETE /api/local/stocks/lots/{id}`: shares you

@@ -53,7 +53,9 @@ def test_middleware_rejects_public_client(make_client):
     client = make_client("203.0.113.7")
     response = client.get("/api/health")
     assert response.status_code == 403
-    assert "home network" in response.json()["detail"]
+    error = response.json()["error"]
+    assert error["code"] == "not_home_network" and "home network" in error["message"]
+    assert "detail" not in response.json()
 
 
 # TestClient.websocket_connect ignores base_url, so give it the full address.

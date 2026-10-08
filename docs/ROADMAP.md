@@ -62,7 +62,7 @@ computer has no friendly screen and the phone only shows sample data.
 ## Phase 4: Sync
 - [x] 13b. Sync API contract v1 — *architect*
 - [x] 14. Pairing: QR code, one-time code, device tokens, revoke — *backend-engineer* + *security-reviewer*
-- [ ] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
+- [x] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
 - [x] 16. Local web dashboard (computer side) — *backend-engineer* (note: poll the device list while a QR is showing so the home-network listener closes after the code expires; no timer closes it)
 
 ## Phase 5: Phone app

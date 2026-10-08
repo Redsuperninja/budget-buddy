@@ -9,31 +9,12 @@ import json
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from app.bodylimit import PAIR_LIMIT_BYTES, read_limited
 from app.deps import SessionDep
 from app.errors import ApiError
 from app.services import pairing as service
 
 router = APIRouter(prefix="/api", tags=["pairing"])
-
-BODY_LIMIT_BYTES = 16 * 1024
-
-
-async def _read_body(request: Request) -> bytes:
-    """Read the body, stopping at the limit (don't trust Content-Length alone)."""
-    declared = request.headers.get("content-length")
-    if declared and declared.isdigit() and int(declared) > BODY_LIMIT_BYTES:
-        raise _too_large()
-    chunks, size = [], 0
-    async for chunk in request.stream():
-        size += len(chunk)
-        if size > BODY_LIMIT_BYTES:
-            raise _too_large()
-        chunks.append(chunk)
-    return b"".join(chunks)
-
-
-def _too_large() -> ApiError:
-    return ApiError(413, "too_large", "That was too much data to send at once. Try again.")
 
 
 @router.post("/pair")
@@ -51,7 +32,7 @@ async def pair(request: Request, session: SessionDep) -> JSONResponse:
     media_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
     if media_type != "application/json":
         raise ApiError(400, "bad_request", service.SERVER_ERROR_MESSAGE)
-    body = await _read_body(request)
+    body = await read_limited(request, PAIR_LIMIT_BYTES)
     try:
         outer = json.loads(body)
     except (ValueError, RecursionError):  # not JSON, or nested so deep it can't be read

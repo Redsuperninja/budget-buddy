@@ -137,6 +137,12 @@ class Receipt(TimestampMixin, Base):
     image_path: Mapped[str | None] = mapped_column(EncryptedString("receipts.image_path"))
     tax_deductible: Mapped[bool] = mapped_column(default=False, server_default="0")
     notes: Mapped[str | None] = mapped_column(EncryptedString("receipts.notes"))
+    # Phone uploads only: the phone's own ID for the receipt, so a retried upload never makes a
+    # second copy (sync contract §6.3). ``deduction_kind`` is the phone's tag for a tax receipt.
+    client_id: Mapped[str | None] = mapped_column(String(36), unique=True)
+    deduction_kind: Mapped[str | None] = mapped_column(String(16))
+    # Which phone uploaded it, so only that phone is told "duplicate" for its own ``client_id``.
+    device_id: Mapped[int | None] = mapped_column(ForeignKey("devices.id", ondelete="SET NULL"))
 
     @property
     def has_image(self) -> bool:

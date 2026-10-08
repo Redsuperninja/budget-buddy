@@ -32,6 +32,7 @@ from app.routers import (
     receipts,
     stocks,
     summary,
+    sync,
     transactions,
 )
 from app.services.pairing import load_server_id, purge_ended_sessions
@@ -98,6 +99,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_error_handlers(app)
     app.include_router(health.router)
     app.include_router(pair.router)
+    app.include_router(sync.router)
     app.include_router(pairing.router)
     app.include_router(accounts.router)
     app.include_router(transactions.router)

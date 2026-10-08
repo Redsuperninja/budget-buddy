@@ -101,7 +101,10 @@ class PrivateNetworkOnlyMiddleware:
             await send({"type": "websocket.close", "code": WS_POLICY_VIOLATION})
             return
 
-        response = JSONResponse(status_code=403, content={"detail": FORBIDDEN_DETAIL})
+        response = JSONResponse(
+            status_code=403,
+            content={"error": {"code": "not_home_network", "message": FORBIDDEN_DETAIL}},
+        )
         await response(scope, receive, send)
 
 

@@ -6,14 +6,11 @@ carry them. Times are Unix seconds passed in by the caller (so tests can control
 
 import hashlib
 import hmac
-import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from nacl.exceptions import CryptoError
 from nacl.public import Box, PrivateKey, PublicKey
-from nacl.secret import SecretBox
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -22,27 +19,23 @@ from app.crypto._fs import write_private_bytes
 from app.crypto.b64url import b64u_decode, b64u_encode
 from app.errors import ApiError
 from app.models import Device, PairingNonce, PairingSession
+from app.services import envelope
 from app.services.devices import hash_token
+from app.services.envelope import (
+    CONTRACT,
+    REPLAY_MESSAGE,
+    SERVER_ERROR_MESSAGE,
+    EncryptedError,
+)
 
-CONTRACT = 1
 APP_ID = "budget-buddy"
 CODE_TTL_SECONDS = 600
 MAX_WRONG_CODES = 5
-CLOCK_WINDOW_SECONDS = 300
 PAIR_PATH = "/api/pair"
 SERVER_ID_FILENAME = "server-id"
 
-SERVER_ERROR_MESSAGE = "Something went wrong. Try again in a minute."
-UPDATE_MESSAGE = (
-    "Budget Buddy needs an update on your phone or computer so they can talk to each other."
-)
 EXPIRED_MESSAGE = (
     "That pairing code has expired. Click Pair a phone on your computer to get a new one."
-)
-REPLAY_MESSAGE = "Sync got interrupted. Please try again."
-CLOCK_MESSAGE = (
-    "The clock on your phone or your computer is wrong. Turn on automatic date and time on "
-    "both, then try again."
 )
 
 
@@ -152,25 +145,6 @@ def active_session(session: Session, now: int) -> PairingSession | None:
 # --- POST /api/pair -----------------------------------------------------------------------
 
 
-class _EncryptedError(Exception):
-    """An error to send back inside the encrypted envelope (the box already opened)."""
-
-    def __init__(self, status: int, code: str, message: str, **extra) -> None:
-        self.status, self.code, self.message, self.extra = status, code, message, extra
-
-
-def _bad_request() -> ApiError:
-    return ApiError(400, "bad_request", SERVER_ERROR_MESSAGE)
-
-
-def _decrypt_failed() -> ApiError:
-    return ApiError(
-        401,
-        "decrypt_failed",
-        "This phone's connection to your computer needs to be set up again. Please pair again.",
-    )
-
-
 @dataclass
 class PairResult:
     status: int
@@ -186,14 +160,6 @@ def require_active_session(session: Session, now: int) -> PairingSession:
     return found
 
 
-def _seal(shared: bytes, request_nonce: str, now: int, status: int, **body) -> dict:
-    inner = {"type": "res", "ts": now, "re": request_nonce, "status": status, **body}
-    plaintext = json.dumps(inner, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-    nonce = os.urandom(24)
-    box = SecretBox(shared).encrypt(plaintext, nonce).ciphertext
-    return {"v": CONTRACT, "nonce": b64u_encode(nonce), "ts": now, "box": b64u_encode(box)}
-
-
 def pair(
     session: Session,
     pairing: PairingSession,
@@ -204,49 +170,16 @@ def pair(
     server_name: str,
 ) -> PairResult:
     """Steps 3 to 8 of §4.4 for ``/api/pair``. Plaintext problems raise ``ApiError``."""
-    if not isinstance(outer, dict):
-        raise _bad_request()
-    version = outer.get("v")
-    if not isinstance(version, int) or isinstance(version, bool):
-        raise _bad_request()  # no usable version at all: not one of our envelopes
-    if version != CONTRACT:
-        raise ApiError(
-            426,
-            "update_needed",
-            UPDATE_MESSAGE,
-            supported=[CONTRACT],
-        )
-    try:
-        nonce = b64u_decode(outer.get("nonce"), 24)
-        box = b64u_decode(outer.get("box"))
-        phone_pub = b64u_decode(outer.get("phone_pub"), 32)
-    except ValueError:
-        raise _bad_request() from None
-    ts = outer.get("ts")
-    if len(box) < 16 or not isinstance(ts, int) or isinstance(ts, bool):
-        raise _bad_request()
-    if abs(now - ts) > CLOCK_WINDOW_SECONDS:
-        raise ApiError(400, "clock_skew", CLOCK_MESSAGE, server_time=now)
-
+    parsed = envelope.parse_outer(outer, with_phone_pub=True)
+    envelope.check_clock(parsed.ts, now)
     try:
         pair_sk = PrivateKey(b64u_decode(pairing.pair_sk, 32))
-        shared = Box(pair_sk, PublicKey(phone_pub)).shared_key()
+        shared = Box(pair_sk, PublicKey(parsed.phone_pub)).shared_key()
     except Exception:  # e.g. a weak public key: libsodium refuses to agree on a key
-        raise _bad_request() from None
-    try:
-        plaintext = SecretBox(shared).decrypt(box, nonce)
-        inner = json.loads(plaintext)
-    except (CryptoError, ValueError):
-        raise _decrypt_failed() from None
-    if (
-        not isinstance(inner, dict)
-        or inner.get("type") != "req"
-        or inner.get("ts") != ts
-        or inner.get("method") != "POST"
-        or inner.get("path") != PAIR_PATH
-    ):
-        raise _decrypt_failed()
+        raise envelope.bad_request() from None
+    inner = envelope.open_request(shared, parsed, path=PAIR_PATH)
 
+    nonce = parsed.nonce
     request_nonce = b64u_encode(nonce)
     try:
         return _pair_inside_box(
@@ -260,9 +193,8 @@ def pair(
             shared=shared,
             request_nonce=request_nonce,
         )
-    except _EncryptedError as err:
-        extra = {"error": {"code": err.code, "message": err.message, **err.extra}}
-        return PairResult(err.status, _seal(shared, request_nonce, now, err.status, **extra))
+    except EncryptedError as err:
+        return PairResult(err.status, envelope.seal_error(shared, request_nonce, now, err))
 
 
 def _pair_inside_box(
@@ -277,13 +209,7 @@ def _pair_inside_box(
     shared: bytes,
     request_nonce: str,
 ) -> PairResult:
-    if inner.get("contract") != CONTRACT:
-        raise _EncryptedError(
-            426,
-            "update_needed",
-            UPDATE_MESSAGE,
-            supported=[CONTRACT],
-        )
+    envelope.check_contract(inner)
 
     # Replay check: insert first, and a duplicate means this exact request was seen before.
     session_id = pairing.id
@@ -292,14 +218,14 @@ def _pair_inside_box(
         session.commit()
     except IntegrityError:
         session.rollback()
-        raise _EncryptedError(409, "replay", REPLAY_MESSAGE) from None
+        raise EncryptedError(409, "replay", REPLAY_MESSAGE) from None
 
     data = inner.get("data")
     code, name, platform, app_version = _validate_data(data)
 
     if not hmac.compare_digest(_hash_code(code), pairing.code_hash):
         _count_wrong_code(session, session_id, now)
-        raise _EncryptedError(410, "pairing_expired", EXPIRED_MESSAGE)
+        raise EncryptedError(410, "pairing_expired", EXPIRED_MESSAGE)
 
     token = b64u_encode(os.urandom(32))
     sync_key = b64u_encode(os.urandom(32))
@@ -317,7 +243,7 @@ def _pair_inside_box(
     )
     if claimed.rowcount != 1:
         session.rollback()
-        raise _EncryptedError(410, "pairing_expired", EXPIRED_MESSAGE)
+        raise EncryptedError(410, "pairing_expired", EXPIRED_MESSAGE)
     device = Device(
         name=name,
         token_hash=hash_token(token),
@@ -331,7 +257,7 @@ def _pair_inside_box(
     session.commit()
     return PairResult(
         200,
-        _seal(
+        envelope.seal(
             shared,
             request_nonce,
             now,
@@ -348,8 +274,8 @@ def _pair_inside_box(
 
 
 def _validate_data(data: object) -> tuple[str, str, str, str]:
-    def bad() -> _EncryptedError:
-        return _EncryptedError(400, "bad_request", SERVER_ERROR_MESSAGE)
+    def bad() -> EncryptedError:
+        return EncryptedError(400, "bad_request", SERVER_ERROR_MESSAGE)
 
     if not isinstance(data, dict):
         raise bad()

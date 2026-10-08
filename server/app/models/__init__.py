@@ -1,7 +1,7 @@
 """Database tables. Importing this package registers every model on ``Base.metadata``."""
 
 from app.models.base import Base
-from app.models.devices import Device, PairingNonce, PairingSession
+from app.models.devices import Device, PairingNonce, PairingSession, SeenNonce
 from app.models.enums import (
     AccountKind,
     CategoryGroup,
@@ -36,6 +36,7 @@ __all__ = [
     "PairingSession",
     "Paycheck",
     "Receipt",
+    "SeenNonce",
     "StockLot",
     "StockSale",
     "StockSaleOrder",
