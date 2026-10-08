@@ -23,12 +23,32 @@ class Account(TimestampMixin, Base):
 
 class Category(TimestampMixin, Base):
     __tablename__ = "categories"
-    __table_args__ = (UniqueConstraint("name"),)
+    __table_args__ = (
+        UniqueConstraint("name"),
+        CheckConstraint(
+            "budget_percent_bp IS NULL OR budget_percent_bp BETWEEN 1 AND 10000",
+            name="budget_percent_range",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     group: Mapped[CategoryGroup] = mapped_column(str_enum(CategoryGroup, "category_group"))
     budget_cents: Mapped[int] = mapped_column(default=0, server_default="0")
+    # A budget as a share of monthly income, in basis points (1500 = 15%). When set, it replaces
+    # ``budget_cents``; see app/services/budget_plan.py for which income it's a share of.
+    budget_percent_bp: Mapped[int | None]
+
+
+class BudgetPlan(TimestampMixin, Base):
+    """Budget settings: one row (id 1), made when first saved."""
+
+    __tablename__ = "budget_plan"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # Take-home pay you plan on each month. Percentage budgets are shares of it; without it, they
+    # are shares of the month's actual income.
+    planned_income_cents: Mapped[int | None]
 
 
 class CategoryRule(TimestampMixin, Base):

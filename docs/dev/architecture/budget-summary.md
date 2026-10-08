@@ -7,12 +7,19 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
 
 - `GET/POST /api/local/categories`, `GET/PATCH /api/local/categories/{id}`.
 - `GET /api/local/summary/monthly?month=YYYY-MM`: income, spending and savings for that month.
+- `GET/PUT /api/local/budget/plan`: `{"planned_income_cents": int | null}`, the planned monthly income that
+  percentage budgets are shares of (one row in `budget_plan`).
 
 ## Categories
 
 - A category has a name (unique, ignoring upper/lower case), a group (`needs`, `wants`, `savings`,
   `income`, or the built-in `transfer`), and a `budget_cents` target (not negative). You can rename it and
   change its budget. The group can't change, and new categories can't use the `transfer` group.
+- **Percentage budgets:** instead of `budget_cents`, a category can have `budget_percent_bp`, a share of monthly
+  income in basis points (1 to 10,000; `1500` = 15%). Sending `budget_cents` switches a category back to an
+  amount (the percentage is cleared); sending a percentage sets `budget_cents` to 0. Both at once is a 422, and
+  income categories can't use a percentage. Math helpers: `app/percent.py` (whole numbers, halves rounded away
+  from zero).
 - **Budgets apply to every month.** There is no per-month budget, so changing one also changes what past
   months show.
 - Default categories are seeded by migration 0002.
@@ -28,8 +35,16 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
 - Transactions with no category, and refunds filed under an income or transfer category, can't be placed.
   They are not guessed at: they show up as `unassigned_in_cents`, `unassigned_out_cents` (both positive)
   and `unassigned_count`, and are left out of the totals.
+- **Budget income:** a percentage budget's `budget_cents` in the summary is its share of the month's budget
+  income: the planned income when one is saved, otherwise that month's actual income (never below zero). The
+  summary reports it as `budget_income_cents` and `budget_income_source` (`planned` or `actual`). Without a
+  plan, a percentage budget grows as the month's pay comes in.
+- **Shares of income:** each needs, wants and savings group has `percent_of_income_bp`, its actual as a share
+  of the month's actual income (`null` for the income group or when no income came in). This is the 50/30/20
+  check.
 - Paychecks never add income by themselves ([paychecks.md](paychecks.md)).
 - **Known gap:** money moved into your own savings account is a transfer, so it isn't counted as saved yet.
   Roadmap item 10b covers this.
 
-The phone's snapshot reuses this summary (sync contract §5).
+The phone's snapshot reuses this summary (sync contract §5), so it gets percentage budgets already worked
+out into cents; the wire format didn't change.

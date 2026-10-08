@@ -35,6 +35,7 @@ from app.models import (
 
 EXPECTED_TABLES = {
     "accounts",
+    "budget_plan",
     "categories",
     "category_rules",
     "transactions",

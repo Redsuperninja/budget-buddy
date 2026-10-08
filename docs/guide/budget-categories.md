@@ -19,7 +19,7 @@ Income, expect to receive). Names can't repeat, and upper or lower case doesn't 
 can't move a category to a different kind. If you picked the wrong kind, make a new category instead.
 
 A budget can't be negative. Budgets apply to every month, so changing one also changes what past months
-show.
+show. A budget can also be a percentage of your income: see [Budget by percentage of income](budget-by-percentage.md).
 
 ## How the monthly summary is counted
 

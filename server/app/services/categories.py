@@ -1,16 +1,12 @@
-"""Budget categories: list, add, rename, and set the monthly budget."""
+"""Budget categories: list, add, rename, and set the monthly budget (an amount or a percentage)."""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Category
-from app.schemas.categories import CategoryCreate, CategoryUpdate
-
-
-def _name_taken() -> ApiError:
-    return ApiError(409, "name_taken", "You already have a category with that name.")
+from app.models import Category, CategoryGroup
+from app.schemas.categories import INCOME_PERCENT, CategoryCreate, CategoryUpdate
 
 
 def _name_taken() -> ApiError:
@@ -57,6 +53,12 @@ def update_category(session: Session, category_id: int, data: CategoryUpdate) ->
     changes = data.changes()
     if "name" in changes:
         _check_name_free(session, changes["name"], own_id=category.id)
+    if "budget_cents" in changes:
+        changes["budget_percent_bp"] = None  # back to an amount budget
+    elif changes.get("budget_percent_bp") is not None:
+        if category.group == CategoryGroup.INCOME:
+            raise ApiError(422, "validation_error", INCOME_PERCENT)
+        changes["budget_cents"] = 0
     for field, value in changes.items():
         setattr(category, field, value)
     _commit(session)
