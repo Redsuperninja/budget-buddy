@@ -117,7 +117,7 @@ def test_summary_counts_only_income_and_spending(client, add_txn, accounts):
     add_txn(checking, 2_000, category_id=groceries, kind="refund")  # lowers spending
     add_txn(checking, -50_000, category_id=retire)
     add_txn(checking, -9_999, kind="adjustment")  # balance fix: not spending
-    # A linked transfer is neither income nor spending.
+    # A linked transfer is neither income nor spending (into savings, it counts as saved).
     out = add_txn(checking, -70_000, category_id=groceries)
     into = add_txn(savings, 70_000)
     link = client.post(
@@ -129,7 +129,8 @@ def test_summary_counts_only_income_and_spending(client, add_txn, accounts):
     assert s["month"] == "2026-01"
     assert s["income_cents"] == 300_000
     assert s["spending_cents"] == 12_000 - 2_000 + 3_000  # 13_000
-    assert s["saved_cents"] == 50_000
+    assert s["saved_cents"] == 50_000 + 70_000  # the move into savings counts as saved (10b)
+    assert s["saved_by_transfer_cents"] == 70_000
     assert s["spending_budget_cents"] == 50_000
     assert unassigned(s) == (0, 0, 0)
     by_name = {c["name"]: c for c in s["categories"]}

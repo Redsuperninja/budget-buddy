@@ -11,6 +11,8 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
   category) can't be placed, so they go in ``unassigned`` (money in and money out
   separately, both positive) instead of being guessed at.
 - A month runs from its first day through its last day, by the transaction's own date.
+- Linked transfers into your own savings-type accounts count as saved, minus transfers back out
+  (``savings_transfers``). They add to the savings group but to no category.
 - A percentage budget is a share of the month's budget income (``budget_plan.budget_income``).
 """
 
@@ -23,6 +25,7 @@ from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.percent import percent_bp
 from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
 from app.services.budget_plan import budget_for, budget_income
+from app.services.savings_transfers import saved_by_transfer
 
 _SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
 _REPORTED = (CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS, CategoryGroup.INCOME)
@@ -95,8 +98,12 @@ def monthly_summary(
         for c in reported
     ]
 
+    by_transfer = saved_by_transfer(session, start, end)
+
     def group_total(group: CategoryGroup) -> GroupTotal:
         actual_cents = sum(t.actual_cents for t in totals if t.group == group)
+        if group == CategoryGroup.SAVINGS:
+            actual_cents += by_transfer
         return GroupTotal(
             group=group,
             budget_cents=sum(t.budget_cents for t in totals if t.group == group),
@@ -113,6 +120,7 @@ def monthly_summary(
         income_cents=by_group[CategoryGroup.INCOME].actual_cents,
         spending_cents=sum(by_group[g].actual_cents for g in _SPENDING),
         saved_cents=by_group[CategoryGroup.SAVINGS].actual_cents,
+        saved_by_transfer_cents=by_transfer,
         spending_budget_cents=sum(by_group[g].budget_cents for g in _SPENDING),
         budget_income_cents=basis,
         budget_income_source=source,

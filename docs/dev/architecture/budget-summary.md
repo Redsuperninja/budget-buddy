@@ -43,8 +43,12 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
   of the month's actual income (`null` for the income group or when no income came in). This is the 50/30/20
   check.
 - Paychecks never add income by themselves ([paychecks.md](paychecks.md)).
-- **Known gap:** money moved into your own savings account is a transfer, so it isn't counted as saved yet.
-  Roadmap item 10b covers this.
+- **Transfers into savings count as saved** (roadmap 10b, `services/savings_transfers.py`): a linked transfer
+  from an everyday account into a `savings`, `brokerage`, `retirement` or `hsa` account adds to `saved_cents`
+  and the savings group's actual; a transfer back out lowers it. Moves between two of those kinds, and
+  payments to cards and loans, don't count. The amount is also reported as `saved_by_transfer_cents`. It
+  belongs to no category, so the savings group can be more than its categories add up to. Transfers are
+  still never income or spending.
 
 The phone's snapshot reuses this summary (sync contract §5), so it gets percentage budgets already worked
 out into cents; the wire format didn't change.
