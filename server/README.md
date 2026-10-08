@@ -19,6 +19,12 @@ On macOS/Linux use `python3 -m venv .venv` and `.venv/bin/...` instead.
 
 Then open <http://127.0.0.1:8765/api/health>. You should see `{"status": "ok", ...}`.
 
+## Try it with demo data
+
+The `scripts\` folder at the top of the repo starts a separate **test** Home Base (its own data folder,
+port 8766) and fills it with made-up data. See [docs/TESTING.md](../docs/TESTING.md). Those helpers need
+the `testing` extra (`pip install -e ".[dev,testing]"`, which `scripts\setup.ps1` does for you).
+
 ## Check your work
 
 ```powershell

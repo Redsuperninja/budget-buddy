@@ -3,6 +3,37 @@
 Each line is planned as **one small pull request**. Owner = the specialized agent that leads it
 (see [WORKFLOW.md](WORKFLOW.md)).
 
+## What's next (milestones)
+
+Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom.
+
+**A. Tester preview** (now): people can try the Home Base with demo data and connect a phone.
+- [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [TESTING.md](TESTING.md).
+
+**B. Alpha: the whole loop works for a non-technical tester.** The biggest gap today is that the
+computer has no friendly screen and the phone only shows sample data.
+1. **16. Local web dashboard.** Comes first, because it's how testers will use the computer. Must include the
+   CSRF/DNS-rebinding protection (#4), showing the pairing QR, CSV upload, and polling the device list.
+2. **15. Encrypted sync** (snapshot download, receipt upload), with the phone-side checks: #19 (encrypt the
+   cached snapshot), #20 (size limits), #23 and #24 (stale or inconsistent snapshots).
+3. **21. Sync button + reminders**, then **20. Receipt capture** with the offline queue.
+4. Quick fixes from testing so far: validation messages that show internal names (for example
+   `<TransactionKind.NORMAL: 'normal'>`), "1 rows" wording in CSV import errors, #31 (accept `.50` and `12.`),
+   #29 (future-dated transactions in balances), #25 and #32 (show negative balances as money owed).
+
+**C. Tax-season beta: the numbers people file with.**
+1. **10. Budget engine** and **10b** (count transfers into savings as saved).
+2. **9. Auto-categorization rules.**
+3. **13. Other deductions + yearly tax summary export.**
+4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
+   #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
+
+**D. Easy install, then public release.**
+1. **22. One-click Windows start**, **24. Encrypted backup & restore**, **23. User guide with screenshots**.
+2. Security hardening: #6 (supply chain: lock file, pinned actions, Dependabot), #26, #27 and #28 (key and
+   encryption hardening), #21 (npm advisories).
+3. **25. Public release prep.**
+
 ## Phase 1: Foundation
 - [x] 1. Repo scaffold, docs, agent definitions — *architect*
 - [x] 2. Home Base skeleton: FastAPI app, config, data folder, health check, tests, CI — *backend-engineer*
