@@ -7,7 +7,7 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 1. Start Budget Buddy on your computer (the Home Base server)
 2. Open a web browser (Chrome, Edge, Firefox, Safari — any browser works)
 3. Go to http://127.0.0.1:8765/ or type that address in the address bar
-4. You'll see the Budget Buddy dashboard with a row of tabs at the top: Home, Accounts, Transactions, Categories, and more
+4. You'll see the Budget Buddy dashboard with five buttons at the top: **Home**, **Money**, **Budget**, **Taxes** and **Phone**
 
 **Your data stays on this computer.** The dashboard only works when you open it from this computer. You can't access it from other computers or your phone.
 
@@ -27,21 +27,29 @@ Click **Show as table** on any chart to see the same numbers as a list.
 Budget Buddy follows your computer's light or dark setting. To pick one yourself, use **Colors** at the top
 right: **Match my computer**, **Light** or **Dark**. Your choice is remembered on this computer.
 
-## The tabs
+## Finding your way around
 
-- **Home:** see your monthly budget: money in, money spent, money saved, how much of each budget you've used, what share of your income went to needs, wants and savings, and your account balances
-- **Accounts:** list your bank and savings accounts; record starting balances
-- **Transactions:** list money coming in and going out; add more
-- **Categories:** set up budget categories and monthly budgets, as amounts or percentages of income
-- **Suggested budget:** a 50/30/20 plan from your last three months
-- **Auto-sort:** rules that put transactions in the right category for you
-- **Import bank file:** download a CSV from your bank and import it
-- **Paychecks:** track pay stubs and year-to-date totals (estimate only, not tax advice)
-- **Donations:** track gifts to charity (estimate only, not tax advice)
-- **Receipts:** photograph and store receipts
-- **Stocks:** track purchases and sales; calculate gains (estimate only, not tax advice)
-- **Tax summary:** other deductions and one page per tax year to download or print (estimate only, not tax advice)
-- **Connect phone:** pair your phone so it can see your budget
+The five buttons at the top each open a section. **Money**, **Budget** and **Taxes** have a few pages each: when
+you open one, a row of tabs appears just below the buttons. Click a tab to switch pages.
+
+- **Home:** your monthly budget: money in, money spent, money saved, how much of each budget you've used, what
+  share of your income went to needs, wants and savings, and your account balances
+- **Money**
+  - **Transactions:** money coming in and going out; add more
+  - **Accounts:** your bank and savings accounts; record starting balances
+  - **Import bank file:** download a CSV from your bank and import it
+  - **Auto-sort:** rules that put transactions in the right category for you
+- **Budget**
+  - **Categories:** budget categories and monthly budgets, as amounts or percentages of income
+  - **Suggested budget:** a 50/30/20 plan from your last three months
+- **Taxes** (estimates only, not tax advice)
+  - **Tax summary:** other deductions and one page per tax year to download or print
+  - **Donations:** gifts to charity and the proof to keep
+  - **Paychecks:** pay stubs and year-to-date totals
+  - **Stocks:** purchases and sales; gains and losses
+- **Phone:** pair your phone so it can see your budget
+
+Receipts are added from your phone.
 
 ## Something went wrong?
 

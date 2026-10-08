@@ -22,6 +22,12 @@ nav { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 nav button { background: none; border: 1px solid transparent; color: var(--text); padding: 0.4rem 0.75rem;
   border-radius: 6px; font: inherit; cursor: pointer; }
 nav button[aria-current="page"] { background: var(--accent); color: var(--accent-text); }
+/* Page tabs inside the current section (Money, Budget, Taxes). */
+.subnav { max-width: 64rem; margin: 0 auto; padding: 0.75rem 1rem 0; border-bottom: 1px solid var(--line); }
+.subnav[hidden] { display: none; }
+.subnav button { border-radius: 6px 6px 0 0; }
+.subnav button[aria-current="page"] { background: none; color: var(--text); border-color: var(--line);
+  border-bottom: 2px solid var(--accent); font-weight: 600; }
 main { max-width: 64rem; margin: 0 auto; padding: 1rem; }
 footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 1.5rem 1rem; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
@@ -81,6 +87,6 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 /* Printing (or saving as PDF) shows only the page content, without navigation or forms. */
 @media print {
   :root { color-scheme: light; }
-  header, footer, form, button, .no-print { display: none !important; }
+  header, footer, form, button, .subnav, .no-print { display: none !important; }
   .card { break-inside: avoid; border-color: #999; }
 }

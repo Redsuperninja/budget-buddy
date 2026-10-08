@@ -4,7 +4,7 @@ Not sure what to budget? Budget Buddy can suggest a budget from your own spendin
 
 ## Open it
 
-1. Open the dashboard and click **Suggested budget**.
+1. Open the dashboard, click **Budget** at the top, then the **Suggested budget** tab.
 2. You'll see a plan for this month, built from the three months before it.
 
 It works best with at least three months of transactions, sorted into categories. With less history it still

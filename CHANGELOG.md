@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Tidier dashboard: five buttons along the top (Home, Money, Budget, Taxes, Phone) instead of twelve. Money, Budget and Taxes show their pages as tabs underneath, and old links to a page still work.
 - Charts: the Home page shows bars for spending against each budget (by group and by category) and lines for the last 12 months of money in, spending and saving, with exact numbers when you point at a month. Every chart can switch to a table, and the colors work in light and dark mode and for color-blind readers.
 - Safer caching: every reply from the Home Base's API now tells browsers (and the desktop app's window) never to keep a copy, so no financial data is left in a browser cache.
 - Desktop app for Windows: Budget Buddy in its own window (no browser or Python needed), with a tray icon that can start with Windows and stays light until you open it. Closing the window stops Budget Buddy; your phone can sync while it's open. Everything you double-click (start, build and install the app) is now in the **launch** folder.

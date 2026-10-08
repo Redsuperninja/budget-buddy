@@ -8,7 +8,7 @@ deduct; that depends on your income, your filing status and whether you itemize.
 
 ## Open it
 
-1. Open the dashboard and click **Tax summary**.
+1. Open the dashboard and click **Taxes** at the top. The **Tax summary** tab opens first.
 2. Type the tax year at the top and click **Show year**.
 
 ## Add other deductions
