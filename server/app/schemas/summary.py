@@ -51,3 +51,14 @@ class MonthlySummary(Schema):
     unassigned_in_cents: int
     unassigned_out_cents: int
     unassigned_count: int
+
+
+class TrendMonth(Schema):
+    month: str  # "YYYY-MM"
+    income_cents: int
+    spending_cents: int  # can be negative when refunds were bigger than spending
+    saved_cents: int  # can be negative when more came out of savings than went in
+
+
+class MonthlyTrend(Schema):
+    months: list[TrendMonth]  # oldest first

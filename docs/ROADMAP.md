@@ -88,6 +88,7 @@ items (20, 21).
 - [x] 14. Pairing: QR code, one-time code, device tokens, revoke — *backend-engineer* + *security-reviewer*
 - [x] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
 - [x] 16. Local web dashboard (computer side) — *backend-engineer* (note: poll the device list while a QR is showing so the home-network listener closes after the code expires; no timer closes it)
+- [x] 16b. Charts on the dashboard: spending against budget, the last 12 months — *backend-engineer*
 
 ## Phase 5: Phone app
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*

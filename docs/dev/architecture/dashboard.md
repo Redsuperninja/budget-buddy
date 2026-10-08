@@ -51,3 +51,12 @@ Met by `LocalAccessMiddleware` (`app/network.py`) plus the CSP:
 
 Server tests use a fake dashboard folder (`fake_dashboard` in `server/tests/conftest.py`), never the real one
 ([../testing.md](../testing.md)).
+
+## Charts
+
+Home shows spending against budget (by group and by category) and the last 12 months of money in, spending and
+saving. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
+the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
+which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The
+three series colors are a color-blind-checked set for both light and dark (checked with the dataviz palette
+validator against the card colors); text never uses a series color, and the line ends carry the series names.

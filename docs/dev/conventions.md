@@ -18,7 +18,8 @@ reviewers check them.
   - Server: business logic in `services/` (one module per area), request/response shapes in `schemas/`,
     small cross-cutting helpers next to what uses them (e.g. `app/crypto/`, `app/bodylimit.py`).
   - Web dashboard (`dashboard/js/`): one module per screen, plus shared modules for API calls
-    (`api/endpoints.js` holds every route string), building the page, money, dates and labels.
+    (`api/endpoints.js` holds every route string), building the page, money, dates, labels, and charts
+    (`charts/`).
   - Phone (`mobile/src/`): screens in `app/`, reusable UI in `components/`, pure logic in `lib/`,
     sync in `sync/`.
   - Desktop (`desktop/budget_buddy_desktop/`): one module per job (tray, window, starting the Home Base,

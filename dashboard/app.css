@@ -55,6 +55,29 @@ button:disabled { opacity: 0.5; cursor: default; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
+/* Charts (js/charts/). Series colors are a color-blind-checked set, light and dark (dataviz palette
+   slots 1-3); text always uses the text colors, never a series color. */
+.series-1 { --series: light-dark(#2a78d6, #3987e5); }
+.series-2 { --series: light-dark(#eb6834, #d95926); }
+.series-3 { --series: light-dark(#1baf7a, #199e70); }
+.chart { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--muted); font-size: 12px; }
+.chart text.label { fill: var(--text); }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .grid.zero { stroke: var(--muted); }
+.chart .bar { fill: var(--series); }
+.chart .budget-mark { stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.chart .line { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; }
+.chart .dot { fill: var(--series); stroke: var(--card); stroke-width: 2; }
+.chart .hit { fill: transparent; pointer-events: all; }
+.chart .row:hover .hit { fill: var(--line); opacity: 0.35; }
+.chart .crosshair { stroke: var(--muted); stroke-width: 1; }
+.chart .tip-box { fill: var(--card); stroke: var(--line); }
+.chart .tip text { fill: var(--text); }
+.legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
+.legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem;
+  background: var(--series); }
+
 /* Printing (or saving as PDF) shows only the page content, without navigation or forms. */
 @media print {
   :root { color-scheme: light; }

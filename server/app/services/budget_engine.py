@@ -39,6 +39,7 @@ from app.schemas.budget_plan import BudgetPlanIn
 from app.schemas.summary import MonthlySummary
 from app.services.budget_plan import get_plan, save_plan
 from app.services.summary import monthly_summary
+from app.services.trend import months_ending
 
 LOOKBACK_MONTHS = 3
 GUIDE_BP = {CategoryGroup.NEEDS: 5_000, CategoryGroup.WANTS: 3_000, CategoryGroup.SAVINGS: 2_000}
@@ -51,8 +52,8 @@ NO_INCOME = (
 
 def months_before(year: int, month: int, count: int) -> list[tuple[int, int]]:
     """The ``count`` full months before ``year-month`` as (year, month), oldest first."""
-    index = year * 12 + (month - 1)
-    return [(i // 12, i % 12 + 1) for i in range(index - count, index)]
+    before = year * 12 + (month - 1) - 1
+    return months_ending(before // 12, before % 12 + 1, count)
 
 
 def _has_data(s: MonthlySummary) -> bool:
