@@ -26,6 +26,9 @@ Each kind shows where it usually goes on a federal return:
 - **Counts only if you itemize** (medical, mortgage interest, property tax, state and local taxes). Limits
   apply, for example only medical costs above a share of your income count.
 - **Can lower your income even if you don't itemize** (student loan interest, HSA, IRA), within limits.
+  For HSA, enter only money you put in yourself: HSA money taken from your paycheck is already left out of
+  your taxable pay, and the Pay section shows it. For IRA, only a traditional IRA counts, not a Roth, and it
+  may be limited if you have a retirement plan at work.
 - **May be a tax credit** (education, childcare).
 - **Depends on your situation** (home office, other).
 

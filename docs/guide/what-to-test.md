@@ -12,12 +12,15 @@
 Open http://127.0.0.1:8766/ on your computer and use the tabs along the top (Home, Accounts, Transactions, and so on).
 
 - [ ] **Monthly summary:** on **Home**, pick this month. Do income and spending look right? Is the "not sorted yet" money clear?
-- [ ] **Categories:** add one, rename it, give it a budget. Try a name that already exists.
+- [ ] **Categories:** add one, rename it, give it a budget. Try a name that already exists. Type `15%` as a budget, and set a planned monthly income.
+- [ ] **Suggested budget:** does the plan make sense for the demo data? Try "Use as percentages of income".
+- [ ] **Auto-sort:** add a rule (for example `GROCERY` to Groceries), then import a bank file or click "Sort transactions now".
 - [ ] **Transactions:** add a purchase (choose "Money out", amount `12.34`). Add a refund.
 - [ ] **CSV import:** on **Import bank file**, choose `scripts\sample-bank-statement.csv`, check the preview, then import. Do it again: rows already there should be skipped.
 - [ ] **Paychecks:** add one whose numbers don't add up. Is the message clear?
 - [ ] **Donations:** look at the year summary for this year. Does the "proof to keep" list make sense?
 - [ ] **Stocks:** look at the gains for this year. Add a sale of more shares than you own.
+- [ ] **Tax summary:** add a medical deduction, download the CSV and open it in a spreadsheet, then try "Print or save as PDF".
 - [ ] **Phone:** connect, then disconnect and connect again. Try scanning an old or used code.
 - [ ] **Messages:** were any error messages confusing or too technical? Note the exact words.
 
