@@ -4,7 +4,7 @@
 > charity. It doesn't decide what you can deduct. Tax rules have many exceptions. Before you file,
 > check IRS Publication 526, your tax software, or a tax professional.
 
-Budget Buddy keeps a list of the gifts you give to charities and, for each tax year, tells you what proof to keep. Add gifts in the Budget Buddy dashboard on your computer.
+Budget Buddy keeps a list of the gifts you give to charities and, for each tax year, tells you what proof to keep. Add gifts in the Budget Buddy dashboard on your computer: click **Taxes** at the top, then the **Donations** tab. You can also turn a payment you already have into a gift (see [Sort a payment into charity](#sort-a-payment-into-charity)).
 
 ## Logging a gift
 
@@ -28,6 +28,43 @@ A few rules:
   date one day ahead is allowed, in case your phone is in a time zone ahead of your computer.
 - A gift counts in the calendar year of its date. A check mailed on December 31 counts in that
   year.
+
+## Sort a payment into charity
+
+If you gave by card, check or bank transfer, the payment is probably already in your transactions (typed in or
+imported from your bank). You don't need to type it again:
+
+1. Click **Money** at the top, then the **Transactions** tab, and find the payment.
+2. Click **Mark as gift** in its row (the **Charity** column).
+3. Check the charity's name. Budget Buddy fills in what your bank called it, like "FAKE FOOD BANK"; change it
+   to the name on the charity's receipt.
+4. Check **Date you gave it**. It starts as the bank's date, but a gift counts on the day you mailed the check
+   or your card was charged. Banks often show a later day (when a check cleared), which matters near the end
+   of the year: a check mailed December 28 that cleared January 4 counts in December.
+5. Check **Amount given**. It starts as the whole payment. If you got something back, like a dinner at a
+   fundraiser gala, enter only the part above what that was worth. It can't be more than the payment.
+6. Click **Save**. The row now says **Gift**, and the gift shows on the Donations tab as
+   "Cash (from a payment)". If only part of the payment was a gift, the paperwork list asks you to keep the
+   charity's statement of what you got back, since your bank record shows only the full payment.
+
+A few things to know:
+
+- Only money you paid out can become a gift. Money coming in, refunds, transfers between your own accounts and
+  balance adjustments don't have a **Mark as gift** button.
+- One payment can be one gift. Gifts of goods (clothes, furniture) aren't payments, so add them on the Donations
+  tab instead.
+- The payment still counts as spending in its budget category. The gift is your tax record, not a second
+  expense.
+- While a payment is a gift, you can't change its amount or type, or link it as a transfer. To do that, remove
+  the gift first (below).
+- If you delete the payment, the gift stays in your donations.
+- If the charity gives you money back (a cancelled event, a double charge), Budget Buddy doesn't change the gift
+  for you. Lower or remove it on the Donations tab.
+
+## Remove a gift
+
+On the Donations tab, click **Remove** next to the gift and confirm. If it came from a payment, the payment stays
+in your transactions and gets its **Mark as gift** button back.
 
 ## What proof to keep
 
@@ -82,6 +119,9 @@ summary doesn't show the note because the rule doesn't exist for 2025.
 | "A donation amount must be more than zero..." | Enter the amount you gave. To undo a refunded gift, edit or delete it. |
 | "The amount can't be zero." | Enter the amount you gave, more than zero. |
 | "That receipt doesn't exist. It may have been deleted." | Pick a receipt that's still saved, or leave the receipt empty. |
+| "The gift can't be more than the payment it came from." | Enter only the part of the payment that was the gift. |
+| "That payment is already recorded as a donation." | It's already on the Donations tab. Refresh the Transactions page. |
+| "This payment is recorded as a donation. Remove the donation first..." | Remove the gift on the Donations tab, change the payment, then sort it into charity again. |
 | "That donation doesn't exist. It may have been deleted." | The gift was already removed. Refresh your list. |
 | "Budget Buddy doesn't have tax rules for [year] yet. Years it has: ..." | Summaries work only for years that have a tax data file. Your gifts are still saved, and the summary will work once that year is added. |
 | This page only works on this computer | Donations can only be viewed and changed on the computer running Budget Buddy, not from another device. |

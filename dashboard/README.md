@@ -48,12 +48,13 @@ All under `js/` (each file starts with a one-line purpose):
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
 | `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
 | `theme.js`, `theme-picker.js` | Light, dark or match the computer: the saved choice (pure, tested) and the header picker. Colors live in `app.css` as `light-dark()` pairs |
-| `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js` and `phone-list.js` are parts of the Import and Connect phone screens |
+| `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens |
 
 To add a screen: create `screens/<name>.js` with a `render` function and add one line to its section in `main.js`.
 Keep the top row short: add a page to an existing section rather than a new section. To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens, by section: **Home** (monthly summary, charts and balances); **Money**: Transactions, Accounts, Import bank file, Auto-sort (rules); **Budget**: Categories, Suggested budget;
+Screens, by section: **Home** (monthly summary, charts and balances); **Money**: Transactions (with a Charity column to
+sort a payment into charity), Accounts, Import bank file, Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks; **Phone**:
 Connect phone.

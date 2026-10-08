@@ -80,6 +80,7 @@ items (20, 21).
 - [x] 10a. Budgets as a percentage of income (planned or actual), and each group's share of income — *finance-tax-expert*
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
+- [x] 11b. Sort a payment into charity: a donation linked to its transaction — *finance-tax-expert* + *backend-engineer*
 - [x] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
 - [x] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 

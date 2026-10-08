@@ -78,6 +78,8 @@ class TransactionOut(Schema):
     source: TransactionSource
     kind: TransactionKind
     transfer_pair_id: int | None
+    # Set when this payment was sorted into charity as a donation.
+    donation_id: int | None = None
     notes: str | None
     created_at: dt.datetime
     updated_at: dt.datetime

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Donations from payments: on the Transactions page, **Mark as gift** turns a payment into a cash gift to charity, with the charity's name, the day you gave it and how much of the payment was the gift (for example, a $100 gala ticket where $60 was the gift). The gift shows on the Donations page with the paperwork to keep, the payment still counts as spending in its budget, and gifts can now be removed. An estimate, not tax advice.
 - Tidier dashboard: five buttons along the top (Home, Money, Budget, Taxes, Phone) instead of twelve. Money, Budget and Taxes show their pages as tabs underneath, and old links to a page still work.
 - Charts: the Home page shows bars for spending against each budget (by group and by category) and lines for the last 12 months of money in, spending and saving, with exact numbers when you point at a month. Every chart can switch to a table, and the colors work in light and dark mode and for color-blind readers.
 - Safer caching: every reply from the Home Base's API now tells browsers (and the desktop app's window) never to keep a copy, so no financial data is left in a browser cache.

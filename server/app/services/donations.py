@@ -38,6 +38,7 @@ from app.schemas.donations import (
     ProofItem,
     ProofThresholds,
 )
+from app.services.donation_payments import check_payment, commit, part_gift_proof, payment_amounts
 from app.tax_data import Charitable
 
 DISCLAIMER = (
@@ -104,9 +105,10 @@ def donation_out(session: Session, donation_id: int) -> DonationOut:
 def create_donation(session: Session, data: DonationCreate) -> DonationOut:
     values = data.model_dump(exclude={"amount"})
     _check_references(session, values)
+    check_payment(session, values["transaction_id"], values["kind"], values["amount_cents"])
     donation = Donation(**values)
     session.add(donation)
-    session.commit()
+    commit(session)
     return _out(donation)
 
 
@@ -115,9 +117,16 @@ def update_donation(session: Session, donation_id: int, data: DonationUpdate) ->
     changes = data.changes()
     changes.pop("amount", None)
     _check_references(session, changes)
+    check_payment(
+        session,
+        changes.get("transaction_id", donation.transaction_id),
+        changes.get("kind", donation.kind),
+        changes.get("amount_cents", donation.amount_cents),
+        donation.id,
+    )
     for field, value in changes.items():
         setattr(donation, field, value)
-    session.commit()
+    commit(session)
     return _out(donation)
 
 
@@ -263,6 +272,7 @@ def summary(session: Session, year: int) -> DonationSummary:
     cash = sum(d.amount_cents for d in donations if d.kind == DonationKind.CASH)
     goods_amounts = [d.amount_cents for d in donations if d.kind == DonationKind.GOODS]
     goods = sum(goods_amounts)
+    payments = payment_amounts(session, donations)
     return DonationSummary(
         tax_year=year,
         is_estimate=True,
@@ -280,7 +290,8 @@ def summary(session: Session, year: int) -> DonationSummary:
                 kind=d.kind,
                 amount_cents=d.amount_cents,
                 has_receipt=d.receipt_id is not None,
-                proof_needed=donation_proof(d.kind, d.amount_cents, rules),
+                proof_needed=donation_proof(d.kind, d.amount_cents, rules)
+                + part_gift_proof(d.amount_cents, payments.get(d.transaction_id)),
             )
             for d in donations
         ],

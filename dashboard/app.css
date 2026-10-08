@@ -56,6 +56,7 @@ a.button { display: inline-block; text-decoration: none; }
 button.danger { background: none; color: var(--bad); border: 1px solid var(--bad); }
 button.plain { background: none; color: var(--text); border: 1px solid var(--line); }
 button:disabled { opacity: 0.5; cursor: default; }
+.inline-form { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: end; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem; }
 .qr { background: #fff; padding: 0.5rem; border-radius: 8px; width: 18rem; max-width: 100%; height: auto; display: block; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }

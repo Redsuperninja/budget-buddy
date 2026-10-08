@@ -1,4 +1,4 @@
-// Transactions: filter by account and month, change a category, add one by hand.
+// Transactions: filter by account and month, change a category, sort a payment into charity, add one by hand.
 
 import {
   createTransaction, listAccounts, listCategories, listTransactions, updateTransaction,
@@ -9,6 +9,7 @@ import { accountField, categoryField, idOrNull, pickOptions } from "../fields.js
 import { form, saveWithNote } from "../form.js";
 import { card, empty, select, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
+import { charityCell } from "./give-to-charity.js";
 
 export async function render(root) {
   const [accounts, categories] = await Promise.all([
@@ -40,9 +41,9 @@ export async function render(root) {
       const page = await listTransactions(params);
       fill(list,
         page.items.length
-          ? table(["Date", "What", "Account", "Amount", "Category"], page.items.map((t) =>
+          ? table(["Date", "What", "Account", "Amount", "Category", "Charity"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
-                categoryPicker(t)]), [3])
+                categoryPicker(t), charityCell(t, refresh)]), [3])
           : empty("No transactions for this choice."),
         page.total > page.items.length
           ? empty(`Showing ${page.items.length} of ${page.total}. Pick a month to narrow it down.`) : null);
