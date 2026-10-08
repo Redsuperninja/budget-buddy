@@ -31,7 +31,7 @@ takes `save_mapping` and `skip_invalid_rows`.
 - **Problem rows** stop the import and are listed by row number, so nothing half-imports, unless
   `skip_invalid_rows=true`. Blank lines are ignored.
 - **Limits:** 5 MB and 10,000 rows per file. UTF-8, UTF-16 and Windows-1252 are accepted.
-- **Formula guard:** a description starting with `=`, `+`, `-` or `@` gets a `'` in front, so a spreadsheet never
+- **Formula guard** (`app/spreadsheet.py`): a description starting with `=`, `+`, `-`, `@`, tab or carriage return gets a `'` in front, so a spreadsheet never
   runs it as a formula after export.
 - Imported rows are `normal` transactions with `source = csv`, sorted into a category by the
   [auto-categorization rules](category-rules.md) where one matches (no category otherwise). Transfers aren't detected

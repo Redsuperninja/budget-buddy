@@ -27,6 +27,7 @@ from app.routers import (
     category_rules,
     csv_import,
     dashboard,
+    deductions,
     donations,
     health,
     pair,
@@ -36,6 +37,7 @@ from app.routers import (
     stocks,
     summary,
     sync,
+    tax_summary,
     transactions,
 )
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions
@@ -115,6 +117,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(paychecks.router)
     app.include_router(receipts.router)
     app.include_router(donations.router)
+    app.include_router(deductions.router)
+    app.include_router(tax_summary.router)
     app.include_router(stocks.router)
     app.include_router(dashboard.router)
     return app

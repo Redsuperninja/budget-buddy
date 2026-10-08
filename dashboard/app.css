@@ -42,8 +42,9 @@ label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; c
 label.check { flex-direction: row; align-items: center; gap: 0.5rem; }
 input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--text); min-width: 0; }
-button.primary, button.danger, button.plain { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; }
-button.primary { background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent); }
+button.primary, button.danger, button.plain, a.button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; }
+button.primary, a.button { background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent); }
+a.button { display: inline-block; text-decoration: none; }
 button.danger { background: none; color: var(--bad); border: 1px solid var(--bad); }
 button.plain { background: none; color: var(--text); border: 1px solid var(--line); }
 button:disabled { opacity: 0.5; cursor: default; }
@@ -51,3 +52,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .qr { background: #fff; padding: 0.5rem; border-radius: 8px; width: 18rem; max-width: 100%; height: auto; display: block; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Printing (or saving as PDF) shows only the page content, without navigation or forms. */
+@media print {
+  header, footer, form, button, .no-print { display: none !important; }
+  .card { break-inside: avoid; border-color: #999; }
+}
