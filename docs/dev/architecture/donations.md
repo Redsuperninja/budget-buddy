@@ -30,8 +30,12 @@ dollar text; for goods, the items' fair market value), and optionally a `receipt
 - The gift keeps its own date: the dashboard starts it at the payment's date but lets people change it, since a
   bank may show when a check cleared rather than when it was mailed. Don't tie the two dates together.
 - A gift smaller than its payment (something came back) adds the `quid_pro_quo_statement` paperwork item.
-- Transactions show the link as `donation_id`. The payment still counts as spending in its category; the gift
-  is a tax record, not a second expense.
+- A newly linked payment is filed under the "Charitable giving" category;
+  `POST /api/local/transactions/{id}/personal-gift` files a payment under "Gifts" with no donation (409 if it's already a charity gift). Both are
+  wants-group categories found by name (case ignored) or made on first use; a same-named income or transfer
+  category is never used (`services/gift_categories.py`).
+- Transactions show the link as `donation_id`. The payment still counts once as spending; the gift is a tax
+  record, not a second expense.
 
 ## Yearly summary
 

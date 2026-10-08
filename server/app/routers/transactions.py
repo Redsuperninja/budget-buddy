@@ -12,6 +12,7 @@ from app.schemas.transactions import (
     TransactionUpdate,
     TransferLink,
 )
+from app.services import gift_categories
 from app.services import transactions as service
 
 router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
@@ -67,3 +68,9 @@ def link_transfer(
 @router.delete("/{transaction_id}/transfer")
 def unlink_transfer(transaction_id: PathId, session: SessionDep) -> TransactionOut:
     return service.unlink_transfer(session, transaction_id)
+
+
+@router.post("/{transaction_id}/personal-gift")
+def mark_personal_gift(transaction_id: PathId, session: SessionDep) -> TransactionOut:
+    """File a payment under "Gifts" (a present for someone; not a tax record)."""
+    return gift_categories.mark_personal_gift(session, transaction_id)

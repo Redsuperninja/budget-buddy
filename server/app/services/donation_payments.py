@@ -19,6 +19,7 @@ from app.errors import ApiError
 from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.money import cents_to_display
 from app.schemas.donations import ProofItem
+from app.services.gift_categories import CHARITY, file_under
 from app.services.transactions import get_transaction
 
 _ALREADY_LINKED = "That payment is already recorded as a donation."
@@ -58,6 +59,12 @@ def check_payment(
             "invalid_payment",
             "The gift can't be more than the payment it came from.",
         )
+
+
+def file_new_link(session: Session, transaction_id: int | None, previous_id: int | None) -> None:
+    """A payment newly sorted into charity goes in the "Charitable giving" category."""
+    if transaction_id is not None and transaction_id != previous_id:
+        file_under(session, get_transaction(session, transaction_id), CHARITY)
 
 
 def commit(session: Session) -> None:
