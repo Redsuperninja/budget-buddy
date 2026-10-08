@@ -19,7 +19,8 @@ Add and track your accounts, spending, and income in the Budget Buddy dashboard.
 1. [Accounts and transactions](accounts-and-transactions.md) — Add a bank account; record spending and income; starting balances.
 2. [Import a bank file](import-a-bank-file.md) — Download a CSV from your bank; let Budget Buddy read it in.
 3. [Budget categories and monthly summary](budget-categories.md) — Set up budget categories; see where your money goes each month.
-4. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
+4. [Budget by percentage of income](budget-by-percentage.md) — Budgets like "15% of income"; your planned monthly income; shares of income.
+5. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
 
 ## Your phone
 

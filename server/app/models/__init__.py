@@ -12,6 +12,7 @@ from app.models.enums import (
 )
 from app.models.ledger import (
     Account,
+    BudgetPlan,
     Category,
     CategoryRule,
     CsvImportMapping,
@@ -25,6 +26,7 @@ __all__ = [
     "Account",
     "AccountKind",
     "Base",
+    "BudgetPlan",
     "Category",
     "CategoryGroup",
     "CategoryRule",

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Percentage budgets: a category's budget can be a share of your income, like 15%, instead of a dollar amount. Percentages are worked out from a planned monthly income you can set (or from what actually came in that month), the Home page shows how much of each budget is used and what share of your income went to needs, wants and savings, and the phone gets the worked-out amounts.
 - Auto-sort rules: tell Budget Buddy that a description containing some text (like "GROCERY MART") belongs in a category. New bank-file rows and transactions added without a category are sorted automatically, the longest matching text wins, a category you picked is never changed, and a "Sort transactions now" button sorts older transactions that have no category yet.
 - Docs reorganized: `docs/guide/` is now a step-by-step user guide for people (with an index, tester pages, keeping your data safe, moving your data folder), and developer docs live in `docs/dev/` as small topic files; `docs/README.md` maps both.
 - Project layout: the web dashboard now lives in its own top-level `dashboard/` folder, separate from the server and the phone app. The server serves it from a fixed list of files (or runs API-only without it), and it has its own tests and checks (ADR-0005).

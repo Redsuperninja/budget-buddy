@@ -22,6 +22,7 @@ from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.routers import (
     accounts,
+    budget_plan,
     categories,
     category_rules,
     csv_import,
@@ -107,6 +108,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(accounts.router)
     app.include_router(transactions.router)
     app.include_router(categories.router)
+    app.include_router(budget_plan.router)
     app.include_router(category_rules.router)
     app.include_router(summary.router)
     app.include_router(csv_import.router)

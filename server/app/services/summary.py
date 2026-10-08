@@ -11,6 +11,7 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
   category) can't be placed, so they go in ``unassigned`` (money in and money out
   separately, both positive) instead of being guessed at.
 - A month runs from its first day through its last day, by the transaction's own date.
+- A percentage budget is a share of the month's budget income (``budget_plan.budget_income``).
 """
 
 import datetime as dt
@@ -19,7 +20,9 @@ from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
+from app.percent import percent_bp
 from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
+from app.services.budget_plan import budget_for, budget_income
 
 _SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
 _REPORTED = (CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS, CategoryGroup.INCOME)
@@ -77,25 +80,33 @@ def monthly_summary(
         total = sums[category.id]
         return total if category.group == CategoryGroup.INCOME else -total
 
+    reported = [c for c in categories if c.group in _REPORTED]
+    income = sum(actual(c) for c in reported if c.group == CategoryGroup.INCOME)
+    basis, source = budget_income(session, income)
     totals = [
         CategoryTotal(
             category_id=c.id,
             name=c.name,
             group=c.group,
-            budget_cents=c.budget_cents,
+            budget_cents=budget_for(c, basis),
+            budget_percent_bp=c.budget_percent_bp,
             actual_cents=actual(c),
         )
-        for c in categories
-        if c.group in _REPORTED
+        for c in reported
     ]
-    groups = [
-        GroupTotal(
-            group=g,
-            budget_cents=sum(t.budget_cents for t in totals if t.group == g),
-            actual_cents=sum(t.actual_cents for t in totals if t.group == g),
+
+    def group_total(group: CategoryGroup) -> GroupTotal:
+        actual_cents = sum(t.actual_cents for t in totals if t.group == group)
+        return GroupTotal(
+            group=group,
+            budget_cents=sum(t.budget_cents for t in totals if t.group == group),
+            actual_cents=actual_cents,
+            percent_of_income_bp=(
+                None if group == CategoryGroup.INCOME else percent_bp(actual_cents, income)
+            ),
         )
-        for g in _REPORTED
-    ]
+
+    groups = [group_total(g) for g in _REPORTED]
     by_group = {g.group: g for g in groups}
     return MonthlySummary(
         month=f"{year:04d}-{month:02d}",
@@ -103,6 +114,8 @@ def monthly_summary(
         spending_cents=sum(by_group[g].actual_cents for g in _SPENDING),
         saved_cents=by_group[CategoryGroup.SAVINGS].actual_cents,
         spending_budget_cents=sum(by_group[g].budget_cents for g in _SPENDING),
+        budget_income_cents=basis,
+        budget_income_source=source,
         groups=groups,
         categories=totals,
         unassigned_in_cents=unassigned_in,
