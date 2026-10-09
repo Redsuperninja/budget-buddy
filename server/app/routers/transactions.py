@@ -16,6 +16,7 @@ from app.schemas.transactions import (
 from app.services import gift_categories, transfers
 from app.services import transactions as service
 from app.services.dividend_matching import find_dividends
+from app.services.repeat_gifts import repeat_gifts
 from app.services.transfer_matching import match_transfers
 
 router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
@@ -67,7 +68,9 @@ def create_transaction(data: TransactionCreate, session: SessionDep) -> Transact
     transaction = service.create_transaction(session, data)
     found = find_dividends(session, {transaction.id})  # a dividend, or the sweep of one
     # The other side of a transfer you entered.
-    if match_transfers(session, {transaction.id}) or found.dividends or found.sweeps:
+    matched = match_transfers(session, {transaction.id})
+    gifts = repeat_gifts(session, {transaction.id})  # a repeat gift to a charity
+    if matched or found.dividends or found.sweeps or gifts:
         session.commit()
     return transaction
 

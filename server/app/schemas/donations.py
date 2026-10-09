@@ -119,6 +119,7 @@ class DonationOut(Schema):
     receipt_id: int | None
     transaction_id: int | None
     notes: str | None
+    auto_added: bool = False  # added for a repeat payment to the same charity
     created_at: dt.datetime
     updated_at: dt.datetime
 

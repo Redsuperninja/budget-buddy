@@ -42,7 +42,7 @@ export async function render(root) {
         const r = await importCsv(accountSelect.value,
           query({ save_mapping: remember.value, skip_invalid_rows: skip.value, file_name: fileInput.files[0].name }), bytes);
         fill(result, h("p", { class: "ok" }, `Done. ${r.imported} new transaction(s) added (${r.categorized} sorted by your rules, ` +
-          `${r.transfers_matched} matched as transfers between your accounts, ${r.dividends_found} dividend(s) found); ` +
+          `${r.transfers_matched} matched as transfers between your accounts, ${r.dividends_found} dividend(s) found, ${r.donations_added} repeat gift(s) to charity recorded); ` +
           `${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.`));
       } catch (err) {
         showError(result, err);

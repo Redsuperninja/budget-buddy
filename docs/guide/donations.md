@@ -63,6 +63,17 @@ A few things to know:
 - If the charity gives you money back (a cancelled event, a double charge), Budget Buddy doesn't change the gift
   for you. Lower or remove it on the Donations tab.
 
+## Monthly or repeat giving
+
+Once you've sorted one payment into charity (the whole payment as the gift), Budget Buddy recognizes the next
+payment to the same charity in your bank file, or one you type in, and records it for you. It goes in **Charitable
+giving** and on the **Donations** page as a cash gift for the whole payment, marked **Added automatically: a repeat
+gift**. Check it like any other gift: the paperwork rules are the same (from $250, a letter from the charity).
+
+- If it isn't a gift, click **Remove** on the Donations page. It won't be added back.
+- A payment where only part was a gift (like a fundraiser dinner) is never repeated: enter those yourself.
+- "The same charity" means the payment's description starts the same way, like `FAKE FOOD BANK`.
+
 ## A present for someone (a personal gift)
 
 For a birthday or holiday present, pick **A personal gift** under **Kind of gift** and click **Save**. The

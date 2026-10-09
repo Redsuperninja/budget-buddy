@@ -41,6 +41,16 @@ dollar text; for goods, the items' fair market value), and optionally a `receipt
 - Transactions show the link as `donation_id`. The payment still counts once as spending; the gift is a tax
   record, not a second expense.
 
+## Recurring gifts (`services/repeat_gifts.py`)
+
+After a bank file is imported, and after a transaction is added by hand, each **new** regular money-out payment
+whose `shop_key` (the start of the description, as in auto-sort learning) matches a payment you linked to a cash
+gift for the **whole** payment is filed under "Charitable giving" and gets a cash donation: the charity's name from
+the newest such gift, the payment's date, the whole payment as the amount, `auto_added = true` (migration 0024).
+Part gifts (a charity dinner) are never repeated. Transfers, refunds, adjustments, stock trades and payments
+already linked to a gift are skipped. Old payments are never looked at again, so deleting an automatic donation is
+final. The import result has `donations_added`.
+
 ## Yearly summary
 
 - Totals what was given that calendar year (cash, goods, overall) and lists the proof each gift needs.

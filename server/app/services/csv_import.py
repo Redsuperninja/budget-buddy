@@ -37,6 +37,7 @@ from app.services.csv_parsing import (
 )
 from app.services.dividend_matching import find_dividends
 from app.services.imports import record
+from app.services.repeat_gifts import repeat_gifts
 from app.services.transfer_matching import match_transfers
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
@@ -205,12 +206,14 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
     # accounts in this file, matched with the other side.
     dividends = find_dividends(session, {t.id for t in added})
     matched = match_transfers(session, {t.id for t in added})
+    gifts = repeat_gifts(session, {t.id for t in added})  # monthly giving to a charity you gave to
     session.commit()
     return ImportResult(
         imported=len(new),
         transfers_matched=matched,
         dividends_found=dividends.dividends,
         dividend_sweeps_linked=dividends.sweeps,
+        donations_added=gifts,
         categorized=sum(t.category_id is not None for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),

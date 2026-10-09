@@ -48,6 +48,7 @@ def test_import_then_reimport_overlapping_statement_skips_duplicates(client, che
         "transfers_matched": 0,
         "dividends_found": 0,
         "dividend_sweeps_linked": 0,
+        "donations_added": 0,
     }
     imported = txns(client, checking)
     # Two identical coffees on the same day are both real purchases, so both are kept.

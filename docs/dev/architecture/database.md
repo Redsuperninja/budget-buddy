@@ -36,6 +36,7 @@
 | 0021 | Positions from a broker's file: what each account held on a day (a snapshot) |
 | 0022 | Import history: each imported file, and what it added, so an import can be undone |
 | 0023 | Retirement account types: Roth IRA, traditional IRA, 401(k), Roth 401(k), 403(b) or other |
+| 0024 | `donations.auto_added`: a donation recorded for you for a repeat gift to a charity |
 
 ## Adding a migration
 

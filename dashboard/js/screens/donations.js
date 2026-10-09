@@ -46,7 +46,8 @@ export async function render(root, options) {
       summary.year_proof_needed.map((p) => h("p", { class: "note" }, p.message)),
       page.items.length
         ? table(["Date", "Charity", "Type", "Amount", "Paperwork to keep", ""], page.items.map((d) =>
-            [d.date, d.organization, typeText(d), formatCents(d.amount_cents), paperwork(d), removeButton(d, year)]), [3])
+            [d.date, d.auto_added ? h("span", {}, d.organization, h("br"),
+              h("span", { class: "muted" }, "Added automatically: a repeat gift")) : d.organization, typeText(d), formatCents(d.amount_cents), paperwork(d), removeButton(d, year)]), [3])
         : empty("No donations for this year."),
       empty("Tip: to turn a payment into a gift, click Mark as gift on the Transactions page (under Money). " +
         "If a charity gave you money back, lower or remove the gift here."),
