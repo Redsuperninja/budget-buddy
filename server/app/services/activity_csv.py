@@ -2,9 +2,12 @@
 
 Each row is a transaction (date, wording, signed amount: money out negative). A row whose wording
 says it's a buy or a sell, with a symbol and a number of shares, is also a stock trade. Wording
-like "Sell Short" or an option is a transaction only. Error messages never repeat a cell.
+like "Sell Short" or an option, and the money market fund that holds the account's cash, are
+transactions only. A row with no money is skipped (``SharesOnly``). Error messages never repeat a
+cell.
 """
 
+import re
 from dataclasses import dataclass
 
 from pydantic import ValidationError
@@ -35,6 +38,16 @@ _AVOID = {
     "amount": ("price", "commission", "fee", "per share", "accrued"),
     "shares": ("price",),
 }
+
+
+# A money market (cash) fund: buying it is the account's cash sweep, and its "sales" are
+# redemptions with no sell wording, so it's never recorded as a stock trade.
+_MONEY_MARKET_SYMBOL = re.compile(r"[A-Z]{3}XX")
+_MONEY_MARKET_WORDS = re.compile(r"money market|core account|core position|sweep", re.I)
+
+
+class SharesOnly(RowProblem):
+    """A row where no money moved (shares moved in or out, a split): skipped, not a problem."""
 
 
 @dataclass
@@ -77,6 +90,10 @@ def _trade(row: list[str], cols: ActivityColumns, action: str, date, cents: int,
     shares_text = _optional(row, cols.shares)
     if not symbol or not shares_text:
         return None, None
+    if _MONEY_MARKET_SYMBOL.fullmatch(symbol.upper()) or _MONEY_MARKET_WORDS.search(
+        " ".join([action, _optional(row, cols.description)])
+    ):
+        return None, None  # the cash sweep: a transaction only
     try:
         kind = trade_kind(action)
     except RowProblem:
@@ -106,7 +123,7 @@ def parse_row(row: list[str], number: int, cols: ActivityColumns, account_id: in
     except ValueError:
         raise RowProblem("The amount isn't a dollar amount we can read.") from None
     if not cents:
-        raise RowProblem("No money moved (like shares moved in or out): nothing to import.")
+        raise SharesOnly("No money moved (shares moved in or out, or a split): nothing to add.")
     symbol = _optional(row, cols.symbol).rstrip("*")
     description = _wording(action, symbol, _optional(row, cols.description))
     if not description:

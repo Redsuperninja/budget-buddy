@@ -35,7 +35,10 @@ class ActivityPreviewRow(Schema):
     description: str | None = None
     amount_cents: int | None = None
     trade: str | None = None  # "Buy 2 VTI" when it becomes a stock trade
-    status: Literal["new", "duplicate", "invalid"] = "new"
+    # True when that trade is already on the Stocks page (from a stock file): it's linked, not added
+    trade_exists: bool = False
+    # "skipped": no money moved (shares moved in or out), so there's nothing to add
+    status: Literal["new", "duplicate", "invalid", "skipped"] = "new"
     problem: str | None = None
 
 
@@ -46,12 +49,14 @@ class ActivityPreview(Schema):
     new_trades: int
     duplicate_rows: int
     invalid_rows: int
+    skipped_rows: int
     rows: list[ActivityPreviewRow]  # the first rows, plus every row with a problem (both capped)
 
 
 class ActivityResult(Schema):
     imported: int
     trades: int  # purchases and sales recorded from the buys and sells
+    trades_linked: int  # of those, already on the Stocks page and now linked to their transaction
     dividends_found: int
     categorized: int
     transfers_matched: int

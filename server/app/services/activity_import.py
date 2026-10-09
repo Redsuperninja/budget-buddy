@@ -4,7 +4,9 @@ Every row becomes a transaction (``source = "csv"``, duplicates skipped the same
 file: ``csv_parsing.fingerprint``). Then, in one database transaction:
 
 - buys and sells with a symbol and shares become stock purchases and sales linked to their
-  transaction (like **Stock trade** on the Transactions page), matched with FIFO;
+  transaction (like **Stock trade** on the Transactions page), matched with FIFO. One already on
+  the Stocks page with no transaction (same account, symbol, date, shares and money: from a stock
+  file, or typed in) is linked instead of added twice;
 - the rest is sorted like a bank import: auto-sort rules, dividends and their sweeps, transfers.
 
 A sale that needs more shares than the account held stops the whole import (422). Reading the
@@ -35,7 +37,7 @@ from app.schemas.activity_import import (
 from app.schemas.stocks import LotCreate
 from app.services import stock_gains as gains
 from app.services.accounts import INVESTMENT_KINDS, get_account
-from app.services.activity_csv import ActivityRow, find_columns, parse_row
+from app.services.activity_csv import ActivityRow, SharesOnly, find_columns, parse_row
 from app.services.category_rules import load_matcher, rule_fields
 from app.services.csv_parsing import (
     RowProblem,
@@ -67,6 +69,58 @@ def _trade_text(r: ActivityRow) -> str | None:
     return f"{verb} {micro_to_text(r.trade.shares_micro)} {r.trade.symbol}"
 
 
+def _trade_key(symbol: str, date, shares_micro: int, cents: int) -> tuple:
+    return symbol, date, shares_micro, cents
+
+
+def _existing_trades(session: Session, account_id: int, rows: list[ActivityRow]) -> dict:
+    """``{row_number: lot or sale}`` for trades already on the Stocks page with no transaction
+    (from a stock file or typed in): same account, symbol, date, shares and money. Those get
+    linked to the new transaction instead of being added twice. Each is used once."""
+    symbols = {r.trade.symbol for r in rows if r.trade is not None}
+    if not symbols:
+        return {}
+    waiting: dict[tuple, list] = {}
+    for model, date, cents in (
+        (StockLot, StockLot.acquired_on, StockLot.cost_basis_cents),
+        (StockSaleOrder, StockSaleOrder.sold_on, StockSaleOrder.proceeds_cents),
+    ):
+        found = session.scalars(
+            select(model)
+            .where(
+                model.account_id == account_id,
+                model.symbol.in_(symbols),
+                model.transaction_id.is_(None),
+            )
+            .order_by(model.id)
+        )
+        for row in found:
+            key = (
+                model,
+                *_trade_key(
+                    row.symbol, getattr(row, date.key), row.shares_micro, getattr(row, cents.key)
+                ),
+            )
+            waiting.setdefault(key, []).append(row)
+    matched = {}
+    for r in rows:
+        if r.trade is None:
+            continue
+        is_buy = isinstance(r.trade, LotCreate)
+        key = (
+            StockLot if is_buy else StockSaleOrder,
+            *_trade_key(
+                r.trade.symbol,
+                r.trade.acquired_on if is_buy else r.trade.sold_on,
+                r.trade.shares_micro,
+                r.trade.cost_basis_cents if is_buy else r.trade.proceeds_cents,
+            ),
+        )
+        if waiting.get(key):
+            matched[r.row_number] = waiting[key].pop(0)
+    return matched
+
+
 def _prepare(session: Session, account_id: int, data: bytes) -> _Prepared:
     account = get_account(session, account_id)
     if account.kind not in INVESTMENT_KINDS:
@@ -86,6 +140,10 @@ def _prepare(session: Session, account_id: int, data: bytes) -> _Prepared:
             continue
         try:
             r = parse_row(row, number, columns, account_id)
+        except SharesOnly as reason:
+            out = ActivityPreviewRow(row_number=number, status="skipped", problem=str(reason))
+            parsed.append((out, None, None))
+            continue
         except RowProblem as problem:
             out = ActivityPreviewRow(row_number=number, status="invalid", problem=str(problem))
             parsed.append((out, None, None))
@@ -113,6 +171,10 @@ def _prepare(session: Session, account_id: int, data: bytes) -> _Prepared:
         for out, _, fp in parsed:
             if fp in existing:
                 out.status = "duplicate"
+    new = [r for out, r, _ in parsed if out.status == "new"]
+    linked = _existing_trades(session, account_id, new)
+    for out, _, _ in parsed:
+        out.trade_exists = out.row_number in linked
     return _Prepared(columns, parsed)
 
 
@@ -128,13 +190,22 @@ def preview(session: Session, account_id: int, data: bytes) -> ActivityPreview:
         new_trades=sum(r.status == "new" and r.trade is not None for r in rows),
         duplicate_rows=counts["duplicate"],
         invalid_rows=counts["invalid"],
+        skipped_rows=counts["skipped"],
         rows=rows[:PREVIEW_ROWS] + problems,
     )
 
 
-def _add_trades(session: Session, added: list[tuple[Transaction, ActivityRow]], import_id: int):
+def _add_trades(
+    session: Session, added: list[tuple[Transaction, ActivityRow]], import_id: int
+) -> tuple[int, int]:
+    """Record the buys and sells (or link ones already on the Stocks page); returns how many
+    trades, and how many of those were linked."""
     trades = [(t, r) for t, r in added if r.trade is not None]
+    existing = _existing_trades(session, added[0][0].account_id, [r for _, r in trades])
     for transaction, r in trades:
+        if r.row_number in existing:
+            existing[r.row_number].transaction_id = transaction.id
+            continue
         if isinstance(r.trade, LotCreate):
             row = StockLot(**r.trade.model_dump(exclude={"shares", "cost_basis"}))
         else:
@@ -151,10 +222,11 @@ def _add_trades(session: Session, added: list[tuple[Transaction, ActivityRow]], 
             422,
             "not_enough_shares",
             f"The sale of {exc.sale.symbol} on {exc.sale.sold_on.isoformat()} is for more shares "
-            "than this account held then. Import the file that has the earlier purchases first, "
-            "or add them on the Stocks page. Nothing was imported.",
+            "than this account held then. Shares bought before this file starts, or moved in "
+            "without a purchase (like from another broker), need to be added first: import the "
+            "earlier file, or add them on the Stocks page. Nothing was imported.",
         ) from None
-    return len(trades)
+    return len(trades), len(existing)
 
 
 def commit(
@@ -176,6 +248,7 @@ def commit(
         return ActivityResult(
             imported=0,
             trades=0,
+            trades_linked=0,
             dividends_found=0,
             categorized=0,
             transfers_matched=0,
@@ -201,7 +274,7 @@ def commit(
         session.add(transaction)
         added.append((transaction, r))
     session.flush()
-    trades = _add_trades(session, added, import_id)
+    trades, linked = _add_trades(session, added, import_id)
     ids = {t.id for t, _ in added}
     dividends = find_dividends(session, ids)
     matched = match_transfers(session, ids)
@@ -209,6 +282,7 @@ def commit(
     return ActivityResult(
         imported=len(added),
         trades=trades,
+        trades_linked=linked,
         dividends_found=dividends.dividends,
         categorized=sum(t.category_id is not None for t, _ in added),
         transfers_matched=matched,
