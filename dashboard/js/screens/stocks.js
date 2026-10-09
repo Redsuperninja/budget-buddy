@@ -1,7 +1,7 @@
 // Stocks: realized gains for a tax year (an estimate), dividends found in your transactions, the shares you
 // bought, adding purchases and sales by hand or from a CSV file. What you hold now and its value are on the Investments page.
 
-import { createLot, createSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
+import { createLot, createSale, deleteLot, deleteSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { accountField, idOrNull, taxYearHeader } from "../fields.js";
@@ -10,6 +10,7 @@ import { card, empty, note, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
 import { dividendsCard } from "./dividends-card.js";
+import { removeButton } from "./remove-button.js";
 import { stockImportCard } from "./stock-import.js";
 
 const termRow = (label, t) =>
@@ -51,15 +52,19 @@ export async function render(root, options) {
         ? note(`${gains.possible_wash_sale_count} sale(s) may be wash sales. See the note above.`) : null,
       h("h3", {}, `Sales in ${year}`),
       gains.sales.length
-        ? table(["Date", "Symbol", "Shares", "Sold for", "Gain or loss", "Flag"], gains.sales.map((s) =>
+        ? table(["Date", "Symbol", "Shares", "Sold for", "Gain or loss", "Flag", ""], gains.sales.map((s) =>
             [s.sold_on, s.symbol, s.shares, formatCents(s.proceeds_cents), formatCents(s.gain_cents),
-              s.possible_wash_sale ? "Possible wash sale" : ""]), [3, 4])
+              s.possible_wash_sale ? "Possible wash sale" : "",
+              removeButton(`Delete this sale of ${s.shares} ${s.symbol}?`, () => deleteSale(s.id), () => reload({ year }))]),
+          [3, 4])
         : empty("No sales in this year.")),
     dividends,
     card("Shares you bought", lots.length
-      ? table(["Symbol", "Account", "Bought", "Shares", "Still held", "Cost"], lots.map((l) =>
+      ? table(["Symbol", "Account", "Bought", "Shares", "Still held", "Cost", ""], lots.map((l) =>
           [l.symbol, accountName.get(l.account_id) || "", l.acquired_on, l.shares, l.remaining_shares,
-            formatCents(l.cost_basis_cents)]), [5])
+            formatCents(l.cost_basis_cents),
+            removeButton(`Delete this purchase of ${l.shares} ${l.symbol}?`, () => deleteLot(l.id), () => reload({ year }))]),
+        [5])
       : empty("No purchases entered yet.")),
     card("Add a purchase", tradeForm({
       dateName: "acquired_on", dateLabel: "Date bought", moneyName: "cost_basis",

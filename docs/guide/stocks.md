@@ -31,6 +31,7 @@ If you imported your brokerage, IRA or HSA account's transactions, you can recor
 **Transactions** page: click **Stock trade** on the payment (for a purchase) or the deposit (for a sale), type the
 symbol and number of shares, check the total, and click **Save**. The row then says what it was, like "Bought 2
 VTI". A stock trade isn't spending or income in your budget: the cash just turned into shares inside the account.
+Click **Undo** next to it to delete the trade; the transaction stays.
 
 ## Entering a sale
 
@@ -95,8 +96,9 @@ the loss isn't just postponed: it's lost for good (IRS Revenue Ruling 2008-5).
   dates and numbers, or add the missing purchase.
 - **"Your sale of ... needs the shares from this purchase"**: you can't delete a purchase a sale
   still uses. Delete that sale first.
-- **A mistake in a purchase or sale**: there's no editing yet. Delete it and enter it again. Your
-  other sales are matched again automatically.
+- **A mistake in a purchase or sale**: there's no editing yet. Click **Delete** next to it on the Stocks page (or
+  **Undo** next to "Bought ..." on the Transactions page) and enter it again. Your other sales are matched again
+  automatically.
 - **A sale doesn't show in the gains**: sales inside a retirement account or HSA aren't taxed, so
   they're left out. Check the sale's account.
 - **An account can't be deleted**: it still has stock purchases or sales. Delete those first.
