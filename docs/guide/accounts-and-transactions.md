@@ -69,6 +69,11 @@ Lists all the money coming in and going out, and lets you add more.
 2. Click the "Category" dropdown and pick one
 3. It saves automatically — you'll see "Saved"
 
+### Balance adjustments are hidden
+
+Opening balances and "match the bank" fixes are balance adjustments. They aren't spending or income, so the
+**Transactions** list hides them unless you untick **Hide balance adjustments**.
+
 ### Sort the ones with no category yet
 
 1. On the **Transactions** page, set **Category set** to **Not yet (uncategorized)**

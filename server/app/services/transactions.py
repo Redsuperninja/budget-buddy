@@ -69,6 +69,8 @@ class TransactionFilters:
     uncategorized: bool = False
     # Leave out dividends and the deposit sweeps linked to them (services/dividend_matching.py).
     hide_dividends: bool = False
+    # Leave out balance adjustments (opening balances and "match the bank" fixes).
+    hide_adjustments: bool = False
 
 
 def get_transaction(session: Session, transaction_id: int) -> Transaction:
@@ -135,6 +137,8 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
             Transaction.id.not_in(trade_transaction_ids()),
         )
 
+    if filters.hide_adjustments:
+        query = query.where(Transaction.kind != TransactionKind.ADJUSTMENT)
     if filters.hide_dividends:
         shown = Dividend.dismissed.is_(False)
         query = query.where(
