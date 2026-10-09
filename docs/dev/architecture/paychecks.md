@@ -53,9 +53,12 @@ entered or imported. Paychecks feed the tax side (wages and withholding by tax y
 - `POST/DELETE /api/local/paychecks/{id}/deposit` links or unlinks the bank deposit. `POST /api/local/paychecks`
   can also take `deposit_transaction_id` to add and link in one go (same checks; nothing is saved if they fail).
 - `GET /api/local/paychecks/deposits?year=` (`services/pay_deposits.py`): pay deposits no paycheck explains yet,
-  newest first, at most 100: `normal` money in, not a transfer, in a checking or savings account, whose
-  description has a payroll word (payroll, direct dep, dir dep, salary, paycheck, wages) or whose category is an
-  income category with "pay" in its name. Each has an `employer` guess (the description up to the payroll word).
+  newest first, at most 100: `normal` money in, not a transfer, in a checking or savings account, that's either
+  in an income category with the word pay, paycheck, payroll or salary in its name, or has no category and a
+  payroll word in its description (payroll, direct dep, dir dep, salary, paycheck, wages). Tax refunds, Social
+  Security, unemployment and reimbursements (tax ref, irs, treas, ssa, unemploy, reimb) and anything in a
+  non-income category are never offered. A pay split across two accounts can't be linked (one deposit must equal
+  the net pay), so both halves stay listed. Each has an `employer` guess (the description up to the payroll word).
   The Paychecks page lists them; **Fill in** starts the form with the date, employer and take-home pay.
 - `GET /api/local/paychecks/summary?year=2026`: year-to-date totals.
 

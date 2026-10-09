@@ -2,8 +2,11 @@
 pay and isn't linked to a paycheck yet. The Paychecks page offers to fill each one in from the pay
 stub, with the date, take-home pay and deposit already set.
 
-Looks like pay: the description has a payroll word (``PAY_WORDS``), or it's in an income category
-named like "Paycheck" (the starter category). Transfers, adjustments and refunds never count.
+Looks like pay: it's in an income category with "pay", "paycheck", "payroll" or "salary" as a word
+in its name (like the starter "Paycheck"), or it has no category and its description has a
+payroll word (``PAY_WORDS``). Tax refunds, Social Security, unemployment and reimbursements
+(``NOT_PAY_WORDS``), and anything in a non-income category, never count; nor do transfers,
+adjustments and refunds.
 Nothing here logs descriptions or amounts.
 """
 
@@ -19,6 +22,10 @@ from app.services.paychecks import DEPOSIT_ACCOUNT_KINDS
 
 _PAY = "payroll|direct dep|dir dep|salary|paycheck|pay check|wages"
 PAY_WORDS = re.compile(rf"(?<![a-z])({_PAY})(?![a-z])", re.I)
+NOT_PAY_WORDS = re.compile(
+    r"(?<![a-z])(tax ref|irs|treas|ssa|soc sec|social security|unemploy|reimb)", re.I
+)
+PAY_CATEGORY = re.compile(r"(?<![a-z])(pay|paycheck|payroll|salary)(?![a-z])", re.I)
 # Where the employer's name ends: "FAKECO INC PAYROLL PPD ID: 123" -> "FAKECO INC".
 _EMPLOYER_END = re.compile(rf"\s+({_PAY}|ppd|des:).*$", re.I)
 MAX_EMPLOYER = 200
@@ -31,10 +38,9 @@ def employer_guess(description: str) -> str:
 
 def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
     """Newest first, at most ``MAX_LISTED``."""
-    pay_categories = {
-        c.id
+    income = {
+        c.id: bool(PAY_CATEGORY.search(c.name))
         for c in session.scalars(select(Category).where(Category.group == CategoryGroup.INCOME))
-        if "pay" in c.name.casefold()
     }
     linked = select(Paycheck.deposit_transaction_id).where(
         Paycheck.deposit_transaction_id.is_not(None)
@@ -52,7 +58,14 @@ def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
         )
         .order_by(Transaction.date.desc(), Transaction.id.desc())
     )
-    found = [t for t in rows if t.category_id in pay_categories or PAY_WORDS.search(t.description)]
+    found = []
+    for t in rows:
+        if NOT_PAY_WORDS.search(t.description):
+            continue
+        if income.get(t.category_id, False) if t.category_id else PAY_WORDS.search(t.description):
+            found.append(t)
+            if len(found) == MAX_LISTED:
+                break
     return [
         PayDeposit(
             transaction_id=t.id,
@@ -62,5 +75,5 @@ def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
             account_id=t.account_id,
             employer=employer_guess(t.description),
         )
-        for t in found[:MAX_LISTED]
+        for t in found
     ]

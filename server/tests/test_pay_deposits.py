@@ -53,3 +53,22 @@ def test_a_wrong_deposit_adds_no_paycheck(client, checking, add_txn):
     )
     assert refused.status_code == 422
     assert client.get(URL, params={"year": 2026}).json()["items"] == []
+
+
+def test_what_isnt_pay(client, checking, add_txn):
+    categories = {c["name"]: c["id"] for c in client.get("/api/local/categories").json()}
+    paypal = client.post(
+        "/api/local/categories", json={"name": "PayPal sales", "group": "income"}
+    ).json()["id"]
+    add_txn(checking, 900, date="2026-04-01", description="IRS TREAS 310 TAX REF DIR DEP")
+    add_txn(checking, 800, date="2026-04-02", description="SSA TREAS 310 DIRECT DEP")
+    add_txn(checking, 700, date="2026-04-03", description="FAKE EXPENSE REIMB DIR DEP")
+    add_txn(checking, 600, date="2026-04-04", description="FAKECO PAYROLL", category_id=paypal)
+    add_txn(
+        checking,
+        500,
+        date="2026-04-05",
+        description="FAKECO PAYROLL",
+        category_id=categories["Groceries"],
+    )
+    assert deposits(client) == []
