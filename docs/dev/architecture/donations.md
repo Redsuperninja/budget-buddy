@@ -45,9 +45,11 @@ dollar text; for goods, the items' fair market value), and optionally a `receipt
 
 After a bank file is imported, and after a transaction is added by hand, each **new** regular money-out payment
 whose `shop_key` (the start of the description, as in auto-sort learning) matches a payment you linked to a cash
-gift for the **whole** payment is filed under "Charitable giving" and gets a cash donation: the charity's name from
-the newest such gift, the payment's date, the whole payment as the amount, `auto_added = true` (migration 0024).
-Part gifts (a charity dinner) are never repeated. Transfers, refunds, adjustments, stock trades and payments
+gift for the **whole** payment is filed under "Charitable giving" with `category_source` null (Budget Buddy's
+choice, so learning ignores it). If it's the same amount as the newest such gift it also gets a cash donation: the
+charity's name from that gift, the payment's date, the whole payment, `auto_added = true` (migration 0024). A
+different amount is only filed (it may include perks). Keys that name a payment method (`NOT_A_PAYEE`: CHECK,
+ZELLE, VENMO, TRANSFER and so on) are never used, nor a key with any part gift (a gala billed like the monthly gift). Transfers, refunds, adjustments, stock trades and payments
 already linked to a gift are skipped. Old payments are never looked at again, so deleting an automatic donation is
 final. The import result has `donations_added`.
 

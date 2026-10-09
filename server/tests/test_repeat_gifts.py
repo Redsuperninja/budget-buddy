@@ -50,10 +50,37 @@ def test_a_repeat_payment_is_recorded_and_filed(client, add_txn, checking, first
     assert category_name(client, payment["category_id"]) == "Charitable giving"
 
 
-def test_a_different_amount_is_still_the_whole_payment(client, add_txn, checking, first_gift):
+def test_a_different_amount_is_filed_but_not_recorded(client, add_txn, checking, first_gift):
+    # More than usual may be a membership with perks or an event: you add the gift part yourself.
     again = add_txn(checking, -5_500, date="2026-02-15", description="FAKE FOOD BANK 0215")
-    auto = [d for d in donations(client) if d["transaction_id"] == again["id"]]
-    assert auto[0]["amount_cents"] == 5_500
+    assert len(donations(client)) == 1
+    payment = client.get(f"/api/local/transactions/{again['id']}").json()
+    assert category_name(client, payment["category_id"]) == "Charitable giving"
+
+
+def test_budget_buddy_files_it_not_you(client, add_txn, checking, first_gift):
+    again = add_txn(checking, -4_000, date="2026-02-15", description="FAKE FOOD BANK 0215")
+    payment = client.get(f"/api/local/transactions/{again['id']}").json()
+    assert payment["category_source"] is None  # auto-sort learning doesn't count it as yours
+
+
+def test_a_check_to_a_charity_doesnt_make_every_check_a_gift(client, add_txn, checking):
+    paid = add_txn(checking, -4_000, date="2026-01-15", description="CHECK 1043")
+    body = {"date": "2026-01-15", "organization": "Fake Food Bank", "kind": "cash",
+            "amount_cents": 4_000, "transaction_id": paid["id"]}  # fmt: skip
+    assert client.post(URL, json=body).status_code == 201
+    rent = add_txn(checking, -4_000, date="2026-02-01", description="CHECK 1044")
+    assert len(donations(client)) == 1
+    assert client.get(f"/api/local/transactions/{rent['id']}").json()["category_id"] is None
+
+
+def test_a_charity_with_a_part_gift_is_left_alone(client, add_txn, checking, first_gift):
+    gala = add_txn(checking, -10_000, date="2026-01-20", description="FAKE FOOD BANK GALA")
+    body = {"date": "2026-01-20", "organization": "Fake Food Bank", "kind": "cash",
+            "amount_cents": 6_000, "transaction_id": gala["id"]}  # fmt: skip
+    assert client.post(URL, json=body).status_code == 201
+    add_txn(checking, -4_000, date="2026-02-15", description="FAKE FOOD BANK 0215")
+    assert len(donations(client)) == 2
 
 
 def test_other_payments_are_left_alone(client, add_txn, checking, first_gift):

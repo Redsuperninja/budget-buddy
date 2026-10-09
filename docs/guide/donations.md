@@ -66,13 +66,19 @@ A few things to know:
 ## Monthly or repeat giving
 
 Once you've sorted one payment into charity (the whole payment as the gift), Budget Buddy recognizes the next
-payment to the same charity in your bank file, or one you type in, and records it for you. It goes in **Charitable
-giving** and on the **Donations** page as a cash gift for the whole payment, marked **Added automatically: a repeat
-gift**. Check it like any other gift: the paperwork rules are the same (from $250, a letter from the charity).
+payment to the same charity in your bank file, or one you type in. It goes in **Charitable giving**, and when it's
+the **same amount** as your last gift there, it's also added on the **Donations** page as a cash gift, marked
+**Added automatically: a repeat gift**.
 
-- If it isn't a gift, click **Remove** on the Donations page. It won't be added back.
-- A payment where only part was a gift (like a fundraiser dinner) is never repeated: enter those yourself.
+- **Check it like any other gift.** Each gift of $250 or more needs a written letter (acknowledgment) from the
+  charity. If you got something back, like a tote bag or a dinner, lower the gift by what that was worth.
+- **A different amount** (a membership with perks, an event, a gift shop) is only put in Charitable giving. Use
+  **Mark as gift** on it and enter just the part that was a gift.
+- **If it isn't a gift,** click **Remove** on the Donations page. It won't be added back.
+- **Not repeated:** payments by check, Zelle, Venmo or transfer (their description says how you paid, not who), and
+  charities where you also had a part gift, like a fundraiser dinner. Enter those yourself.
 - "The same charity" means the payment's description starts the same way, like `FAKE FOOD BANK`.
+- A gift by check counts on the day you mailed it, not the day it cleared, so check the date near New Year.
 
 ## A present for someone (a personal gift)
 

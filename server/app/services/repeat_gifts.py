@@ -1,18 +1,26 @@
 """Recurring gifts to charity: a new payment to a charity you already gave to by the same kind of
-payment is filed under "Charitable giving" and recorded as a donation for you.
+payment is filed under "Charitable giving" and, for the same amount, recorded as a donation for you.
 
 - "The same charity" is the payment's ``shop_key`` (the start of its description, as auto-sort
   learning uses), matched against payments you linked to a cash donation for the **whole** payment.
-  A gift that was only part of its payment (a charity dinner, say) is never repeated: what you got
-  back can change.
-- The new donation copies the charity's name from the most recent such gift; its date is the
-  payment's date and its amount the whole payment. It's marked ``auto_added`` so the Donations page
-  can say so. Proof rules (a written acknowledgment from $250) apply as for any gift.
+  A key that only names how you paid ("CHECK 1043", "ZELLE PAYMENT TO ...") isn't a charity, so it's
+  never used (``NOT_A_PAYEE``): one charity check mustn't make the rent check a gift.
+- A charity you also gave a **part** gift through (a gala dinner billed like the monthly gift) is
+  left alone: what you got back can't be told apart from the gift.
+- Same amount as the newest gift: a cash donation is added (the charity's name from that gift, the
+  payment's date, the whole payment) and marked ``auto_added``. A different amount may be a
+  membership with perks or an event, so the payment is only filed under "Charitable giving"; you add
+  the gift yourself with the amount that was a gift.
+- Budget Buddy's filing is marked as its own (``category_source`` None), so auto-sort learning
+  doesn't take it for your choice. Proof rules (a written acknowledgment from $250) apply as for any
+  gift.
 - Only payments that just came in (imported or added by hand) are looked at, so deleting an
   automatic donation is final: Budget Buddy never adds it back.
 - Regular money out only: not a transfer, refund, balance adjustment, paycheck deposit, stock trade
   or a payment already linked to a donation. Nothing here logs descriptions or amounts.
 """
+
+from dataclasses import dataclass
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -22,23 +30,60 @@ from app.services.category_learning import shop_key
 from app.services.gift_categories import CHARITY, file_under
 from app.services.stock_records import trade_transaction_ids
 
+# First words of a description that say how you paid, not who you paid.
+NOT_A_PAYEE = frozenset(
+    {
+        "ACH", "ATM", "BILL", "CASH", "CHECK", "CHECKS", "CHK", "DEPOSIT", "E-TRANSFER", "ONLINE",
+        "PAYPAL", "PMT", "TRANSFER", "VENMO", "WIRE", "WITHDRAWAL", "XFER", "ZELLE",
+    }
+)  # fmt: skip
 
-def _charities_by_key(session: Session) -> dict[str, str]:
-    """Shop key -> charity name, from your whole-payment cash gifts (newest gift wins)."""
+
+@dataclass
+class Repeats:
+    filed: int = 0  # put in "Charitable giving"
+    recorded: int = 0  # of those, added as donations (same amount as last time)
+
+
+@dataclass
+class _Charity:
+    organization: str
+    amount_cents: int  # the newest whole-payment gift
+    part_gift: bool = False  # some gift through this key was only part of its payment
+
+
+def _charity_key(description: str) -> str | None:
+    key = shop_key(description)
+    if key is None or key.split()[0].strip("*#:-").upper() in NOT_A_PAYEE:
+        return None
+    return key.casefold()
+
+
+def _charities_by_key(session: Session) -> dict[str, _Charity]:
+    """Charity key -> what you gave there before, from cash gifts linked to a payment."""
     rows = session.execute(
-        select(Transaction.description, Donation.organization)
-        .join(Donation, Donation.transaction_id == Transaction.id)
-        .where(
-            Donation.kind == DonationKind.CASH,
-            Donation.amount_cents == -Transaction.amount_cents,
+        select(
+            Transaction.description,
+            Transaction.amount_cents,
+            Donation.organization,
+            Donation.amount_cents,
         )
+        .join(Donation, Donation.transaction_id == Transaction.id)
+        .where(Donation.kind == DonationKind.CASH)
         .order_by(Donation.date, Donation.id)
     )
-    found: dict[str, str] = {}
-    for description, organization in rows:
-        key = shop_key(description)
-        if key is not None:
-            found[key.casefold()] = organization
+    found: dict[str, _Charity] = {}
+    for description, paid_cents, organization, gift_cents in rows:
+        key = _charity_key(description)
+        if key is None:
+            continue
+        before = found.get(key)
+        if gift_cents < -paid_cents:  # part of the payment was a gift
+            found[key] = before or _Charity(organization, gift_cents)
+            found[key].part_gift = True
+        else:
+            part = before.part_gift if before else False
+            found[key] = _Charity(organization, gift_cents, part)
     return found
 
 
@@ -59,32 +104,33 @@ def _new_payments(session: Session, ids: set[int]) -> list[Transaction]:
     )
 
 
-def repeat_gifts(session: Session, transaction_ids: set[int]) -> int:
-    """Record the payments among ``transaction_ids`` that repeat a gift to charity. Returns how
-    many donations were added. Not saved until the caller commits."""
-    if not transaction_ids:
-        return 0
-    payments = _new_payments(session, transaction_ids)
+def repeat_gifts(session: Session, transaction_ids: set[int]) -> Repeats:
+    """File the payments among ``transaction_ids`` that repeat a gift to charity, and record the
+    ones for the same amount. Not saved until the caller commits."""
+    done = Repeats()
+    payments = _new_payments(session, transaction_ids) if transaction_ids else []
     if not payments:
-        return 0
+        return done
     charities = _charities_by_key(session)
-    added = 0
     for payment in payments:
-        key = shop_key(payment.description)
-        organization = charities.get(key.casefold()) if key else None
-        if organization is None:
+        key = _charity_key(payment.description)
+        charity = charities.get(key) if key else None
+        if charity is None or charity.part_gift:
             continue
+        file_under(session, payment, CHARITY, by_you=False)
+        done.filed += 1
+        if -payment.amount_cents != charity.amount_cents:
+            continue  # a different amount: maybe not all a gift, so you add it yourself
         session.add(
             Donation(
                 date=payment.date,
-                organization=organization,
+                organization=charity.organization,
                 amount_cents=-payment.amount_cents,
                 kind=DonationKind.CASH,
                 transaction_id=payment.id,
                 auto_added=True,
             )
         )
-        file_under(session, payment, CHARITY)
-        added += 1
+        done.recorded += 1
     session.flush()
-    return added
+    return done

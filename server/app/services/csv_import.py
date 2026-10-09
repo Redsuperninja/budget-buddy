@@ -213,7 +213,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
         transfers_matched=matched,
         dividends_found=dividends.dividends,
         dividend_sweeps_linked=dividends.sweeps,
-        donations_added=gifts,
+        donations_added=gifts.recorded,
         categorized=sum(t.category_id is not None for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),

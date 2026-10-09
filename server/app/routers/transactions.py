@@ -70,7 +70,7 @@ def create_transaction(data: TransactionCreate, session: SessionDep) -> Transact
     # The other side of a transfer you entered.
     matched = match_transfers(session, {transaction.id})
     gifts = repeat_gifts(session, {transaction.id})  # a repeat gift to a charity
-    if matched or found.dividends or found.sweeps or gifts:
+    if matched or found.dividends or found.sweeps or gifts.filed:
         session.commit()
     return transaction
 
