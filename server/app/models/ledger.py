@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.crypto.fields import EncryptedString
 from app.models.base import Base, TimestampMixin, str_enum
 from app.models.enums import AccountKind, CategoryGroup, TransactionKind, TransactionSource
+from app.transfer_types import classify
 
 
 class Account(TimestampMixin, Base):
@@ -101,6 +102,21 @@ class Transaction(TimestampMixin, Base):
     # The rule that sorted it. No foreign key (adding one would mean rebuilding this table, which
     # other tables point at); deleting a rule clears it in services/category_rules.py.
     sorted_by_rule_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    # Set when you undo a transfer link, so automatic matching never links it again.
+    auto_transfer_off: Mapped[bool] = mapped_column(default=False, server_default="0")
+    # The category (and how it was set) from before it was linked as a transfer, put back when the
+    # link is undone. No foreign keys, like sorted_by_rule_id (migration 0016 only adds columns).
+    pre_transfer_category_id: Mapped[int | None] = mapped_column(Integer)
+    pre_transfer_category_source: Mapped[str | None] = mapped_column(String(8))
+    pre_transfer_rule_id: Mapped[int | None] = mapped_column(Integer)
+    account = relationship("Account", viewonly=True, lazy="selectin")
+    transfer_partner = relationship(
+        "Transaction",
+        primaryjoin="foreign(Transaction.transfer_pair_id) == remote(Transaction.id)",
+        uselist=False,
+        viewonly=True,
+        lazy="selectin",
+    )
     # The charitable gift this payment is, if it was sorted into charity (Donation.transaction_id).
     donation = relationship(
         "Donation",
@@ -113,6 +129,15 @@ class Transaction(TimestampMixin, Base):
     @property
     def donation_id(self) -> int | None:
         return self.donation.id if self.donation is not None else None
+
+    @property
+    def transfer_type(self) -> str | None:
+        """A linked transfer's kind (app/transfer_types.py), the same on both sides."""
+        partner = self.transfer_partner
+        if self.kind != TransactionKind.TRANSFER or partner is None:
+            return None
+        out, into = (self, partner) if self.amount_cents < 0 else (partner, self)
+        return classify(out.account.kind, into.account.kind).value
 
 
 class CsvImportMapping(TimestampMixin, Base):

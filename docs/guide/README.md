@@ -27,6 +27,7 @@ Add and track your accounts, spending, and income in the Budget Buddy dashboard.
 4. [Budget by percentage of income](budget-by-percentage.md) — Budgets like "15% of income"; your planned monthly income; shares of income.
 5. [Get a suggested budget](suggested-budget.md) — A 50/30/20 plan from your last three months; use it with one click.
 6. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
+7. [Transfers between your accounts](transfers.md) — Card payments and money into savings or retirement, linked for you; what's counted as saved.
 
 ## Your phone and other computers
 

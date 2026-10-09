@@ -1,15 +1,18 @@
-// The category dropdown in a transaction's row (Transactions and Auto-sort pages). Shows "auto-sorted" when a
-// rule picked the category, and says so when picking one teaches Budget Buddy a new auto-sort rule.
+// The category dropdown in a transaction's row (Transactions and Auto-sort pages). Shows what kind of transfer a
+// linked one is, "auto-sorted" when a rule picked the category, and when a pick teaches a new auto-sort rule.
 
 import { updateTransaction } from "../api/endpoints.js";
 import { h } from "../dom.js";
 import { idOrNull, pickOptions } from "../fields.js";
+import { transferTypeLabel } from "../labels.js";
 import { select } from "../widgets.js";
 
 export function categoryPicker(t, categories) {
   const picker = select(pickOptions(categories, "(no category)"),
     { value: t.category_id || "", "aria-label": "Category" });
-  const tag = h("span", { class: "muted" }, t.category_source === "rule" ? " auto-sorted" : "");
+  const tagText = t.transfer_type ? ` Transfer: ${transferTypeLabel(t.transfer_type)}`
+    : t.category_source === "rule" ? " auto-sorted" : "";
+  const tag = h("span", { class: "muted" }, tagText);
   const note = h("span", { class: "muted", role: "status" });
   picker.addEventListener("change", async () => {
     try {

@@ -57,7 +57,8 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 ## Transfers and lock rules
 
 - `POST/DELETE /api/local/transactions/{id}/transfer` links or unlinks a transfer between two of your accounts.
-  Only two regular (`normal`) transactions can be linked; both move to the Transfer category.
+  Only two regular (`normal`) transactions can be linked; both move to the Transfer category. Most pairs are
+  linked automatically, and each linked side has a `transfer_type` ([transfers.md](transfers.md)).
 - While linked, a transaction's account, amount, kind and category are locked and it can't be deleted: remove
   the link first.
 - A transaction that backs a paycheck has its own locks ([paychecks.md](paychecks.md)).
