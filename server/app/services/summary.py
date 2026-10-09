@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.percent import percent_bp
 from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
+from app.services.bank_trades import inside_account_ids
 from app.services.budget_plan import budget_for, budget_income
 from app.services.dividends import kept_in_account
 from app.services.savings_transfers import saved_by_transfer
@@ -65,6 +66,7 @@ def monthly_summary(
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
             kept_in_account(Transaction.id),
             Transaction.id.not_in(trade_transaction_ids()),
+            Transaction.id.not_in(inside_account_ids()),  # bank-file trades and their sweeps
         )
         .group_by(Transaction.category_id, Transaction.kind)
     ).all()

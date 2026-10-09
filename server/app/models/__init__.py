@@ -34,11 +34,13 @@ from app.models.tax import (
     StockSale,
     StockSaleOrder,
 )
+from app.models.trades import BankTrade, SecuritySymbol
 
 __all__ = [
     "Account",
     "AccountKind",
     "Base",
+    "BankTrade",
     "BudgetPlan",
     "Category",
     "CategoryGroup",
@@ -58,6 +60,7 @@ __all__ = [
     "Receipt",
     "RemoteComputer",
     "RetirementType",
+    "SecuritySymbol",
     "SeenNonce",
     "StockLot",
     "StockPrice",

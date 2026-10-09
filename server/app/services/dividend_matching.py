@@ -33,6 +33,7 @@ from sqlalchemy.orm import Session
 from app.models import (
     Account,
     AccountKind,
+    BankTrade,
     CategoryGroup,
     CategorySource,
     Dividend,
@@ -77,7 +78,7 @@ def looks_like_dividend(description: str, account_kind: AccountKind) -> bool:
     return bool(DIVIDEND_WORDS.search(description) or short)
 
 
-def _regular(query):
+def regular(query):
     """Regular transactions not already a transfer, a paycheck's deposit or a donation."""
     return query.where(
         Transaction.kind == TransactionKind.NORMAL,
@@ -95,7 +96,7 @@ def _regular(query):
 
 def _new_dividends(session: Session, ids: set[int] | None) -> list[Transaction]:
     query = (
-        _regular(select(Transaction, Account.kind))
+        regular(select(Transaction, Account.kind))
         .join(Account, Account.id == Transaction.account_id)
         .where(
             Transaction.amount_cents > 0,
@@ -129,11 +130,19 @@ def _link_sweeps(session: Session) -> int:
     ).all()
     if not open_dividends:
         return 0
-    used = select(Dividend.sweep_transaction_id).where(Dividend.sweep_transaction_id.is_not(None))
+    used = (
+        select(Dividend.sweep_transaction_id)
+        .where(Dividend.sweep_transaction_id.is_not(None))
+        .union(
+            select(BankTrade.sweep_transaction_id).where(
+                BankTrade.sweep_transaction_id.is_not(None)
+            )
+        )
+    )
     sweeps = [
         t
         for t in session.scalars(
-            _regular(select(Transaction)).where(
+            regular(select(Transaction)).where(
                 Transaction.amount_cents < 0,
                 Transaction.account_id.in_({t.account_id for _, t in open_dividends}),
                 Transaction.id.not_in(used),

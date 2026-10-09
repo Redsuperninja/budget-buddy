@@ -18,6 +18,7 @@ from app.schemas.stocks import (
     TermTotalsOut,
 )
 from app.services import stock_gains as gains
+from app.services.bank_trades import remember_symbol
 from app.services.stock_records import (
     check_account,
     check_trade_transaction,
@@ -141,6 +142,9 @@ def create_sale(session: Session, data: SaleCreate) -> SaleOut:
                 "number of shares and the date, or add the missing purchase first."
             )
         raise ApiError(422, "not_enough_shares", message) from None
+    remember_symbol(
+        session, values["transaction_id"], values["symbol"]
+    )  # a trade from the bank file
     session.commit()
     return sale_out(session, new_id)
 

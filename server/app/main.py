@@ -24,6 +24,7 @@ from app.remote_access import RemoteAccess
 from app.routers import (
     accounts,
     activity_import,
+    bank_trades,
     budget_plan,
     categories,
     category_rules,
@@ -140,6 +141,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(receipts.router)
     app.include_router(donations.router)
     app.include_router(dividends.router)
+    app.include_router(bank_trades.router)
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
     app.include_router(stock_import.router)

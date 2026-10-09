@@ -36,6 +36,8 @@ transaction's, never copied.
   trend use the same summary. Elsewhere a dividend is income and its sweep keeps its own category.
 - **Totals** only count dividends whose payment is still money in and `normal`. Two `find` runs at once: the
   second adds nothing (a savepoint catches the unique-constraint clash).
+- A linked sweep doesn't show under "needs a category" (it only parks the cash). Stock trades and their sweeps
+  work the same way ([bank-trades.md](bank-trades.md)).
 - **Its sweep** is a regular money-out transaction in the same account, for exactly the same amount, from 1 day
   before to 3 days after, with the word "sweep" in it. Closest date wins, then the one added first; one sweep per
   dividend. Sweeps keep their own category, and a linked sweep is never matched as a transfer.

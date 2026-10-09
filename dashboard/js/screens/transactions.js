@@ -85,7 +85,7 @@ export async function render(root, options = {}) {
     card("Transactions",
       h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter),
         h("label", {}, "Show", sortedFilter),
-        advanced(h("label", { class: "check" }, hideDividends, "Hide dividends and sweeps")),
+        advanced(h("label", { class: "check" }, hideDividends, "Hide dividends, stock trades and sweeps")),
         advanced(h("label", { class: "check" }, hideAdjustments, "Hide balance adjustments")),
         advanced(h("span", {}, findTransfers, matchNote))),
       list),

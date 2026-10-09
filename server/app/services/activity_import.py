@@ -38,6 +38,7 @@ from app.schemas.stocks import LotCreate
 from app.services import stock_gains as gains
 from app.services.accounts import INVESTMENT_KINDS, get_account
 from app.services.activity_csv import ActivityRow, SharesOnly, find_columns, parse_row
+from app.services.bank_trades import find_trades
 from app.services.category_rules import load_matcher, rule_fields
 from app.services.csv_parsing import (
     RowProblem,
@@ -277,6 +278,7 @@ def commit(
     trades, linked = _add_trades(session, added, import_id)
     ids = {t.id for t, _ in added}
     dividends = find_dividends(session, ids)
+    find_trades(session, ids)  # links each trade's deposit sweep, if the file has them
     matched = match_transfers(session, ids)
     session.commit()
     return ActivityResult(
