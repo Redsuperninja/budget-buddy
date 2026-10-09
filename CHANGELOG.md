@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Remove stock trades: **Delete** next to each purchase and sale on the Stocks page, and **Undo** next to a "Bought ..." or "Sold ..." trade on the Transactions page (the transaction stays). Budget Buddy asks first, and says so if a sale still needs a purchase.
+- Remove stock trades: **Delete** next to each purchase and sale on the Stocks page ("Sales you entered" lists every sale, including retirement and HSA ones), and **Undo** next to a "Bought ..." or "Sold ..." trade on the Transactions page (the transaction stays). Budget Buddy asks first, and says so if a sale still needs a purchase.
 - A new Home page: four money tiles (in, spent with a budget meter, saved with your savings rate, left over), a **Needs your attention** list that links to what's waiting, a bar showing where your income went (needs, wants, savings, left over), and your net worth with a bar for each account's balance.
 - Positions file: on the Investments page, import your broker's positions (holdings) CSV for an account. It shows what the broker says you hold next to what your recorded purchases and sales add up to (a difference means a trade may be missing), and its prices become your latest prices. It never changes your purchases, sales or gains.
 - Paychecks from your bank file: pay deposits (like "... PAYROLL" or anything in Paycheck) show on the Paychecks page under **Pay deposits to fill in**. **Fill in** starts a paycheck with the date, employer and take-home pay, linked to the deposit; add gross pay and taxes from your stub.

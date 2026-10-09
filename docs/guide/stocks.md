@@ -96,9 +96,9 @@ the loss isn't just postponed: it's lost for good (IRS Revenue Ruling 2008-5).
   dates and numbers, or add the missing purchase.
 - **"Your sale of ... needs the shares from this purchase"**: you can't delete a purchase a sale
   still uses. Delete that sale first.
-- **A mistake in a purchase or sale**: there's no editing yet. Click **Delete** next to it on the Stocks page (or
-  **Undo** next to "Bought ..." on the Transactions page) and enter it again. Your other sales are matched again
-  automatically.
+- **A mistake in a purchase or sale**: there's no editing yet. Click **Delete** next to it under "Shares you
+  bought" or "Sales you entered" on the Stocks page (or **Undo** next to "Bought ..." on the Transactions page)
+  and enter it again. Your other sales are matched again automatically.
 - **A sale doesn't show in the gains**: sales inside a retirement account or HSA aren't taxed, so
   they're left out. Check the sale's account.
 - **An account can't be deleted**: it still has stock purchases or sales. Delete those first.
