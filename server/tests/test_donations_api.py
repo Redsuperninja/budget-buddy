@@ -11,7 +11,7 @@ import pytest
 from app import tax_data
 from app.models import DonationKind
 from app.schemas import donations as donation_schemas
-from app.services.donations import donation_proof, year_proof
+from app.services.donation_proof import donation_proof, year_proof
 
 URL = "/api/local/donations"
 RULES_2025 = tax_data.load_tax_year(2025).charitable  # same thresholds, no non-itemizer rule

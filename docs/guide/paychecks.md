@@ -15,7 +15,7 @@ Copy each line from your pay stub.
 | State tax | State income tax withheld |
 | Social Security | Social Security tax (often "OASDI" on the stub) |
 | Medicare | Medicare tax |
-| 401(k)/403(b) before tax | Traditional 401(k), 403(b) or 457 (taken before taxes) |
+| 401(k)/403(b) before tax | Traditional 401(k), 403(b) or 457 (taken before taxes). The [Investments](investments.md) page counts this line, with Roth 401(k), toward the 401(k) limit; a 457(b) has its own limit |
 | HSA | HSA contributions taken from your pay (taken before taxes) |
 | Health insurance premiums | Health, dental, vision premiums, and FSA (taken before taxes) |
 | Roth 401(k) | Roth 401(k) or Roth 403(b) (taken after taxes) |
@@ -76,6 +76,6 @@ Your numbers don't add up. Check your pay stub and try again.
 
 The deposit you're trying to link isn't in your transactions. Make sure it's imported from your bank and has the exact take-home amount.
 
-**This page only works on this computer**
+**"This only works on the computer where Budget Buddy is running"**
 
 Use the computer running Budget Buddy, or [connect this one](use-on-another-computer.md) first.

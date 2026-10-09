@@ -12,7 +12,8 @@ each side implements it.
    summary).
 2. Every sync payload is **encrypted end-to-end with the sync key** (NaCl secretbox), so even plain HTTP on the
    home network can't be snooped. Requests also need the device token.
-3. Only health, pairing and sync routes answer the home network; everything else answers this computer only.
+3. Only health, pairing and sync routes answer phones on the home network; everything else answers this computer
+   only, or a computer joined with a one-time code ([remote-computers.md](remote-computers.md)).
    Phones can be removed from the dashboard ([pairing.md](pairing.md)).
 
 ## Server side (roadmap #15)
