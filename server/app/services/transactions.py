@@ -39,6 +39,19 @@ _DONATION_LOCKED_MESSAGE = (
     "its amount or type, or to make it part of a transfer."
 )
 
+# A transaction classified as a stock trade backs that purchase or sale.
+_TRADE_LOCKED_MESSAGE = (
+    "This transaction is recorded as a stock trade. Delete that purchase or sale on the Stocks "
+    "page first to change its account, amount or type, or to make it part of a transfer."
+)
+
+
+def is_stock_trade(session: Session, transaction: Transaction) -> bool:
+    return any(
+        session.scalar(select(model.id).where(model.transaction_id == transaction.id)) is not None
+        for model in (StockLot, StockSaleOrder)
+    )
+
 
 @dataclass(frozen=True)
 class TransactionFilters:
@@ -178,6 +191,8 @@ def update_transaction(
         raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
     if _DONATION_LOCKED_FIELDS & changes.keys() and transaction.donation is not None:
         raise ApiError(409, "linked_to_donation", _DONATION_LOCKED_MESSAGE)
+    if _TRANSFER_LOCKED_FIELDS & changes.keys() and is_stock_trade(session, transaction):
+        raise ApiError(409, "linked_to_stock_trade", _TRADE_LOCKED_MESSAGE)
     _check_kind_rules(
         changes.get("kind", transaction.kind),
         changes.get("amount_cents", transaction.amount_cents),

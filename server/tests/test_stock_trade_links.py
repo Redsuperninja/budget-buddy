@@ -65,3 +65,22 @@ def test_deleting_the_transaction_keeps_the_shares(client, brokerage, add_txn):
     lot = buy_from(client, paid["id"]).json()
     assert client.delete(f"{TXN}/{paid['id']}").status_code == 204
     assert client.get(f"{LOTS}/{lot['id']}").json()["transaction_id"] is None
+
+
+def test_a_trade_transaction_is_locked(client, brokerage, make_account, add_txn):
+    paid = add_txn(brokerage, -20_000, date="2026-03-02", description="YOU BOUGHT FAKE")
+    assert buy_from(client, paid["id"]).status_code == 201
+    for change in ({"amount_cents": -1}, {"kind": "refund"}, {"account_id": brokerage}):
+        refused = client.patch(f"{TXN}/{paid['id']}", json=change)
+        assert (refused.status_code, refused.json()["error"]["code"]) == (
+            409,
+            "linked_to_stock_trade",
+        )
+    assert client.patch(f"{TXN}/{paid['id']}", json={"description": "Renamed"}).status_code == 200
+
+    # Never matched as a transfer, by hand or automatically.
+    checking = make_account()["id"]
+    other = add_txn(checking, 20_000, date="2026-03-02", description="Transfer from brokerage")
+    linked = client.post(f"{TXN}/{paid['id']}/transfer", json={"other_id": other["id"]})
+    assert linked.status_code == 409
+    assert client.post(f"{TXN}/match-transfers").json()["matched"] == 0

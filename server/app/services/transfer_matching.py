@@ -6,8 +6,9 @@ Two transactions are matched when all of these hold:
 - their dates are at most ``WINDOW_DAYS`` apart (a bank transfer or card payment can take a few
   days to show on the other side, longer over a weekend and holiday);
 - both are regular transactions that aren't already linked, aren't a paycheck's deposit, a
-  donation or a dividend's deposit sweep, weren't unlinked by you before (``auto_transfer_off``),
-  and have no category yet or a transfer category (a category from you or a rule is respected);
+  donation, a stock trade or a dividend's deposit sweep, weren't unlinked by you before
+  (``auto_transfer_off``), and have no category yet or a transfer category (a category from you or
+  a rule is respected);
 - at least one description looks like a transfer (``TRANSFER_WORDS``), a credit card's side looks
   like a payment, and neither looks like a dividend, interest, an employer match, pay or a refund
   (``NOT_TRANSFER_WORDS``): an equal amount alone is too often a coincidence;
@@ -37,6 +38,7 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
+from app.services.stock_records import trade_transaction_ids
 from app.services.transfers import pair_up
 
 WINDOW_DAYS = 5
@@ -77,6 +79,7 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
                 Paycheck.deposit_transaction_id.is_not(None))),
             Transaction.id.not_in(select(Donation.transaction_id).where(
                 Donation.transaction_id.is_not(None))),
+            Transaction.id.not_in(trade_transaction_ids()),
             Transaction.id.not_in(select(Dividend.sweep_transaction_id).where(
                 Dividend.sweep_transaction_id.is_not(None))),
             Transaction.category_id.is_(None) | Transaction.category_id.in_(transfer_categories),

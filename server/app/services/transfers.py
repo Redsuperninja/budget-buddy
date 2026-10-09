@@ -16,8 +16,10 @@ from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.services.transactions import (
     _DEPOSIT_LOCKED_MESSAGE,
     _DONATION_LOCKED_MESSAGE,
+    _TRADE_LOCKED_MESSAGE,
     get_transaction,
     is_paycheck_deposit,
+    is_stock_trade,
 )
 
 
@@ -69,6 +71,8 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
         raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
     if first.donation is not None or second.donation is not None:
         raise ApiError(409, "linked_to_donation", _DONATION_LOCKED_MESSAGE)
+    if is_stock_trade(session, first) or is_stock_trade(session, second):
+        raise ApiError(409, "linked_to_stock_trade", _TRADE_LOCKED_MESSAGE)
     if first.kind != TransactionKind.NORMAL or second.kind != TransactionKind.NORMAL:
         # Linking would hide what a refund or an opening-balance adjustment was, and unlinking
         # couldn't bring it back.
