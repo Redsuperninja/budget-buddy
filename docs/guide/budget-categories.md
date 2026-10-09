@@ -5,7 +5,8 @@ Budget Buddy sorts your money into categories so you can see where it goes each 
 ## The four kinds of category
 
 - **Needs**: things you have to pay for, like rent, groceries, utilities, and insurance.
-- **Wants**: things you choose to spend on, like dining out, entertainment, and shopping.
+- **Wants**: things you choose to spend on, like dining out, entertainment, and shopping. **Other Expenses** is
+  here too, for spending that fits nowhere else.
 - **Savings**: money you set aside, like an emergency fund or retirement.
 - **Income**: money you earn, like your paycheck or interest.
 
