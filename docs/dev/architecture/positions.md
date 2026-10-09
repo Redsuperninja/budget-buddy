@@ -7,12 +7,13 @@ clear), `services/csv_headers.py` (header matching shared with the stock import)
 
 ## Routes (this computer, or a joined one: the `stocks` area)
 
-Query for both imports: `account_id` (required) and `as_of` (the day the file is from; files rarely say).
+Query for both imports: `account_id` (required) and `as_of` (the day the file is from; files rarely say; not in
+the future).
 
 - `POST /api/local/stocks/positions/import/preview`: columns found, positions (one per symbol), skipped lines.
 - `POST /api/local/stocks/positions/import`: replace the account's snapshot; returns counts and `prices_updated`.
-- `GET /api/local/stocks/positions`: each account's snapshot, with `recorded_shares_micro` (what its purchases and
-  sales add up to, from `stock_holdings`) and `matches`.
+- `GET /api/local/stocks/positions`: each account's snapshot, with `recorded_shares_micro` (that account's
+  purchases minus sales of the symbol dated on or before `as_of`, so later trades don't look missing) and `matches`.
 - `DELETE /api/local/stocks/positions/{account_id}`: forget an account's snapshot.
 
 ## Rules
@@ -27,4 +28,5 @@ Query for both imports: `account_id` (required) and `as_of` (the day the file is
   Fidelity's `SPAXX**`), no or negative shares (cash, short positions), and notes. The same symbol on several
   lines is added up; a cost or value missing on any of them makes the total unknown (`null`).
 - **Prices**: a line's price becomes the symbol's `StockPrice` with source `file`, unless a price dated after
-  `as_of` is saved. Value shown = the file's value, else shares x latest price.
+  `as_of`, or a live (`feed`) price from the same day, is saved. Value shown = the file's value, else shares x the
+  latest price (today's, not the file's).

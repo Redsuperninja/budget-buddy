@@ -92,3 +92,29 @@ def test_clear_and_errors(client, ira):
     assert send(client, 999).status_code == 404
     refused = send(client, ira, "Name,Amount\r\nx,1\r\n")
     assert (refused.status_code, refused.json()["error"]["code"]) == (422, "columns_not_found")
+
+
+def test_dates_and_prices_from_the_review(client, ira):
+    import datetime as dt
+
+    from app.db import SessionLocal
+    from app.models import StockPrice
+
+    future = (dt.date.today() + dt.timedelta(days=1)).isoformat()
+    assert send(client, ira, as_of=future).status_code == 422
+
+    # A purchase dated after the file isn't counted when comparing.
+    lot = {"account_id": ira, "symbol": "OTHR", "acquired_on": "2026-10-08", "shares": "1.5"}
+    assert client.post("/api/local/stocks/lots", json=lot | {"cost_basis": "15"}).is_success
+    ok(send(client, ira, action="import", as_of="2026-10-07"))
+    othr = client.get(URL).json()["accounts"][0]["positions"][1]
+    assert (othr["symbol"], othr["recorded_shares_micro"], othr["matches"]) == ("OTHR", 0, False)
+
+    # A live price from the same day stays.
+    with SessionLocal(bind=client.app.state.engine) as session:
+        price = session.get(StockPrice, "FAKE")
+        price.source, price.price_cents, price.as_of = "feed", 2_600, dt.date(2026, 10, 8)
+        session.commit()
+    assert (
+        ok(send(client, ira, action="import", as_of="2026-10-08"))["prices_updated"] == 1
+    )  # OTHR only

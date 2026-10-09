@@ -3,6 +3,8 @@
 import datetime as dt
 from typing import Literal
 
+from pydantic import field_validator
+
 from app.schemas.common import Id, Schema
 
 NOTE = (
@@ -17,6 +19,13 @@ class PositionsChoices(Schema):
 
     account_id: Id
     as_of: dt.date  # the day the file is from (positions files rarely say)
+
+    @field_validator("as_of")
+    @classmethod
+    def _not_future(cls, value: dt.date) -> dt.date:
+        if value > dt.date.today():
+            raise ValueError("The file's date can't be in the future.")
+        return value
 
 
 class PositionPreviewRow(Schema):
@@ -48,8 +57,12 @@ class PositionOut(Schema):
     shares_micro: int
     shares: str
     cost_basis_cents: int | None
-    value_cents: int | None  # from the file, or shares x your latest price
-    recorded_shares_micro: int  # what your recorded purchases and sales say you hold
+    value_cents: (
+        int | None
+    )  # from the file, or shares x your latest price (today's, not the file's)
+    recorded_shares_micro: (
+        int  # what your recorded purchases and sales add up to on the file's date
+    )
     matches: bool
 
 

@@ -3,16 +3,17 @@
 Importing replaces the account's earlier snapshot. Positions never change purchases, sales or
 gains; the Investments page shows them next to what your recorded purchases and sales add up
 to, so a missing trade stands out. A price in the file becomes the symbol's latest price
-(source "file") unless a price from a later day is already saved. Reading the file is in
+(source "file") unless a price from a later day, or a live price from the same day, is already
+saved. The file's date can't be in the future. Reading the file is in
 ``positions_csv``. Nothing here logs file contents, symbols or amounts.
 """
 
 from dataclasses import dataclass
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Account, Position, StockPrice
+from app.models import Account, Position, StockLot, StockPrice, StockSaleOrder
 from app.schemas.positions import (
     AccountPositionsOut,
     PositionOut,
@@ -25,7 +26,7 @@ from app.schemas.positions import (
 from app.services.accounts import get_account
 from app.services.csv_parsing import decode_csv, detect_delimiter, read_rows
 from app.services.positions_csv import ParsedPosition, Skip, find_columns, parse_position
-from app.services.stock_holdings import holdings, value_cents
+from app.services.stock_holdings import value_cents
 from app.shares import micro_to_text
 
 MAX_SKIPPED_SHOWN = 100
@@ -93,8 +94,10 @@ def preview(session: Session, data: bytes, choices: PositionsChoices) -> Positio
 
 def _save_price(session: Session, symbol: str, price_cents: int, choices: PositionsChoices) -> bool:
     price = session.get(StockPrice, symbol)
-    if price is not None and price.as_of > choices.as_of:
-        return False  # a later price is already saved
+    if price is not None and (
+        price.as_of > choices.as_of or (price.as_of == choices.as_of and price.source == "feed")
+    ):
+        return False  # a later price, or a live one from the same day, is already saved
     price = price or StockPrice(symbol=symbol)
     price.price_cents, price.as_of = price_cents, choices.as_of
     price.source, price.fetched_at = "file", None
@@ -128,12 +131,27 @@ def commit(session: Session, data: bytes, choices: PositionsChoices) -> Position
     )
 
 
+def _recorded_shares(session: Session, position: Position) -> int:
+    """Shares bought minus shares sold in the position's account, dated on or before the file's
+    day, so a trade recorded after the file doesn't look missing."""
+    bought = session.scalar(
+        select(func.coalesce(func.sum(StockLot.shares_micro), 0)).where(
+            StockLot.account_id == position.account_id,
+            StockLot.symbol == position.symbol,
+            StockLot.acquired_on <= position.as_of,
+        )
+    )
+    sold = session.scalar(
+        select(func.coalesce(func.sum(StockSaleOrder.shares_micro), 0)).where(
+            StockSaleOrder.account_id == position.account_id,
+            StockSaleOrder.symbol == position.symbol,
+            StockSaleOrder.sold_on <= position.as_of,
+        )
+    )
+    return bought - sold
+
+
 def list_positions(session: Session) -> PositionsOut:
-    recorded = {
-        (group.account_id, h.symbol): h.shares_micro
-        for group in holdings(session).accounts
-        for h in group.holdings
-    }
     prices = {p.symbol: p.price_cents for p in session.scalars(select(StockPrice))}
     rows = session.execute(
         select(Position, Account.name)
@@ -155,7 +173,7 @@ def list_positions(session: Session) -> PositionsOut:
         value = position.value_cents
         if value is None and position.symbol in prices:
             value = value_cents(position.shares_micro, prices[position.symbol])
-        mine = recorded.get((position.account_id, position.symbol), 0)
+        mine = _recorded_shares(session, position)
         group.positions.append(
             PositionOut(
                 symbol=position.symbol,
