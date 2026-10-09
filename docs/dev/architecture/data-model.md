@@ -14,6 +14,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `paychecks` | id, pay_date, employer, account_id?, deposit_transaction_id? (unique), gross_cents, federal_tax_cents, state_tax_cents, social_security_cents, medicare_cents, retirement_cents, hsa_cents, health_insurance_cents, roth_retirement_cents, other_deductions_cents, net_cents (all ≥ 0), notes (enc) |
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, notes (enc), client_id? (unique), deduction_kind?, device_id? (phone uploads) |
 | `positions` | one line of a broker's positions file: account_id (cascade), symbol (unique per account), shares_micro (> 0), cost_basis_cents?, value_cents?, as_of |
+| `imports` | one imported file: kind (bank/stocks/activity/positions), account_id?, file_name, rows_added; rows it added carry `import_id` |
 | `dividends` | id, transaction_id (unique; the dividend payment), sweep_transaction_id? (unique; its deposit sweep), payer, dismissed |
 | `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included), transaction_id? (unique; the payment it was classified from) |

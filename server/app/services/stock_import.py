@@ -26,6 +26,7 @@ from app.schemas.stock_import import (
 from app.schemas.stocks import LotCreate
 from app.services import stock_gains as gains
 from app.services.csv_parsing import RowProblem, decode_csv, detect_delimiter, read_rows
+from app.services.imports import record
 from app.services.stock_csv import ParsedRow, find_columns, parse_row
 from app.services.stock_records import check_account, in_account, rematch
 from app.shares import micro_to_text
@@ -150,12 +151,17 @@ def commit(session: Session, data: bytes, choices: StockCommitChoices) -> StockI
             "choose to skip those rows.",
         )
     new = [parsed for out, parsed in p.rows if out.status == "new"]
+    import_id = (
+        record(session, "stocks", choices.account_id, choices.file_name, len(new)) if new else None
+    )
     for parsed in new:
         t = parsed.trade
         if isinstance(t, LotCreate):
-            session.add(StockLot(**t.model_dump(exclude={"shares", "cost_basis"})))
+            row = StockLot(**t.model_dump(exclude={"shares", "cost_basis"}))
         else:
-            session.add(StockSaleOrder(**t.model_dump(exclude={"shares", "proceeds"})))
+            row = StockSaleOrder(**t.model_dump(exclude={"shares", "proceeds"}))
+        row.import_id = import_id
+        session.add(row)
     session.flush()
     try:
         for symbol in sorted({parsed.trade.symbol for parsed in new}):

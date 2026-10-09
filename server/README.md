@@ -79,6 +79,7 @@ for pairing and joining; common rules are in
 | Suggested budget | [budget-engine.md](../docs/dev/architecture/budget-engine.md) |
 | Auto-categorization rules | [category-rules.md](../docs/dev/architecture/category-rules.md) |
 | Bank CSV import | [csv-import.md](../docs/dev/architecture/csv-import.md) |
+| Import history | [imports.md](../docs/dev/architecture/imports.md) |
 | Receipts and photos | [receipts.md](../docs/dev/architecture/receipts.md) |
 | Paychecks | [paychecks.md](../docs/dev/architecture/paychecks.md) |
 | Donations | [donations.md](../docs/dev/architecture/donations.md) |

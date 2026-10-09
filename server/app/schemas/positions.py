@@ -3,7 +3,7 @@
 import datetime as dt
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from app.schemas.common import Id, Schema
 
@@ -19,6 +19,7 @@ class PositionsChoices(Schema):
 
     account_id: Id
     as_of: dt.date  # the day the file is from (positions files rarely say)
+    file_name: str | None = Field(None, max_length=200)  # for the import history
 
     @field_validator("as_of")
     @classmethod

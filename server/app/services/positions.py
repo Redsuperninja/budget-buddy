@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Account, Position, StockLot, StockPrice, StockSaleOrder
+from app.models import Account, ImportBatch, Position, StockLot, StockPrice, StockSaleOrder
 from app.schemas.positions import (
     AccountPositionsOut,
     PositionOut,
@@ -25,6 +25,7 @@ from app.schemas.positions import (
 )
 from app.services.accounts import get_account
 from app.services.csv_parsing import decode_csv, detect_delimiter, read_rows
+from app.services.imports import record
 from app.services.positions_csv import ParsedPosition, Skip, find_columns, parse_position
 from app.services.stock_holdings import value_cents
 from app.shares import micro_to_text
@@ -109,6 +110,15 @@ def commit(session: Session, data: bytes, choices: PositionsChoices) -> Position
     """Replace the account's snapshot with this file's positions, all at once."""
     p = _prepare(session, data, choices)
     session.execute(delete(Position).where(Position.account_id == choices.account_id))
+    # The earlier file for this account is replaced, so it leaves the import history too.
+    session.execute(
+        delete(ImportBatch).where(
+            ImportBatch.kind == "positions", ImportBatch.account_id == choices.account_id
+        )
+    )
+    import_id = record(
+        session, "positions", choices.account_id, choices.file_name, len(p.positions)
+    )
     session.add_all(
         Position(
             account_id=choices.account_id,
@@ -117,6 +127,7 @@ def commit(session: Session, data: bytes, choices: PositionsChoices) -> Position
             cost_basis_cents=x.cost_basis_cents,
             value_cents=x.value_cents,
             as_of=choices.as_of,
+            import_id=import_id,
         )
         for x in p.positions
     )

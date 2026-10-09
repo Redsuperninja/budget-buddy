@@ -7,6 +7,8 @@ column picker. Each row becomes a purchase (lot) or a sale, in one account or no
 import datetime as dt
 from typing import Literal
 
+from pydantic import Field
+
 from app.schemas.common import Id, Schema
 
 Kind = Literal["buy", "sell"]
@@ -20,6 +22,7 @@ class StockImportChoices(Schema):
 
 class StockCommitChoices(StockImportChoices):
     skip_invalid_rows: bool = False
+    file_name: str | None = Field(None, max_length=200)  # for the import history
 
 
 class StockColumns(Schema):
