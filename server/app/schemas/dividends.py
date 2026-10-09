@@ -6,8 +6,10 @@ from app.schemas.common import Schema
 
 NOTE = (
     "This is an estimate, not tax advice. Check it against the Form 1099-DIV from your broker, "
-    "which also says how much is qualified (usually taxed at a lower rate). Dividends inside a "
-    "retirement account or HSA aren't taxed."
+    "which also says how much is qualified (usually taxed at a lower rate). A dividend counts in "
+    "the year it was paid, except one declared in October to December and paid in January, "
+    "which your 1099-DIV counts in the year before. Dividends inside a retirement account or HSA "
+    "aren't taxed now, while they stay in the account."
 )
 
 

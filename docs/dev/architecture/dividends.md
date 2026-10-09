@@ -27,12 +27,19 @@ transaction's, never copied.
 - **When**: after a bank file is imported (before transfer matching), after a transaction is added by hand, and on
   `find`.
 - **A dividend** is a regular (`normal`) money-in transaction, not a transfer, paycheck deposit or donation, whose
-  description has the whole word div, divs, dividend or dividends. It goes in the income category "Dividends"
-  (made the first time; `category_source` stays null, as for transfers) unless you picked its category yourself,
-  or "Dividends" names one of your non-income categories.
+  description has the whole word dividend(s), or div(s) in a brokerage, retirement or HSA account, and none of
+  "non-dividend", "return of capital", "exempt", "div of", "division" or "payroll". It goes in the income category
+  "Dividends" (made the first time; `category_source` stays null, as for transfers) unless you or a rule already
+  set its category, or "Dividends" names one of your non-income categories.
+- **Budget**: in a retirement account or HSA (`TAX_FREE_KINDS`), a dividend and its linked sweep are left out of
+  the monthly summary (`dividends.kept_in_account`), so they're neither income nor saved; the budget engine and
+  trend use the same summary. Elsewhere a dividend is income and its sweep keeps its own category.
+- **Totals** only count dividends whose payment is still money in and `normal`. Two `find` runs at once: the
+  second adds nothing (a savepoint catches the unique-constraint clash).
 - **Its sweep** is a regular money-out transaction in the same account, for exactly the same amount, from 1 day
   before to 3 days after, with the word "sweep" in it. Closest date wins, then the one added first; one sweep per
   dividend. Sweeps keep their own category, and a linked sweep is never matched as a transfer.
 - **Payer**: the description up to "common stock", "cash div", "qualified/ordinary dividend", "dividend" or "div".
-- Not handled yet: qualified vs ordinary (only the 1099-DIV knows), foreign tax paid, and dividends on the tax
-  summary page.
+- Not handled yet: qualified vs ordinary (only the 1099-DIV knows), foreign tax paid, reversals (dismiss the
+  dividend by hand), interest from sweep or money-market funds, January payments of dividends declared in the
+  last quarter (the 1099-DIV counts them in the year before), and dividends on the tax summary page.

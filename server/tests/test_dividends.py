@@ -107,3 +107,51 @@ def test_deleting_the_payment_deletes_the_dividend(client, ira, add_txn):
     paid = add_txn(ira, 130, date="2026-09-08", description="FAKECO CASH DIV")
     assert client.delete(f"{TXN}/{paid['id']}").status_code == 204
     assert client.get(f"{DIV}/2026").json()["dividends"] == []
+
+
+@pytest.mark.parametrize(
+    ("description", "kind", "expected"),
+    [
+        ("FAKECO COMMON STOCK CASH DIV ON 1 SHS", "retirement", True),
+        ("FAKE FUND ORDINARY DIVIDEND", "checking", True),
+        ("FAKECO CASH DIV", "checking", False),  # a bare "div" only in investment accounts
+        ("NON-DIVIDEND DISTRIBUTION", "brokerage", False),  # return of capital
+        ("FAKE MUNI FUND TAX-EXEMPT DIVIDEND", "brokerage", False),
+        ("FAKE STATE DIV OF MOTOR VEHICLES", "brokerage", False),
+        ("FAKECO DIV 12 PAYROLL", "brokerage", False),
+    ],
+)
+def test_what_counts_as_a_dividend(client, make_account, add_txn, description, kind, expected):
+    account = make_account(name="Fake", kind=kind)["id"]
+    add_txn(account, 130, date="2026-09-08", description=description)
+    assert len(client.get(f"{DIV}/2026").json()["dividends"]) == int(expected)
+
+
+def test_a_rule_category_is_kept(client, make_account, add_txn):
+    brokerage = make_account(name="Fake Brokerage", kind="brokerage")["id"]
+    other_income = next(
+        c["id"] for c in client.get("/api/local/categories").json() if c["name"] == "Other Income"
+    )
+    rule = {"pattern": "FAKECO", "category_id": other_income}
+    assert client.post("/api/local/category-rules", json=rule).status_code == 201
+    paid = add_txn(brokerage, 130, description="FAKECO CASH DIV")
+    assert (paid["category_id"], paid["category_source"]) == (other_income, "rule")
+    assert client.get(f"{TXN}/{paid['id']}").json()["category_id"] == other_income
+
+
+def test_ira_dividends_and_sweeps_stay_out_of_the_budget(client, ira, make_account, add_txn):
+    brokerage = make_account(name="Fake Brokerage", kind="brokerage")["id"]
+    add_txn(ira, 130, date="2026-09-08", description="FAKECO CASH DIV")
+    add_txn(ira, -130, date="2026-09-08", description="FAKE DEPOSIT SWEEP")
+    add_txn(brokerage, 1_000, date="2026-09-09", description="FAKE FUND DIVIDEND")
+    summary = client.get("/api/local/summary/monthly", params={"month": "2026-09"}).json()
+    # Only the brokerage dividend is income; the IRA's cash never left the IRA.
+    assert summary["income_cents"] == 1_000
+    assert summary["unassigned_out_cents"] == 0
+
+
+def test_a_payment_changed_to_money_out_leaves_the_totals(client, ira, add_txn):
+    paid = add_txn(ira, 130, date="2026-09-08", description="FAKECO CASH DIV")
+    changed = client.patch(f"{TXN}/{paid['id']}", json={"amount_cents": -130})
+    assert changed.status_code == 200, changed.text
+    assert client.get(f"{DIV}/2026").json()["total_cents"] == 0
