@@ -21,11 +21,13 @@ upload checks (`CsvBody`). Dashboard: **Money**, **Import files** (`screens/acti
   security's description are optional.
 - **Every row** with money moving is a `normal` transaction (`source = csv`): wording = action, plus the security's
   name and `(SYMBOL)` when the action doesn't already say them; amount as signed in the file. Rows with no money
-  (shares journaled in) are invalid. Duplicates use the bank import's fingerprint, so overlapping files are safe.
+  (shares journaled in, splits) are `skipped`, not invalid. Duplicates use the bank import's fingerprint, so overlapping files are safe.
 - **Stock trades**: a row whose action is a plain buy or sell (`stock_csv.trade_kind`: never short, cover, open,
   options, cancel or corrections), with a symbol and shares, money out for a buy and in for a sale, also becomes a
   lot or sale order linked to its transaction (`transaction_id`, as in [stocks.md](stocks.md)) and to the import.
-  Cost basis = the amount paid; proceeds = the amount received. Trades get no category (they stay out of the
+  Cost basis = the amount paid; proceeds = the amount received. Never for a money market fund (a 3-letter + "XX"
+  symbol, or "money market", "core account" or "sweep" wording): that's the account's cash. A matching lot or sale
+  already there with no transaction (same account, symbol, date, shares, cents) is linked instead of added. Trades get no category (they stay out of the
   budget). Each symbol is matched again with FIFO; a sale needing more shares than held stops the import (422
   `not_enough_shares`).
 - **The rest** is sorted like a bank import: auto-sort rules, then dividends and their sweeps

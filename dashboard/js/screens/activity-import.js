@@ -29,7 +29,8 @@ export function activityImportCard(accounts) {
         const query = new URLSearchParams({ skip_invalid_rows: skip.value, file_name: fileInput.files[0].name });
         const r = await importActivity(accountSelect.value, query.toString(), bytes);
         fill(result, h("p", { class: "ok", role: "status" },
-          `Done. ${r.imported} transaction(s) added: ${r.trades} stock trade(s), ${r.dividends_found} dividend(s), ` +
+          `Done. ${r.imported} transaction(s) added: ${r.trades} stock trade(s) (${r.trades_linked} already on the Stocks page, now ` +
+          `linked), ${r.dividends_found} dividend(s), ` +
           `${r.categorized} sorted by your rules, ${r.transfers_matched} matched as transfers; ` +
           `${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.`));
       } catch (err) {
@@ -39,9 +40,11 @@ export function activityImportCard(accounts) {
     } }, `Import ${p.new_rows} new row(s)`);
     fill(result,
       h("p", {}, `${p.total_rows} row(s): ${p.new_rows} new (${p.new_trades} stock trade(s)), ` +
-        `${p.duplicate_rows} already imported, ${p.invalid_rows} with problems.`),
+        `${p.duplicate_rows} already imported, ${p.skipped_rows} with no money moved (skipped), ` +
+        `${p.invalid_rows} with problems.`),
       newRows.length ? table(["Row", "Date", "What", "Amount", "Stock trade"], newRows.map((r) =>
-        [r.row_number, r.date, r.description, formatCents(r.amount_cents), r.trade || ""]), [3]) : null,
+        [r.row_number, r.date, r.description, formatCents(r.amount_cents),
+          r.trade ? `${r.trade}${r.trade_exists ? " (already on Stocks: linked)" : ""}` : ""]), [3]) : null,
       problems.length ? h("div", {}, h("h3", {}, "Rows with a problem or already imported"),
         table(["Row", "Status", "Note"], problems.map((r) => [r.row_number, r.status, r.problem || ""]))) : null,
       h("div", { class: "toolbar" }, h("label", {}, "Rows with problems", skip), button));
