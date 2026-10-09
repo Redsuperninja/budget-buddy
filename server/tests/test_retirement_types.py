@@ -1,5 +1,7 @@
 """Retirement account types, and Roth IRA money counted toward the IRA limit. Fake data only."""
 
+import pytest
+
 ACCOUNTS = "/api/local/accounts"
 
 
@@ -44,3 +46,43 @@ def test_money_into_a_roth_ira_counts_toward_the_ira_limit(client, make_account,
     add_txn(traditional, 20_000, date="2026-03-01", description="CONTRIBUTION")  # a deduction's job
     assert ira_line(client)["contributed_cents"] == 150_000
     assert "marked Roth IRA" in ira_line(client)["note"]
+
+
+@pytest.mark.parametrize(
+    ("from_kind", "from_type", "counted"),
+    [
+        ("checking", None, True),  # new money: a contribution
+        ("retirement", "traditional_ira", False),  # a Roth conversion
+        ("retirement", "roth_ira", False),  # a move between Roth IRAs
+        ("retirement", "401k", False),  # a rollover
+        ("hsa", None, False),
+    ],
+)
+def test_a_transfer_counts_only_when_it_is_new_money(
+    client, make_account, add_txn, from_kind, from_type, counted
+):
+    source = make_account(name="Fake source", kind=from_kind, retirement_type=from_type)["id"]
+    roth = make_account(name="Fake Roth", kind="retirement", retirement_type="roth_ira")["id"]
+    out = add_txn(source, -200_000, date="2026-02-01", description="Fake move")
+    into = add_txn(roth, 200_000, date="2026-02-01", description="Fake move")
+    linked = client.post(
+        f"/api/local/transactions/{into['id']}/transfer", json={"other_id": out["id"]}
+    )
+    assert linked.status_code == 200, linked.text
+    assert ira_line(client)["contributed_cents"] == (200_000 if counted else 0)
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "ROTH CONV FROM IRA CONTRIBUTION",
+        "RECHAR CONTRIBUTION",
+        "ROLL-OVER CONTRIBUTION",
+        "TRUSTEE TO TRUSTEE CONTRIBUTION",
+        "ACAT CONTRIBUTION",
+    ],  # fmt: skip
+)
+def test_rollover_words_never_count(client, make_account, add_txn, description):
+    roth = make_account(name="Fake Roth", kind="retirement", retirement_type="roth_ira")["id"]
+    add_txn(roth, 300_000, date="2026-03-01", description=description)
+    assert ira_line(client)["contributed_cents"] == 0

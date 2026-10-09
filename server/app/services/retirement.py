@@ -12,8 +12,10 @@ here. What's counted:
 - **IRA:** the "IRA contribution" deductions you entered for that tax year, plus money put into an
   account marked Roth IRA during the year (``_roth_ira_total``): linked transfers into it, and
   deposits there that say "contribution". Dividends, interest, stock sales and rollovers there
-  don't count. A Roth contribution made by the tax-filing deadline for the year before is counted
-  in the year it was made, so the note asks you to check those.
+  don't count, and nor does a transfer from another retirement account or HSA (a conversion,
+  rollover, or a move between IRAs: none of these use up the yearly limit). A Roth contribution
+  made by the tax-filing deadline for the year before is counted in the year it was made, so the
+  note asks you to check those.
 - **HSA:** pay-stub HSA amounts plus "HSA contribution" deductions. The limit depends on
   self-only or family coverage, so both are shown.
 
@@ -24,7 +26,7 @@ import datetime as dt
 import re
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from app import tax_data
 from app.errors import ApiError
@@ -45,8 +47,9 @@ NOTE = (
     "your age, so they're listed but not added. Employer matches aren't included, and Roth IRA "
     "contributions only when the account is marked Roth IRA on the Accounts page. These totals "
     "add up everyone's pay stubs and deductions, but the 401(k) and IRA limits are for each "
-    "person: if you entered a spouse's, compare each person separately. Check with your plan or "
-    "a tax professional."
+    "person: if you entered a spouse's, compare each person separately. Higher incomes can lower "
+    "or remove what you're allowed to put in a Roth IRA. Check with your plan or a tax "
+    "professional."
 )
 
 
@@ -71,16 +74,23 @@ def _deduction_total(session: Session, year: int, kind: DeductionKind) -> int:
 
 
 _CONTRIBUTION = re.compile(r"(?<![a-z])contrib", re.I)
-_ROLLOVER = re.compile(r"(?<![a-z])(rollover|roll over|conversion|convert|recharacteriz)", re.I)
+_ROLLOVER = re.compile(r"(?<![a-z])(roll.?over|conv|rechar|trustee|acat|transfer of assets)", re.I)
+# Money from these accounts into a Roth IRA is a conversion or rollover, not a new contribution.
+_FROM_RETIREMENT = (AccountKind.RETIREMENT, AccountKind.HSA)
 
 
 def _roth_ira_total(session: Session, year: int) -> int:
     """Money put into Roth IRA accounts in ``year``: linked transfers in, and deposits that say
     "contribution" (not rollovers or conversions, which don't use up the limit)."""
+    partner = aliased(Transaction)
+    partner_account = aliased(Account)
     rows = session.execute(
         select(Transaction.kind, Transaction.description, Transaction.amount_cents)
         .join(Account, Account.id == Transaction.account_id)
+        .outerjoin(partner, partner.id == Transaction.transfer_pair_id)
+        .outerjoin(partner_account, partner_account.id == partner.account_id)
         .where(
+            partner_account.kind.is_(None) | partner_account.kind.not_in(_FROM_RETIREMENT),
             Account.kind == AccountKind.RETIREMENT,
             Account.retirement_type == RetirementType.ROTH_IRA.value,
             Transaction.amount_cents > 0,

@@ -85,8 +85,10 @@ This part shows, for the year you pick, how much you've put in and how much room
 - **HSA:** don't also enter pay-stub HSA amounts as an HSA deduction (that counts them twice). If you weren't
   covered all year, your limit may be lower.
 - **Roth IRA:** mark the account as **Roth IRA** on the Accounts page. Transfers into it, and deposits there that
-  say "contribution", then count toward the IRA limit. Rollovers, conversions, dividends and sales don't. A
-  contribution made early in the year for the year before is counted in the year it was made: check those.
+  say "contribution", then count toward the IRA limit. Rollovers, conversions, moves from another IRA, 401(k) or
+  HSA, dividends and sales don't. A contribution made early in the year for the year before is counted in the year
+  it was made: check those. A refund of an excess contribution isn't taken off. Higher incomes can lower or remove
+  what you're allowed to put in a Roth IRA.
 - **Not included:** employer matches (they don't count toward your own 401(k) limit), and money your employer
   puts in your HSA if it isn't on your pay stub (it does count toward the HSA limit).
 - If you're over a limit, the line says how much, in red unless an age catch-up could cover it. Talk to your plan
