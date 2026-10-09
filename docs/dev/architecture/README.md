@@ -5,18 +5,20 @@ How Budget Buddy is put together. Each topic has its own page (below); this page
 ## Big picture
 
 ```
- ┌──────────────── Your home network ────────────────┐
- │                                                    │
- │  ┌──────────────┐   encrypted sync    ┌─────────┐  │
- │  │  Home Base   │ ◀────────────────▶ │  Phone   │  │
- │  │  (your PC)   │   (on home Wi-Fi)   │   app    │  │
- │  │              │                     └─────────┘  │
- │  │ FastAPI      │                                  │
- │  │ SQLite DB    │  ← data lives here only          │
- │  │ Receipt files│                                  │
- │  └──────────────┘                                  │
- └────────────────────────────────────────────────────┘
-        Nothing is sent to the internet or a cloud.
+ ┌──────────────────── Your home network ─────────────────────┐
+ │                                                             │
+ │  ┌──────────────┐   encrypted sync    ┌──────────────────┐  │
+ │  │  Home Base   │ ◀────────────────▶ │ Phone app         │  │
+ │  │  (your PC)   │   (on home Wi-Fi)   └──────────────────┘  │
+ │  │              │                     ┌──────────────────┐  │
+ │  │ FastAPI      │ ◀── dashboard ───── │ Browser or desktop│  │
+ │  │ SQLite DB    │     over HTTP       │ app on this PC;   │  │
+ │  │ Receipt files│                     │ joined phones and │  │
+ │  │ dashboard/   │                     │ computers         │  │
+ │  └──────────────┘                     └──────────────────┘  │
+ │   ← data lives here only                                    │
+ └─────────────────────────────────────────────────────────────┘
+   Nothing is sent to the internet or a cloud (except optional live prices: symbols only, ADR-0010).
 ```
 
 ## The parts and their boundaries
