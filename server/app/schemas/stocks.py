@@ -5,7 +5,7 @@ Shares: send ``shares`` as text ("2.5") or ``shares_micro`` as whole millionths 
 """
 
 import datetime as dt
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import AfterValidator, Field, model_validator
 
@@ -127,6 +127,9 @@ class LotOut(Schema):
     remaining_shares: str
     long_term_from: dt.date  # shares sold on or after this date are long term
     transaction_id: int | None = None  # the payment it was classified from, if any
+    # What backs it up: "transaction" (linked to a bank or brokerage line), "positions_file" (the
+    # account's broker file agrees, dated on or after it), or None: not verified yet.
+    checked_by: Literal["transaction", "positions_file"] | None = None
     created_at: dt.datetime
     updated_at: dt.datetime
 
@@ -157,6 +160,9 @@ class SaleOut(Schema):
     gain_cents: int
     possible_wash_sale: bool
     transaction_id: int | None = None  # the deposit it was classified from, if any
+    # What backs it up: "transaction" (linked to a bank or brokerage line), "positions_file" (the
+    # account's broker file agrees, dated on or after it), or None: not verified yet.
+    checked_by: Literal["transaction", "positions_file"] | None = None
     # False inside a retirement account or HSA: not taxed, left out of the gains summary.
     taxed: bool = True
     lots: list[RealizedOut]  # which purchases the shares came from (oldest first: FIFO)

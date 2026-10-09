@@ -8,6 +8,7 @@ from app.models import StockLot, StockSale, StockSaleOrder
 from app.schemas.stocks import LotCreate, LotOut
 from app.services import stock_gains as gains
 from app.services.bank_trades import remember_symbol
+from app.services.holdings_check import Snapshot, checked_by, snapshots
 from app.services.stock_records import (
     check_account,
     check_trade_transaction,
@@ -27,7 +28,7 @@ def _sold_by_lot(session: Session, lot_ids: list[int]) -> dict[int, int]:
     return {lot_id: sold for lot_id, sold in rows}
 
 
-def _lot_out(lot: StockLot, sold: dict[int, int]) -> LotOut:
+def _lot_out(lot: StockLot, sold: dict[int, int], files: dict[int, Snapshot]) -> LotOut:
     remaining = lot.shares_micro - sold.get(lot.id, 0)
     return LotOut(
         id=lot.id,
@@ -41,6 +42,9 @@ def _lot_out(lot: StockLot, sold: dict[int, int]) -> LotOut:
         remaining_shares=micro_to_text(remaining),
         long_term_from=gains.long_term_from(lot.acquired_on),
         transaction_id=lot.transaction_id,
+        checked_by=checked_by(
+            files, lot.account_id, lot.symbol, lot.acquired_on, lot.transaction_id
+        ),
         created_at=lot.created_at,
         updated_at=lot.updated_at,
     )
@@ -55,12 +59,13 @@ def list_lots(session: Session, symbol: str | None, account_id: int | None) -> l
         query = query.where(StockLot.account_id == account_id)
     lots = session.scalars(query.order_by(StockLot.symbol, StockLot.acquired_on, StockLot.id)).all()
     sold = _sold_by_lot(session, [lot.id for lot in lots])
-    return [_lot_out(lot, sold) for lot in lots]
+    files = snapshots(session)
+    return [_lot_out(lot, sold, files) for lot in lots]
 
 
 def lot_out(session: Session, lot_id: int) -> LotOut:
     lot = get_lot(session, lot_id)
-    return _lot_out(lot, _sold_by_lot(session, [lot.id]))
+    return _lot_out(lot, _sold_by_lot(session, [lot.id]), snapshots(session))
 
 
 def create_lot(session: Session, data: LotCreate) -> LotOut:

@@ -82,8 +82,16 @@ Most brokers let you download your positions (also called holdings) as a CSV fil
 (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view), under **Import a positions file**, pick the account, the day the file is from, and the file, then click
 **Preview** and **Save**.
 
-- Budget Buddy shows what the file says you hold, next to what your recorded purchases and sales add up to. If
-  they differ, a purchase or sale is probably missing on the Stocks page.
+- Budget Buddy shows what the file says you hold (**Broker says**) next to what your recorded purchases and sales
+  add up to on the file's day (**Your records**), both ways: a stock you still hold by your records that the
+  file doesn't list shows as **Not in the file** (a sale may be missing). Fewer shares than the broker means a
+  purchase may be missing; more means a sale may be.
+- If trades from your bank file in that account still need their shares, it says how many: that's usually why
+  the shares differ. The check updates as soon as you add a trade or import a newer file.
+- On the **Stocks** page, each purchase and sale says what backs it up (**Checked by**): **A transaction** (linked
+  to a line in your bank or brokerage file), **Broker's positions file** (the newest file for that account agrees,
+  and is dated on or after the trade), or **Not verified yet**. Set **Show** to **Not verified yet** to see only
+  the ones to check.
 - Prices in the file become your latest prices (shown as "from your broker's file"), unless you already have a
   price from a later day.
 - It never changes your purchases, sales or gains. Saving a newer file for the same account replaces the old one;

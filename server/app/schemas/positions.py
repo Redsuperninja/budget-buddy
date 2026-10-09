@@ -64,7 +64,10 @@ class PositionOut(Schema):
     recorded_shares_micro: (
         int  # what your recorded purchases and sales add up to on the file's date
     )
+    recorded_shares: str = "0"  # the same as text
     matches: bool
+    # False: you hold it by your records, but the broker's file doesn't list it (shares are 0).
+    in_file: bool = True
 
 
 class AccountPositionsOut(Schema):
@@ -73,6 +76,9 @@ class AccountPositionsOut(Schema):
     as_of: dt.date
     positions: list[PositionOut]
     value_cents: int | None  # None if any position has no value
+    # Trades named in a bank file in this account, on or before the file's day, still without
+    # shares: the usual reason the shares don't match (services/holdings_check.py).
+    bank_trades_waiting: int = 0
 
 
 class PositionsOut(Schema):

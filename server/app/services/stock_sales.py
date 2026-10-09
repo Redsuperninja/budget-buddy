@@ -19,6 +19,7 @@ from app.schemas.stocks import (
 )
 from app.services import stock_gains as gains
 from app.services.bank_trades import remember_symbol
+from app.services.holdings_check import Snapshot, checked_by, snapshots
 from app.services.stock_records import (
     check_account,
     check_trade_transaction,
@@ -53,7 +54,9 @@ def _realized(session: Session, symbols: set[str]) -> dict[int, list[gains.Reali
     return by_sale
 
 
-def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool) -> SaleOut:
+def _sale_out(
+    order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool, files: dict[int, Snapshot]
+) -> SaleOut:
     """``taxed`` False for a sale inside a retirement account or HSA: no gain to report, so no
     wash-sale flag either."""
     return SaleOut(
@@ -68,6 +71,9 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool) 
         gain_cents=sum(p.gain_cents for p in pieces),
         possible_wash_sale=taxed and any(p.possible_wash_sale for p in pieces),
         transaction_id=order.transaction_id,
+        checked_by=checked_by(
+            files, order.account_id, order.symbol, order.sold_on, order.transaction_id
+        ),
         taxed=taxed,
         lots=[
             RealizedOut(
@@ -91,7 +97,10 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool) 
 def _sales_out(session: Session, orders: list[StockSaleOrder]) -> list[SaleOut]:
     realized = _realized(session, {o.symbol for o in orders})
     untaxed = untaxed_account_ids(session)
-    return [_sale_out(o, realized.get(o.id, []), o.account_id not in untaxed) for o in orders]
+    files = snapshots(session)
+    return [
+        _sale_out(o, realized.get(o.id, []), o.account_id not in untaxed, files) for o in orders
+    ]
 
 
 def list_sales(
@@ -174,6 +183,7 @@ def gains_summary(session: Session, tax_year: int) -> GainsSummaryOut:
         if o.account_id not in untaxed
     ]
     realized = _realized(session, {o.symbol for o in orders})
+    files = snapshots(session)
     summary = gains.summarize((item for o in orders for item in realized.get(o.id, [])), tax_year)
     return GainsSummaryOut(
         tax_year=tax_year,
@@ -181,5 +191,5 @@ def gains_summary(session: Session, tax_year: int) -> GainsSummaryOut:
         long_term=TermTotalsOut(**asdict(summary.long_term)),
         total_gain_cents=summary.total_gain_cents,
         possible_wash_sale_count=summary.possible_wash_sale_count,
-        sales=[_sale_out(o, realized.get(o.id, []), True) for o in orders],
+        sales=[_sale_out(o, realized.get(o.id, []), True, files) for o in orders],
     )
