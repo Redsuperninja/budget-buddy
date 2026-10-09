@@ -1,13 +1,15 @@
-// Paychecks: year totals (an estimate), the year's paychecks, and adding one from a pay stub.
+// Paychecks: year totals (an estimate), the year's paychecks, pay deposits waiting for one, and adding one from a
+// pay stub (started from a deposit, or blank).
 
-import { createPaycheck, listAccounts, listPaychecks, paycheckSummary } from "../api/endpoints.js";
+import { createPaycheck, listAccounts, listPaychecks, payDeposits, paycheckSummary } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { accountField, idOrNull, taxYearHeader } from "../fields.js";
 import { form } from "../form.js";
 import { card, empty, table } from "../widgets.js";
-import { formatCents, parseDollars } from "../money.js";
+import { centsToInput, formatCents, parseDollars } from "../money.js";
 import { reload } from "../router.js";
+import { payDepositsCard } from "./pay-deposits.js";
 
 const PAY_FIELDS = [
   ["gross_cents", "Gross pay"], ["federal_tax_cents", "Federal tax"], ["state_tax_cents", "State tax"],
@@ -28,10 +30,13 @@ function stubCents(text, label) {
 export async function render(root, options) {
   const year = options.year || thisYear();
   const accounts = await listAccounts();
-  const [page, summary] = await Promise.all([
+  const [page, summary, deposits] = await Promise.all([
     listPaychecks(year),
     paycheckSummary(year),
+    payDeposits(year),
   ]);
+  const accountName = new Map(accounts.map((a) => [a.id, a.name]));
+  const addCard = h("div", {});
   const gross = summary.totals.gross_cents || 0;
   const net = summary.totals.net_cents || 0;
   const taxes = (p) => p.federal_tax_cents + p.state_tax_cents + p.social_security_cents + p.medicare_cents;
@@ -50,17 +55,31 @@ export async function render(root, options) {
             [p.pay_date, p.employer, formatCents(p.gross_cents), formatCents(taxes(p)), formatCents(p.net_cents)]),
           [2, 3, 4])
         : empty("No paychecks for this year.")),
-    card("Add a paycheck",
-      empty("Copy the numbers from your pay stub. Gross minus every deduction must equal take-home pay."),
-      form([
-        { name: "pay_date", label: "Pay date", type: "date", value: today(), required: true },
-        { name: "employer", label: "Employer", required: true, maxlength: 200 },
-        accountField(accounts, "Paid into (optional)", "(not sure)"),
-        ...PAY_FIELDS.map(([name, label]) => ({ name, label: `${label} ($)`, value: "", inputmode: "decimal" })),
-      ], "Add paycheck", async (v) => {
-        const json = { pay_date: v.pay_date, employer: v.employer, account_id: idOrNull(v.account_id) };
-        for (const [name, label] of PAY_FIELDS) json[name] = stubCents(v[name], label);
-        await createPaycheck(json);
-        await reload({ year });
-      })));
+    payDepositsCard(deposits, accountName, (d) => {
+      fill(addCard, addPaycheckCard(accounts, year, d));
+      addCard.scrollIntoView({ behavior: "smooth" });
+    }),
+    addCard);
+  fill(addCard, addPaycheckCard(accounts, year, null));
+}
+
+// The pay-stub form; with a deposit, it starts from that deposit and links the paycheck to it.
+function addPaycheckCard(accounts, year, deposit) {
+  const start = { net_cents: deposit ? centsToInput(deposit.amount_cents) : "" };
+  return card(deposit ? `Fill in the paycheck paid on ${deposit.date}` : "Add a paycheck",
+    empty("Copy the numbers from your pay stub. Gross minus every deduction must equal take-home pay."),
+    form([
+      { name: "pay_date", label: "Pay date", type: "date", value: deposit ? deposit.date : today(), required: true },
+      { name: "employer", label: "Employer", required: true, maxlength: 200, value: deposit ? deposit.employer : "" },
+      deposit ? null : accountField(accounts, "Paid into (optional)", "(not sure)"),
+      ...PAY_FIELDS.map(([name, label]) =>
+        ({ name, label: `${label} ($)`, value: start[name] || "", inputmode: "decimal" })),
+    ].filter(Boolean), "Add paycheck", async (v) => {
+      const json = { pay_date: v.pay_date, employer: v.employer };
+      if (deposit) json.deposit_transaction_id = deposit.transaction_id;
+      else json.account_id = idOrNull(v.account_id);
+      for (const [name, label] of PAY_FIELDS) json[name] = stubCents(v[name], label);
+      await createPaycheck(json);
+      await reload({ year });
+    }));
 }

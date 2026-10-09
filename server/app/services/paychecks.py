@@ -74,12 +74,18 @@ def list_paychecks(session: Session, year: int | None, limit: int, offset: int) 
 
 
 def create_paycheck(session: Session, data: PaycheckCreate) -> Paycheck:
+    """Add a paycheck, linked to its deposit straight away when ``deposit_transaction_id`` is
+    given (from a pay deposit waiting on the Paychecks page). All or nothing."""
     values = data.model_dump()
+    deposit_id = values.pop("deposit_transaction_id")
     check_adds_up(values)
     if values["account_id"] is not None:
         get_account(session, values["account_id"])
     paycheck = Paycheck(**values)
     session.add(paycheck)
+    if deposit_id is not None:
+        session.flush()
+        _attach_deposit(session, paycheck, get_transaction(session, deposit_id))
     session.commit()
     return paycheck
 
@@ -123,6 +129,13 @@ def link_deposit(session: Session, paycheck_id: int, transaction_id: int) -> Pay
     deposit = get_transaction(session, transaction_id)
     if paycheck.deposit_transaction_id == deposit.id:
         return paycheck  # already linked
+    _attach_deposit(session, paycheck, deposit)
+    session.commit()
+    return paycheck
+
+
+def _attach_deposit(session: Session, paycheck: Paycheck, deposit: Transaction) -> None:
+    """``link_deposit``'s checks and the link itself, not saved yet."""
     if paycheck.deposit_transaction_id is not None:
         raise ApiError(
             409, "already_linked", "This paycheck is already linked to a deposit. Remove it first."
@@ -148,8 +161,6 @@ def link_deposit(session: Session, paycheck_id: int, transaction_id: int) -> Pay
         )
     paycheck.deposit_transaction_id = deposit.id
     paycheck.account_id = deposit.account_id
-    session.commit()
-    return paycheck
 
 
 def unlink_deposit(session: Session, paycheck_id: int) -> Paycheck:

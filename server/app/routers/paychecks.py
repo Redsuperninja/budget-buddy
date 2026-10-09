@@ -11,8 +11,10 @@ from app.schemas.paychecks import (
     PaycheckPage,
     PaycheckSummary,
     PaycheckUpdate,
+    PayDeposit,
 )
 from app.services import paychecks as service
+from app.services.pay_deposits import waiting_deposits
 
 router = APIRouter(prefix="/api/local/paychecks", tags=["paychecks"])
 
@@ -33,6 +35,13 @@ def list_paychecks(
 def year_summary(session: SessionDep, year: Year | None = None) -> PaycheckSummary:
     """Year-to-date totals (this calendar year unless ``year`` is given)."""
     return service.year_summary(session, year or dt.date.today().year)
+
+
+# Declared before "/{paycheck_id}" so the path isn't read as an ID.
+@router.get("/deposits")
+def pay_deposits(session: SessionDep, year: Year | None = None) -> list[PayDeposit]:
+    """Pay deposits not linked to a paycheck yet (this calendar year unless ``year`` is given)."""
+    return waiting_deposits(session, year or dt.date.today().year)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)

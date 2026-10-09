@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Paychecks from your bank file: pay deposits (like "... PAYROLL" or anything in Paycheck) show on the Paychecks page under **Pay deposits to fill in**. **Fill in** starts a paycheck with the date, employer and take-home pay, linked to the deposit; add gross pay and taxes from your stub.
 - The Transactions page hides balance adjustments (opening balances and "match the bank" fixes) unless you untick **Hide balance adjustments**.
 - Stock trades from your transactions: in a brokerage, IRA or HSA account, click **Stock trade** on a payment or deposit to record it as a stock purchase or sale (symbol and shares). It shows on the Stocks page, and the transaction is no longer counted as spending, income or uncategorized.
 - Income isn't budgeted any more: it's what the rest of your budget is measured against. Income categories have no budget box on the Categories page, and the Home page's budget table lists only needs, wants and savings.

@@ -50,7 +50,13 @@ entered or imported. Paychecks feed the tax side (wages and withholding by tax y
 
 - `GET/POST /api/local/paychecks` (filter: `year`), `GET/PATCH/DELETE /api/local/paychecks/{id}`. Amounts are
   whole cents only (no dollar text).
-- `POST/DELETE /api/local/paychecks/{id}/deposit` links or unlinks the bank deposit.
+- `POST/DELETE /api/local/paychecks/{id}/deposit` links or unlinks the bank deposit. `POST /api/local/paychecks`
+  can also take `deposit_transaction_id` to add and link in one go (same checks; nothing is saved if they fail).
+- `GET /api/local/paychecks/deposits?year=` (`services/pay_deposits.py`): pay deposits no paycheck explains yet,
+  newest first, at most 100: `normal` money in, not a transfer, in a checking or savings account, whose
+  description has a payroll word (payroll, direct dep, dir dep, salary, paycheck, wages) or whose category is an
+  income category with "pay" in its name. Each has an `employer` guess (the description up to the payroll word).
+  The Paychecks page lists them; **Fill in** starts the form with the date, employer and take-home pay.
 - `GET /api/local/paychecks/summary?year=2026`: year-to-date totals.
 
 ## Year-to-date summary
