@@ -1,4 +1,5 @@
-// Transactions: filter by account, month and how they were sorted (or show the ones with no category yet), change a category, mark a gift, add one by hand.
+// Transactions: filter by account, month and how they were sorted (or show the ones with no category yet), hide
+// dividends and their sweeps, change a category, mark a gift, add one by hand.
 
 import { createTransaction, listAccounts, listCategories, listTransactions, matchTransfers } from "../api/endpoints.js";
 import { currentMonth, monthRange, today } from "../dates.js";
@@ -20,6 +21,7 @@ export async function render(root) {
   const monthFilter = h("input", { type: "month", value: currentMonth() });
   const sortedFilter = select([["", "Any way"], ["none", "Not yet (uncategorized)"], ["rule", "Auto-sorted"],
     ["you", "Picked by you"]]);
+  const hideDividends = h("input", { type: "checkbox" });
   const accountNames = new Map(accounts.map((a) => [a.id, a.name]));
 
   async function refresh() {
@@ -27,6 +29,7 @@ export async function render(root) {
     if (accountFilter.value) params.set("account_id", accountFilter.value);
     if (sortedFilter.value === "none") params.set("uncategorized", "true");
     else if (sortedFilter.value) params.set("sorted_by", sortedFilter.value);
+    if (hideDividends.checked) params.set("hide_dividends", "true");
     if (monthFilter.value) {
       const { from, to } = monthRange(monthFilter.value);
       params.set("date_from", from);
@@ -51,6 +54,7 @@ export async function render(root) {
   accountFilter.addEventListener("change", refresh);
   monthFilter.addEventListener("change", refresh);
   sortedFilter.addEventListener("change", refresh);
+  hideDividends.addEventListener("change", refresh);
 
   // Links card payments and moves between your accounts that weren't linked when they came in.
   const matchNote = h("span", { class: "muted", role: "status" });
@@ -67,7 +71,8 @@ export async function render(root) {
   fill(root,
     card("Transactions",
       h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter),
-        h("label", {}, "Category set", sortedFilter), h("span", {}, findTransfers, matchNote)),
+        h("label", {}, "Category set", sortedFilter), h("label", {}, hideDividends, " Hide dividends and sweeps"),
+        h("span", {}, findTransfers, matchNote)),
       list),
     accounts.length
       ? card("Add a transaction", form([

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Dividends: imported or typed-in dividends (like "... CASH DIV ON 1 SHS ...") go in a new **Dividends** income category, and the deposit sweep that moved the same cash on is linked to them. The Stocks page lists each year's dividends with the taxed total (dividends in an IRA, 401(k) or HSA aren't taxed), **Find dividends** checks older transactions, **Not a dividend** undoes one, and the Transactions page can hide dividends and their sweeps. An estimate, not tax advice.
 - Sort what's left: on the Transactions page, set **Category set** to **Not yet (uncategorized)** to see only payments and refunds with no category yet, and pick one for each right there.
 - New **Other Expenses** category (in Wants) for spending that fits nowhere else, next to Other Income. Added for you on the next start, unless you already have a category with that name.
 - Import stocks from a CSV file: on the Stocks page, choose a spreadsheet or your broker's file with Symbol, Date, Shares and Cost columns (and an optional Buy/Sell column) to add many purchases and sales at once. A preview shows what's new, what's already there and any row with a problem; importing the same file twice adds nothing, and sales use your oldest shares first.

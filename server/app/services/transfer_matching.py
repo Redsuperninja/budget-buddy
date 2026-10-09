@@ -5,9 +5,9 @@ Two transactions are matched when all of these hold:
 - one is money out and the other money in, for exactly the same amount, on different accounts;
 - their dates are at most ``WINDOW_DAYS`` apart (a bank transfer or card payment can take a few
   days to show on the other side, longer over a weekend and holiday);
-- both are regular transactions that aren't already linked, aren't a paycheck's deposit or a
-  donation, weren't unlinked by you before (``auto_transfer_off``), and have no category yet or a
-  transfer category (a category from you or a rule is respected);
+- both are regular transactions that aren't already linked, aren't a paycheck's deposit, a
+  donation or a dividend's deposit sweep, weren't unlinked by you before (``auto_transfer_off``),
+  and have no category yet or a transfer category (a category from you or a rule is respected);
 - at least one description looks like a transfer (``TRANSFER_WORDS``), a credit card's side looks
   like a payment, and neither looks like a dividend, interest, an employer match, pay or a refund
   (``NOT_TRANSFER_WORDS``): an equal amount alone is too often a coincidence;
@@ -31,6 +31,7 @@ from app.models import (
     AccountKind,
     Category,
     CategoryGroup,
+    Dividend,
     Donation,
     Paycheck,
     Transaction,
@@ -76,6 +77,8 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
                 Paycheck.deposit_transaction_id.is_not(None))),
             Transaction.id.not_in(select(Donation.transaction_id).where(
                 Donation.transaction_id.is_not(None))),
+            Transaction.id.not_in(select(Dividend.sweep_transaction_id).where(
+                Dividend.sweep_transaction_id.is_not(None))),
             Transaction.category_id.is_(None) | Transaction.category_id.in_(transfer_categories),
         )
     )  # fmt: skip

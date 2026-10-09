@@ -39,7 +39,7 @@ export async function render(root) {
         const r = await importCsv(accountSelect.value,
           query({ save_mapping: remember.value, skip_invalid_rows: skip.value }), bytes);
         fill(result, h("p", { class: "ok" }, `Done. ${r.imported} new transaction(s) added (${r.categorized} sorted by your rules, ` +
-          `${r.transfers_matched} matched as transfers between your accounts); ` +
+          `${r.transfers_matched} matched as transfers between your accounts, ${r.dividends_found} dividend(s) found); ` +
           `${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.`));
       } catch (err) {
         showError(result, err);

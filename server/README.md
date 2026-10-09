@@ -82,6 +82,7 @@ for pairing and joining; common rules are in
 | Receipts and photos | [receipts.md](../docs/dev/architecture/receipts.md) |
 | Paychecks | [paychecks.md](../docs/dev/architecture/paychecks.md) |
 | Donations | [donations.md](../docs/dev/architecture/donations.md) |
+| Dividends | [dividends.md](../docs/dev/architecture/dividends.md) |
 | Stocks | [stocks.md](../docs/dev/architecture/stocks.md) |
 | Stock CSV import | [stock-import.md](../docs/dev/architecture/stock-import.md) |
 | Other deductions, yearly tax summary, CSV export | [tax-summary.md](../docs/dev/architecture/tax-summary.md) |

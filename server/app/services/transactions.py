@@ -11,6 +11,7 @@ from app.models import (
     Category,
     CategoryGroup,
     CategorySource,
+    Dividend,
     Paycheck,
     Transaction,
     TransactionKind,
@@ -50,6 +51,8 @@ class TransactionFilters:
     # Only ones still waiting for a category: regular payments and refunds with none yet.
     # Transfers and balance adjustments don't need one, so they're left out.
     uncategorized: bool = False
+    # Leave out dividends and the deposit sweeps linked to them (services/dividend_matching.py).
+    hide_dividends: bool = False
 
 
 def get_transaction(session: Session, transaction_id: int) -> Transaction:
@@ -113,6 +116,17 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
         query = query.where(
             Transaction.category_id.is_(None),
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
+        )
+
+    if filters.hide_dividends:
+        shown = Dividend.dismissed.is_(False)
+        query = query.where(
+            Transaction.id.not_in(select(Dividend.transaction_id).where(shown)),
+            Transaction.id.not_in(
+                select(Dividend.sweep_transaction_id).where(
+                    shown, Dividend.sweep_transaction_id.is_not(None)
+                )
+            ),
         )
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))

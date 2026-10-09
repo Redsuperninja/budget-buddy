@@ -35,6 +35,7 @@ from app.services.csv_parsing import (
     parse_row,
     read_rows,
 )
+from app.services.dividend_matching import find_dividends
 from app.services.transfer_matching import match_transfers
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
@@ -197,12 +198,16 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
             "Some of these rows were imported at the same time by another window. "
             "Please preview the file again.",
         ) from None
-    # Card payments and moves between your accounts in this file, matched with the other side.
+    # Dividends and their deposit sweeps first, then card payments and moves between your
+    # accounts in this file, matched with the other side.
+    dividends = find_dividends(session, {t.id for t in added})
     matched = match_transfers(session, {t.id for t in added})
     session.commit()
     return ImportResult(
         imported=len(new),
         transfers_matched=matched,
+        dividends_found=dividends.dividends,
+        dividend_sweeps_linked=dividends.sweeps,
         categorized=sum(t.category_id is not None for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),
