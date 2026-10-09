@@ -81,6 +81,17 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }
 .chart .tip-box { fill: var(--card); stroke: var(--line); }
 .chart .tip text { fill: var(--text); }
+/* Home: money tiles with a thin meter, and the "needs your attention" list. */
+.tiles .tile { display: flex; flex-direction: column; gap: 0.35rem; }
+.tile.good-tile .big { color: var(--good); } .tile.bad-tile .big { color: var(--bad); }
+.meter { display: block; width: 100%; height: 6px; }
+.meter .meter-track { fill: var(--line); }
+.meter .meter-fill { fill: var(--accent); }
+.meter.over .meter-fill { fill: var(--bad); }
+ul.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+ul.todo .count { display: inline-block; min-width: 1.8rem; padding: 0.1rem 0.45rem; border-radius: 999px;
+  background: var(--warn-bg); text-align: center; font-weight: 600; }
+.leftover { --series: light-dark(#c3c8d1, #4a5262); }
 .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
 .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem;
   background: var(--series); }

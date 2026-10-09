@@ -105,6 +105,7 @@ items (20, 21).
 - [x] 15. Encrypted sync endpoints: snapshot download, receipt upload — *backend-engineer* + *security-reviewer*
 - [x] 16. Local web dashboard (computer side) — *backend-engineer* (note: poll the device list while a QR is showing so the home-network listener closes after the code expires; no timer closes it)
 - [x] 16b. Charts on the dashboard: spending against budget, the last 12 months — *backend-engineer*
+- [x] 16e. Home redesign: money tiles, what needs you, where your income went, what you have and owe — *backend-engineer*
 - [x] 16c. Tidier dashboard navigation: five sections with page tabs — *backend-engineer*
 - [x] 16d. Use the dashboard from another computer at home, joined with a one-time code (ADR-0009) — *backend-engineer* + *security-reviewer*
 
