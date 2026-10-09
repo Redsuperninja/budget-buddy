@@ -23,6 +23,7 @@ class PriceFeedOut(Schema):
 
 
 class RefreshResult(Schema):
+    enabled: bool  # live prices are on (so the page knows whether to say anything)
     updated: list[str]  # symbols with a new price
     not_found: list[str]  # symbols Finnhub didn't know (some mutual funds, for example)
     message: str | None  # why it stopped or didn't run, in plain English

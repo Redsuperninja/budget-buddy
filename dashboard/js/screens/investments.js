@@ -64,18 +64,18 @@ function limitsCard(r) {
 
 export async function render(root, options) {
   const year = options.year || thisYear();
-  const { feed, note: refreshed } = await refreshIfOn();  // prices first, so the totals below use them
-  const [held, limits] = await Promise.all([stockHoldings(), retirementLimits(year)]);
+  const { enabled, note: refreshed } = await refreshIfOn();  // prices first, so the totals below use them
+  const [held, limits, settings] = await Promise.all([stockHoldings(), retirementLimits(year), settingsCard(year)]);
   fill(root,
     card("Your investments",
       note(held.note),
       refreshed ? h("p", { class: "muted", role: "status" }, refreshed) : null,
-      refreshButton(year, feed),
+      refreshButton(year, enabled),
       h("p", {}, h("strong", {}, `All accounts: ${money(held.value_cents)}`),
         ` (cost ${formatCents(held.cost_basis_cents)})`),
       held.accounts.length ? null : empty("No shares held. Add purchases on the Stocks page (under Taxes).")),
     held.accounts.map(accountCard),
     priceForm(year),
-    settingsCard(year, feed),
+    settings,
     limitsCard(limits));
 }

@@ -18,13 +18,16 @@ no third-party calls with user data).
 ## Decision
 **Finnhub with the user's own free key** (the owner's choice), as an exception to "no outside calls" with these
 limits:
-- **Off until turned on**, on the Investments page. Typing prices keeps working either way.
+- **Off until turned on**, on the Investments page of the Budget Buddy computer (not from a joined computer,
+  [ADR-0009](0009-other-computers.md)). Typing prices keeps working either way.
 - **Only symbols are sent** (like VTI), one HTTPS request per held symbol, from the Home Base (never the browser,
   so the page's Content-Security-Policy is unchanged). No amounts, accounts, names or anything else.
 - **The key** is stored encrypted (`price_feed.api_key`), never returned by the API, and sent only in the
-  `X-Finnhub-Token` header, so it never appears in an address or a log.
+  `X-Finnhub-Token` header, so it never appears in an address or a log. Redirects are never followed (they would
+  carry the header elsewhere).
 - **On demand only:** when the Investments page opens and on its Refresh button; never on a timer. A symbol
-  fetched in the last minute isn't asked for again, which also keeps within the free limit.
+  fetched in the last minute isn't asked for again, at most 50 per refresh and one refresh at a time, which also
+  keeps within the free limit.
 - Each price records where it came from (`you` or `feed`) and when it was fetched, and the page says so.
 
 ## Consequences

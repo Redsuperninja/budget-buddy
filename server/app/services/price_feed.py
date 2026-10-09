@@ -13,6 +13,8 @@ so it can't end up in a log). Nothing else: no amounts, accounts or other data.
 
 import datetime as dt
 import json
+import ssl
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -28,13 +30,17 @@ QUOTE_URL = "https://finnhub.io/api/v1/quote"
 TIMEOUT_SECONDS = 5
 FRESH_SECONDS = 60
 MAX_REPLY_BYTES = 4096
+MAX_SYMBOLS = 50  # per refresh, under Finnhub's free 60 a minute
+MAX_PRICE = Decimal("1000000000")  # a billion dollars a share: anything above is a bad reply
 FEED = "feed"
+_RUNNING = threading.Lock()
 
 OFF = "Live prices are off. Turn them on and add your Finnhub key on the Investments page."
 NO_KEY = "Add your free Finnhub key on the Investments page to get live prices."
 BAD_KEY = "Finnhub didn't accept your key. Check it on finnhub.io and paste it again."
 LIMIT = "Finnhub's free limit was reached. Try again in a minute."
 OFFLINE = "Couldn't reach Finnhub. Check your internet connection and try again."
+BUSY = "Prices are already being refreshed. Try again in a moment."
 
 
 class FeedStop(Exception):
@@ -77,12 +83,30 @@ def held_symbols(session: Session) -> list[str]:
     return list(rows.scalars())
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never follow a redirect: urllib would copy the key header to wherever it points."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None  # the 3xx then raises HTTPError, shown as "couldn't reach"
+
+
+# Certificates always checked (an explicit default context), no redirects. The system proxy, if
+# any, is used: HTTPS goes through it as a tunnel (docs/dev/architecture/security.md).
+_OPENER = urllib.request.build_opener(
+    _NoRedirect(), urllib.request.HTTPSHandler(context=ssl.create_default_context())
+)
+
+
+def _reject_constant(name: str):
+    raise ValueError(f"not a number: {name}")  # NaN, Infinity
+
+
 def _get_json(url: str, key: str) -> dict:
     """One HTTPS GET to Finnhub. The key goes in a header, not the address."""
     request = urllib.request.Request(url, headers={"X-Finnhub-Token": key})
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as reply:  # noqa: S310
-            return json.loads(reply.read(MAX_REPLY_BYTES))
+        with _OPENER.open(request, timeout=TIMEOUT_SECONDS) as reply:
+            return json.loads(reply.read(MAX_REPLY_BYTES), parse_constant=_reject_constant)
     except urllib.error.HTTPError as exc:
         if exc.code in (401, 403):
             raise FeedStop(BAD_KEY) from None
@@ -96,43 +120,68 @@ def _get_json(url: str, key: str) -> dict:
 def quote(symbol: str, key: str) -> tuple[int, dt.date] | None:
     """The latest price in cents and its date, or None if Finnhub doesn't know the symbol."""
     data = _get_json(f"{QUOTE_URL}?{urllib.parse.urlencode({'symbol': symbol})}", key)
+    latest = dt.datetime.now(dt.UTC) + dt.timedelta(days=1)
     try:
         price = Decimal(str(data.get("c") or 0))
         when = int(data.get("t") or 0)
-    except (InvalidOperation, TypeError, ValueError, AttributeError):
-        return None
-    if price <= 0 or when <= 0:
-        return None
-    cents = int((price * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
-    return cents, dt.datetime.fromtimestamp(when, dt.UTC).date()
+        if (
+            not price.is_finite()
+            or not 0 < price <= MAX_PRICE
+            or not 0 < when <= latest.timestamp()
+        ):
+            return None
+        cents = int((price * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+        day = dt.datetime.fromtimestamp(when, dt.UTC).date()
+    except (InvalidOperation, TypeError, ValueError, AttributeError, OverflowError, OSError):
+        return None  # anything odd: no price, rather than a broken page
+    return (cents, day) if cents > 0 else None
+
+
+def _due(session: Session, now: dt.datetime) -> list[str]:
+    """Held symbols without a feed price from the last minute, at most ``MAX_SYMBOLS``."""
+    fresh = now - dt.timedelta(seconds=FRESH_SECONDS)
+    recent = {
+        p.symbol
+        for p in session.scalars(select(StockPrice).where(StockPrice.source == FEED))
+        if p.fetched_at and p.fetched_at > fresh
+    }
+    return [s for s in held_symbols(session) if s not in recent][:MAX_SYMBOLS]
 
 
 def refresh(session: Session, now: dt.datetime | None = None) -> RefreshResult:
-    """Fetch the latest price of each symbol you hold that wasn't fetched in the last minute."""
+    """Fetch the latest price of each symbol you hold that wasn't fetched in the last minute.
+
+    All the asking happens first, with nothing written; then the prices are saved in one short
+    transaction, so the database is never locked while waiting on the internet. One refresh at a
+    time: a second one meanwhile just says so.
+    """
     now = now or dt.datetime.now(dt.UTC).replace(tzinfo=None)
     feed = _feed(session)
     if not feed.enabled:
-        return RefreshResult(updated=[], not_found=[], message=OFF)
+        return RefreshResult(enabled=False, updated=[], not_found=[], message=OFF)
     if not feed.api_key:
-        return RefreshResult(updated=[], not_found=[], message=NO_KEY)
-    updated, not_found, message = [], [], None
-    for symbol in held_symbols(session):
-        row = session.get(StockPrice, symbol)
-        fresh = dt.timedelta(seconds=FRESH_SECONDS)
-        if row and row.source == FEED and row.fetched_at and now - row.fetched_at < fresh:
-            continue
-        try:
-            found = quote(symbol, feed.api_key)
-        except FeedStop as stop:
-            message = str(stop)
-            break
-        if found is None:
-            not_found.append(symbol)
-            continue
-        row = row or StockPrice(symbol=symbol)
-        row.price_cents, row.as_of = found
-        row.source, row.fetched_at = FEED, now
-        session.add(row)
-        updated.append(symbol)
-    session.commit()
-    return RefreshResult(updated=updated, not_found=not_found, message=message)
+        return RefreshResult(enabled=True, updated=[], not_found=[], message=NO_KEY)
+    key, due = feed.api_key, _due(session, now)
+    session.rollback()  # end the read before going to the internet
+    if not _RUNNING.acquire(blocking=False):
+        return RefreshResult(enabled=True, updated=[], not_found=[], message=BUSY)
+    try:
+        found, not_found, message = {}, [], None
+        for symbol in due:
+            try:
+                price = quote(symbol, key)
+            except FeedStop as stop:
+                message = str(stop)
+                break
+            if price is None:
+                not_found.append(symbol)
+            else:
+                found[symbol] = price
+        for symbol, (cents, day) in found.items():
+            row = session.get(StockPrice, symbol) or StockPrice(symbol=symbol)
+            row.price_cents, row.as_of, row.source, row.fetched_at = cents, day, FEED, now
+            session.add(row)
+        session.commit()
+    finally:
+        _RUNNING.release()
+    return RefreshResult(enabled=True, updated=list(found), not_found=not_found, message=message)

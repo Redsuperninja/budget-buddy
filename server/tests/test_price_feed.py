@@ -1,17 +1,28 @@
 """Live prices from Finnhub (ADR-0010). Finnhub is faked: tests never touch the internet."""
 
 import datetime as dt
+import types
 import urllib.error
 
 import pytest
 
 from app.services import price_feed
 
-FEED = "/api/local/stocks/price-feed"
+FEED = "/api/local/price-feed"
 REFRESH = "/api/local/stocks/prices/refresh"
 HOLDINGS = "/api/local/stocks/holdings"
 KEY = "fakekey123"
 WHEN = int(dt.datetime(2026, 10, 9, 20, 0, tzinfo=dt.UTC).timestamp())
+
+
+@pytest.fixture(autouse=True)
+def no_internet(monkeypatch):
+    """Every test: the real opener is never used, so nothing reaches Finnhub."""
+
+    def refuse(request, timeout):
+        raise AssertionError(f"a test tried to reach {request.full_url}")
+
+    monkeypatch.setattr(price_feed, "_OPENER", types.SimpleNamespace(open=refuse))
 
 
 @pytest.fixture
@@ -65,7 +76,12 @@ def test_refresh_fetches_held_symbols_only(client, finnhub, make_account):
                                                   "shares": "1", "proceeds": "1.00"})  # fmt: skip
     assert turn_on(client).json() == {"enabled": True, "has_key": True}
     result = client.post(REFRESH).json()
-    assert result == {"updated": ["FAKE", "IRAF"], "not_found": [], "message": None}
+    assert result == {
+        "enabled": True,
+        "updated": ["FAKE", "IRAF"],
+        "not_found": [],
+        "message": None,
+    }
     assert {url.split("symbol=")[1] for url, _ in finnhub} == {"FAKE", "IRAF"}  # not GONE
     assert all(key == KEY and KEY not in url for url, key in finnhub)  # key in the header only
     holding = client.get(HOLDINGS).json()["accounts"][0]["holdings"][0]
@@ -120,7 +136,7 @@ def test_http_errors_become_plain_messages(monkeypatch, error, words):
         assert request.full_url.startswith("https://finnhub.io/")
         raise error
 
-    monkeypatch.setattr(price_feed.urllib.request, "urlopen", raise_it)
+    monkeypatch.setattr(price_feed, "_OPENER", types.SimpleNamespace(open=raise_it))
     with pytest.raises(price_feed.FeedStop, match=words):
         price_feed.quote("FAKE", KEY)
 
@@ -142,6 +158,56 @@ def test_the_key_is_never_sent_back_and_can_be_removed(client):
 
 
 def test_bad_replies_are_ignored(monkeypatch):
-    for reply in ({"c": "x", "t": WHEN}, {"c": -1, "t": WHEN}, [], {"c": 5}):
+    replies = [
+        {"c": "x", "t": WHEN}, {"c": -1, "t": WHEN}, [], {"c": 5}, {"c": float("nan"), "t": WHEN},
+        {"c": float("inf"), "t": WHEN}, {"c": 1e300, "t": WHEN}, {"c": 1e20, "t": WHEN},
+        {"c": 5, "t": 1e20}, {"c": 5, "t": WHEN + 10**9}, {"c": 0.001, "t": WHEN},
+    ]  # fmt: skip
+    for reply in replies:
         monkeypatch.setattr(price_feed, "_get_json", lambda url, key, r=reply: r)
         assert price_feed.quote("FAKE", KEY) is None
+
+
+def test_a_redirect_is_never_followed(monkeypatch):
+    """urllib copies headers to a redirect's target; the key must never go anywhere but Finnhub."""
+    import io
+    import urllib.request
+
+    sent = []
+
+    class Redirecting(urllib.request.BaseHandler):
+        handler_order = 100  # before the real HTTPS handler: nothing goes on the network
+
+        def https_open(self, request):
+            sent.append(request.full_url)
+            response = urllib.response.addinfourl(
+                io.BytesIO(b""), {"Location": "http://evil.example/"}, request.full_url, 302
+            )
+            response.msg = "Found"
+            return response
+
+    opener = urllib.request.build_opener(price_feed._NoRedirect(), Redirecting())
+    monkeypatch.setattr(price_feed, "_OPENER", opener)
+    with pytest.raises(price_feed.FeedStop, match="Couldn't reach"):
+        price_feed.quote("FAKE", KEY)
+    assert sent == ["https://finnhub.io/api/v1/quote?symbol=FAKE"]
+
+
+def test_a_huge_or_odd_reply_is_rejected_when_parsed():
+    with pytest.raises(ValueError):
+        price_feed.json.loads(b'{"c": NaN}', parse_constant=price_feed._reject_constant)
+
+
+def test_one_refresh_at_a_time(client, finnhub):
+    buy(client, "FAKE")
+    turn_on(client)
+    price_feed._RUNNING.acquire()
+    try:
+        assert "already" in client.post(REFRESH).json()["message"]
+    finally:
+        price_feed._RUNNING.release()
+
+
+def test_settings_are_this_computer_only(make_client):
+    lan = make_client("192.168.1.50", base_url="http://192.168.1.20:8765")
+    assert lan.get(FEED).status_code == 403

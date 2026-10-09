@@ -33,7 +33,10 @@ only, and the desktop's local requests skip any proxy.
 
 Off unless turned on ([ADR-0010](../../adr/0010-live-stock-prices.md)). The Home Base (never the browser) sends
 only held symbols to Finnhub over HTTPS, on demand; the key is an encrypted column (`price_feed.api_key`), never
-returned by the API, and sent only in a request header. Tests fake Finnhub and never use the network.
+returned by the API, and sent only in a request header; redirects are never followed and certificates always
+checked. A system proxy, if set, is used: HTTPS passes through it as a tunnel, so only a TLS-inspecting proxy could
+see the key. Turning it on or changing the key is this computer only. Tests replace the opener and fail if anything
+tries to reach the network.
 
 ## Never cached
 

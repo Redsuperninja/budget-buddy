@@ -33,7 +33,8 @@ Budget Buddy can get the latest prices for you from **Finnhub**, a stock price s
 it on:
 
 1. Sign up for a free account at finnhub.io and copy your **API key** from your Finnhub dashboard.
-2. On the Investments page, under **Live prices**, choose **On**, paste the key and click **Save**.
+2. On the Investments page of the Budget Buddy computer, under **Live prices**, choose **On**, paste the key and
+   click **Save**. (A connected computer can refresh prices but can't turn them on or change the key.)
 
 From then on, prices refresh when you open the Investments page and when you click **Refresh prices**, never in
 the background. Each price says **live** and the time it was fetched.
