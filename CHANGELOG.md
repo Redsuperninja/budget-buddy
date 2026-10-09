@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Live stock prices (optional): with a free Finnhub key, the Investments page gets the latest prices when you open it and when you click **Refresh prices** (never in the background). Only your symbols are sent, the key is stored encrypted, and each price says whether it's live or typed in. Off until you turn it on (ADR-0010).
 - Transfers found for you: when you import a bank file or add a transaction, Budget Buddy links money leaving one of your accounts with the same amount arriving in another within 5 days (when one side says it's a transfer or payment), and says what it is: a credit card or loan payment, money into or out of savings, investments, retirement or an HSA. A **Find transfers** button checks older transactions, ties and anything already categorized are left for you, and undoing a link puts each side's category back and is remembered.
 - Fixed: the desktop app opens even when Budget Buddy is already running from the launch folder (it checks it's really Budget Buddy first), and the dashboard no longer shows a blank page after an update while Budget Buddy is running: new page files are picked up without a restart, and if the page can't load it says to restart.
 - Docs and code tidy-up: guides quote the real "only works on the computer where Budget Buddy is running" message, the paychecks guide says how the 401(k) line counts toward limits, and the donation paperwork rules have their own file. No behavior change.

@@ -16,7 +16,8 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) |
 | `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) |
-| `stock_prices` | symbol (primary key), price_cents per share (≥ 0), as_of: the latest price typed in |
+| `stock_prices` | symbol (primary key), price_cents per share (≥ 0), as_of, source (you/feed), fetched_at?: the latest price |
+| `price_feed` | id (1), enabled, api_key (enc): live prices from Finnhub (ADR-0010) |
 | `stock_sales` | one lot's part of an order: order_id (cascade delete), lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0); rebuilt with FIFO ([stocks.md](stocks.md)) |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description? (enc), date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark, revoked, revoked_at, paired_at, last_sync_at |

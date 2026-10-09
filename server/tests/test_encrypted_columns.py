@@ -37,6 +37,7 @@ ENCRYPTED = {
     ("deductions", "description"),
     ("devices", "sync_key"),
     ("pairing_sessions", "pair_sk"),
+    ("price_feed", "api_key"),
 }
 
 

@@ -1,5 +1,6 @@
-// Investments: what you hold in each account (shares, cost, value at the prices you type in) and this year's
-// retirement and HSA contributions against the limits. Buying and selling are on the Stocks page.
+// Investments: what you hold in each account (shares, cost, value at live or typed-in prices) and this year's
+// retirement and HSA contributions against the limits. Buying and selling are on the Stocks page; live prices
+// are in live-prices.js (refreshed when this page opens and on Refresh, if turned on).
 
 import { retirementLimits, setStockPrice, stockHoldings } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
@@ -10,6 +11,7 @@ import { kindLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { reload } from "../router.js";
 import { card, empty, note, table } from "../widgets.js";
+import { priceText, refreshButton, refreshIfOn, settingsCard } from "./live-prices.js";
 
 const money = (cents) => (cents === null ? "no price yet" : formatCents(cents));
 
@@ -19,14 +21,14 @@ function accountCard(group) {
     group.taxed ? null : empty("Not taxed when you sell inside this account."),
     table(["Symbol", "Shares", "Cost", "Price", "Value", "Gain or loss (not sold)"], group.holdings.map((x) => [
       x.symbol, x.shares, formatCents(x.cost_basis_cents),
-      x.price_cents === null ? "" : `${formatCents(x.price_cents)} on ${x.price_as_of}`,
+      priceText(x),
       money(x.value_cents), x.unrealized_gain_cents === null ? "" : formatCents(x.unrealized_gain_cents),
     ]), [2, 3, 4, 5]),
     h("p", {}, h("strong", {}, `Total: ${money(group.value_cents)}`), ` (cost ${formatCents(group.cost_basis_cents)})`));
 }
 
 function priceForm(year) {
-  return card("Update a price",
+  return card("Type a price",
     empty("Type the latest price of one share, from your broker's website or app. Budget Buddy never looks " +
       "prices up on the internet."),
     form([
@@ -62,14 +64,18 @@ function limitsCard(r) {
 
 export async function render(root, options) {
   const year = options.year || thisYear();
+  const { feed, note: refreshed } = await refreshIfOn();  // prices first, so the totals below use them
   const [held, limits] = await Promise.all([stockHoldings(), retirementLimits(year)]);
   fill(root,
     card("Your investments",
       note(held.note),
+      refreshed ? h("p", { class: "muted", role: "status" }, refreshed) : null,
+      refreshButton(year, feed),
       h("p", {}, h("strong", {}, `All accounts: ${money(held.value_cents)}`),
         ` (cost ${formatCents(held.cost_basis_cents)})`),
       held.accounts.length ? null : empty("No shares held. Add purchases on the Stocks page (under Taxes).")),
     held.accounts.map(accountCard),
     priceForm(year),
+    settingsCard(year, feed),
     limitsCard(limits));
 }

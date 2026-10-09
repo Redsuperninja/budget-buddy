@@ -71,6 +71,9 @@ export const createSale = (json) => api("POST", `${LOCAL}/stocks/sales`, { json 
 export const stockGains = (year) => api("GET", `${LOCAL}/stocks/gains/${year}`);
 export const stockHoldings = () => api("GET", `${LOCAL}/stocks/holdings`);
 export const setStockPrice = (json) => api("POST", `${LOCAL}/stocks/prices`, { json });
+export const priceFeed = () => api("GET", `${LOCAL}/stocks/price-feed`);
+export const savePriceFeed = (json) => api("PUT", `${LOCAL}/stocks/price-feed`, { json });
+export const refreshPrices = () => api("POST", `${LOCAL}/stocks/prices/refresh`);
 
 // Retirement and HSA contributions against the year's limits
 export const retirementLimits = (year) => api("GET", `${LOCAL}/retirement/${year}`);

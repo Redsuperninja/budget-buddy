@@ -38,6 +38,7 @@ def set_price(session: Session, data: PriceIn) -> None:
     price = session.get(StockPrice, data.symbol) or StockPrice(symbol=data.symbol)
     price.price_cents = data.price_cents
     price.as_of = data.as_of
+    price.source, price.fetched_at = "you", None  # typed in
     session.add(price)
     session.commit()
 
@@ -77,6 +78,8 @@ def holdings(session: Session) -> HoldingsOut:
                 cost_basis_cents=cost,
                 price_cents=price.price_cents if price else None,
                 price_as_of=price.as_of if price else None,
+                price_source=price.source if price else None,
+                price_fetched_at=price.fetched_at if price else None,
                 value_cents=value,
                 unrealized_gain_cents=None if value is None else value - cost,
             )

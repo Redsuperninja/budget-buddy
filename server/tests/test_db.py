@@ -44,6 +44,7 @@ EXPECTED_TABLES = {
     "receipts",
     "remote_computers",
     "stock_prices",
+    "price_feed",
     "donations",
     "stock_lots",
     "stock_sales",

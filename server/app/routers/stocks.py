@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Query, status
 
 from app.deps import PathId, QueryId, SessionDep
+from app.schemas.price_feed import PriceFeedIn, PriceFeedOut, RefreshResult
 from app.schemas.stock_holdings import HoldingsOut, PriceIn
 from app.schemas.stocks import GainsSummaryOut, LotCreate, LotOut, SaleCreate, SaleOut
-from app.services import stock_holdings, stock_lots, stock_sales
+from app.services import price_feed, stock_holdings, stock_lots, stock_sales
 
 router = APIRouter(prefix="/api/local/stocks", tags=["stocks"])
 
@@ -76,3 +77,20 @@ def holdings(session: SessionDep) -> HoldingsOut:
 def set_price(data: PriceIn, session: SessionDep) -> None:
     """Save the latest price of a symbol (per share), replacing the one before."""
     stock_holdings.set_price(session, data)
+
+
+@router.get("/price-feed")
+def price_feed_settings(session: SessionDep) -> PriceFeedOut:
+    return price_feed.settings(session)
+
+
+@router.put("/price-feed")
+def save_price_feed(data: PriceFeedIn, session: SessionDep) -> PriceFeedOut:
+    """Turn live prices on or off, and save or remove the Finnhub key (never sent back)."""
+    return price_feed.save_settings(session, data)
+
+
+@router.post("/prices/refresh")
+def refresh_prices(session: SessionDep) -> RefreshResult:
+    """Fetch the latest prices of the symbols you hold, if live prices are on (ADR-0010)."""
+    return price_feed.refresh(session)
