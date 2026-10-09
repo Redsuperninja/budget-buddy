@@ -19,8 +19,10 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
   change its budget. The group can't change, and new categories can't use the `transfer` group.
 - **Percentage budgets:** instead of `budget_cents`, a category can have `budget_percent_bp`, a share of monthly
   income in basis points (1 to 10,000; `1500` = 15%). Sending `budget_cents` switches a category back to an
-  amount (the percentage is cleared); sending a percentage sets `budget_cents` to 0. Both at once is a 422, and
-  income categories can't use a percentage. Math helpers: `app/percent.py` (whole numbers, halves rounded away
+  amount (the percentage is cleared); sending a percentage sets `budget_cents` to 0. Both at once is a 422.
+- **Income has no budget**: it's what the other budgets are measured against. A nonzero `budget_cents` or any
+  percentage on an income category is a 422 ("Income categories don't have a budget"), and one saved by an older
+  version is ignored (`budget_plan.budget_for` returns 0), so the income group's budget is always 0. Math helpers: `app/percent.py` (whole numbers, halves rounded away
   from zero).
 - **Budgets apply to every month.** There is no per-month budget, so changing one also changes what past
   months show.

@@ -8,7 +8,10 @@ from app.percent import WHOLE_BP
 from app.schemas.common import Name, Schema, UpdateSchema
 
 BOTH_BUDGETS = "Set the budget as an amount or as a percentage of income, not both."
-INCOME_PERCENT = "An income category's budget can't be a percentage of income. Enter an amount."
+INCOME_NO_BUDGET = (
+    "Income categories don't have a budget: your income is what the rest of the budget is "
+    "measured against."
+)
 
 
 def _check_budget(value):
@@ -40,7 +43,7 @@ class CategoryCreate(Schema):
     group: CategoryGroup
     # Applies to every month: changing it also changes what past months show.
     budget_cents: int = 0
-    # Or: a share of monthly income in basis points (1500 = 15%). Not for income categories.
+    # Or: a share of monthly income in basis points (1500 = 15%). Income categories have neither.
     budget_percent_bp: int | None = None
 
     @field_validator("group", mode="before")
@@ -57,11 +60,10 @@ class CategoryCreate(Schema):
 
     @model_validator(mode="after")
     def _one_kind_of_budget(self):
-        if self.budget_percent_bp is not None:
-            if self.budget_cents:
-                raise ValueError(BOTH_BUDGETS)
-            if self.group == CategoryGroup.INCOME:
-                raise ValueError(INCOME_PERCENT)
+        if self.budget_percent_bp is not None and self.budget_cents:
+            raise ValueError(BOTH_BUDGETS)
+        if self.group == CategoryGroup.INCOME and (self.budget_cents or self.budget_percent_bp):
+            raise ValueError(INCOME_NO_BUDGET)
         return self
 
 

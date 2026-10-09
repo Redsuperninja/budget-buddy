@@ -252,11 +252,14 @@ def test_refund_under_transfer_category_is_unassigned(client, add_txn, accounts)
     assert (s["income_cents"], s["spending_cents"], s["saved_cents"]) == (0, 0, 0)
 
 
-def test_income_and_savings_budgets_appear_in_groups(client):
-    client.patch(f"{CATS}/{cid(client, 'Paycheck')}", json={"budget_cents": 400_000})
+def test_savings_budgets_appear_in_groups_and_income_has_none(client):
+    refused = client.patch(f"{CATS}/{cid(client, 'Paycheck')}", json={"budget_cents": 400_000})
+    assert refused.status_code == 422
+    assert "measured against" in refused.json()["error"]["message"]
+    assert client.patch(f"{CATS}/{cid(client, 'Paycheck')}", json={"budget_cents": 0}).is_success
     client.patch(f"{CATS}/{cid(client, 'Retirement')}", json={"budget_cents": 50_000})
     groups = {g["group"]: g for g in summary(client)["groups"]}
-    assert groups["income"]["budget_cents"] == 400_000
+    assert groups["income"]["budget_cents"] == 0
     assert groups["savings"]["budget_cents"] == 50_000
     assert groups["savings"]["actual_cents"] == 0
 

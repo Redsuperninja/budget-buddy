@@ -1,5 +1,6 @@
 // Categories: rename, change the monthly budget (an amount or a percentage of income), add a new
-// one, and the planned monthly income that percentages are shares of.
+// one, and the planned monthly income that percentages are shares of. Income categories have no budget:
+// income is what the rest of the budget is measured against.
 
 import { createCategory, getBudgetPlan, listCategories, saveBudgetPlan, updateCategory } from "../api/endpoints.js";
 import { fill, h } from "../dom.js";
@@ -28,11 +29,14 @@ function budgetBody(text) {
 const budgetText = (c) => (c.budget_percent_bp !== null ? formatBp(c.budget_percent_bp) : centsToInput(c.budget_cents));
 
 function editableRow(c) {
+  const isIncome = c.group === "income";
   const name = h("input", { value: c.name, "aria-label": "Name", maxlength: 100 });
-  const budget = h("input", { value: budgetText(c), "aria-label": "Monthly budget", inputmode: "decimal" });
+  const budget = isIncome
+    ? h("span", { class: "muted" }, "No budget: measured against")
+    : h("input", { value: budgetText(c), "aria-label": "Monthly budget", inputmode: "decimal" });
   const note = h("span", { class: "muted" });
   const save = h("button", { class: "plain", type: "button", onclick: () => saveWithNote(note, async () => {
-    await updateCategory(c.id, { name: name.value, ...budgetBody(budget.value) });
+    await updateCategory(c.id, { name: name.value, ...(isIncome ? {} : budgetBody(budget.value)) });
   }) }, "Save");
   return [name, groupLabel(c.group), budget, h("span", {}, save, note)];
 }
@@ -69,15 +73,16 @@ export async function render(root) {
         ? table(["Name", "Group", "Monthly budget ($ or %)", ""], categories.map(editableRow))
         : empty("No categories yet."),
       percentTotalNote(categories),
-      empty("Type an amount like 250.00, or a percentage of income like 15%. Income categories take amounts only. " +
+      empty("Type an amount like 250.00, or a percentage of income like 15%. Income categories have no budget: your " +
+        "income is what everything else is measured against. " +
         "A category's group can't be changed once made. A budget applies to every month.")),
     plannedIncomeCard(plan),
     card("Add a category", form([
       { name: "name", label: "Name", required: true, maxlength: 100 },
       { name: "group", label: "Group", options: GROUPS },
-      { name: "budget", label: "Monthly budget ($ or %)", value: "0", inputmode: "decimal" },
+      { name: "budget", label: "Monthly budget ($ or %; not for income)", value: "0", inputmode: "decimal" },
     ], "Add category", async (v) => {
-      await createCategory({ name: v.name, group: v.group, ...budgetBody(v.budget) });
+      await createCategory({ name: v.name, group: v.group, ...(v.group === "income" ? {} : budgetBody(v.budget)) });
       await reload();
     })),
   );

@@ -81,6 +81,7 @@ items (20, 21).
 ## Phase 3: Budget & taxes
 - [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
 - [x] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
+- [x] 10d. Income has no budget: it's what the rest of the budget is measured against — *finance-tax-expert*
 - [x] 10a. Budgets as a percentage of income (planned or actual), and each group's share of income — *finance-tax-expert*
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 10c. Match transfers between accounts automatically and say what kind they are — *backend-engineer* + *finance-tax-expert*
