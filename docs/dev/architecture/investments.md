@@ -1,7 +1,8 @@
 # Investments: holdings, prices, retirement limits
 
 Code: `services/stock_holdings.py`, `services/retirement.py`, `routers/stocks.py` (holdings, prices),
-`routers/retirement.py`, table `stock_prices` (migration 0015). Dashboard: `screens/investments.js` (Money,
+`routers/retirement.py`, `services/price_feed.py`, tables `stock_prices` (migration 0015) and `price_feed`
+(migration 0017). Dashboard: `screens/investments.js` (Money,
 Investments). User guide: [docs/guide/investments.md](../../guide/investments.md). Estimates, not tax advice.
 
 ## Holdings
@@ -15,8 +16,25 @@ Investments). User guide: [docs/guide/investments.md](../../guide/investments.md
 
 ## Prices
 
-`POST /api/local/stocks/prices` `{symbol, price_cents | price, as_of}` saves the latest price per symbol (one row
-per symbol, replaced each time). 204. Prices are typed in; Budget Buddy never fetches them.
+`POST /api/local/stocks/prices` `{symbol, price_cents | price, as_of}` saves a typed-in price (one row per
+symbol, replaced each time; `source` "you"). 204.
+
+## Live prices (`services/price_feed.py`, [ADR-0010](../../adr/0010-live-stock-prices.md))
+
+- `GET/PUT /api/local/price-feed` `{enabled, api_key?}` (table `price_feed`, one row, migration 0017): this
+  computer only (not on the joined computers' allow-list); off by default; the key is encrypted at rest, only
+  `has_key` is returned, and `api_key: ""` removes it.
+- `POST /api/local/stocks/prices/refresh` (joined computers too): if on and a key is saved, one HTTPS GET per
+  held symbol (at most 50, skipping any fetched in the last 60 s) to `https://finnhub.io/api/v1/quote` with the key
+  in `X-Finnhub-Token`. The opener never follows redirects (urllib would copy the header) and always checks
+  certificates; 5 s timeout, reply read up to 4 KB, NaN/Infinity refused. A price must be finite, above zero and at
+  most $1 billion, and its time no later than tomorrow, or the symbol counts as not found. All quotes are fetched
+  first and saved in one short transaction afterwards (no database lock while waiting on the internet); one
+  refresh runs at a time. Returns `{enabled, updated, not_found, message}`; 401/403, 429 or no connection stop
+  early with a plain message, keeping prices fetched so far.
+- The dashboard calls refresh when the Investments page opens and on Refresh prices; never on a timer. A failed
+  refresh becomes a note; the page still shows. The key box uses `autocomplete="new-password"`.
+- Holdings include `price_source` and `price_fetched_at`.
 
 ## Retirement and HSA contributions
 

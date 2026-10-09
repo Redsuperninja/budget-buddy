@@ -19,7 +19,7 @@ A private, local-first budgeting and tax-prep helper.
 | Devices | Phone app over home Wi-Fi; the dashboard on other computers at home after a one-time code |
 | Spending | Receipts (photo + amount + category), auto-categorized transactions |
 | Budget | Suggested budget from your real income & spending, monthly targets vs. actual |
-| Investments | Stocks and funds in brokerage, retirement and HSA accounts; value at prices you enter; 401(k), IRA and HSA limits |
+| Investments | Stocks and funds in brokerage, retirement and HSA accounts; value at live prices (optional, from Finnhub) or prices you enter; 401(k), IRA and HSA limits |
 | Taxes | Charitable donations (typed in, or sorted from a payment), stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |
 
 ## Quick start

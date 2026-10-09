@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Query, status
 
 from app.deps import PathId, QueryId, SessionDep
+from app.schemas.price_feed import RefreshResult
 from app.schemas.stock_holdings import HoldingsOut, PriceIn
 from app.schemas.stocks import GainsSummaryOut, LotCreate, LotOut, SaleCreate, SaleOut
-from app.services import stock_holdings, stock_lots, stock_sales
+from app.services import price_feed, stock_holdings, stock_lots, stock_sales
 
 router = APIRouter(prefix="/api/local/stocks", tags=["stocks"])
 
@@ -76,3 +77,9 @@ def holdings(session: SessionDep) -> HoldingsOut:
 def set_price(data: PriceIn, session: SessionDep) -> None:
     """Save the latest price of a symbol (per share), replacing the one before."""
     stock_holdings.set_price(session, data)
+
+
+@router.post("/prices/refresh")
+def refresh_prices(session: SessionDep) -> RefreshResult:
+    """Fetch the latest prices of the symbols you hold, if live prices are on (ADR-0010)."""
+    return price_feed.refresh(session)

@@ -8,7 +8,7 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 - The master key lives in the OS password vault (Windows Credential Manager, macOS Keychain, Linux Secret
   Service, via `keyring`), never in files. The data folder holds only a `key-fingerprint` to check the key
   belongs to it. Only derived keys (fields, files, backup) are kept in memory.
-- Sensitive columns (account numbers, notes, device sync keys, pairing secret keys) use the encrypted column
+- Sensitive columns (account numbers, notes, device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.
 - Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
   names. The plain photo is never written to disk.
@@ -28,6 +28,15 @@ parts compute it this way (`server/app/instance_proof.py`, `desktop/budget_buddy
 written only after the port is bound (a second copy that can't bind leaves it alone), removed on shutdown, and
 ignored when its process isn't running. The key is never logged or sent; the proof route answers this computer
 only, and the desktop's local requests skip any proxy.
+
+## The one outside connection: live prices
+
+Off unless turned on ([ADR-0010](../../adr/0010-live-stock-prices.md)). The Home Base (never the browser) sends
+only held symbols to Finnhub over HTTPS, on demand; the key is an encrypted column (`price_feed.api_key`), never
+returned by the API, and sent only in a request header; redirects are never followed and certificates always
+checked. A system proxy, if set, is used: HTTPS passes through it as a tunnel, so only a TLS-inspecting proxy could
+see the key. Turning it on or changing the key is this computer only. Tests replace the opener and fail if anything
+tries to reach the network.
 
 ## Never cached
 

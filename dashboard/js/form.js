@@ -23,7 +23,7 @@ export function form(fields, submitLabel, onSubmit) {
       ? select(f.options, { name: f.name, value: f.value })
       : h("input", {
           name: f.name, type: f.type || "text", value: f.value ?? "", placeholder: f.placeholder,
-          required: f.required, maxlength: f.maxlength, inputmode: f.inputmode, autocomplete: "off",
+          required: f.required, maxlength: f.maxlength, inputmode: f.inputmode, autocomplete: f.autocomplete || "off",
         });
     return h("label", {}, f.label, inputs[f.name]);
   });

@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, ForeignKey, String
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.crypto.fields import EncryptedString
@@ -92,8 +92,8 @@ class StockSale(TimestampMixin, Base):
 
 
 class StockPrice(TimestampMixin, Base):
-    """The latest price you typed in for a symbol (never fetched from the internet), used to show
-    what your holdings are worth. One row per symbol."""
+    """The latest price of a symbol, used to show what your holdings are worth. One row per symbol:
+    typed in by you, or fetched from the price feed when you turned it on (ADR-0010)."""
 
     __tablename__ = "stock_prices"
     __table_args__ = (CheckConstraint("price_cents >= 0", name="price_not_negative"),)
@@ -101,6 +101,19 @@ class StockPrice(TimestampMixin, Base):
     symbol: Mapped[str] = mapped_column(String(16), primary_key=True)
     price_cents: Mapped[int]  # per share
     as_of: Mapped[dt.date] = mapped_column(Date)
+    source: Mapped[str] = mapped_column(String(8), default="you", server_default="you")  # or "feed"
+    fetched_at: Mapped[dt.datetime | None] = mapped_column(DateTime)  # UTC, feed prices only
+
+
+class PriceFeed(TimestampMixin, Base):
+    """Live prices from Finnhub (ADR-0010): off until turned on. One row (id 1). Only the symbols
+    you hold are ever sent. The key is encrypted at rest and never returned by the API."""
+
+    __tablename__ = "price_feed"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    enabled: Mapped[bool] = mapped_column(default=False, server_default="0")
+    api_key: Mapped[str | None] = mapped_column(EncryptedString("price_feed.api_key"))
 
 
 class Deduction(TimestampMixin, Base):
