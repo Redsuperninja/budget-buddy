@@ -6,6 +6,13 @@ export const ACCOUNT_KINDS = [
   ["other", "Other"],
 ];
 
+// What kind of retirement account (retirement accounts only).
+export const RETIREMENT_TYPES = [
+  ["roth_ira", "Roth IRA"], ["traditional_ira", "Traditional IRA"], ["401k", "401(k)"], ["roth_401k", "Roth 401(k)"],
+  ["403b", "403(b)"], ["other", "Other retirement"],
+];
+export const retirementTypeLabel = (type) => (type ? lookup(RETIREMENT_TYPES, type) : "");
+
 // "transfer" is built in and can't be chosen when adding a category.
 export const GROUPS = [["needs", "Needs"], ["wants", "Wants"], ["savings", "Savings"], ["income", "Income"]];
 

@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import Field, model_validator
 
-from app.models import AccountKind
+from app.models import AccountKind, RetirementType
 from app.schemas.common import (
     Cents,
     DollarText,
@@ -19,12 +19,22 @@ from app.schemas.common import (
 Last4 = Annotated[str | None, Field(pattern=r"^[0-9]{4}$")]
 
 
+RETIREMENT_ONLY = "Only a retirement account has a retirement type (like Roth IRA or 401(k))."
+
+
 class AccountCreate(Schema):
     name: Name
     kind: AccountKind
+    retirement_type: RetirementType | None = None  # retirement accounts only
     institution: OptionalShortText = None
     last4: Last4 = None
     notes: Notes = None
+
+    @model_validator(mode="after")
+    def _retirement_type(self):
+        if self.retirement_type is not None and self.kind != AccountKind.RETIREMENT:
+            raise ValueError(RETIREMENT_ONLY)
+        return self
 
 
 class AccountUpdate(UpdateSchema):
@@ -32,6 +42,7 @@ class AccountUpdate(UpdateSchema):
 
     name: Name | None = None
     kind: AccountKind | None = None
+    retirement_type: RetirementType | None = None
     institution: OptionalShortText = None
     last4: Last4 = None
     notes: Notes = None
@@ -41,6 +52,7 @@ class AccountOut(Schema):
     id: int
     name: str
     kind: AccountKind
+    retirement_type: RetirementType | None
     institution: str | None
     last4: str | None
     notes: str | None

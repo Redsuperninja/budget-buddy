@@ -73,7 +73,7 @@ This part shows, for the year you pick, how much you've put in and how much room
 | Line | What's counted | Limit |
 | --- | --- | --- |
 | 401(k) or 403(b) | Your own contributions on your pay stubs, traditional and Roth together | $24,500 in 2026 |
-| IRA | The **IRA contribution** deductions you entered on the Tax summary page | $7,500 in 2026 |
+| IRA | The **IRA contribution** deductions you entered on the Tax summary page, plus money put into accounts marked **Roth IRA** | $7,500 in 2026 |
 | HSA | Pay-stub HSA amounts plus **HSA contribution** deductions | $4,400 for just you, $8,750 for a family (shared by spouses), in 2026 |
 
 - **Age catch-up:** at 50 or older you can put in more (and more again from 60 to 63 for a 401(k); at 55 or older
@@ -84,9 +84,11 @@ This part shows, for the year you pick, how much you've put in and how much room
   so if you entered a spouse's too, compare each person separately.
 - **HSA:** don't also enter pay-stub HSA amounts as an HSA deduction (that counts them twice). If you weren't
   covered all year, your limit may be lower.
-- **Not included:** employer matches (they don't count toward your own 401(k) limit), Roth IRA contributions
-  (they aren't deductions, so Budget Buddy doesn't see them; the IRA limit is shared with them), and money your
-  employer puts in your HSA if it isn't on your pay stub (it does count toward the HSA limit).
+- **Roth IRA:** mark the account as **Roth IRA** on the Accounts page. Transfers into it, and deposits there that
+  say "contribution", then count toward the IRA limit. Rollovers, conversions, dividends and sales don't. A
+  contribution made early in the year for the year before is counted in the year it was made: check those.
+- **Not included:** employer matches (they don't count toward your own 401(k) limit), and money your employer
+  puts in your HSA if it isn't on your pay stub (it does count toward the HSA limit).
 - If you're over a limit, the line says how much, in red unless an age catch-up could cover it. Talk to your plan
   or a tax professional about fixing an excess contribution.
 

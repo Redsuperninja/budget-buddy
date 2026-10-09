@@ -14,6 +14,12 @@ Lists all your bank and savings accounts, and their current balances.
 4. Bank name is optional
 5. Click **Add account**
 
+### Change an account's type
+
+In the **Accounts** list, pick a new **Type** next to an account; it saves straight away. For a retirement account,
+also pick what kind it is: **Roth IRA**, **Traditional IRA**, **401(k)**, **Roth 401(k)**, **403(b)** or **Other
+retirement**. It shows on the Investments page, and money put into a Roth IRA counts toward the IRA limit there.
+
 ### Match your bank's balance
 
 So the balance in Budget Buddy is the one your bank shows, tell it the balance once, and your transactions do the

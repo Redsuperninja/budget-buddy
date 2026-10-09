@@ -20,6 +20,8 @@ class Account(TimestampMixin, Base):
     institution: Mapped[str | None] = mapped_column(String(100))
     last4: Mapped[str | None] = mapped_column(EncryptedString("accounts.last4"))
     notes: Mapped[str | None] = mapped_column(EncryptedString("accounts.notes"))
+    # Retirement accounts only: Roth IRA, traditional IRA, 401(k)... (enums.RetirementType).
+    retirement_type: Mapped[str | None] = mapped_column(String(16))
 
 
 class Category(TimestampMixin, Base):

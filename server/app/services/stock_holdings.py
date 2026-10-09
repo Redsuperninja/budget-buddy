@@ -93,6 +93,7 @@ def holdings(session: Session) -> HoldingsOut:
                 account_id=account_id,
                 account_name=account.name if account else NO_ACCOUNT,
                 account_kind=account.kind if account else None,
+                retirement_type=account.retirement_type if account else None,
                 taxed=not (account and account.kind in TAX_FREE_KINDS),
                 holdings=items,
                 cost_basis_cents=sum(h.cost_basis_cents for h in items),

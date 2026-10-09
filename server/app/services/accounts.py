@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Account, AccountKind, StockLot, StockSaleOrder, Transaction
-from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
+from app.schemas.accounts import RETIREMENT_ONLY, AccountCreate, AccountOut, AccountUpdate
 
 # Selling inside these accounts isn't taxed: their stock sales are left out of the gains summary.
 TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}
@@ -79,6 +79,11 @@ def _has_stocks(session: Session, account_id: int) -> bool:
 def update_account(session: Session, account_id: int, data: AccountUpdate) -> AccountOut:
     account = get_account(session, account_id)
     changes = data.changes()
+    kind = changes.get("kind", account.kind)
+    if kind != AccountKind.RETIREMENT:
+        if changes.get("retirement_type") is not None:
+            raise ApiError(422, "validation_error", RETIREMENT_ONLY)
+        changes["retirement_type"] = None  # no longer a retirement account
     for field, value in changes.items():
         setattr(account, field, value)
     session.commit()

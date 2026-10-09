@@ -99,6 +99,7 @@ items (20, 21).
 - [x] 12g. Import a broker's positions file: a holdings snapshot per account, compared with your trades, prices updated — *backend-engineer* + *security-reviewer*
 - [x] 12f. Record a stock purchase or sale from a transaction on the Transactions page — *backend-engineer* + *finance-tax-expert*
 - [x] 12e. Dividends from your transactions: filed under Dividends, deposit sweeps linked, a yearly list, hide toggle — *backend-engineer* + *finance-tax-expert*
+- [x] 12i. Retirement account types (Roth IRA, traditional IRA, 401(k)...), with Roth IRA money counted toward the IRA limit — *backend-engineer* + *finance-tax-expert*
 - [x] 12b. Investments: stocks in any account, holdings and typed-in prices, retirement and HSA limits — *finance-tax-expert*
 - [x] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*
 

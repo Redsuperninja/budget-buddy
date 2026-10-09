@@ -43,6 +43,7 @@ class AccountHoldingsOut(Schema):
     account_id: int | None
     account_name: str
     account_kind: AccountKind | None
+    retirement_type: str | None = None  # Roth IRA, 401(k)... for retirement accounts
     taxed: bool  # False for retirement accounts and HSAs
     holdings: list[HoldingOut]
     cost_basis_cents: int

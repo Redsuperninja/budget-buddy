@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Account types: change an account's type right in the Accounts list, and mark a retirement account as a Roth IRA, traditional IRA, 401(k), Roth 401(k), 403(b) or other. Money put into a Roth IRA (transfers in, and deposits that say contribution) now counts toward the IRA limit on the Investments page.
 - Receipts page: **Money**, **Receipts** shows the receipts synced from your phone with a small picture (click for full size, or download one your browser can't show), and **Delete** removes an outdated one and its photo.
 - Brokerage activity import: on **Import files** (the old Import bank file page), import your broker's activity or history CSV into a brokerage, IRA, 401(k) or HSA account. Every row becomes a transaction, buys and sells with a symbol and shares are also recorded as stock trades, and dividends are filed, so nothing needs sorting by hand. It shows in Import history, where it can be undone.
 - Import history: **Money**, **Import history** lists every file you imported (bank, stock trades, positions) with its account, name and what it added. **Remove** undoes one: what it added is deleted and transfers it was part of go back to normal.
