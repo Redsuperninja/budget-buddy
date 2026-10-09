@@ -35,5 +35,13 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Its transactions lose their category (ON DELETE SET NULL), like deleting it by hand.
-    op.execute(sa.text("DELETE FROM categories WHERE name = :name").bindparams(name=NAME))
+    # Only when it still looks like the one added here and nothing uses it, so a category you
+    # made yourself (or have since used) is never deleted.
+    op.execute(
+        sa.text(
+            "DELETE FROM categories WHERE name = :name AND \"group\" = 'wants' "
+            "AND budget_cents = 0 AND budget_percent_bp IS NULL "
+            "AND id NOT IN (SELECT category_id FROM transactions WHERE category_id IS NOT NULL) "
+            "AND id NOT IN (SELECT category_id FROM category_rules)"
+        ).bindparams(name=NAME)
+    )

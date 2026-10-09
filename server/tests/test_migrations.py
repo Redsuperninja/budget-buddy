@@ -254,5 +254,17 @@ def test_migration_0018_keeps_your_own_other_expenses_category(tmp_path):
         migrate("downgrade", "0017")
         migrate("upgrade", "0018")
         assert other_expenses() == [("Other Expenses", "wants")]
+
+        with engine.begin() as conn:  # now used: a downgrade keeps it
+            conn.execute(text("INSERT INTO accounts (id, name, kind) VALUES (1, 'C', 'checking')"))
+            conn.execute(
+                text(
+                    "INSERT INTO transactions (account_id, date, amount_cents, description, "
+                    "category_id, source, kind) SELECT 1, '2026-01-02', -500, 'Fake', id, "
+                    "'manual', 'normal' FROM categories WHERE name = 'Other Expenses'"
+                )
+            )
+        migrate("downgrade", "0017")
+        assert other_expenses() == [("Other Expenses", "wants")]
     finally:
         engine.dispose()
