@@ -68,6 +68,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [donations.md](donations.md) | Charitable donations and the yearly summary |
 | [transfers.md](transfers.md) | Matching transfers between your accounts automatically; transfer kinds |
 | [stocks.md](stocks.md) | Stock lots, sales, FIFO, gains |
+| [stock-import.md](stock-import.md) | Stock purchases and sales from a CSV file |
 | [investments.md](investments.md) | Holdings by account, typed-in prices, retirement and HSA limits |
 | [tax-summary.md](tax-summary.md) | Other deductions, the yearly tax summary and its CSV export |
 

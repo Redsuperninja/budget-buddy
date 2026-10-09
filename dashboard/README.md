@@ -56,6 +56,6 @@ server route, add a function to `api/endpoints.js`.
 
 Screens, by section: **Home** (monthly summary, charts and balances); **Money**: Transactions (with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import bank file, Auto-sort (rules); **Budget**: Categories, Suggested budget;
-**Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks; **Devices**:
+**Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
 Connect phone, Other computers (`other-computers.js`). `join.js` is the join page for another computer
 ([ADR-0009](../docs/adr/0009-other-computers.md)).

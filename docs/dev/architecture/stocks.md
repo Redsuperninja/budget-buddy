@@ -16,6 +16,7 @@ database), `routers/stocks.py`. Estimates, not tax advice. User guide:
   with cost, gain or loss, term, and a possible-wash-sale flag. Filters: `symbol`, `account_id`, `tax_year`.
   Newest first.
 - `GET /api/local/stocks/gains/{tax_year}`: short- and long-term totals for sales in that year.
+- Importing purchases and sales from a CSV file: [stock-import.md](stock-import.md).
 
 ## Tables
 

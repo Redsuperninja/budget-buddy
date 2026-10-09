@@ -23,6 +23,8 @@ For each time you bought shares, enter:
 If you bought the same stock several times, enter each purchase separately. Each one is called a
 "lot".
 
+Got a lot of them? [Import them from a CSV file](import-stocks.md) instead.
+
 ## Entering a sale
 
 For each time you sold shares, enter:

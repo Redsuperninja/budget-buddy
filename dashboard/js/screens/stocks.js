@@ -1,5 +1,5 @@
-// Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales. What
-// you hold now and its value are on the Investments page.
+// Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales by hand
+// or from a CSV file. What you hold now and its value are on the Investments page.
 
 import { createLot, createSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
@@ -9,6 +9,7 @@ import { form } from "../form.js";
 import { card, empty, note, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
+import { stockImportCard } from "./stock-import.js";
 
 const termRow = (label, t) =>
   [label, formatCents(t.proceeds_cents), formatCents(t.cost_basis_cents), formatCents(t.gain_cents)];
@@ -38,6 +39,7 @@ export async function render(root, options) {
     });
 
   fill(root,
+    options.imported ? h("p", { class: "ok", role: "status" }, options.imported) : null,
     card("Stock gains",
       taxYearHeader(year, gains.note),
       table(["Held", "Sold for", "Cost", "Gain or loss"], [
@@ -64,5 +66,6 @@ export async function render(root, options) {
     card("Add a sale", tradeForm({
       dateName: "sold_on", dateLabel: "Date sold", moneyName: "proceeds",
       moneyLabel: "Total received after fees", submitLabel: "Add sale", save: createSale,
-      moneyKey: "proceeds_cents", moneyWhat: "amount received" })));
+      moneyKey: "proceeds_cents", moneyWhat: "amount received" })),
+    stockImportCard(accounts, year));
 }
