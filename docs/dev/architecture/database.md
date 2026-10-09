@@ -21,6 +21,16 @@
 | 0006 | Phone pairing: `devices` columns, `pairing_sessions`, `pairing_nonces` |
 | 0007 | Stock sales as entered: `stock_sale_orders`, `stock_sales.order_id` |
 | 0008 | Encrypted sync: `seen_nonces`, `devices.nonce_watermark`, `receipts.client_id` / `deduction_kind` / `device_id` |
+| 0009 | Auto-categorization rules (roadmap #9) |
+| 0010 | Percentage budgets |
+| 0011 | Encrypt deduction descriptions |
+| 0012 | Donations from transactions: link a gift to the bank or card payment it came from |
+| 0013 | Other computers on the home network (ADR-0009) |
+| 0014 | Auto-sort learning: how each category was set, and learned rules |
+| 0015 | Stock prices you type in, to show what your holdings are worth |
+| 0016 | Automatic transfer matching: remember transfers you unlinked |
+| 0017 | Live stock prices from Finnhub (ADR-0010) |
+| 0018 | Add an "Other Expenses" category |
 
 ## Adding a migration
 

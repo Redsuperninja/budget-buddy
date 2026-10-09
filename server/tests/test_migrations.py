@@ -70,7 +70,7 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
         assert errors == []
         assert len(calls) == 1
         assert _revision(engines[0]) == HEAD
-        assert _category_count(engines[0]) == 18  # seed not duplicated
+        assert _category_count(engines[0]) == 19  # seed not duplicated
     finally:
         for engine in engines:
             engine.dispose()
@@ -219,5 +219,52 @@ def test_a_newer_database_gets_a_clear_message(tmp_path):
         with pytest.raises(DatabaseUpgradeError, match="newer version of Budget Buddy"):
             run_migrations(engine)
         assert _revision(engine) == "9999"  # nothing was changed
+    finally:
+        engine.dispose()
+
+
+def test_migration_0018_keeps_your_own_other_expenses_category(tmp_path):
+    engine = create_db_engine(tmp_path)
+    config = alembic_config()
+
+    def migrate(direction, target):
+        with engine.begin() as conn:
+            config.attributes["connection"] = conn
+            getattr(command, direction)(config, target)
+
+    def other_expenses():
+        with engine.connect() as conn:
+            sql = "SELECT name, \"group\" FROM categories WHERE lower(name) = 'other expenses'"
+            return [tuple(row) for row in conn.execute(text(sql))]
+
+    try:
+        migrate("upgrade", "0017")
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    'INSERT INTO categories (name, "group", budget_cents) '
+                    "VALUES ('other expenses', 'needs', 5000)"
+                )
+            )
+        migrate("upgrade", "0018")
+        assert other_expenses() == [("other expenses", "needs")]  # yours, not a second one
+
+        with engine.begin() as conn:
+            conn.execute(text("DELETE FROM categories WHERE name = 'other expenses'"))
+        migrate("downgrade", "0017")
+        migrate("upgrade", "0018")
+        assert other_expenses() == [("Other Expenses", "wants")]
+
+        with engine.begin() as conn:  # now used: a downgrade keeps it
+            conn.execute(text("INSERT INTO accounts (id, name, kind) VALUES (1, 'C', 'checking')"))
+            conn.execute(
+                text(
+                    "INSERT INTO transactions (account_id, date, amount_cents, description, "
+                    "category_id, source, kind) SELECT 1, '2026-01-02', -500, 'Fake', id, "
+                    "'manual', 'normal' FROM categories WHERE name = 'Other Expenses'"
+                )
+            )
+        migrate("downgrade", "0017")
+        assert other_expenses() == [("Other Expenses", "wants")]
     finally:
         engine.dispose()

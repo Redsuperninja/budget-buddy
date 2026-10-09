@@ -90,7 +90,7 @@ def test_migrations_are_idempotent(data_dir, engine):
     run_migrations(engine)  # second run on the same database is a no-op
     create_app()  # and so is starting the app again
     with SessionLocal(bind=engine) as session:
-        assert session.scalar(select(func.count()).select_from(Category)) == 18
+        assert session.scalar(select(func.count()).select_from(Category)) == 19
 
 
 def test_default_categories_seeded(session):
@@ -107,7 +107,14 @@ def test_default_categories_seeded(session):
             "Insurance",
             "Healthcare",
         },
-        CategoryGroup.WANTS: {"Dining Out", "Entertainment", "Shopping", "Subscriptions", "Travel"},
+        CategoryGroup.WANTS: {
+            "Dining Out",
+            "Entertainment",
+            "Shopping",
+            "Subscriptions",
+            "Travel",
+            "Other Expenses",
+        },
         CategoryGroup.SAVINGS: {"Emergency Fund", "Retirement", "Investments"},
         CategoryGroup.INCOME: {"Paycheck", "Interest", "Other Income"},
         CategoryGroup.TRANSFER: {"Transfer"},
@@ -315,7 +322,7 @@ def test_get_session_dependency(client):
     def count_categories(session: Annotated[Session, Depends(get_session)]) -> dict[str, int]:
         return {"count": len(session.scalars(select(Category)).all())}
 
-    assert client.get("/_test/categories").json() == {"count": 18}
+    assert client.get("/_test/categories").json() == {"count": 19}
 
 
 def _account(session, kind=AccountKind.CHECKING):
