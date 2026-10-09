@@ -76,6 +76,7 @@ items (20, 21).
   - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
 - [x] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 - [x] 9b. Auto-sort learns from your picks; see what was auto-sorted — *backend-engineer*
+- [x] 9d. Hide balance adjustments on the Transactions page (on by default) — *backend-engineer*
 - [x] 9c. Show only transactions with no category yet, to sort them quickly — *backend-engineer*
 
 ## Phase 3: Budget & taxes

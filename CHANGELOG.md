@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The Transactions page hides balance adjustments (opening balances and "match the bank" fixes) unless you untick **Hide balance adjustments**.
 - Stock trades from your transactions: in a brokerage, IRA or HSA account, click **Stock trade** on a payment or deposit to record it as a stock purchase or sale (symbol and shares). It shows on the Stocks page, and the transaction is no longer counted as spending, income or uncategorized.
 - Income isn't budgeted any more: it's what the rest of your budget is measured against. Income categories have no budget box on the Categories page, and the Home page's budget table lists only needs, wants and savings.
 - Dividends: imported or typed-in dividends (like "... CASH DIV ON 1 SHS ...") go in a new **Dividends** income category, and the deposit sweep that moved the same cash on is linked to them. The Stocks page lists each year's dividends with the taxed total (dividends in an IRA, 401(k) or HSA aren't taxed), **Find dividends** checks older transactions, **Not a dividend** undoes one, and the Transactions page can hide dividends and their sweeps. An estimate, not tax advice.

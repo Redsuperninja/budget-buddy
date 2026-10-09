@@ -41,6 +41,9 @@ def list_transactions(
     hide_dividends: Annotated[
         bool, Query(description="Leave out dividends and their deposit sweeps")
     ] = False,
+    hide_adjustments: Annotated[
+        bool, Query(description="Leave out balance adjustments, like opening balances")
+    ] = False,
 ) -> TransactionPage:
     filters = service.TransactionFilters(
         account_id,
@@ -54,6 +57,7 @@ def list_transactions(
         sorted_by,
         uncategorized,
         hide_dividends,
+        hide_adjustments,
     )
     return service.list_transactions(session, filters)
 

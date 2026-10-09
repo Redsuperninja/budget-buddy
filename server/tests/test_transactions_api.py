@@ -363,3 +363,11 @@ def test_biggest_possible_id_is_just_not_found(client, accounts):
     assert client.get(f"/api/local/accounts/{BIGGEST_ID}").status_code == 404
     assert client.get(f"{URL}/{BIGGEST_ID}").status_code == 404
     assert client.get(URL, params={"offset": BIGGEST_ID}).json()["items"] == []
+
+
+def test_hide_balance_adjustments(client, add_txn, accounts):
+    checking, _ = accounts
+    add_txn(checking, -2_000, description="Coffee")
+    add_txn(checking, 300, description="Opening balance", kind="adjustment")
+    items = client.get(URL, params={"hide_adjustments": True}).json()["items"]
+    assert [t["description"] for t in items] == ["Coffee"]
