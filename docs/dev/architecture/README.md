@@ -66,6 +66,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [receipts.md](receipts.md) | Receipts and receipt photos |
 | [paychecks.md](paychecks.md) | Paychecks, the adds-up rule, deposit links, year-to-date summary |
 | [donations.md](donations.md) | Charitable donations and the yearly summary |
+| [dividends.md](dividends.md) | Dividends found in transactions, their deposit sweeps |
 | [transfers.md](transfers.md) | Matching transfers between your accounts automatically; transfer kinds |
 | [stocks.md](stocks.md) | Stock lots, sales, FIFO, gains |
 | [stock-import.md](stock-import.md) | Stock purchases and sales from a CSV file |

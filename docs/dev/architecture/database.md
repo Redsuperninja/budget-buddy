@@ -31,6 +31,7 @@
 | 0016 | Automatic transfer matching: remember transfers you unlinked |
 | 0017 | Live stock prices from Finnhub (ADR-0010) |
 | 0018 | Add an "Other Expenses" category |
+| 0019 | Dividends found in your transactions, with their deposit sweeps |
 
 ## Adding a migration
 

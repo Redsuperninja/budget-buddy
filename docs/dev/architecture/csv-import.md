@@ -34,5 +34,5 @@ takes `save_mapping` and `skip_invalid_rows`.
 - **Formula guard** (`app/spreadsheet.py`): a description starting with `=`, `+`, `-`, `@`, tab or carriage return gets a `'` in front, so a spreadsheet never
   runs it as a formula after export.
 - Imported rows are `normal` transactions with `source = csv`, sorted into a category by the
-  [auto-categorization rules](category-rules.md) where one matches (no category otherwise). Transfers aren't detected
-  automatically; the user links them ([ledger.md](ledger.md)).
+  [auto-categorization rules](category-rules.md) where one matches (no category otherwise). Then dividends and their
+  deposit sweeps are found ([dividends.md](dividends.md)), then transfers between accounts ([transfers.md](transfers.md)).

@@ -100,6 +100,9 @@ class ImportResult(Schema):
     categorized: int
     # Pairs linked as transfers between your accounts (a card payment, money into savings...).
     transfers_matched: int = 0
+    # Dividends found (filed under "Dividends") and deposit sweeps linked to one.
+    dividends_found: int = 0
+    dividend_sweeps_linked: int = 0
     skipped_duplicates: int
     skipped_invalid: int
     mapping_saved: bool

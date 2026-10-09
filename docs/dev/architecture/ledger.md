@@ -50,7 +50,8 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
     The accounts list's `balance_cents` includes future-dated transactions; this end-of-day sum doesn't.
 - **Transactions:** `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`, `date_from`,
   `date_to`, `kind`, `q`, `sorted_by` (`rule` or `you`, [category-rules.md](category-rules.md)), `uncategorized` (`true`: normal and
-  refund transactions with no category yet; transfers and adjustments never need one), `limit`, `offset`;
+  refund transactions with no category yet; transfers and adjustments never need one), `hide_dividends`
+  ([dividends.md](dividends.md)), `limit`, `offset`;
   newest first), `GET/PATCH/DELETE /api/local/transactions/{id}`.
   - Send `amount_cents`, or `amount` as dollar text (`"-12.34"`).
   - Adjustments can't have a category. A `refund` must be a positive amount.

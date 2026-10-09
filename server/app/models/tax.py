@@ -1,4 +1,5 @@
-"""Tax items: donations, stock lots/sales, and other deductions. Amounts are integer cents."""
+"""Tax items: donations, dividends, stock lots/sales, and other deductions. Amounts are integer
+cents."""
 
 import datetime as dt
 
@@ -31,6 +32,25 @@ class Donation(TimestampMixin, Base):
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True, unique=True
     )
     notes: Mapped[str | None] = mapped_column(EncryptedString("donations.notes"))
+
+
+class Dividend(TimestampMixin, Base):
+    """A dividend paid into one of your accounts: a money-in transaction that looks like one, and
+    the deposit sweep that moved the same cash on (if found). The date and amount are the
+    transaction's, so they're never stored twice. See app/services/dividend_matching.py."""
+
+    __tablename__ = "dividends"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    transaction_id: Mapped[int] = mapped_column(
+        ForeignKey("transactions.id", ondelete="CASCADE"), unique=True
+    )
+    sweep_transaction_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transactions.id", ondelete="SET NULL"), unique=True
+    )
+    payer: Mapped[str] = mapped_column(String(100))  # from the description: "JOHNSON & JOHNSON"
+    # "Not a dividend": kept so it isn't found again, but left out of lists and totals.
+    dismissed: Mapped[bool] = mapped_column(default=False, server_default="0")
 
 
 class StockLot(TimestampMixin, Base):

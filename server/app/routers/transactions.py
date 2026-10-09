@@ -15,6 +15,7 @@ from app.schemas.transactions import (
 )
 from app.services import gift_categories, transfers
 from app.services import transactions as service
+from app.services.dividend_matching import find_dividends
 from app.services.transfer_matching import match_transfers
 
 router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
@@ -37,6 +38,9 @@ def list_transactions(
     uncategorized: Annotated[
         bool, Query(description="Only payments and refunds with no category yet")
     ] = False,
+    hide_dividends: Annotated[
+        bool, Query(description="Leave out dividends and their deposit sweeps")
+    ] = False,
 ) -> TransactionPage:
     filters = service.TransactionFilters(
         account_id,
@@ -49,6 +53,7 @@ def list_transactions(
         offset,
         sorted_by,
         uncategorized,
+        hide_dividends,
     )
     return service.list_transactions(session, filters)
 
@@ -56,7 +61,9 @@ def list_transactions(
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_transaction(data: TransactionCreate, session: SessionDep) -> TransactionOut:
     transaction = service.create_transaction(session, data)
-    if match_transfers(session, {transaction.id}):  # the other side of a transfer you entered
+    found = find_dividends(session, {transaction.id})  # a dividend, or the sweep of one
+    # The other side of a transfer you entered.
+    if match_transfers(session, {transaction.id}) or found.dividends or found.sweeps:
         session.commit()
     return transaction
 

@@ -1,5 +1,5 @@
-// Stocks: realized gains for a tax year (an estimate), the shares you bought, adding purchases and sales by hand
-// or from a CSV file. What you hold now and its value are on the Investments page.
+// Stocks: realized gains for a tax year (an estimate), dividends found in your transactions, the shares you
+// bought, adding purchases and sales by hand or from a CSV file. What you hold now and its value are on the Investments page.
 
 import { createLot, createSale, listAccounts, listLots, stockGains } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
@@ -9,6 +9,7 @@ import { form } from "../form.js";
 import { card, empty, note, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
+import { dividendsCard } from "./dividends-card.js";
 import { stockImportCard } from "./stock-import.js";
 
 const termRow = (label, t) =>
@@ -18,8 +19,8 @@ export async function render(root, options) {
   const year = options.year || thisYear();
   const accounts = await listAccounts();
   const accountName = new Map(accounts.map((a) => [a.id, a.name]));
-  const [lots, gains] = await Promise.all([
-    listLots(), stockGains(year),
+  const [lots, gains, dividends] = await Promise.all([
+    listLots(), stockGains(year), dividendsCard(year, accountName),
   ]);
 
   // Purchases and sales are entered the same way, apart from the date and money labels.
@@ -54,6 +55,7 @@ export async function render(root, options) {
             [s.sold_on, s.symbol, s.shares, formatCents(s.proceeds_cents), formatCents(s.gain_cents),
               s.possible_wash_sale ? "Possible wash sale" : ""]), [3, 4])
         : empty("No sales in this year.")),
+    dividends,
     card("Shares you bought", lots.length
       ? table(["Symbol", "Account", "Bought", "Shares", "Still held", "Cost"], lots.map((l) =>
           [l.symbol, accountName.get(l.account_id) || "", l.acquired_on, l.shares, l.remaining_shares,

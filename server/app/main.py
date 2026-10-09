@@ -29,6 +29,7 @@ from app.routers import (
     csv_import,
     dashboard,
     deductions,
+    dividends,
     donations,
     health,
     instance,
@@ -133,6 +134,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(paychecks.router)
     app.include_router(receipts.router)
     app.include_router(donations.router)
+    app.include_router(dividends.router)
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
     app.include_router(stock_import.router)

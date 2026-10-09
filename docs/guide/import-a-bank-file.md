@@ -32,7 +32,9 @@ Most banks let you download your transactions as a CSV file. Budget Buddy can re
 
 **The first time you import from a bank account.** Budget Buddy asks which column is which. Next time it remembers your choice. You can change your mind and import again with new choices.
 
-**Transfers between your accounts.** Aren't spotted automatically — link them yourself on the Transactions page.
+**Transfers between your accounts.** Clear ones are linked for you ([Transfers](transfers.md)); link the rest yourself on the Transactions page.
+
+**Dividends.** Are put in the Dividends category, with the deposit sweep that moved the cash on ([Dividends](dividends.md)).
 
 **Rows with problems.** Stop the import and are listed by row number, so nothing half-imports. Fix your choices, or add `skip_invalid_rows=true` to import the rest. Blank lines are ignored.
 

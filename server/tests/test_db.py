@@ -46,6 +46,7 @@ EXPECTED_TABLES = {
     "stock_prices",
     "price_feed",
     "donations",
+    "dividends",
     "stock_lots",
     "stock_sales",
     "stock_sale_orders",

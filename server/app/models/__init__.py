@@ -23,6 +23,7 @@ from app.models.ledger import (
 )
 from app.models.tax import (
     Deduction,
+    Dividend,
     Donation,
     PriceFeed,
     StockLot,
@@ -44,6 +45,7 @@ __all__ = [
     "Deduction",
     "DeductionKind",
     "Device",
+    "Dividend",
     "Donation",
     "DonationKind",
     "PairingNonce",

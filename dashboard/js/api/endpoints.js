@@ -56,6 +56,11 @@ export const donationSummary = (year) => api("GET", `${LOCAL}/donations/summary/
 export const createDonation = (json) => api("POST", `${LOCAL}/donations`, { json });
 export const deleteDonation = (id) => api("DELETE", `${LOCAL}/donations/${id}`);
 
+// Dividends found in your transactions, with their deposit sweeps
+export const listDividends = (year) => api("GET", `${LOCAL}/dividends/${year}`);
+export const findDividends = () => api("POST", `${LOCAL}/dividends/find`);
+export const dismissDividend = (id) => api("POST", `${LOCAL}/dividends/${id}/dismiss`);
+
 // Other deductions and the yearly tax summary
 export const listDeductions = (year) => api("GET", `${LOCAL}/deductions?tax_year=${year}`);
 export const createDeduction = (json) => api("POST", `${LOCAL}/deductions`, { json });

@@ -32,6 +32,7 @@ JOINED_AREAS = frozenset(
         "categories",
         "category-rules",
         "deductions",
+        "dividends",
         "donations",
         "paychecks",
         "receipts",

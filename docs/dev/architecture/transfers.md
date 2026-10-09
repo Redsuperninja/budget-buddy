@@ -10,7 +10,7 @@ Code: `services/transfers.py` (link, unlink, `pair_up`), `services/transfer_matc
 
 - one money-out and one money-in transaction for exactly the same amount, on different accounts, dated at most
   `WINDOW_DAYS` (5) apart;
-- both `normal`, unlinked, not a paycheck's deposit or a linked donation, not unlinked by the user before
+- both `normal`, unlinked, not a paycheck's deposit, a linked donation or a dividend's deposit sweep, not unlinked by the user before
   (`auto_transfer_off`), and uncategorized or in a transfer-group category (a category from the user or a rule
   is respected);
 - at least one description matches `TRANSFER_WORDS`; a credit card's side matches `CARD_PAYMENT_WORDS` (a refund
