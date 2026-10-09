@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Sort what's left: on the Transactions page, set **Category set** to **Not yet (uncategorized)** to see only payments and refunds with no category yet, and pick one for each right there.
 - Import stocks from a CSV file: on the Stocks page, choose a spreadsheet or your broker's file with Symbol, Date, Shares and Cost columns (and an optional Buy/Sell column) to add many purchases and sales at once. A preview shows what's new, what's already there and any row with a problem; importing the same file twice adds nothing, and sales use your oldest shares first.
 - Live stock prices (optional): with a free Finnhub key, the Investments page gets the latest prices when you open it and when you click **Refresh prices** (never in the background). Only your symbols are sent, the key is stored encrypted, and each price says whether it's live or typed in. Off until you turn it on (ADR-0010).
 - Transfers found for you: when you import a bank file or add a transaction, Budget Buddy links money leaving one of your accounts with the same amount arriving in another within 5 days (when one side says it's a transfer or payment), and says what it is: a credit card or loan payment, money into or out of savings, investments, retirement or an HSA. A **Find transfers** button checks older transactions, ties and anything already categorized are left for you, and undoing a link puts each side's category back and is remembered.

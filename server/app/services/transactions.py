@@ -47,6 +47,9 @@ class TransactionFilters:
     limit: int = 100
     offset: int = 0
     sorted_by: CategorySource | None = None  # "rule": auto-sorted; "you": picked by hand
+    # Only ones still waiting for a category: regular payments and refunds with none yet.
+    # Transfers and balance adjustments don't need one, so they're left out.
+    uncategorized: bool = False
 
 
 def get_transaction(session: Session, transaction_id: int) -> Transaction:
@@ -106,6 +109,11 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
         query = query.where(Transaction.description.like(pattern, escape="\\"))
     if filters.sorted_by is not None:
         query = query.where(Transaction.category_source == filters.sorted_by.value)
+    if filters.uncategorized:
+        query = query.where(
+            Transaction.category_id.is_(None),
+            Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
+        )
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))
     items = session.scalars(

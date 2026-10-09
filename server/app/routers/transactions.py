@@ -34,9 +34,21 @@ def list_transactions(
     sorted_by: Annotated[
         CategorySource | None, Query(description='"rule": auto-sorted; "you": picked by hand')
     ] = None,
+    uncategorized: Annotated[
+        bool, Query(description="Only payments and refunds with no category yet")
+    ] = False,
 ) -> TransactionPage:
     filters = service.TransactionFilters(
-        account_id, category_id, date_from, date_to, kind, q, limit, offset, sorted_by
+        account_id,
+        category_id,
+        date_from,
+        date_to,
+        kind,
+        q,
+        limit,
+        offset,
+        sorted_by,
+        uncategorized,
     )
     return service.list_transactions(session, filters)
 
