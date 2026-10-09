@@ -29,8 +29,8 @@ function accountCard(group) {
 
 function priceForm(year) {
   return card("Type a price",
-    empty("Type the latest price of one share, from your broker's website or app. Budget Buddy never looks " +
-      "prices up on the internet."),
+    empty("Type the latest price of one share, from your broker's website or app. It replaces the last price, " +
+      "live or typed in. Use this for funds live prices don't cover."),
     form([
       { name: "symbol", label: "Symbol", required: true, maxlength: 16, placeholder: "VTI" },
       { name: "price", label: "Price of one share in dollars", required: true, inputmode: "decimal" },
