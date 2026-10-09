@@ -81,6 +81,7 @@ items (20, 21).
 - [x] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
 - [x] 10a. Budgets as a percentage of income (planned or actual), and each group's share of income — *finance-tax-expert*
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
+- [x] 10c. Match transfers between accounts automatically and say what kind they are — *backend-engineer* + *finance-tax-expert*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
 - [x] 11b. Sort a payment into charity: a donation linked to its transaction — *finance-tax-expert* + *backend-engineer*
 - [x] 11c. Gift categories: charity gifts filed under "Charitable giving", personal gifts under "Gifts" — *finance-tax-expert*

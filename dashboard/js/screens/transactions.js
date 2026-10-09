@@ -1,6 +1,6 @@
 // Transactions: filter by account, month and how they were sorted, change a category, mark a gift, add one by hand.
 
-import { createTransaction, listAccounts, listCategories, listTransactions } from "../api/endpoints.js";
+import { createTransaction, listAccounts, listCategories, listTransactions, matchTransfers } from "../api/endpoints.js";
 import { currentMonth, monthRange, today } from "../dates.js";
 import { fill, h, showError } from "../dom.js";
 import { accountField, categoryField, idOrNull, pickOptions } from "../fields.js";
@@ -50,10 +50,22 @@ export async function render(root) {
   monthFilter.addEventListener("change", refresh);
   sortedFilter.addEventListener("change", refresh);
 
+  // Links card payments and moves between your accounts that weren't linked when they came in.
+  const matchNote = h("span", { class: "muted", role: "status" });
+  const findTransfers = h("button", { class: "plain", type: "button", onclick: async () => {
+    try {
+      const { matched } = await matchTransfers();
+      matchNote.textContent = matched ? ` Linked ${matched} transfer(s).` : " No new transfers found.";
+      await refresh();
+    } catch (err) {
+      matchNote.textContent = ` ${err.message}`;
+    }
+  } }, "Find transfers");
+
   fill(root,
     card("Transactions",
       h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter),
-        h("label", {}, "Category set", sortedFilter)),
+        h("label", {}, "Category set", sortedFilter), h("span", {}, findTransfers, matchNote)),
       list),
     accounts.length
       ? card("Add a transaction", form([

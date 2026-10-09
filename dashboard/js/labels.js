@@ -23,4 +23,13 @@ export const DEDUCTION_KINDS = [
 ];
 export const deductionKindLabel = (kind) => lookup(DEDUCTION_KINDS, kind);
 
+// What kind of transfer a linked pair is (server app/transfer_types.py).
+export const TRANSFER_TYPES = [
+  ["card_payment", "Credit card payment"], ["loan_payment", "Loan payment"], ["to_savings", "Into savings"],
+  ["to_investments", "Into investments"], ["to_retirement", "Into retirement"], ["to_hsa", "Into HSA"],
+  ["from_savings", "Out of savings"], ["from_investments", "Out of investments"],
+  ["from_retirement", "Out of retirement"], ["from_hsa", "Out of HSA"], ["between_accounts", "Between accounts"],
+];
+export const transferTypeLabel = (type) => lookup(TRANSFER_TYPES, type);
+
 export const NOT_TAX_ADVICE = "Estimate, not tax advice.";

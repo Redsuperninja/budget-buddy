@@ -11,9 +11,11 @@ from app.schemas.transactions import (
     TransactionPage,
     TransactionUpdate,
     TransferLink,
+    TransfersMatched,
 )
-from app.services import gift_categories
+from app.services import gift_categories, transfers
 from app.services import transactions as service
+from app.services.transfer_matching import match_transfers
 
 router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
 
@@ -41,7 +43,19 @@ def list_transactions(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_transaction(data: TransactionCreate, session: SessionDep) -> TransactionOut:
-    return service.create_transaction(session, data)
+    transaction = service.create_transaction(session, data)
+    if match_transfers(session, {transaction.id}):  # the other side of a transfer you entered
+        session.commit()
+    return transaction
+
+
+# Declared before "/{transaction_id}" so the path isn't read as an ID.
+@router.post("/match-transfers")
+def find_transfers(session: SessionDep) -> TransfersMatched:
+    """Link every clear transfer pair among all transactions (services/transfer_matching.py)."""
+    matched = match_transfers(session)
+    session.commit()
+    return TransfersMatched(matched=matched)
 
 
 @router.get("/{transaction_id}")
@@ -65,12 +79,12 @@ def delete_transaction(transaction_id: PathId, session: SessionDep) -> None:
 def link_transfer(
     transaction_id: PathId, data: TransferLink, session: SessionDep
 ) -> TransactionOut:
-    return service.link_transfer(session, transaction_id, data.other_id)
+    return transfers.link_transfer(session, transaction_id, data.other_id)
 
 
 @router.delete("/{transaction_id}/transfer")
 def unlink_transfer(transaction_id: PathId, session: SessionDep) -> TransactionOut:
-    return service.unlink_transfer(session, transaction_id)
+    return transfers.unlink_transfer(session, transaction_id)
 
 
 @router.post("/{transaction_id}/personal-gift")

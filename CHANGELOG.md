@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Transfers found for you: when you import a bank file or add a transaction, Budget Buddy links money leaving one of your accounts with the same amount arriving in another within 4 days, and says what it is: a credit card or loan payment, money into or out of savings, investments, retirement or an HSA. A **Find transfers** button checks older transactions, ties are left for you, and a link you undo is never made again.
 - Fixed: the desktop app opens even when Budget Buddy is already running from the launch folder (it checks it's really Budget Buddy first), and the dashboard no longer shows a blank page after an update while Budget Buddy is running: new page files are picked up without a restart, and if the page can't load it says to restart.
 - Docs and code tidy-up: guides quote the real "only works on the computer where Budget Buddy is running" message, the paychecks guide says how the 401(k) line counts toward limits, and the donation paperwork rules have their own file. No behavior change.
 - Match your bank's balance: on the Accounts page, type today's balance from your bank (or the balance at the start of the year, or on any day) and Budget Buddy adds one balance adjustment for the difference, so the balance shown is the one in your bank. Adjustments aren't income or spending.

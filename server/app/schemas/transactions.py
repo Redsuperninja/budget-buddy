@@ -13,6 +13,7 @@ from app.schemas.common import (
     UpdateSchema,
     resolve_amount,
 )
+from app.transfer_types import TransferType
 
 Description = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 # "transfer" is set only by linking two transactions (POST .../transfer), never directly.
@@ -82,6 +83,9 @@ class TransactionOut(Schema):
     donation_id: int | None = None
     # How the category was set: "rule" (auto-sorted, by ``sorted_by_rule_id``) or "you".
     category_source: CategorySource | None = None
+    # For a linked transfer: card_payment, to_savings, to_retirement... (app/transfer_types.py).
+    transfer_type: TransferType | None = None
+    auto_transfer_off: bool = False
     sorted_by_rule_id: int | None = None
     # Only right after a pick by hand: the text of an auto-sort rule Budget Buddy just learned.
     learned_rule: str | None = None
@@ -95,3 +99,7 @@ class TransactionPage(Schema):
     total: int
     limit: int
     offset: int
+
+
+class TransfersMatched(Schema):
+    matched: int  # pairs linked as transfers
