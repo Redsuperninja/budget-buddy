@@ -83,6 +83,7 @@ for pairing and joining; common rules are in
 | Paychecks | [paychecks.md](../docs/dev/architecture/paychecks.md) |
 | Donations | [donations.md](../docs/dev/architecture/donations.md) |
 | Stocks | [stocks.md](../docs/dev/architecture/stocks.md) |
+| Stock CSV import | [stock-import.md](../docs/dev/architecture/stock-import.md) |
 | Other deductions, yearly tax summary, CSV export | [tax-summary.md](../docs/dev/architecture/tax-summary.md) |
 | Pairing, devices, home-network listener | [pairing.md](../docs/dev/architecture/pairing.md) |
 | Phone sync (`/api/sync/*`) | [sync.md](../docs/dev/architecture/sync.md) and the [sync contract](../docs/api/sync-contract.md) |

@@ -27,7 +27,7 @@ MAX_ROWS = 10_000
 MAX_DESCRIPTION = 500
 DELIMITERS = (",", ";", "\t", "|")
 
-_THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]+)?")
+THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]+)?")
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 SPACES = re.compile(r"\s+")
 
@@ -103,7 +103,7 @@ def parse_amount(text: str) -> int | None:
     sign = text[:1] if text[:1] in ("+", "-") else ""
     number = text[len(sign) :]
     if "," in number:
-        if not _THOUSANDS.fullmatch(number):
+        if not THOUSANDS.fullmatch(number):
             raise ValueError("Comma isn't a thousands separator")
         number = number.replace(",", "")
     cents = dollars_to_cents(sign + number)
@@ -125,7 +125,7 @@ def clean_description(text: str) -> str:
     return text[:MAX_DESCRIPTION]
 
 
-def _cell(row: list[str], column: int) -> str:
+def cell(row: list[str], column: int) -> str:
     if column >= len(row):
         raise RowProblem("This row has fewer columns than the others.")
     return row[column].strip()
@@ -135,17 +135,17 @@ def _amount(row: list[str], column: int | None, what: str) -> int | None:
     if column is None:
         return None
     try:
-        return parse_amount(_cell(row, column))
+        return parse_amount(cell(row, column))
     except ValueError:
         raise RowProblem(f"The {what} isn't a dollar amount we can read.") from None
 
 
 def parse_row(row: list[str], m: CsvMapping) -> tuple[dt.date, str, int]:
     try:
-        date = parse_date(_cell(row, m.date_column), m.date_format)
+        date = parse_date(cell(row, m.date_column), m.date_format)
     except ValueError:
         raise RowProblem(f"The date isn't in the {m.date_format} format.") from None
-    description = clean_description(_cell(row, m.description_column))
+    description = clean_description(cell(row, m.description_column))
     if not description:
         raise RowProblem("The description is empty.")
     if m.amount_column is not None:

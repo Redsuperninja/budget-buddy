@@ -47,6 +47,7 @@ Track income, donations, and stock gains to help prepare for tax time.
 1. [Paychecks](paychecks.md) — Log pay stubs; check that numbers add up; link deposits; year-to-date totals.
 2. [Donations](donations.md) — Track gifts to charity; sort a payment into charity; what proof to keep for each gift.
 3. [Stocks](stocks.md) — Record purchases and sales in any account; calculate gains and losses; spot wash sales.
+   - [Import stocks from a CSV file](import-stocks.md) — Add many purchases and sales at once from a spreadsheet or your broker's file.
 4. [Your investments and retirement savings](investments.md) — What you hold in each account and what it's worth; 401(k), IRA and HSA contributions against the limits.
 5. [Tax summary and other deductions](tax-summary.md) — Medical bills, mortgage interest and more; one page per year; download or print it.
 

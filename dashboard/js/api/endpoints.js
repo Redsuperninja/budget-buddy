@@ -74,6 +74,9 @@ export const setStockPrice = (json) => api("POST", `${LOCAL}/stocks/prices`, { j
 export const priceFeed = () => api("GET", `${LOCAL}/price-feed`);
 export const savePriceFeed = (json) => api("PUT", `${LOCAL}/price-feed`, { json });
 export const refreshPrices = () => api("POST", `${LOCAL}/stocks/prices/refresh`);
+// Stock CSV import (query: already-encoded text; bytes: the CSV file)
+export const previewStockCsv = (query, bytes) => sendCsv(`${LOCAL}/stocks/import/preview?${query}`, bytes);
+export const importStockCsv = (query, bytes) => sendCsv(`${LOCAL}/stocks/import?${query}`, bytes);
 
 // Retirement and HSA contributions against the year's limits
 export const retirementLimits = (year) => api("GET", `${LOCAL}/retirement/${year}`);
