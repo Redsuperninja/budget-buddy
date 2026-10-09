@@ -76,3 +76,7 @@ Move files with `git mv` in small PRs, update links in the same PR, and run the 
 - Bank-file trades: read share counts when a broker puts them in the description; partial fills on several lines.
 - Recurring gifts: a "check these" note on Home when a repeat payment to a charity had a different amount.
 - An owner on paychecks and deductions (limits are per person), the 457(b) plan type, phone reminders (#21).
+- From the reviews (should-fix, not done): Roth IRA deposits made January to April 15 for the year before, when
+  the description names that year, should count toward that year (`services/retirement.py`); a refund of an excess
+  contribution should be taken off; the Receipts page's "Download photo" link should use `?download=true` when a
+  photo can't be shown.
