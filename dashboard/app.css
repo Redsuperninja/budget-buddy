@@ -81,6 +81,9 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }
 .chart .tip-box { fill: var(--card); stroke: var(--line); }
 .chart .tip text { fill: var(--text); }
+img.thumb { display: block; width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: 6px;
+  border: 1px solid var(--line); }
+
 /* Home: money tiles with a thin meter, and the "needs your attention" list. */
 .tiles .tile { display: flex; flex-direction: column; gap: 0.35rem; }
 .tile.good-tile .big { color: var(--good); } .tile.bad-tile .big { color: var(--bad); }

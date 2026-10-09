@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Receipts page: **Money**, **Receipts** shows the receipts synced from your phone with a small picture (click for full size, or download one your browser can't show), and **Delete** removes an outdated one and its photo.
 - Brokerage activity import: on **Import files** (the old Import bank file page), import your broker's activity or history CSV into a brokerage, IRA, 401(k) or HSA account. Every row becomes a transaction, buys and sells with a symbol and shares are also recorded as stock trades, and dividends are filed, so nothing needs sorting by hand. It shows in Import history, where it can be undone.
 - Import history: **Money**, **Import history** lists every file you imported (bank, stock trades, positions) with its account, name and what it added. **Remove** undoes one: what it added is deleted and transfers it was part of go back to normal.
 - Remove stock trades: **Delete** next to each purchase and sale on the Stocks page ("Sales you entered" lists every sale, including retirement and HSA ones), and **Undo** next to a "Bought ..." or "Sold ..." trade on the Transactions page (the transaction stays). Budget Buddy asks first, and says so if a sale still needs a purchase.

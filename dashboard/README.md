@@ -55,7 +55,7 @@ Keep the top row short: add a page to an existing section rather than a new sect
 server route, add a function to `api/endpoints.js`.
 
 Screens, by section: **Home** (money tiles, what needs you, where the income went, budget charts, the last 12 months, what you have and owe); **Money**: Transactions (with a Charity column to
-sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Auto-sort (rules); **Budget**: Categories, Suggested budget;
+sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
 Connect phone, Other computers (`other-computers.js`). `join.js` is the join page for another computer
 ([ADR-0009](../docs/adr/0009-other-computers.md)).

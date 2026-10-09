@@ -75,6 +75,7 @@ items (20, 21).
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 7b. Pay deposits from bank files start a paycheck on the Paychecks page, linked to the deposit — *backend-engineer*
 - [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
+- [x] 8b. Receipts page on the dashboard: photos, details, delete outdated ones — *backend-engineer*
   - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
 - [x] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 - [x] 9b. Auto-sort learns from your picks; see what was auto-sorted — *backend-engineer*
