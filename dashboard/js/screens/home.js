@@ -1,15 +1,19 @@
-// Home: the month at a glance, charts of spending against budget and the last 12 months (each also
-// as a table), and account balances.
+// Home: the month at a glance (money tiles and what needs you), where the income went, spending against budget,
+// the last 12 months, and what you have and owe. Every chart can also be read as a table.
 
-import { listAccounts, monthlySummary, monthlyTrend } from "../api/endpoints.js";
+import {
+  listAccounts, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, stockHoldings,
+} from "../api/endpoints.js";
 import { currentMonth } from "../dates.js";
 import { fill, h } from "../dom.js";
-import { card, empty, note, statCard, table } from "../widgets.js";
-import { groupLabel, kindLabel } from "../labels.js";
-import { formatBalance, formatCents } from "../money.js";
+import { empty, table } from "../widgets.js";
+import { groupLabel } from "../labels.js";
+import { formatCents } from "../money.js";
 import { formatBp, percentUsed } from "../percent.js";
 import { reload } from "../router.js";
 import { categoriesChart, groupsChart, trendChart } from "./home-charts.js";
+import { balancesCard, incomeSplitCard } from "./home-overview.js";
+import { attentionCard, monthTiles } from "./home-tiles.js";
 
 const used = (c) => {
   const pct = percentUsed(c.actual_cents, c.budget_cents);
@@ -35,41 +39,35 @@ function budgetTable(summary) {
     summary.categories.some((c) => c.budget_percent_bp !== null) ? empty(incomeBasis(summary)) : null);
 }
 
-function monthCards(summary) {
-  return h("div", { class: "cards" },
-    statCard("Money in", formatCents(summary.income_cents)),
-    statCard("Spent", formatCents(summary.spending_cents),
-      h("div", { class: "muted" }, `Planned: ${formatCents(summary.spending_budget_cents)}`)),
-    statCard("Saved", formatCents(summary.saved_cents), summary.saved_by_transfer_cents
-      ? h("div", { class: "muted" }, `Moved to savings: ${formatCents(summary.saved_by_transfer_cents)}`) : null),
-    statCard("Not sorted yet (money out)", formatCents(summary.unassigned_out_cents)));
-}
-
 export async function render(root, options) {
   const month = options.month || currentMonth();
-  const [summary, trend, accounts] = await Promise.all([
+  const [summary, trend, accounts, waiting, deposits, positions, held] = await Promise.all([
     monthlySummary(month),
     monthlyTrend(month),
     listAccounts(),
+    listTransactions(new URLSearchParams({ uncategorized: "true", limit: "1" })),
+    payDeposits(month.slice(0, 4)),
+    listPositions(),
+    stockHoldings(),
   ]);
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
   picker.addEventListener("change", () => { if (picker.value) reload({ month: picker.value }); });
+  const mismatched = positions.accounts.flatMap((a) => a.positions).filter((p) => !p.matches).length;
 
   fill(root,
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker)),
-    monthCards(summary),
-    summary.unassigned_count
-      ? note(`${summary.unassigned_count} transaction(s) have no category yet ` +
-          `(${formatCents(summary.unassigned_out_cents)} out, ${formatCents(summary.unassigned_in_cents)} in). ` +
-          "They are not counted above. Set a category on the Transactions page, or add an Auto-sort rule.")
-      : null,
+    monthTiles(summary),
+    attentionCard([
+      { count: waiting.total, href: "#transactions",
+        text: "transaction(s) with no category: on Transactions, set Category set to Not yet" },
+      { count: deposits.length, href: "#paychecks", text: "pay deposit(s) to fill in on Paychecks" },
+      { count: mismatched, href: "#investments", text: "position(s) that don't match your recorded trades" },
+    ]),
+    incomeSplitCard(summary),
     groupsChart(summary),
     categoriesChart(summary, budgetTable(summary)),
     trendChart(trend),
-    card("Account balances", accounts.length
-      ? table(["Account", "Type", "Balance"],
-          accounts.map((a) => [a.name, kindLabel(a.kind), formatBalance(a.balance_cents, a.kind)]), [2])
-      : empty("No accounts yet. Add one on the Accounts page.")),
+    balancesCard(accounts, held.accounts.length ? held.value_cents : null),
     empty("Budgets are the same every month, so changing one also changes how past months look."),
   );
 }

@@ -14,7 +14,18 @@ after you connect them with a one-time code ([use Budget Buddy on another comput
 
 ## Charts
 
-The **Home** page has charts:
+The **Home** page shows your month at a glance:
+
+- **Four tiles:** money in (what everything else is measured against), what you spent (with a bar for how much of
+  your spending budget that is), what you saved (and what share of your income), and what's left over.
+- **Needs your attention:** transactions with no category, pay deposits to fill in, and investment positions
+  that don't match your recorded trades. Click one to go there. "All caught up" means nothing's waiting.
+- **Where your income went:** one bar the length of your income, split into needs, wants and savings, with what's
+  left over in gray. If you spent and saved more than came in, a line marks where your income ran out.
+- **What you have and owe:** your net worth, and a bar for each account: money you have to the right, money you
+  owe (credit cards, loans) to the left.
+
+It also has these charts:
 
 - **Needs, wants and savings** and **Budget and actual by category:** a bar for what you've spent this month,
   and a short upright line where your budget is. If the bar goes past the line, you're over budget (the amount
