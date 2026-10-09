@@ -11,13 +11,20 @@ first row has to name the columns. Budget Buddy looks for:
 | Column | Other names that work | What goes in it |
 | --- | --- | --- |
 | **Symbol** | Ticker | Like `VTI` or `BRK.B` |
-| **Date** | Trade date, Date acquired, Date sold | The day you bought or sold |
+| **Date** | Trade date, Date acquired, Date sold | The day you bought or sold (the trade date, not the settlement date) |
 | **Shares** | Quantity, Qty | How many shares, like `10` or `2.5` |
 | **Cost** | Amount, Cost basis, Proceeds, Total | The **total** paid including fees, or received after fees, not the price per share |
 | **Type** (optional) | Action | **Buy** or **Sell** |
 
-Without a **Type** column, every row is added as a purchase. Other columns (like Price or Description) are
-ignored, so a broker's own file often works as it is. A minus sign on shares or money is fine.
+Without a **Type** column, every row is added as a purchase. If your file has a **Type** column, a minus sign on
+shares or money is fine (brokers often show sold shares as negative); without one, a row with negative shares is
+flagged, since it's probably a sale. Other columns (like Price, Fees or Description) are ignored, so a broker's own
+file often works as it is.
+
+- **Reinvested dividends** (a "Reinvest" row with shares) count as purchases, at the amount reinvested. A row with
+  only the cash dividend and no shares can be skipped.
+- **Short sales, options and corrections** (like "Sell Short", "Buy to Cover", "Sell to Open" or "Cancel") can't be
+  imported. Skip those rows and enter them by hand.
 
 A small example:
 
@@ -43,8 +50,8 @@ same as sales you type in (see [Stocks](stocks.md)).
 
 - **"We couldn't find the columns"**: the first row of the file needs column names like Symbol, Date, Shares
   and Cost. Add a row at the top with those names.
-- **"The type should say Buy or Sell"**: that row is something else, like a dividend. Delete the row, or choose
-  to skip rows with problems.
+- **"The type should say Buy or Sell"**: that row is something else, like a cash dividend or reinvested dividend
+  cash with no shares. Delete the row, or choose to skip rows with problems.
 - **"The sale of ... is for more shares than you owned then"**: the file sells shares Budget Buddy doesn't know
   you had in that account by that date. Add the missing purchases to the file (or enter them first), then
   import again. Nothing was saved.

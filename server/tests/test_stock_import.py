@@ -148,3 +148,42 @@ def test_unreadable_dates(client):
     p = ok(send(client, body))
     assert p["columns"]["date_format"] is None
     assert "format we know" in p["rows"][0]["problem"]
+
+
+def test_short_sales_options_and_corrections_are_refused(client):
+    body = (
+        "Action,Symbol,Date,Quantity,Amount\r\n"
+        "YOU BOUGHT SALESFORCE INC,FAKE,2026-01-05,2,20.00\r\n"
+        "Sell Short,FAKE,2026-01-06,1,10.00\r\n"
+        "Buy to Cover,FAKE,2026-01-07,1,10.00\r\n"
+        "Sell to Open CALL,FAKE,2026-01-08,1,10.00\r\n"
+        "Cancel Buy,FAKE,2026-01-09,1,10.00\r\n"
+        "Buy Correction,FAKE,2026-01-10,1,10.00\r\n"
+        "Sell,FAKE,2026-01-11,(1),15.00\r\n"
+    )
+    p = ok(send(client, body))
+    statuses = [(r["row_number"], r["status"], r["kind"]) for r in p["rows"]]
+    assert statuses[0] == (2, "new", "buy")  # "SALESFORCE" isn't the word "sale"
+    assert statuses[-1] == (8, "new", "sell")  # shares sold shown as (1)
+    refused = [r for r in p["rows"] if r["status"] == "invalid"]
+    assert [r["row_number"] for r in refused] == [3, 4, 5, 6, 7]
+    assert all(r["problem"].startswith("Short sales, options and corrections") for r in refused)
+
+
+def test_negative_shares_need_a_matching_type(client):
+    no_type = "Symbol,Date,Shares,Cost\r\nFAKE,2026-01-05,-2,20.00\r\n"
+    problem = ok(send(client, no_type))["rows"][0]["problem"]
+    assert problem.startswith("The shares are negative, so this looks like a sale.")
+    contradicts = "Type,Symbol,Date,Shares,Cost\r\nBuy,FAKE,2026-01-05,2-,20.00\r\n"
+    problem = ok(send(client, contradicts))["rows"][0]["problem"]
+    assert problem == "The type says Buy, but the number of shares is negative."
+
+
+def test_price_fee_and_settlement_columns_are_never_used(client):
+    body = (
+        "Symbol,Settlement Date,Trade Date,Qty,Cost Per Share,Avg Cost,Commission Amount,Total\r\n"
+        "FAKE,2026-01-07,2026-01-05,2,10.00,10.00,1.00,21.00\r\n"
+    )
+    p = ok(send(client, body))
+    assert (p["columns"]["date"], p["columns"]["money"]) == (2, 7)
+    assert (p["rows"][0]["date"], p["rows"][0]["money_cents"]) == ("2026-01-05", 2_100)

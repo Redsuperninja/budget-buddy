@@ -15,7 +15,7 @@ from app.errors import ApiError
 from app.schemas.stock_import import Kind, StockColumns
 from app.schemas.stocks import LotCreate, SaleCreate
 from app.services.csv_columns import detect_date_format
-from app.services.csv_parsing import RowProblem, parse_amount, parse_date
+from app.services.csv_parsing import THOUSANDS, RowProblem, cell, parse_amount, parse_date
 
 HEADER_SEARCH_ROWS = 10
 NO_COLUMNS = (
@@ -29,13 +29,32 @@ NO_COLUMNS = (
 _TYPE_NAMES = ("type", "action", "buy sell", "buy or sell", "side", "transaction type", "activity")
 _WORDS = {
     "symbol": ("symbol", "ticker"),
-    "date": ("trade date", "date acquired", "acquired", "purchase date", "date sold", "date"),
+    "date": (
+        "trade date",
+        "transaction date",
+        "run date",
+        "date acquired",
+        "acquired",
+        "purchase date",
+        "date sold",
+        "date",
+    ),
     "shares": ("quantity", "shares", "qty", "units"),
     "money": ("cost basis", "total cost", "proceeds", "net amount", "amount", "cost", "total"),
 }
-_BUY_WORDS = ("buy", "bought", "purchase", "reinvest")
-_SELL_WORDS = ("sell", "sold", "sale")
-_THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]+)?")
+# Never used for that role: the holding period runs from the trade date, not the settlement
+# date, and the money column is the row's total, not a price per share, a fee or a commission.
+_NOT = {
+    "date": ("settle",),
+    "money": ("per share", "price", "avg", "average", "unit", "fee", "commission"),
+}
+_BUY = re.compile(r"\b(buy|bought|purchase|purchased|reinvest|reinvestment)\b")
+_SELL = re.compile(r"\b(sell|sold|sale)\b")
+# Short sales, options and corrections aren't plain purchases or sales: enter them by hand.
+_NOT_PLAIN = re.compile(
+    r"\b(short|cover|open|close|options?|calls?|puts?|exercised?|assign(ed)?|cancel(l?ed)?|cxl"
+    r"|correct(ion)?)\b"
+)
 _FIELD_NAMES = {
     "symbol": "symbol",
     "shares": "number of shares",
@@ -61,10 +80,13 @@ def _pick(names: list[str]) -> dict | None:
     if kind is not None:
         picked["kind"] = kind
     for role, words in _WORDS.items():
+        usable = [
+            i
+            for i, n in enumerate(names)
+            if i not in picked.values() and not any(w in n for w in _NOT.get(role, ()))
+        ]
         for word in words:
-            col = next(
-                (i for i, n in enumerate(names) if word in n and i not in picked.values()), None
-            )
+            col = next((i for i in usable if word in names[i]), None)
             if col is not None:
                 picked[role] = col
                 break
@@ -83,25 +105,39 @@ def find_columns(rows: list[list[str]]) -> tuple[int, StockColumns]:
     raise ApiError(422, "columns_not_found", NO_COLUMNS)
 
 
-def _cell(row: list[str], column: int) -> str:
-    if column >= len(row):
-        raise RowProblem("This row has fewer columns than the others.")
-    return row[column].strip()
-
-
 def _kind(text: str) -> Kind:
     text = text.casefold()
-    is_buy = any(w in text for w in _BUY_WORDS)
-    is_sell = any(w in text for w in _SELL_WORDS)
+    if _NOT_PLAIN.search(text):
+        raise RowProblem(
+            "Short sales, options and corrections can't be imported. Enter them by hand."
+        )
+    is_buy, is_sell = bool(_BUY.search(text)), bool(_SELL.search(text))
     if is_buy == is_sell:
         raise RowProblem("The type should say Buy or Sell.")
     return "buy" if is_buy else "sell"
 
 
-def _shares(text: str) -> str:
-    """Brokers often show shares sold as negative, and big numbers with commas."""
-    text = text.lstrip("+-").strip()
-    return text.replace(",", "") if _THOUSANDS.fullmatch(text) else text
+def _shares(text: str) -> tuple[str, bool]:
+    """The number of shares without its sign, and whether it was negative: "-5", "(5)" or "5-".
+    Brokers often show shares sold as negative, and big numbers with commas."""
+    negative = False
+    if text.startswith("(") and text.endswith(")"):
+        text, negative = text[1:-1].strip(), True
+    elif text.endswith("-"):
+        text, negative = text[:-1].strip(), True
+    elif text.startswith(("-", "+")):
+        text, negative = text[1:].strip(), text[0] == "-"
+    return (text.replace(",", "") if THOUSANDS.fullmatch(text) else text), negative
+
+
+def _check_sign(kind: Kind, negative: bool, has_type: bool) -> None:
+    if negative and not has_type:
+        raise RowProblem(
+            "The shares are negative, so this looks like a sale. Add a Type column that says "
+            "Buy or Sell."
+        )
+    if negative and kind == "buy":
+        raise RowProblem("The type says Buy, but the number of shares is negative.")
 
 
 def _money(text: str) -> int:
@@ -124,19 +160,21 @@ def _problem(exc: ValidationError) -> RowProblem:
 
 
 def parse_row(row: list[str], number: int, cols: StockColumns, account_id: int | None) -> ParsedRow:
-    kind = _kind(_cell(row, cols.kind)) if cols.kind is not None else "buy"
+    kind = _kind(cell(row, cols.kind)) if cols.kind is not None else "buy"
+    shares, negative = _shares(cell(row, cols.shares))
+    _check_sign(kind, negative, cols.kind is not None)
     if cols.date_format is None:
         raise RowProblem("The dates aren't in a format we know, like 2026-01-31 or 01/31/2026.")
     try:
-        date = parse_date(_cell(row, cols.date), cols.date_format)
+        date = parse_date(cell(row, cols.date), cols.date_format)
     except ValueError:
         raise RowProblem(f"The date isn't in the {cols.date_format} format.") from None
     common = {
         "account_id": account_id,
-        "symbol": _cell(row, cols.symbol),
-        "shares": _shares(_cell(row, cols.shares)),
+        "symbol": cell(row, cols.symbol),
+        "shares": shares,
     }
-    cents = _money(_cell(row, cols.money))
+    cents = _money(cell(row, cols.money))
     try:
         if kind == "buy":
             trade = LotCreate(**common, acquired_on=date, cost_basis_cents=cents)
