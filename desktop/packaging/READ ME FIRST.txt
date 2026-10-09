@@ -1,0 +1,53 @@
+Budget Buddy for Windows
+========================
+
+A private budgeting and tax-prep helper. Your money records stay on this computer, encrypted.
+Budget Buddy organizes your records and estimates numbers to help you prepare. It is not tax advice.
+
+
+INSTALL (about a minute)
+------------------------
+1. Unzip this whole folder first (right-click the zip, "Extract All...").
+2. Double-click "Install Budget Buddy".
+3. Open Budget Buddy from the Start menu or the desktop shortcut.
+
+No admin rights and no Python needed. To try it without installing, open the "Budget Buddy" folder
+and double-click "Budget Buddy.exe".
+
+If Windows says "Windows protected your PC": this early version isn't signed by a publisher yet.
+Click "More info", then "Run anyway". Only do this for a copy you downloaded from the project's
+own Releases page.
+
+
+FIRST STEPS
+-----------
+Budget Buddy opens on Home with a "Get started" list: add your accounts, bring in what you spent
+(import a file from your bank, or type it in), and set monthly budgets.
+
+It starts in a simple view. For every tool (import history, auto-sort rules, broker files, live
+prices and more), click Settings at the top right and set View to "All tools".
+
+Write down the recovery phrase Budget Buddy shows you, and keep it somewhere safe.
+
+
+ON YOUR PHONE
+-------------
+Open Budget Buddy in your phone's web browser at home, with nothing to install:
+1. On this computer, in Budget Buddy: Devices, then Other devices, then "Allow another device".
+2. On your phone (on your home Wi-Fi), type the address it shows, then the code.
+If Windows asks whether Budget Buddy may use the network, allow "Private networks" only.
+
+
+UPDATE OR REMOVE
+----------------
+Update: close Budget Buddy (and Quit from its tray icon), unzip the new version and double-click
+"Install Budget Buddy" again. Your data is kept.
+
+Remove: Windows Settings, Apps, Budget Buddy, Uninstall (or double-click "Uninstall Budget Buddy"
+here). Your data folder, %LOCALAPPDATA%\BudgetBuddy, is kept unless you delete it yourself.
+
+
+HELP
+----
+The user guide is in the project's docs/guide folder on GitHub. Licensed under MIT; see
+"Budget Buddy\THIRD-PARTY-NOTICES.txt" for the parts it is built from.
