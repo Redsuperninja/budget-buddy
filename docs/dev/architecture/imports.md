@@ -24,4 +24,6 @@ guide: [docs/guide/import-history.md](../../guide/import-history.md).
   category (`transfers.unlink_sides`, without blocking future matching), and a stock trade from elsewhere linked to
   one of its transactions keeps its shares but loses the link. Its own trades are deleted and each affected symbol
   and account is matched again with FIFO.
-- File names are stored as given, shown only in the history, and never logged.
+- File names are cleaned (control and direction-changing characters removed, at most 200 characters), stored
+  encrypted (`imports.file_name`: bank file names often hold account digits), shown only in the history, and
+  never logged.

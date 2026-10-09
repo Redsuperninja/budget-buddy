@@ -89,3 +89,15 @@ def test_a_newer_positions_file_replaces_the_older_entry(client, make_account):
     assert [(e["kind"], e["file_name"]) for e in history(client)] == [("positions", "new.csv")]
     assert client.delete(f"{URL}/{history(client)[0]['id']}").status_code == 204
     assert client.get("/api/local/stocks/positions").json()["accounts"] == []
+
+
+def test_file_names_are_cleaned_and_stored_encrypted(client, checking):
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    ok(send(client, checking, CHECKING_CSV, "commit", file_name="Fake1234\u202e\u0007vsc.csv"))
+    assert history(client)[0]["file_name"] == "Fake1234vsc.csv"
+    with SessionLocal(bind=client.app.state.engine) as session:
+        raw = session.execute(text("SELECT file_name FROM imports")).scalar()
+    assert b"Fake1234" not in raw

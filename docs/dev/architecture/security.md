@@ -71,6 +71,9 @@ Every route also checks the `Host` header, and dashboard writes check `Origin` a
 ([server.md](server.md), [dashboard.md](dashboard.md)). The home-network listener is opened only while it's
 needed ([pairing.md](pairing.md)). Sync payloads are encrypted and replay-checked ([sync.md](sync.md)).
 
+A joined computer can do anything the dashboard can, including bulk changes: undoing a whole import
+(`DELETE /api/local/imports/{id}`) is one request, behind a confirm box.
+
 Joined computers talk plain HTTP on the home network (no app-level encryption, unlike phones), so the guide
 limits it to trusted home networks ([ADR-0009](../../adr/0009-other-computers.md)).
 

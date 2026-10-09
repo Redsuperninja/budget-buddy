@@ -38,6 +38,7 @@ ENCRYPTED = {
     ("devices", "sync_key"),
     ("pairing_sessions", "pair_sk"),
     ("price_feed", "api_key"),
+    ("imports", "file_name"),
 }
 
 

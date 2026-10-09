@@ -14,6 +14,8 @@ in one go, all or nothing:
 Nothing here logs file names, descriptions or amounts.
 """
 
+import unicodedata
+
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
@@ -35,15 +37,19 @@ from app.services.transfers import unlink_sides
 MAX_FILE_NAME = 200
 
 
+def clean_file_name(name: str | None) -> str:
+    """Printable characters only (no control or direction-changing characters, which could make
+    a name show misleadingly), at most ``MAX_FILE_NAME``."""
+    text = "".join(c for c in (name or "") if unicodedata.category(c) not in ("Cc", "Cf"))
+    return text.strip()[:MAX_FILE_NAME]
+
+
 def record(
     session: Session, kind: str, account_id: int | None, file_name: str | None, rows: int
 ) -> int:
     """Add an import to the history (not saved until the caller commits); returns its id."""
     batch = ImportBatch(
-        kind=kind,
-        account_id=account_id,
-        file_name=(file_name or "").strip()[:MAX_FILE_NAME],
-        rows_added=rows,
+        kind=kind, account_id=account_id, file_name=clean_file_name(file_name), rows_added=rows
     )
     session.add(batch)
     session.flush()

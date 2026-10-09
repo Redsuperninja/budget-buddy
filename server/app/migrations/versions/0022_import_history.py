@@ -1,8 +1,8 @@
 """Import history: each imported file, and what it added, so an import can be undone
 
-``imports`` lists the files. ``transactions``, ``stock_lots``, ``stock_sale_orders`` and
-``positions`` get ``import_id`` (no foreign keys, so no table rebuilds; undoing an import deletes
-its rows by this id).
+``imports`` lists the files (names encrypted, like other personal text). ``transactions``,
+``stock_lots``, ``stock_sale_orders`` and ``positions`` get ``import_id`` (no foreign keys, so no
+table rebuilds; undoing an import deletes its rows by this id).
 
 Revision ID: 0022
 Revises: 0021
@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("kind", sa.String(length=16), nullable=False),
         sa.Column("account_id", sa.Integer(), nullable=True),
-        sa.Column("file_name", sa.String(length=200), nullable=False),
+        sa.Column("file_name", sa.LargeBinary(), nullable=False),  # encrypted (ADR-0003)
         sa.Column("rows_added", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
