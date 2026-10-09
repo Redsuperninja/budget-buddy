@@ -25,11 +25,13 @@ export function select(options, { value, ...attrs } = {}) {
 }
 
 // rows: lists of cells (text or nodes). rightAligned: column numbers to right-align (numbers).
-// advancedColumns: column numbers shown only in the All tools view.
+// advancedColumns: column numbers shown only in the All tools view. Each cell carries its column name, so on a
+// phone app.css can show a row of a wider table (three or more columns) as a small card of "name: value" lines.
 export function table(headers, rows, rightAligned = [], advancedColumns = []) {
   const cls = (i) => [rightAligned.includes(i) ? "num" : "", advancedColumns.includes(i) ? "advanced" : ""]
     .join(" ").trim() || null;
-  return h("div", { class: "scroll" }, h("table", {},
+  return h("div", { class: "scroll" }, h("table", { class: headers.length > 2 ? "stack" : null },
     h("thead", {}, h("tr", {}, headers.map((t, i) => h("th", { class: cls(i) }, t)))),
-    h("tbody", {}, rows.map((row) => h("tr", {}, row.map((cell, i) => h("td", { class: cls(i) }, cell)))))));
+    h("tbody", {}, rows.map((row) =>
+      h("tr", {}, row.map((cell, i) => h("td", { class: cls(i), "data-label": headers[i] || null }, cell)))))));
 }

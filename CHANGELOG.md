@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Budget Buddy fits your phone: open it in your phone's web browser at home (Devices, **Other devices**, which used to be Other computers, works for phones too). On a narrow screen the section buttons and tabs scroll in one row, tables show each row as a small card, and chart text is bigger.
 - Simpler dashboard for everyday use, with every tool one switch away: Budget Buddy now starts in a **simple view**. **Settings** (top right) holds **View** (**Simple** or **All tools**) and **Colors**. All tools brings back Import history, Auto-sort, Find transfers, Mark as gift, stock trades, transaction types, positions files and live price settings. New users get a **Get started** checklist on Home. Pickers start on your checking account instead of the first account by name, "transactions need a category" on Home opens exactly those, the Transactions filter reads **Show: Needs a category**, and tax pages say "not tax advice" once instead of twice.
 - Fixed: loading the demo data (`scripts/load-demo-data.ps1`) stopped at "Setting monthly budgets" because it tried to give income a budget.
 - Account types: change an account's type right in the Accounts list, and mark a retirement account as a Roth IRA, traditional IRA, 401(k), Roth 401(k), 403(b) or other. Money put into a Roth IRA (transfers in, and deposits that say contribution) now counts toward the IRA limit on the Investments page.

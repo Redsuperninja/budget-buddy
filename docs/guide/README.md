@@ -34,14 +34,14 @@ Add and track your accounts, spending, and income in the Budget Buddy dashboard.
 
 ## Your phone and other computers
 
-Connect your phone to see your budget and send receipts to your computer, or open Budget Buddy on another
-computer at home.
+Open Budget Buddy in your phone's web browser or on another computer at home, or connect the phone app to send
+receipts to your computer.
 
 1. [Connect your phone](connect-your-phone.md) — Pair once per phone; Wi-Fi requirements; what happens if it doesn't work.
 2. [Sync your phone](sync-your-phone.md) — What goes both ways; privacy; removing a phone.
 3. [Phone home screen](phone-home-screen.md) — What Budget Buddy shows on your phone.
 4. [Manage connected phones](manage-connected-phones.md) — See and remove phones that are connected.
-5. [Use Budget Buddy on another computer](use-on-another-computer.md) — Connect a laptop with a one-time code; what it can do; removing it.
+5. [Use Budget Buddy on another computer or your phone's browser](use-on-another-computer.md) — Connect a laptop or phone with a one-time code; what it can do; removing it.
 
 ## Taxes (estimates, not tax advice)
 
