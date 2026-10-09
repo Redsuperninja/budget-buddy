@@ -25,6 +25,13 @@ If you bought the same stock several times, enter each purchase separately. Each
 
 Got a lot of them? [Import them from a CSV file](import-stocks.md) instead.
 
+## From your transactions
+
+If you imported your brokerage, IRA or HSA account's transactions, you can record a trade right from the
+**Transactions** page: click **Stock trade** on the payment (for a purchase) or the deposit (for a sale), type the
+symbol and number of shares, check the total, and click **Save**. The row then says what it was, like "Bought 2
+VTI". A stock trade isn't spending or income in your budget: the cash just turned into shares inside the account.
+
 ## Entering a sale
 
 For each time you sold shares, enter:

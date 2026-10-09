@@ -72,6 +72,7 @@ export const taxExportUrl = (year) => `${LOCAL}/tax-summary/${year}/export.csv`;
 // Stocks
 export const listLots = () => api("GET", `${LOCAL}/stocks/lots`);
 export const createLot = (json) => api("POST", `${LOCAL}/stocks/lots`, { json });
+export const listSales = () => api("GET", `${LOCAL}/stocks/sales`);
 export const createSale = (json) => api("POST", `${LOCAL}/stocks/sales`, { json });
 export const stockGains = (year) => api("GET", `${LOCAL}/stocks/gains/${year}`);
 export const stockHoldings = () => api("GET", `${LOCAL}/stocks/holdings`);

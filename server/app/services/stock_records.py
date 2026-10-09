@@ -11,10 +11,17 @@ import datetime as dt
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.errors import not_found
-from app.models import Account, StockLot, StockSale, StockSaleOrder
+from app.errors import ApiError, not_found
+from app.models import (
+    Account,
+    StockLot,
+    StockSale,
+    StockSaleOrder,
+    Transaction,
+    TransactionKind,
+)
 from app.services import stock_gains as gains
-from app.services.accounts import TAX_FREE_KINDS, get_account
+from app.services.accounts import INVESTMENT_KINDS, TAX_FREE_KINDS, get_account
 
 
 def to_gains_lot(row: StockLot) -> gains.Lot:
@@ -57,6 +64,53 @@ def check_account(session: Session, account_id: int | None) -> None:
     left out of the gains summary, but purchases there still count for wash sales."""
     if account_id is not None:
         get_account(session, account_id)
+
+
+def check_trade_transaction(session: Session, values: dict, is_buy: bool) -> None:
+    """A purchase or sale classified from a transaction: a regular one in a brokerage,
+    retirement or HSA account, money out for a purchase or in for a sale, not already a stock
+    trade. The trade goes in the transaction's account (``values["account_id"]`` is set)."""
+    transaction_id = values.get("transaction_id")
+    if transaction_id is None:
+        return
+    transaction = session.get(Transaction, transaction_id)
+    if transaction is None:
+        raise not_found("transaction")
+    account = get_account(session, transaction.account_id)
+    if transaction.kind != TransactionKind.NORMAL or transaction.transfer_pair_id is not None:
+        raise ApiError(422, "not_a_trade", "Only a regular transaction can be a stock trade.")
+    if account.kind not in INVESTMENT_KINDS:
+        raise ApiError(
+            422,
+            "not_a_trade",
+            "Only transactions in a brokerage, retirement or HSA account can be stock trades.",
+        )
+    if (transaction.amount_cents < 0) != is_buy:
+        side = "money out" if is_buy else "money in"
+        what = "purchase" if is_buy else "sale"
+        raise ApiError(422, "not_a_trade", f"A stock {what} has to be {side}.")
+    if values.get("account_id") not in (None, transaction.account_id):
+        raise ApiError(422, "not_a_trade", "The trade must be in the transaction's account.")
+    linked = (
+        select(StockLot.id)
+        .where(StockLot.transaction_id == transaction_id)
+        .union_all(select(StockSaleOrder.id).where(StockSaleOrder.transaction_id == transaction_id))
+    )
+    if session.execute(linked).first():
+        raise ApiError(409, "already_a_trade", "This transaction is already a stock trade.")
+    values["account_id"] = transaction.account_id
+
+
+def trade_transaction_ids():
+    """Ids of transactions classified as stock trades: cash turning into shares (or back) inside
+    an investment account, so the monthly summary leaves them out."""
+    return (
+        select(StockLot.transaction_id)
+        .where(StockLot.transaction_id.is_not(None))
+        .union(
+            select(StockSaleOrder.transaction_id).where(StockSaleOrder.transaction_id.is_not(None))
+        )
+    )
 
 
 def untaxed_account_ids(session: Session) -> set[int]:

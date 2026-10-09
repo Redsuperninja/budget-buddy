@@ -15,8 +15,8 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, notes (enc), client_id? (unique), deduction_kind?, device_id? (phone uploads) |
 | `dividends` | id, transaction_id (unique; the dividend payment), sweep_transaction_id? (unique; its deposit sweep), payer, dismissed |
 | `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
-| `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included) |
-| `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees) |
+| `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included), transaction_id? (unique; the payment it was classified from) |
+| `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees), transaction_id? (unique; the deposit it was classified from) |
 | `stock_prices` | symbol (primary key), price_cents per share (≥ 0), as_of, source (you/feed), fetched_at?: the latest price |
 | `price_feed` | id (1), enabled, api_key (enc): live prices from Finnhub (ADR-0010) |
 | `stock_sales` | one lot's part of an order: order_id (cascade delete), lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0); rebuilt with FIFO ([stocks.md](stocks.md)) |

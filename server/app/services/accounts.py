@@ -14,6 +14,8 @@ from app.schemas.accounts import AccountCreate, AccountOut, AccountUpdate
 
 # Selling inside these accounts isn't taxed: their stock sales are left out of the gains summary.
 TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}
+# Accounts that hold stocks and funds: a stock trade or a short "div" there means what it says.
+INVESTMENT_KINDS = {AccountKind.BROKERAGE, AccountKind.RETIREMENT, AccountKind.HSA}
 
 
 def _totals(session: Session, account_ids: list[int]) -> dict[int, tuple[int, int]]:

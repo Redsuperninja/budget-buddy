@@ -3,7 +3,7 @@
 import datetime as dt
 from dataclasses import dataclass
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
@@ -13,6 +13,8 @@ from app.models import (
     CategorySource,
     Dividend,
     Paycheck,
+    StockLot,
+    StockSaleOrder,
     Transaction,
     TransactionKind,
     TransactionSource,
@@ -21,6 +23,7 @@ from app.schemas.transactions import TransactionCreate, TransactionPage, Transac
 from app.services.accounts import get_account
 from app.services.category_learning import picked_by_hand
 from app.services.category_rules import load_matcher, rule_fields
+from app.services.stock_records import trade_transaction_ids
 
 # Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
 # so unlink first.
@@ -49,7 +52,7 @@ class TransactionFilters:
     offset: int = 0
     sorted_by: CategorySource | None = None  # "rule": auto-sorted; "you": picked by hand
     # Only ones still waiting for a category: regular payments and refunds with none yet.
-    # Transfers and balance adjustments don't need one, so they're left out.
+    # Transfers, balance adjustments and stock trades don't need one, so they're left out.
     uncategorized: bool = False
     # Leave out dividends and the deposit sweeps linked to them (services/dividend_matching.py).
     hide_dividends: bool = False
@@ -116,6 +119,7 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
         query = query.where(
             Transaction.category_id.is_(None),
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
+            Transaction.id.not_in(trade_transaction_ids()),
         )
 
     if filters.hide_dividends:
@@ -210,6 +214,11 @@ def delete_transaction(session: Session, transaction_id: int) -> None:
             "part_of_transfer",
             "This transaction is part of a transfer. Remove the transfer link before deleting "
             "this transaction.",
+        )
+    # A stock trade classified from it stays (the shares are real); only the link goes.
+    for model in (StockLot, StockSaleOrder):
+        session.execute(
+            update(model).where(model.transaction_id == transaction.id).values(transaction_id=None)
         )
     session.delete(transaction)
     session.commit()

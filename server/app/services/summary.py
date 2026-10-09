@@ -16,6 +16,8 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
 - A percentage budget is a share of the month's budget income (``budget_plan.budget_income``).
 - A dividend paid inside a retirement account or HSA, and its deposit sweep, are left out: the
   cash stays in the account (``dividends.kept_in_account``).
+- A transaction classified as a stock purchase or sale is left out too: cash turned into shares
+  (or back) inside an investment account (``stock_records.trade_transaction_ids``).
 """
 
 import datetime as dt
@@ -29,6 +31,7 @@ from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
 from app.services.budget_plan import budget_for, budget_income
 from app.services.dividends import kept_in_account
 from app.services.savings_transfers import saved_by_transfer
+from app.services.stock_records import trade_transaction_ids
 
 _SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
 _REPORTED = (CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS, CategoryGroup.INCOME)
@@ -61,6 +64,7 @@ def monthly_summary(
             Transaction.date < end,
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
             kept_in_account(Transaction.id),
+            Transaction.id.not_in(trade_transaction_ids()),
         )
         .group_by(Transaction.category_id, Transaction.kind)
     ).all()
