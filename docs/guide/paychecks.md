@@ -43,6 +43,17 @@ Gross pay minus every tax and deduction must equal take-home pay, to the cent:
 
 If the numbers don't add up, Budget Buddy tells you how far off you are. If your stub has a line that doesn't fit any field, add it to the closest one of the same kind (before tax or after tax) and mention it in the notes.
 
+## Pay deposits to fill in
+
+When you import your bank file, deposits that look like pay (like `FAKECO INC PAYROLL`, or anything in your
+**Paycheck** category) show on the Paychecks page under **Pay deposits to fill in**. Click **Fill in**: the form
+starts with the pay date, the employer and the take-home pay, and the paycheck is linked to that deposit. Add the
+rest from your pay stub (gross pay, taxes, deductions) and click **Add paycheck**. The deposit then leaves the list.
+
+Tax refunds, Social Security, unemployment and reimbursements aren't listed, even when they say "direct deposit".
+If your pay is split between two accounts, neither part can be linked (a paycheck links to one deposit for its
+whole take-home pay): add that paycheck with **Add a paycheck** instead.
+
 ## Link the bank deposit (optional)
 
 You can link a paycheck to the deposit in your checking or savings account. The deposit must be for exactly the take-home pay.

@@ -39,6 +39,8 @@ class PaycheckCreate(PaycheckFields):
     employer: Employer
     account_id: Id | None = None
     notes: Notes = None
+    # The deposit of its net pay, linked straight away (same checks as linking it later).
+    deposit_transaction_id: Id | None = None
 
 
 class PaycheckUpdate(UpdateSchema):
@@ -85,6 +87,17 @@ class PaycheckPage(Schema):
     total: int
     limit: int
     offset: int
+
+
+class PayDeposit(Schema):
+    """Money in that looks like pay and isn't linked to a paycheck yet: a paycheck to fill in."""
+
+    transaction_id: int
+    date: dt.date
+    description: str
+    amount_cents: int  # the take-home (net) pay
+    account_id: int
+    employer: str  # a guess from the description, to start the form with
 
 
 class SocialSecurityCheck(Schema):

@@ -48,6 +48,7 @@ export const startPairing = () => api("POST", `${LOCAL}/pairing`);
 // Paychecks
 export const listPaychecks = (year) => api("GET", `${LOCAL}/paychecks?year=${year}`);
 export const paycheckSummary = (year) => api("GET", `${LOCAL}/paychecks/summary?year=${year}`);
+export const payDeposits = (year) => api("GET", `${LOCAL}/paychecks/deposits?year=${year}`);
 export const createPaycheck = (json) => api("POST", `${LOCAL}/paychecks`, { json });
 
 // Donations
