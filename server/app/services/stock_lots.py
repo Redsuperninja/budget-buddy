@@ -7,7 +7,13 @@ from app.errors import ApiError
 from app.models import StockLot, StockSale, StockSaleOrder
 from app.schemas.stocks import LotCreate, LotOut
 from app.services import stock_gains as gains
-from app.services.stock_records import check_account, get_lot, in_account, rematch
+from app.services.stock_records import (
+    check_account,
+    check_trade_transaction,
+    get_lot,
+    in_account,
+    rematch,
+)
 from app.shares import micro_to_text
 
 
@@ -33,6 +39,7 @@ def _lot_out(lot: StockLot, sold: dict[int, int]) -> LotOut:
         remaining_shares_micro=remaining,
         remaining_shares=micro_to_text(remaining),
         long_term_from=gains.long_term_from(lot.acquired_on),
+        transaction_id=lot.transaction_id,
         created_at=lot.created_at,
         updated_at=lot.updated_at,
     )
@@ -57,6 +64,7 @@ def lot_out(session: Session, lot_id: int) -> LotOut:
 
 def create_lot(session: Session, data: LotCreate) -> LotOut:
     values = data.model_dump(exclude={"shares", "cost_basis"})
+    check_trade_transaction(session, values, is_buy=True)
     check_account(session, values["account_id"])
     lot = StockLot(**values)
     session.add(lot)

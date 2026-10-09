@@ -17,6 +17,14 @@ database), `routers/stocks.py`. Estimates, not tax advice. User guide:
   Newest first.
 - `GET /api/local/stocks/gains/{tax_year}`: short- and long-term totals for sales in that year.
 - Importing purchases and sales from a CSV file: [stock-import.md](stock-import.md).
+- **Classified from a transaction**: `POST .../lots` or `.../sales` with `transaction_id` (Transactions page,
+  **Stock trade**). The transaction must be `normal`, not a transfer, in a brokerage, retirement or HSA account
+  (`INVESTMENT_KINDS`), money out for a purchase or in for a sale, and not already a trade (409
+  `already_a_trade`); the trade goes in its account. Lots and sales return `transaction_id`. A linked
+  transaction is left out of the monthly summary and the uncategorized list (cash turned into shares inside the
+  account). While linked, its account, amount and kind can't change and it can't become a transfer, by hand or
+  automatically (409 `linked_to_stock_trade`). Deleting the transaction keeps the trade and clears the link;
+  deleting the trade frees the transaction. Migration 0020 adds the columns, with unique indexes and no foreign keys.
 
 ## Tables
 

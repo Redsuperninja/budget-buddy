@@ -41,6 +41,7 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
+from app.services.accounts import INVESTMENT_KINDS
 from app.services.named_categories import find_or_make
 
 CATEGORY = "Dividends"
@@ -51,7 +52,6 @@ SHORT_WORDS = re.compile(r"(?<![a-z])divs?(?![a-z])", re.I)  # only in investmen
 NOT_DIVIDEND_WORDS = re.compile(
     r"non-?\s?dividend|return of capital|exempt|(?<![a-z])div of(?![a-z])|division|payroll", re.I
 )
-INVESTMENT_KINDS = {AccountKind.BROKERAGE, AccountKind.RETIREMENT, AccountKind.HSA}
 SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I)
 # Where the payer's name ends: "JOHNSON & JOHNSON COMMON STOCK CASH DIV ..." -> "JOHNSON & JOHNSON".
 _PAYER_END = re.compile(

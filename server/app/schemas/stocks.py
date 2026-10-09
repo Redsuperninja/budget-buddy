@@ -74,9 +74,11 @@ def _resolve_money(cents: int | None, dollars: str | None, what: str) -> int:
 
 
 class LotCreate(Schema):
-    """Shares you bought in one purchase. ``cost_basis`` is the total you paid, including fees."""
+    """Shares you bought in one purchase. ``cost_basis`` is the total you paid, including fees.
+    ``transaction_id``: the payment it was, when classified from the Transactions page."""
 
     account_id: Id | None = None
+    transaction_id: Id | None = None
     symbol: Symbol
     acquired_on: dt.date
     shares_micro: SharesMicro | None = None
@@ -93,9 +95,11 @@ class LotCreate(Schema):
 
 
 class SaleCreate(Schema):
-    """Shares you sold. ``proceeds`` is the total you received, after fees."""
+    """Shares you sold. ``proceeds`` is the total you received, after fees.
+    ``transaction_id``: the deposit it was, when classified from the Transactions page."""
 
     account_id: Id | None = None
+    transaction_id: Id | None = None
     symbol: Symbol
     sold_on: dt.date
     shares_micro: SharesMicro | None = None
@@ -122,6 +126,7 @@ class LotOut(Schema):
     remaining_shares_micro: int  # not sold yet
     remaining_shares: str
     long_term_from: dt.date  # shares sold on or after this date are long term
+    transaction_id: int | None = None  # the payment it was classified from, if any
     created_at: dt.datetime
     updated_at: dt.datetime
 
@@ -151,6 +156,7 @@ class SaleOut(Schema):
     cost_basis_cents: int
     gain_cents: int
     possible_wash_sale: bool
+    transaction_id: int | None = None  # the deposit it was classified from, if any
     # False inside a retirement account or HSA: not taxed, left out of the gains summary.
     taxed: bool = True
     lots: list[RealizedOut]  # which purchases the shares came from (oldest first: FIFO)

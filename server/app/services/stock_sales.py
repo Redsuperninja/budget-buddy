@@ -20,6 +20,7 @@ from app.schemas.stocks import (
 from app.services import stock_gains as gains
 from app.services.stock_records import (
     check_account,
+    check_trade_transaction,
     get_order,
     in_year,
     rematch,
@@ -65,6 +66,7 @@ def _sale_out(order: StockSaleOrder, pieces: list[gains.Realized], taxed: bool) 
         cost_basis_cents=sum(p.cost_basis_cents for p in pieces),
         gain_cents=sum(p.gain_cents for p in pieces),
         possible_wash_sale=taxed and any(p.possible_wash_sale for p in pieces),
+        transaction_id=order.transaction_id,
         taxed=taxed,
         lots=[
             RealizedOut(
@@ -114,6 +116,7 @@ def sale_out(session: Session, sale_id: int) -> SaleOut:
 
 def create_sale(session: Session, data: SaleCreate) -> SaleOut:
     values = data.model_dump(exclude={"shares", "proceeds"})
+    check_trade_transaction(session, values, is_buy=False)
     check_account(session, values["account_id"])
     order = StockSaleOrder(**values)
     session.add(order)

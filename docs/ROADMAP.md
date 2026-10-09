@@ -91,6 +91,7 @@ items (20, 21).
 - [x] 12. Stock lots & sales: cost basis, short/long-term gains — *finance-tax-expert*
 - [x] 12c. Live stock prices from Finnhub, on demand and only when turned on (ADR-0010) — *backend-engineer* + *security-reviewer*
 - [x] 12d. Import stock purchases and sales from a CSV file — *backend-engineer* + *finance-tax-expert* + *security-reviewer*
+- [x] 12f. Record a stock purchase or sale from a transaction on the Transactions page — *backend-engineer* + *finance-tax-expert*
 - [x] 12e. Dividends from your transactions: filed under Dividends, deposit sweeps linked, a yearly list, hide toggle — *backend-engineer* + *finance-tax-expert*
 - [x] 12b. Investments: stocks in any account, holdings and typed-in prices, retirement and HSA limits — *finance-tax-expert*
 - [x] 13. Other deductions + yearly tax summary export (CSV/PDF) — *finance-tax-expert*

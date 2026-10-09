@@ -3,7 +3,7 @@ cents."""
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, String
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.crypto.fields import EncryptedString
@@ -68,6 +68,9 @@ class StockLot(TimestampMixin, Base):
     shares_micro: Mapped[int]
     acquired_on: Mapped[dt.date] = mapped_column(Date)
     cost_basis_cents: Mapped[int]  # total paid, including fees
+    # The transaction it was classified from (Transactions page), if any. No foreign key (see
+    # migration 0020); deleting the transaction clears it.
+    transaction_id: Mapped[int | None] = mapped_column(Integer, index=True, unique=True)
 
 
 class StockSaleOrder(TimestampMixin, Base):
@@ -86,6 +89,8 @@ class StockSaleOrder(TimestampMixin, Base):
     sold_on: Mapped[dt.date] = mapped_column(Date)
     shares_micro: Mapped[int]
     proceeds_cents: Mapped[int]  # total received, after fees
+    # The transaction it was classified from, like ``StockLot.transaction_id``.
+    transaction_id: Mapped[int | None] = mapped_column(Integer, index=True, unique=True)
 
 
 class StockSale(TimestampMixin, Base):
