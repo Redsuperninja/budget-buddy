@@ -10,7 +10,7 @@ from typing import Literal
 
 from sqlalchemy.orm import Session
 
-from app.models import BudgetPlan, Category
+from app.models import BudgetPlan, Category, CategoryGroup
 from app.percent import share_of
 from app.schemas.budget_plan import BudgetPlanIn, BudgetPlanOut
 
@@ -40,7 +40,10 @@ def budget_income(session: Session, actual_income_cents: int) -> tuple[int, Inco
 
 
 def budget_for(category: Category, income_cents: int) -> int:
-    """A category's budget in cents for a month with this budget income."""
+    """A category's budget in cents for a month with this budget income. Income categories have
+    none (one saved by an older version is ignored): income is what budgets are measured against."""
+    if category.group == CategoryGroup.INCOME:
+        return 0
     if category.budget_percent_bp is None:
         return category.budget_cents
     return share_of(income_cents, category.budget_percent_bp)

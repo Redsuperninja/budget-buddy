@@ -24,11 +24,13 @@ const incomeBasis = (s) => (s.budget_income_source === "planned"
   : `Percentage budgets are shares of this month's income, ${formatCents(s.budget_income_cents)}. ` +
     "Set a planned monthly income on the Categories page to keep them steady.");
 
+// Income isn't budgeted: it's what the budgets are measured against, shown in "Money in" above.
 function budgetTable(summary) {
-  if (!summary.categories.length) return empty("No categories yet.");
+  const budgeted = summary.categories.filter((c) => c.group !== "income");
+  if (!budgeted.length) return empty("No categories yet.");
   return h("div", {},
     table(["Category", "Group", "Budget (monthly)", "Actual this month", "Used"],
-      summary.categories.map((c) =>
+      budgeted.map((c) =>
         [c.name, groupLabel(c.group), budgetCell(c), formatCents(c.actual_cents), used(c)]), [2, 3, 4]),
     summary.categories.some((c) => c.budget_percent_bp !== null) ? empty(incomeBasis(summary)) : null);
 }

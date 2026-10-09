@@ -15,8 +15,8 @@ your own Transfer categories.
 
 ## Adding, renaming, and setting a budget
 
-You can add a category, rename it, and set a monthly budget for it (the amount you plan to spend, or for
-Income, expect to receive). Names can't repeat, and upper or lower case doesn't make a name different. You
+You can add a category, rename it, and set a monthly budget for it (the amount you plan to spend or save).
+Income categories have no budget: your income is what the rest of the budget is measured against. Names can't repeat, and upper or lower case doesn't make a name different. You
 can't move a category to a different kind. If you picked the wrong kind, make a new category instead.
 
 A budget can't be negative. Budgets apply to every month, so changing one also changes what past months

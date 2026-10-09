@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Income isn't budgeted any more: it's what the rest of your budget is measured against. Income categories have no budget box on the Categories page, and the Home page's budget table lists only needs, wants and savings.
 - Dividends: imported or typed-in dividends (like "... CASH DIV ON 1 SHS ...") go in a new **Dividends** income category, and the deposit sweep that moved the same cash on is linked to them. The Stocks page lists each year's dividends with the taxed total (dividends in an IRA, 401(k) or HSA aren't taxed), **Find dividends** checks older transactions, **Not a dividend** undoes one, and the Transactions page can hide dividends and their sweeps. An estimate, not tax advice.
 - Sort what's left: on the Transactions page, set **Category set** to **Not yet (uncategorized)** to see only payments and refunds with no category yet, and pick one for each right there.
 - New **Other Expenses** category (in Wants) for spending that fits nowhere else, next to Other Income. Added for you on the next start, unless you already have a category with that name.

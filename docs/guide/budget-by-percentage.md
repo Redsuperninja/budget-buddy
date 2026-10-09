@@ -41,4 +41,5 @@ Your phone shows the same budgets as dollar amounts after you sync.
 
 - **"Please enter a percentage from 0.01% to 100%."** Use a number with at most two decimals, like `12.5%`.
 - **"Set the budget as an amount or as a percentage of income, not both."** Type one or the other.
-- **"An income category's budget can't be a percentage of income."** Enter an amount instead.
+- **"Income categories don't have a budget"**: your income is what the other budgets are measured against, so an
+  income category takes no amount or percentage.

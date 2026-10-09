@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryGroup
-from app.schemas.categories import INCOME_PERCENT, CategoryCreate, CategoryUpdate
+from app.schemas.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
 
 
 def _name_taken() -> ApiError:
@@ -53,11 +53,13 @@ def update_category(session: Session, category_id: int, data: CategoryUpdate) ->
     changes = data.changes()
     if "name" in changes:
         _check_name_free(session, changes["name"], own_id=category.id)
+    if category.group == CategoryGroup.INCOME and (
+        changes.get("budget_cents") or changes.get("budget_percent_bp") is not None
+    ):
+        raise ApiError(422, "validation_error", INCOME_NO_BUDGET)
     if "budget_cents" in changes:
         changes["budget_percent_bp"] = None  # back to an amount budget
     elif changes.get("budget_percent_bp") is not None:
-        if category.group == CategoryGroup.INCOME:
-            raise ApiError(422, "validation_error", INCOME_PERCENT)
         changes["budget_cents"] = 0
     for field, value in changes.items():
         setattr(category, field, value)

@@ -85,12 +85,30 @@ def test_amount_and_percentage_together_are_refused(client):
         assert "not both" in response.json()["error"]["message"]
 
 
-def test_income_category_cannot_be_a_percentage(client):
-    patch = client.patch(f"{CATS}/{cid(client, 'Paycheck')}", json={"budget_percent_bp": 100})
-    post = client.post(CATS, json={"name": "Tips", "group": "income", "budget_percent_bp": 100})
-    for response in (patch, post):
+def test_income_categories_have_no_budget(client):
+    paycheck = f"{CATS}/{cid(client, 'Paycheck')}"
+    refused = [
+        client.patch(paycheck, json={"budget_percent_bp": 100}),
+        client.patch(paycheck, json={"budget_cents": 100}),
+        client.post(CATS, json={"name": "Tips", "group": "income", "budget_percent_bp": 100}),
+        client.post(CATS, json={"name": "Tips", "group": "income", "budget_cents": 100}),
+    ]
+    for response in refused:
         assert response.status_code == 422
-        assert "income category" in response.json()["error"]["message"]
+        assert "Income categories don't have a budget" in response.json()["error"]["message"]
+    assert client.post(CATS, json={"name": "Tips", "group": "income"}).status_code == 201
+
+
+def test_an_old_income_budget_is_ignored(client):
+    from sqlalchemy import update
+
+    from app.db import SessionLocal
+    from app.models import Category
+
+    with SessionLocal(bind=client.app.state.engine) as session:  # saved by an older version
+        session.execute(update(Category).where(Category.name == "Paycheck").values(budget_cents=9))
+        session.commit()
+    assert groups(summary(client))["income"]["budget_cents"] == 0
 
 
 def test_group_shares_of_income(client, checking, add_txn):
