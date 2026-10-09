@@ -209,7 +209,7 @@ def test_every_dashboard_route_is_classified(data_dir):
     from app.main import create_app
     from app.remote_access import JOINED_AREAS
 
-    this_computer_only = {"pairing", "devices", "remote-computers", "csrf-token"}
+    this_computer_only = {"pairing", "devices", "remote-computers", "csrf-token", "instance"}
 
     def paths(routes):  # included routers are wrapped; their routes carry the full path
         for route in routes:

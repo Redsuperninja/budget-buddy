@@ -12,7 +12,10 @@ bank CSV import, paychecks, donations, stocks and connecting a phone. Its code l
   code's location, not the current directory), and builds an **allowlist** once: `index.html`, top-level
   `*.css` and `js/**/*.js`. No symlinks are followed, every resolved path must stay inside the folder,
   dotfiles, `tests/` and `package.json` are never listed, and file count and size are capped. The check is
-  repeated when a file is read.
+  repeated when a file is read. A request for a file that isn't listed rebuilds the list with the same rules (at
+  most every 2 seconds), so files added by an update are served without a restart.
+- Until `main.js` runs, the page shows "Loading Budget Buddy..." with a hint to restart, so a script that fails
+  to load never leaves a blank page.
 - `GET /` serves `index.html`; `GET /static/{path}` serves the other allowlisted files. The page loads
   `/static/js/main.js`.
 - **API-only mode.** If the folder is missing, isn't a folder, or has no `index.html`, the server logs one

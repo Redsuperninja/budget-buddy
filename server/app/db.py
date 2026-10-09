@@ -36,6 +36,14 @@ SCRUB_MARKER_FILENAME = "scrub-pending"
 SessionLocal = sessionmaker(autoflush=False, expire_on_commit=False)
 
 
+# A newer Budget Buddy already updated this database; this (older) copy can't read it.
+NEWER_DATABASE_MESSAGE = (
+    "Your data was last opened by a newer version of Budget Buddy, so this copy can't use it. "
+    "Update this copy: in the launch folder, double-click Build desktop app, then Install desktop "
+    "app. Your data is safe and unchanged."
+)
+
+
 class DatabaseUpgradeError(RuntimeError):
     """The database couldn't be brought up to date. The message is meant for the user."""
 
@@ -161,11 +169,15 @@ def run_migrations(engine: Engine) -> None:
     db_path = Path(engine.url.database)
     marker = scrub_marker_path(db_path)
     config = alembic_config()
-    head = ScriptDirectory.from_config(config).get_current_head()
+    scripts = ScriptDirectory.from_config(config)
+    head = scripts.get_current_head()
+    known = {revision.revision for revision in scripts.walk_revisions()}
 
     with _exclusive_lock(db_path.with_name(db_path.name + ".lock")):
         with engine.connect() as connection:
             current = MigrationContext.configure(connection).get_current_revision()
+        if current is not None and current not in known:
+            raise DatabaseUpgradeError(NEWER_DATABASE_MESSAGE)
         if current != head:
             _upgrade_with_backup(engine, db_path, config, current)
         if marker.exists():

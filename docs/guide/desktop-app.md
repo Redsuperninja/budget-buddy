@@ -36,7 +36,11 @@ phones can sync now**, or **Resting: open it to let phones sync**.
 - **"Budget Buddy couldn't start."** The message says why. If it mentions a port, another program is using it:
   restart the computer and try again.
 - **"Budget Buddy is already open."** Look for its window on the taskbar.
-- **"Something is already using port 8765."** Budget Buddy may already be running from the launch folder's
-  **Start Budget Buddy**: close that window first. Budget Buddy won't show anything else that answers there.
+- **Budget Buddy is already running from the launch folder.** That's fine: the app checks it's really Budget
+  Buddy and opens it. Closing the app's window leaves it running; close its own window to stop it.
+- **"Something else is using port 8765."** Another program is using Budget Buddy's port, so the app won't show
+  it (it could be pretending to be Budget Buddy). Close that program, or restart the computer.
+- **The page stays on "Loading Budget Buddy..."** Close every Budget Buddy window, including the tray icon's
+  **Quit**, and start it again. This can happen right after an update.
 - **Install says Budget Buddy is running.** Close the window, right-click the tray icon, choose **Quit**, then
   install again.

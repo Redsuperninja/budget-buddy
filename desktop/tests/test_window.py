@@ -10,8 +10,8 @@ from contextlib import contextmanager
 
 import pytest
 
+from budget_buddy_desktop import genuine, launcher, probe
 from budget_buddy_desktop import home_base as home_base_module
-from budget_buddy_desktop import launcher, probe
 from budget_buddy_desktop.home_base import GENERAL_PROBLEM, HomeBase, StartFailed, explain
 
 STAND_IN = textwrap.dedent(
@@ -142,8 +142,18 @@ def test_window_starts_its_own_home_base(monkeypatch, port, shown):
 def test_never_shows_something_else_on_the_port(monkeypatch, port):
     use_home_base(monkeypatch, "-c", "raise SystemExit('should not start')")
     monkeypatch.setattr(probe, "is_running", lambda p, timeout=1.0: True)
-    with pytest.raises(StartFailed, match="already using port"):
+    monkeypatch.setattr(genuine, "is_budget_buddy", lambda p: False)
+    with pytest.raises(StartFailed, match="Something else is using port"):
         HomeBase(port).start()
+
+
+def test_a_running_budget_buddy_is_reused(monkeypatch, port):
+    use_home_base(monkeypatch, "-c", "raise SystemExit('should not start')")
+    monkeypatch.setattr(probe, "is_running", lambda p, timeout=1.0: True)
+    monkeypatch.setattr(genuine, "is_budget_buddy", lambda p: True)
+    home_base = HomeBase(port)
+    home_base.start()
+    assert home_base.reused and home_base.process is None
 
 
 def test_start_up_problem_gets_a_window(monkeypatch, port, shown):
