@@ -1,7 +1,7 @@
 # Import history: see and remove imported files
 
 Every file you import (a bank file, stock trades, a brokerage activity file or a positions file) is listed under
-**Money**, **Import history**, newest first: when you imported it, what kind of file it was, the account, the file's
+**Money**, **Import history** (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view), newest first: when you imported it, what kind of file it was, the account, the file's
 name and how much it added. Importing a file that adds nothing new isn't listed.
 
 ## Remove an outdated or wrong import

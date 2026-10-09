@@ -7,7 +7,12 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 1. Start Budget Buddy on your computer (the Home Base server)
 2. Open a web browser (Chrome, Edge, Firefox, Safari — any browser works)
 3. Go to http://127.0.0.1:8765/ or type that address in the address bar
-4. You'll see the Budget Buddy dashboard with five buttons at the top: **Home**, **Money**, **Budget**, **Taxes** and **Devices**
+4. You'll see the Budget Buddy dashboard with five buttons at the top: **Home**, **Money**, **Budget**, **Taxes** and
+   **Devices**, and **Settings** at the top right
+
+The first time, **Home** shows a **Get started** list: add your accounts, bring in what you spent, set monthly
+budgets, and (if you like) use it on your phone. Each step links to the page that does it, and the list goes away
+once the first three are done.
 
 **Your data stays on this computer.** The dashboard works on this computer, and on other computers at home only
 after you connect them with a one-time code ([use Budget Buddy on another computer](use-on-another-computer.md)).
@@ -34,10 +39,23 @@ It also has these charts:
 
 Click **Show as table** on any chart to see the same numbers as a list.
 
+## Simple view or All tools
+
+Budget Buddy starts in the **simple view**: the pages and buttons most people need. When you want more control,
+click **Settings** at the top right and set **View** to **All tools**. That adds:
+
+- the **Import history** and **Auto-sort** pages (under **Money**)
+- on **Transactions**: **Find transfers**, **Hide dividends and sweeps**, **Hide balance adjustments**, the
+  **Mark as gift** and **Stock trade** buttons, and the transaction **Type** (refund or balance adjustment)
+- on **Investments**: importing your broker's positions file, and the live prices settings
+
+Nothing is lost in the simple view: your rules, imports and settings keep working, they're just out of the way.
+Set **View** back to **Simple** any time. The choice is remembered in this browser.
+
 ## Light or dark
 
-Budget Buddy follows your computer's light or dark setting. To pick one yourself, use **Colors** at the top
-right: **Match my computer**, **Light** or **Dark**. Your choice is remembered on this computer.
+Budget Buddy follows your computer's light or dark setting. To pick one yourself, open **Settings** at the top
+right and set **Colors** to **Match my computer**, **Light** or **Dark**. Your choice is remembered in this browser.
 
 ## Finding your way around
 
@@ -51,7 +69,9 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   - **Accounts:** your bank and savings accounts; match a balance to your bank
   - **Investments:** what you hold in each account and what it's worth; retirement and HSA contributions
   - **Import files:** import a CSV from your bank, or your broker's activity file
-  - **Auto-sort:** rules that put transactions in the right category for you
+  - **Receipts:** receipt photos sent from your phone
+  - **Import history** (All tools): every file you imported; undo one
+  - **Auto-sort** (All tools): rules that put transactions in the right category for you
 - **Budget**
   - **Categories:** budget categories and monthly budgets, as amounts or percentages of income
   - **Suggested budget:** a 50/30/20 plan from your last three months
@@ -64,7 +84,7 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   - **Connect phone:** pair your phone so it can see your budget
   - **Other computers:** let another computer at home open Budget Buddy
 
-Receipts are added from your phone.
+Receipts are added from the phone app.
 
 ## Something went wrong?
 

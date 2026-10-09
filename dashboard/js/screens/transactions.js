@@ -1,5 +1,7 @@
 // Transactions: filter by account, month and how they were sorted (or show the ones with no category yet), hide
 // dividends and their sweeps and (by default) balance adjustments, change a category, mark a gift or a stock trade, add one by hand.
+// options.sorted ("none" from Home's "needs a category" link) opens that filter across all months. Finding transfers,
+// hiding dividends, the "Mark as" column and the transaction type are power-user tools (All tools view).
 
 import {
   createTransaction, listAccounts, listCategories, listLots, listSales, listTransactions, matchTransfers,
@@ -8,22 +10,22 @@ import { currentMonth, monthRange, today } from "../dates.js";
 import { fill, h, showError } from "../dom.js";
 import { accountField, categoryField, idOrNull, pickOptions } from "../fields.js";
 import { form } from "../form.js";
-import { card, empty, select, table } from "../widgets.js";
+import { advanced, card, empty, select, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { categoryPicker } from "./category-picker.js";
 import { charityCell } from "./give-to-charity.js";
 import { stockTradeCell, tradeLabels } from "./stock-trade-cell.js";
 
-export async function render(root) {
+export async function render(root, options = {}) {
   const [accounts, firstCategories] = await Promise.all([
     listAccounts(), listCategories(),
   ]);
   let categories = firstCategories;
   const list = h("div", {});
   const accountFilter = select(pickOptions(accounts, "All accounts"));
-  const monthFilter = h("input", { type: "month", value: currentMonth() });
-  const sortedFilter = select([["", "Any way"], ["none", "Not yet (uncategorized)"], ["rule", "Auto-sorted"],
-    ["you", "Picked by you"]]);
+  const monthFilter = h("input", { type: "month", value: options.sorted ? "" : currentMonth() });
+  const sortedFilter = select([["", "Show all"], ["none", "Needs a category"], ["rule", "Sorted automatically"],
+    ["you", "Sorted by you"]], { value: options.sorted });
   const hideDividends = h("input", { type: "checkbox" });
   const hideAdjustments = h("input", { type: "checkbox", checked: true });
   const accountNames = new Map(accounts.map((a) => [a.id, a.name]));
@@ -48,11 +50,12 @@ export async function render(root) {
         [listTransactions(params), listCategories(), listLots(), listSales()]);
       const trades = tradeLabels(lots, sales);
       fill(list,
+        monthFilter.value ? null : empty("Showing every month. Pick a month to narrow it down."),
         page.items.length
           ? table(["Date", "What", "Account", "Amount", "Category", "Mark as"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
                 categoryPicker(t, categories), h("span", {}, charityCell(t, refresh),
-                  stockTradeCell(t, accountKinds.get(t.account_id), trades, refresh))]), [3])
+                  stockTradeCell(t, accountKinds.get(t.account_id), trades, refresh))]), [3], [5])
           : empty(sortedFilter.value === "none" ? "Everything here has a category." : "No transactions for this choice."),
         page.total > page.items.length
           ? empty(`Showing ${page.items.length} of ${page.total}. Pick a month to narrow it down.`) : null);
@@ -81,9 +84,10 @@ export async function render(root) {
   fill(root,
     card("Transactions",
       h("div", { class: "toolbar" }, h("label", {}, "Account", accountFilter), h("label", {}, "Month", monthFilter),
-        h("label", {}, "Category set", sortedFilter), h("label", {}, hideDividends, " Hide dividends and sweeps"),
-        h("label", {}, hideAdjustments, " Hide balance adjustments"),
-        h("span", {}, findTransfers, matchNote)),
+        h("label", {}, "Show", sortedFilter),
+        advanced(h("label", { class: "check" }, hideDividends, "Hide dividends and sweeps")),
+        advanced(h("label", { class: "check" }, hideAdjustments, "Hide balance adjustments")),
+        advanced(h("span", {}, findTransfers, matchNote))),
       list),
     accounts.length
       ? card("Add a transaction", form([
@@ -93,7 +97,7 @@ export async function render(root) {
           { name: "amount", label: "Amount in dollars", required: true, placeholder: "12.50", inputmode: "decimal" },
           { name: "description", label: "What was it?", required: true, maxlength: 500 },
           categoryField(categories, "(none yet)"),
-          { name: "kind", label: "Type",
+          { name: "kind", label: "Type", advanced: true,
             options: [["normal", "Regular"], ["refund", "Refund"], ["adjustment", "Balance adjustment"]] },
         ], "Add transaction", async (v) => {
           const magnitude = Math.abs(centsOrThrow(v.amount));

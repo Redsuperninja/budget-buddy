@@ -7,7 +7,7 @@ import { fill, h, showError } from "../dom.js";
 import { pickOptions } from "../fields.js";
 import { formatCents } from "../money.js";
 import { reload } from "../router.js";
-import { card, empty, note, select, table } from "../widgets.js";
+import { advanced, card, empty, note, select, table } from "../widgets.js";
 
 const money = (cents) => (cents === null ? "" : formatCents(cents));
 
@@ -81,6 +81,6 @@ export async function positionsCards(accounts, year) {
     data.accounts.length
       ? card("From your broker's positions file", note(data.note), data.accounts.map((g) => accountTable(g, year)))
       : null,
-    accounts.length ? importCard(accounts, year) : null,
+    accounts.length ? advanced(importCard(accounts, year)) : null,  // a power-user tool (All tools view)
   ];
 }

@@ -5,6 +5,6 @@
   "description": "Budget Buddy computer dashboard: plain HTML, CSS and JavaScript. No dependencies, no build step.",
   "scripts": {
     "test": "node --test",
-    "coverage": "node --test --experimental-test-coverage --test-coverage-include=js/money.js --test-coverage-include=js/dates.js --test-coverage-include=js/percent.js --test-coverage-include=js/theme.js --test-coverage-include=js/charts/scale.js --test-coverage-include=js/charts/shares.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100"
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include=js/money.js --test-coverage-include=js/dates.js --test-coverage-include=js/percent.js --test-coverage-include=js/theme.js --test-coverage-include=js/prefs.js --test-coverage-include=js/view.js --test-coverage-include=js/charts/scale.js --test-coverage-include=js/charts/shares.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100"
   }
 }

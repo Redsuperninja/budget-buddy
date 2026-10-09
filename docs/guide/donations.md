@@ -34,7 +34,7 @@ A few rules:
 If you gave by card, check or bank transfer, the payment is probably already in your transactions (typed in or
 imported from your bank). You don't need to type it again:
 
-1. Click **Money** at the top, then the **Transactions** tab, and find the payment.
+1. Turn on the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view, click **Money** at the top, then the **Transactions** tab, and find the payment.
 2. Click **Mark as gift** in its row (the **Gift** column) and leave **Kind of gift** on **To a charity**.
 3. Check the charity's name. Budget Buddy fills in what your bank called it, like "FAKE FOOD BANK"; change it
    to the name on the charity's receipt.

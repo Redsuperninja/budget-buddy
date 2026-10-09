@@ -19,7 +19,8 @@ node --test
 Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no packages):
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
-`money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js` and `charts.test.js` cover the logic.
+`money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `labels.test.js` and
+`charts.test.js` cover the logic.
 
 ## What the server expects
 
@@ -34,27 +35,31 @@ All under `js/` (each file starts with a one-line purpose):
 
 | File | Job |
 | --- | --- |
-| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order; the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
-| `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page), `reload()` and `onLeave()` for screens |
+| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order (`advanced: true` pages get a tab only in the All tools view); the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
+| `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page, plus optional choices like `#transactions?sorted=none` passed to `render` as options), `reload()` and `onLeave()` for screens |
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |
 | `dom.js` | `h()`, `fill()`, `showError()` (textContent only, never `innerHTML`) |
-| `widgets.js` | `card`, `statCard`, `table`, `select`, `empty`, `note` |
-| `form.js` | The `form()` engine and `saveWithNote()` |
-| `fields.js` | Shared form fields: account and category pickers, tax-year header, text-to-value helpers |
+| `widgets.js` | `card`, `statCard`, `table` (optional power-user columns), `select`, `empty`, `note`, `advanced` (marks a piece as All tools only) |
+| `form.js` | The `form()` engine (a field with `advanced: true` shows only in All tools, so it needs a default) and `saveWithNote()` |
+| `fields.js` | Shared form fields: account picker (everyday accounts first) and category picker, tax-year header (says "not tax advice" once), text-to-value helpers |
 | `money.js` | Cents to dollars and typed dollars to cents (string logic, no float maths) |
 | `dates.js` | Today, current month, month ranges |
-| `labels.js` | Plain-English names for account types, groups and so on |
+| `labels.js` | Plain-English names for account types, groups and so on; `everydayFirst()` orders accounts for pickers |
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
 | `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
-| `theme.js`, `theme-picker.js` | Light, dark or match the computer: the saved choice (pure, tested) and the header picker. Colors live in `app.css` as `light-dark()` pairs |
+| `prefs.js` | A remembered choice from a short list, shown as an attribute on `<html>` (pure, tested); used by `theme.js` and `view.js` |
+| `theme.js` | Light, dark or match the computer (`data-theme`). Colors live in `app.css` as `light-dark()` pairs |
+| `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |
+| `settings-menu.js` | The header's **Settings** menu with the View and Colors pickers |
 | `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens; `category-picker.js` is the category dropdown shared by Transactions and Auto-sort; `account-balance.js` is the Accounts screen's "Match your bank's balance"; `live-prices.js` is the Investments screen's live prices (ADR-0010) |
 
 To add a screen: create `screens/<name>.js` with a `render` function and add one line to its section in `main.js`.
-Keep the top row short: add a page to an existing section rather than a new section. To call a new
+Keep the top row short: add a page to an existing section rather than a new section. Keep the simple view calm:
+a page, card, column or field only power users need is marked `advanced` (see `view.js`). To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens, by section: **Home** (money tiles, what needs you, where the income went, budget charts, the last 12 months, what you have and owe); **Money**: Transactions (with a Charity column to
+Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, the last 12 months, what you have and owe); **Money**: Transactions (with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
 Connect phone, Other computers (`other-computers.js`). `join.js` is the join page for another computer

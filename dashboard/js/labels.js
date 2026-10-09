@@ -40,3 +40,11 @@ export const TRANSFER_TYPES = [
 export const transferTypeLabel = (type) => lookup(TRANSFER_TYPES, type);
 
 export const NOT_TAX_ADVICE = "Estimate, not tax advice.";
+
+// Everyday accounts first (checking, savings, card, cash), so a picker for spending or a bank file starts on one.
+// Keeps the Home Base's order otherwise.
+const EVERYDAY = ["checking", "savings", "credit_card", "cash"];
+const everydayRank = (kind) => (EVERYDAY.includes(kind) ? EVERYDAY.indexOf(kind) : EVERYDAY.length);
+export const everydayFirst = (accounts) =>
+  accounts.map((a, i) => [a, i]).sort(([a, i], [b, j]) => everydayRank(a.kind) - everydayRank(b.kind) || i - j)
+    .map(([a]) => a);

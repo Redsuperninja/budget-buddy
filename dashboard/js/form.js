@@ -13,7 +13,8 @@ export async function saveWithNote(noteEl, action) {
   }
 }
 
-// A form from field descriptions: { name, label, type, value, options, required, ... }.
+// A form from field descriptions: { name, label, type, value, options, required, ... }. A field with
+// advanced: true is shown only in the All tools view, so it needs a sensible default value.
 // onSubmit gets the typed-in text by field name. If it throws, the message shows under the form.
 export function form(fields, submitLabel, onSubmit) {
   const message = h("p", { class: "error", role: "alert", hidden: true });
@@ -25,7 +26,7 @@ export function form(fields, submitLabel, onSubmit) {
           name: f.name, type: f.type || "text", value: f.value ?? "", placeholder: f.placeholder,
           required: f.required, maxlength: f.maxlength, inputmode: f.inputmode, autocomplete: f.autocomplete || "off",
         });
-    return h("label", {}, f.label, inputs[f.name]);
+    return h("label", { class: f.advanced ? "advanced" : null }, f.label, inputs[f.name]);
   });
   const button = h("button", { class: "primary", type: "submit" }, submitLabel);
   return h("form", {

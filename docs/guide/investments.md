@@ -33,7 +33,7 @@ Budget Buddy can get the latest prices for you from **Finnhub**, a stock price s
 it on:
 
 1. Sign up for a free account at finnhub.io and copy your **API key** from your Finnhub dashboard.
-2. On the Investments page of the Budget Buddy computer, under **Live prices**, choose **On**, paste the key and
+2. On the Investments page of the Budget Buddy computer, in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view, under **Live prices**, choose **On**, paste the key and
    click **Save**. (A connected computer can refresh prices but can't turn them on or change the key.)
 
 From then on, prices refresh when you open the Investments page and when you click **Refresh prices**, never in
@@ -54,8 +54,8 @@ date, then click **Save price**. The new price replaces the old one, including a
 
 ## Import your broker's positions file
 
-Most brokers let you download your positions (also called holdings) as a CSV file. On the **Investments** page,
-under **Import a positions file**, pick the account, the day the file is from, and the file, then click
+Most brokers let you download your positions (also called holdings) as a CSV file. On the **Investments** page
+(in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view), under **Import a positions file**, pick the account, the day the file is from, and the file, then click
 **Preview** and **Save**.
 
 - Budget Buddy shows what the file says you hold, next to what your recorded purchases and sales add up to. If

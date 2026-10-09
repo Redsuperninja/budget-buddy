@@ -1,4 +1,5 @@
-// Home: the month at a glance (money tiles and what needs you), where the income went, spending against budget,
+// Home: a "Get started" checklist for someone new (home-start.js), the month at a glance (money tiles and what needs
+// you), where the income went, spending against budget,
 // the last 12 months, and what you have and owe. Every chart can also be read as a table.
 
 import {
@@ -13,6 +14,7 @@ import { formatBp, percentUsed } from "../percent.js";
 import { reload } from "../router.js";
 import { categoriesChart, groupsChart, trendChart } from "./home-charts.js";
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
+import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
 
 const used = (c) => {
@@ -41,7 +43,7 @@ function budgetTable(summary) {
 
 export async function render(root, options) {
   const month = options.month || currentMonth();
-  const [summary, trend, accounts, waiting, deposits, positions, held] = await Promise.all([
+  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction] = await Promise.all([
     monthlySummary(month),
     monthlyTrend(month),
     listAccounts(),
@@ -49,25 +51,34 @@ export async function render(root, options) {
     payDeposits(month.slice(0, 4)),
     listPositions(),
     stockHoldings(),
+    listTransactions(new URLSearchParams({ limit: "1" })),
   ]);
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
   picker.addEventListener("change", () => { if (picker.value) reload({ month: picker.value }); });
   const mismatched = positions.accounts.flatMap((a) => a.positions).filter((p) => !p.matches).length;
 
+  // Until the first transaction there is nothing to chart: the checklist says what to do first.
+  const hasTransactions = anyTransaction.total > 0;
   fill(root,
+    startCard({ accounts: accounts.length > 0, transactions: hasTransactions,
+      budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) }),
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker)),
     monthTiles(summary),
-    attentionCard([
-      { count: waiting.total, href: "#transactions",
-        text: "transaction(s) with no category: on Transactions, set Category set to Not yet" },
-      { count: deposits.length, href: "#paychecks", text: "pay deposit(s) to fill in on Paychecks" },
-      { count: mismatched, href: "#investments", text: "position(s) that don't match your recorded trades" },
+    hasTransactions && attentionCard([
+      { count: waiting.total, href: "#transactions?sorted=none",
+        text: waiting.total === 1 ? "transaction needs a category" : "transactions need a category" },
+      { count: deposits.length, href: "#paychecks",
+        text: deposits.length === 1 ? "pay deposit to fill in on Paychecks" : "pay deposits to fill in on Paychecks" },
+      { count: mismatched, href: "#investments", text: mismatched === 1
+        ? "position doesn't match your recorded trades" : "positions don't match your recorded trades" },
     ]),
-    incomeSplitCard(summary),
-    groupsChart(summary),
-    categoriesChart(summary, budgetTable(summary)),
-    trendChart(trend),
-    balancesCard(accounts, held.accounts.length ? held.value_cents : null),
-    empty("Budgets are the same every month, so changing one also changes how past months look."),
+    hasTransactions && [
+      incomeSplitCard(summary),
+      groupsChart(summary),
+      categoriesChart(summary, budgetTable(summary)),
+      trendChart(trend),
+      balancesCard(accounts, held.accounts.length ? held.value_cents : null),
+      empty("Budgets are the same every month, so changing one also changes how past months look."),
+    ],
   );
 }
