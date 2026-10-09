@@ -15,8 +15,15 @@ def accounts(make_account) -> dict[str, int]:
     return {k: make_account(name=f"Fake {k}", kind=k)["id"] for k in kinds}
 
 
-def add(client, account_id, cents, date="2026-03-02", **extra):
-    body = {"account_id": account_id, "amount_cents": cents, "date": date, "description": "Fake"}
+def add(
+    client, account_id, cents, date="2026-03-02", description="ONLINE TRANSFER PAYMENT", **extra
+):
+    body = {
+        "account_id": account_id,
+        "amount_cents": cents,
+        "date": date,
+        "description": description,
+    }
     response = client.post(TXN, json=body | extra)
     assert response.status_code == 201, response.text
     return response.json()
@@ -53,7 +60,7 @@ def test_money_back_out_of_savings(client, accounts):
 
 def test_too_far_apart_or_different_amounts_dont_match(client, accounts):
     add(client, accounts["checking"], -5_000, date="2026-03-01")
-    late = add(client, accounts["savings"], 5_000, date="2026-03-06")  # 5 days
+    late = add(client, accounts["savings"], 5_000, date="2026-03-07")  # 6 days
     other = add(client, accounts["savings"], 4_999, date="2026-03-01")
     assert get(client, late)["kind"] == "normal" and get(client, other)["kind"] == "normal"
 
@@ -88,6 +95,58 @@ def test_a_category_you_picked_is_respected(client, accounts):
     assert back["kind"] == "normal"
 
 
+def test_five_days_apart_still_matches(client, accounts):
+    add(client, accounts["checking"], -5_000, date="2026-03-01")
+    back = add(client, accounts["retirement"], 5_000, date="2026-03-06")  # a long weekend
+    assert back["kind"] == "transfer"
+
+
+@pytest.mark.parametrize(
+    ("out_text", "in_text"),
+    [
+        ("FAKE FOOD BANK", "FAKE DEPOSIT"),  # nothing says transfer: a coincidence
+        ("ONLINE TRANSFER", "DIVIDEND FAKE FUND"),  # a dividend, not your money moved
+        ("ONLINE TRANSFER", "EMPLOYER MATCH"),
+        ("ONLINE TRANSFER", "PAYROLL FAKE CO"),
+    ],
+)
+def test_coincidences_dont_match(client, accounts, out_text, in_text):
+    add(client, accounts["checking"], -5_000, description=out_text)
+    back = add(client, accounts["brokerage"], 5_000, description=in_text)
+    assert back["kind"] == "normal"
+
+
+def test_a_card_refund_is_not_a_payment(client, accounts):
+    add(client, accounts["checking"], -3_000, description="ONLINE TRANSFER")
+    refund = add(client, accounts["credit_card"], 3_000, description="FAKE STORE CREDIT")
+    assert refund["kind"] == "normal"
+    payment = add(client, accounts["credit_card"], 3_000, description="PAYMENT THANK YOU")
+    assert payment["transfer_type"] == "card_payment"
+
+
+def test_rule_sorted_transactions_are_left_alone(client, accounts):
+    food = client.post("/api/local/categories", json={"name": "Fake Food", "group": "needs"})
+    client.post(
+        "/api/local/category-rules", json={"pattern": "MART", "category_id": food.json()["id"]}
+    )
+    add(client, accounts["checking"], -3_000, description="FAKE MART PAYMENT")
+    back = add(client, accounts["savings"], 3_000, description="TRANSFER")
+    assert back["kind"] == "normal"
+
+
+def test_undo_puts_the_category_back(client, accounts):
+    transfer_category = next(
+        c["id"] for c in client.get("/api/local/categories").json() if c["group"] == "transfer"
+    )
+    out = add(client, accounts["checking"], -7_000)
+    back = add(client, accounts["savings"], 7_000)
+    assert get(client, out)["category_id"] == transfer_category
+    client.delete(f"{TXN}/{out['id']}/transfer")
+    for side in (out, back):
+        undone = get(client, side)
+        assert (undone["kind"], undone["category_id"]) == ("normal", None)
+
+
 def test_unlinking_is_remembered(client, accounts):
     out = add(client, accounts["checking"], -7_000)
     add(client, accounts["savings"], 7_000)
@@ -120,11 +179,11 @@ def test_matched_saving_counts_as_saved(client, accounts):
     assert summary["spending_cents"] == 0
 
 
-def test_paycheck_deposit_and_donation_are_left_alone(client, accounts, monkeypatch):
+def test_a_donation_is_left_alone(client, accounts, monkeypatch):
     from app.schemas import donations as donation_schemas
 
     monkeypatch.setattr(donation_schemas, "_today", lambda: __import__("datetime").date(2030, 1, 1))
-    gift = add(client, accounts["checking"], -4_000)
+    gift = add(client, accounts["checking"], -4_000, description="ONLINE PAYMENT FAKE CHARITY")
     client.post("/api/local/donations", json={"date": "2026-03-02", "organization": "Fake",
                                                 "kind": "cash", "amount_cents": 4_000,
                                                 "transaction_id": gift["id"]})  # fmt: skip

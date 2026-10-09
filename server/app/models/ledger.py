@@ -104,6 +104,11 @@ class Transaction(TimestampMixin, Base):
     sorted_by_rule_id: Mapped[int | None] = mapped_column(Integer, index=True)
     # Set when you undo a transfer link, so automatic matching never links it again.
     auto_transfer_off: Mapped[bool] = mapped_column(default=False, server_default="0")
+    # The category (and how it was set) from before it was linked as a transfer, put back when the
+    # link is undone. No foreign keys, like sorted_by_rule_id (migration 0016 only adds columns).
+    pre_transfer_category_id: Mapped[int | None] = mapped_column(Integer)
+    pre_transfer_category_source: Mapped[str | None] = mapped_column(String(8))
+    pre_transfer_rule_id: Mapped[int | None] = mapped_column(Integer)
     account = relationship("Account", viewonly=True, lazy="selectin")
     transfer_partner = relationship(
         "Transaction",

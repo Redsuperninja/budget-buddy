@@ -298,10 +298,10 @@ def test_linked_transfer_moves_to_the_transfer_category(client, add_txn, account
         assert locked.json()["error"]["code"] == "part_of_transfer"
     assert client.patch(f"{URL}/{out['id']}", json={"category_id": transfer}).status_code == 200
 
-    # Unlinking keeps the Transfer category, so it still isn't spending until recategorized.
+    # Unlinking puts back the category from before the link (none if it had none).
     unlinked = client.delete(f"{URL}/{out['id']}/transfer").json()
-    assert (unlinked["kind"], unlinked["category_id"]) == ("normal", transfer)
-    assert client.patch(f"{URL}/{out['id']}", json={"category_id": groceries}).status_code == 200
+    assert (unlinked["kind"], unlinked["category_id"]) == ("normal", groceries)
+    assert client.get(f"{URL}/{into['id']}").json()["category_id"] is None
 
 
 def test_transfer_needs_two_existing_transactions(client, add_txn, accounts):

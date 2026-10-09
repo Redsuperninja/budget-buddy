@@ -1,7 +1,8 @@
 """Automatic transfer matching: remember transfers you unlinked
 
 ``transactions.auto_transfer_off`` is set on both sides when you undo a transfer link, so
-automatic matching never links them again. A plain added column (no table rebuild).
+automatic matching never links them again. ``pre_transfer_*`` keep the category from before a link,
+put back on undo. Plain added columns (no table rebuild, so no foreign keys).
 
 Revision ID: 0016
 Revises: 0015
@@ -25,7 +26,16 @@ def upgrade() -> None:
         "transactions",
         sa.Column("auto_transfer_off", sa.Boolean(), server_default="0", nullable=False),
     )
+    op.add_column("transactions", sa.Column("pre_transfer_category_id", sa.Integer()))
+    op.add_column("transactions", sa.Column("pre_transfer_category_source", sa.String(8)))
+    op.add_column("transactions", sa.Column("pre_transfer_rule_id", sa.Integer()))
 
 
 def downgrade() -> None:
-    op.drop_column("transactions", "auto_transfer_off")
+    for column in (
+        "pre_transfer_rule_id",
+        "pre_transfer_category_source",
+        "pre_transfer_category_id",
+        "auto_transfer_off",
+    ):
+        op.drop_column("transactions", column)

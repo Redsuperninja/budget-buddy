@@ -9,17 +9,21 @@ Code: `services/transfers.py` (link, unlink, `pair_up`), `services/transfer_matc
 `match_transfers(session, only_ids)` links pairs that are:
 
 - one money-out and one money-in transaction for exactly the same amount, on different accounts, dated at most
-  `WINDOW_DAYS` (4) apart;
+  `WINDOW_DAYS` (5) apart;
 - both `normal`, unlinked, not a paycheck's deposit or a linked donation, not unlinked by the user before
-  (`auto_transfer_off`), and not in a category the user picked (`category_source` "you") unless it's a transfer
-  category;
+  (`auto_transfer_off`), and uncategorized or in a transfer-group category (a category from the user or a rule
+  is respected);
+- at least one description matches `TRANSFER_WORDS`; a credit card's side matches `CARD_PAYMENT_WORDS` (a refund
+  isn't a payment); neither matches `NOT_TRANSFER_WORDS` (dividends, interest, employer match, payroll, refunds,
+  cash back);
 - money leaving any account but a credit card or loan;
 - each other's single best match: the closest date wins; a tie on either side links nothing.
 
 It runs after a CSV import (pairs with at least one imported row; `ImportResult.transfers_matched`), after
 `POST /api/local/transactions` (that transaction), and on `POST /api/local/transactions/match-transfers` (all;
 `{"matched": N}`). Linked pairs get kind `transfer`, the transfer category, and `category_source` None (Budget
-Buddy's choice). Unlinking sets `auto_transfer_off` on both sides; linking by hand clears it.
+Buddy's choice). Linking (automatic or by hand) keeps each side's previous category, source and rule in
+`pre_transfer_*`; unlinking puts them back and sets `auto_transfer_off` on both sides; linking by hand clears it.
 
 ## Kinds
 

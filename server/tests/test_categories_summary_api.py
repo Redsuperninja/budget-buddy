@@ -168,14 +168,16 @@ def test_uncategorized_is_reported_not_guessed(client, add_txn, accounts):
     assert unassigned(s) == (500, 2_500, 2)
 
 
-def test_unlinked_transfer_keeps_transfer_category_and_stays_out(client, add_txn, accounts):
+def test_unlinked_transfer_gets_its_old_category_back(client, add_txn, accounts):
     out = add_txn(accounts[0], -1_000)
     into = add_txn(accounts[1], 1_000)
     base = f"/api/local/transactions/{out['id']}"
     client.post(f"{base}/transfer", json={"other_id": into["id"]})
+    assert summary(client)["unassigned_count"] == 0  # linked: not income or spending
     assert client.delete(f"{base}/transfer").is_success
+    # They had no category before the link, so they're waiting to be sorted again.
     s = summary(client)
-    assert (s["income_cents"], s["spending_cents"], s["unassigned_count"]) == (0, 0, 0)
+    assert (s["income_cents"], s["spending_cents"], s["unassigned_count"]) == (0, 0, 2)
 
 
 @pytest.mark.parametrize(

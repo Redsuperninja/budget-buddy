@@ -37,6 +37,12 @@ def _unlink(transaction: Transaction, partner: Transaction | None) -> None:
             side.transfer_pair_id = None
             side.kind = TransactionKind.NORMAL
             side.auto_transfer_off = True
+            # Back to the category from before the link (none if it had none).
+            side.category_id = side.pre_transfer_category_id
+            side.category_source = side.pre_transfer_category_source
+            side.sorted_by_rule_id = side.pre_transfer_rule_id
+            side.pre_transfer_category_id = side.pre_transfer_category_source = None
+            side.pre_transfer_rule_id = None
 
 
 def link_transfer(session: Session, transaction_id: int, other_id: int) -> Transaction:
@@ -88,6 +94,10 @@ def pair_up(session: Session, first: Transaction, second: Transaction) -> None:
     """Link two checked transactions as one transfer (the caller commits)."""
     first.transfer_pair_id, second.transfer_pair_id = second.id, first.id
     for side in (first, second):
+        # Kept so undoing the link puts the category back (and it counts as spending again).
+        side.pre_transfer_category_id = side.category_id
+        side.pre_transfer_category_source = side.category_source
+        side.pre_transfer_rule_id = side.sorted_by_rule_id
         side.kind = TransactionKind.TRANSFER
         # So a category filter (e.g. Groceries) doesn't list money you only moved. Budget Buddy's
         # choice, not yours or a rule's.
@@ -102,8 +112,8 @@ def pair_up(session: Session, first: Transaction, second: Transaction) -> None:
 def unlink_transfer(session: Session, transaction_id: int) -> Transaction:
     """Undo a transfer link. Both sides go back to being normal transactions.
 
-    They keep the Transfer category, so they still don't count as spending or income until the
-    user picks another category. Automatic matching won't link either of them again.
+    Each gets back the category it had before it was linked (none if it had none), so it counts
+    as spending or income again. Automatic matching won't link either of them again.
     """
     transaction = get_transaction(session, transaction_id)
     if transaction.transfer_pair_id is None:
