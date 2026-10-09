@@ -9,7 +9,7 @@ Most banks let you download your transactions as a CSV file. Budget Buddy can re
 
 ## Import the file
 
-1. On the Budget Buddy dashboard, click **Money** at the top, then the **Import bank file** tab
+1. On the Budget Buddy dashboard, click **Money** at the top, then the **Import files** tab
 2. Pick the account to import into
 3. Click "Choose file" and select the CSV you downloaded
 4. Click **Preview**

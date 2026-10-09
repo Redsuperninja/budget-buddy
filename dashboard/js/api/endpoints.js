@@ -39,6 +39,10 @@ const csv = (accountId) => `${LOCAL}/accounts/${accountId}/csv-import`;
 const sendCsv = (path, bytes) => api("POST", path, { body: bytes, contentType: "text/csv" });
 export const previewCsv = (accountId, query, bytes) => sendCsv(`${csv(accountId)}/preview?${query}`, bytes);
 export const importCsv = (accountId, query, bytes) => sendCsv(`${csv(accountId)}?${query}`, bytes);
+// Brokerage activity file (bytes: the CSV file)
+const activity = (accountId) => `${LOCAL}/accounts/${accountId}/activity-import`;
+export const previewActivity = (accountId, bytes) => sendCsv(`${activity(accountId)}/preview`, bytes);
+export const importActivity = (accountId, query, bytes) => sendCsv(`${activity(accountId)}?${query}`, bytes);
 
 // Import history (undo an import)
 export const listImports = () => api("GET", `${LOCAL}/imports`);

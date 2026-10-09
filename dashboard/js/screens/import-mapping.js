@@ -1,4 +1,4 @@
-// Import bank file: the "Which column is which?" form and the settings it starts from.
+// Import files (bank file): the "Which column is which?" form and the settings it starts from.
 
 import { form } from "../form.js";
 

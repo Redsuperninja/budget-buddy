@@ -85,7 +85,7 @@ def find_columns(rows: list[list[str]]) -> tuple[int, StockColumns]:
     raise ApiError(422, "columns_not_found", NO_COLUMNS)
 
 
-def _kind(text: str) -> Kind:
+def trade_kind(text: str) -> Kind:
     text = text.casefold()
     if _NOT_PLAIN.search(text):
         raise RowProblem(
@@ -97,7 +97,7 @@ def _kind(text: str) -> Kind:
     return "buy" if is_buy else "sell"
 
 
-def _shares(text: str) -> tuple[str, bool]:
+def shares_and_sign(text: str) -> tuple[str, bool]:
     """The number of shares without its sign, and whether it was negative: "-5", "(5)" or "5-".
     Brokers often show shares sold as negative, and big numbers with commas."""
     negative = False
@@ -140,8 +140,8 @@ def _problem(exc: ValidationError) -> RowProblem:
 
 
 def parse_row(row: list[str], number: int, cols: StockColumns, account_id: int | None) -> ParsedRow:
-    kind = _kind(cell(row, cols.kind)) if cols.kind is not None else "buy"
-    shares, negative = _shares(cell(row, cols.shares))
+    kind = trade_kind(cell(row, cols.kind)) if cols.kind is not None else "buy"
+    shares, negative = shares_and_sign(cell(row, cols.shares))
     _check_sign(kind, negative, cols.kind is not None)
     if cols.date_format is None:
         raise RowProblem("The dates aren't in a format we know, like 2026-01-31 or 01/31/2026.")

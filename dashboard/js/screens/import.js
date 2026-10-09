@@ -1,10 +1,12 @@
-// Import bank file: pick an account and a CSV, check the preview, set which column is which, import.
+// Import files: a bank file (pick an account and a CSV, check the preview, set which column is which, import), and a
+// brokerage activity file (activity-import.js).
 
 import { importCsv, listAccounts, previewCsv } from "../api/endpoints.js";
 import { fill, h, showError } from "../dom.js";
 import { pickOptions } from "../fields.js";
 import { formatCents } from "../money.js";
 import { card, empty, note, select, table } from "../widgets.js";
+import { activityImportCard } from "./activity-import.js";
 import { mappingForm } from "./import-mapping.js";
 
 const YES_NO = [["false", "No"], ["true", "Yes"]];
@@ -78,5 +80,6 @@ export async function render(root) {
         choices = {};
         try { await preview(); } catch (err) { showError(result, err); }
       } }, "Preview")),
-    result));
+    result),
+    activityImportCard(accounts));
 }

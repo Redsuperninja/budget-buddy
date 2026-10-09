@@ -64,6 +64,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [category-rules.md](category-rules.md) | Auto-categorization rules |
 | [csv-import.md](csv-import.md) | Bank CSV import |
 | [imports.md](imports.md) | Import history and undoing an import |
+| [activity-import.md](activity-import.md) | Brokerage activity files: transactions, trades and dividends sorted |
 | [receipts.md](receipts.md) | Receipts and receipt photos |
 | [paychecks.md](paychecks.md) | Paychecks, the adds-up rule, deposit links, year-to-date summary |
 | [donations.md](donations.md) | Charitable donations and the yearly summary |
