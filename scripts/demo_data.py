@@ -93,7 +93,6 @@ def load(api: LocalApi, today: dt.date) -> None:
         "Travel": 10000,
         "Emergency Fund": 30000,
         "Investments": 20000,
-        "Paycheck": 520000,
     }
     for name, cents in budgets.items():
         if name in cats:
