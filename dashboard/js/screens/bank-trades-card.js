@@ -65,11 +65,11 @@ export async function bankTradesCard() {
   } }, "Find trades in my transactions");
   return card("Stock trades from your bank file",
     empty("Trades your bank file names by company, each with the deposit sweep that moved the cash. Neither counts " +
-      "as spending or income. Type the ticker and number of shares once to see the price per share; the trade " +
-      "then shows on the Stocks page too."),
+      "as spending or income. Type the ticker and number of shares once to see the price per share (the amount " +
+      "already includes any commission); the trade then shows on the Stocks page too."),
     h("div", { class: "toolbar" }, find, note),
     items.length
-      ? table(["Date", "Company", "Trade", "Amount", "Ticker", "Shares", "Price per share", ""],
+      ? table(["Date", "Company", "Trade", "Amount", "Ticker", "Shares", "Price per share (with fees)", ""],
           items.map(row), [3, 5, 6])
       : empty("No trades found yet. Import your brokerage account's bank file, or click Find trades."));
 }

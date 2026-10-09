@@ -22,7 +22,6 @@ It runs after a bank file is imported, after a transaction is added by hand, and
 Nothing here logs descriptions or amounts.
 """
 
-import datetime as dt
 import re
 from dataclasses import dataclass
 
@@ -32,19 +31,21 @@ from sqlalchemy.orm import Session
 
 from app.models import Account, BankTrade, Dividend, SecuritySymbol, Transaction
 from app.services.accounts import INVESTMENT_KINDS
-from app.services.dividend_matching import (
-    SWEEP_DAYS_AFTER,
-    SWEEP_DAYS_BEFORE,
-    SWEEP_WORDS,
-    looks_like_dividend,
-    regular,
-)
+from app.services.dividend_matching import looks_like_dividend
+from app.services.sweeps import SWEEP_WORDS, link_sweeps, regular
 
-TRADE_WORDS = re.compile(
-    r"acting as (principal|agent)|(?<![a-z])(un)?solicited(?![a-z])|commission (field|equivalent)"
-    r"|(?<![a-z])(you )?(bought|sold)(?![a-z])",
+# Trade-confirmation wording, which only trades carry.
+CONFIRMATION_WORDS = re.compile(
+    r"acting as (principal|agent)|(?<![a-z])(un)?solicited(?![a-z])|commission (field|equivalent)",
     re.I,
 )
+# A plain "bought" or "sold" counts too, unless the line is about cash funds or bonds coming due.
+BOUGHT_SOLD = re.compile(r"(?<![a-z])(bought|sold)(?![a-z])", re.I)
+NOT_STOCK_WORDS = re.compile(
+    r"money market|mmkt|(?<![a-z])mmf(?![a-z])|redemption|redeem|matur|to cover", re.I
+)
+# A cancelled or corrected trade reverses money: it mustn't look like the opposite trade.
+REVERSAL_WORDS = re.compile(r"cancel|(?<![a-z])cxl(?![a-z])|correct|revers|rebill|adjust", re.I)
 _LEADING_ACTION = re.compile(r"^\s*(you\s+)?(bought|sold|buy|sell)\s+", re.I)
 # Where the company's name ends: "ABBOTT LABORATORIES UNSOLICITED ..." -> "ABBOTT LABORATORIES".
 _NAME_END = re.compile(
@@ -72,19 +73,11 @@ def ticker_in(description: str) -> str | None:
 
 
 def looks_like_trade(description: str) -> bool:
-    return bool(TRADE_WORDS.search(description)) and not SWEEP_WORDS.search(description)
-
-
-def _used_sweeps():
-    return (
-        select(Dividend.sweep_transaction_id)
-        .where(Dividend.sweep_transaction_id.is_not(None))
-        .union(
-            select(BankTrade.sweep_transaction_id).where(
-                BankTrade.sweep_transaction_id.is_not(None)
-            )
-        )
-    )
+    if SWEEP_WORDS.search(description) or REVERSAL_WORDS.search(description):
+        return False
+    if CONFIRMATION_WORDS.search(description):
+        return True
+    return bool(BOUGHT_SOLD.search(description)) and not NOT_STOCK_WORDS.search(description)
 
 
 def _new_trades(session: Session, ids: set[int] | None) -> list[Transaction]:
@@ -108,44 +101,13 @@ def _new_trades(session: Session, ids: set[int] | None) -> list[Transaction]:
 
 
 def _link_sweeps(session: Session) -> int:
-    open_trades = session.execute(
+    waiting = session.execute(
         select(BankTrade, Transaction)
         .join(Transaction, Transaction.id == BankTrade.transaction_id)
         .where(BankTrade.dismissed.is_(False), BankTrade.sweep_transaction_id.is_(None))
         .order_by(Transaction.date, Transaction.id)
     ).all()
-    if not open_trades:
-        return 0
-    sweeps = [
-        t
-        for t in session.scalars(
-            regular(select(Transaction)).where(
-                Transaction.account_id.in_({t.account_id for _, t in open_trades}),
-                Transaction.id.not_in(_used_sweeps()),
-                Transaction.id.not_in(select(BankTrade.transaction_id)),
-            )
-        )
-        if SWEEP_WORDS.search(t.description)
-    ]
-    linked = 0
-    taken: set[int] = set()
-    for trade, paid in open_trades:
-        start = paid.date - dt.timedelta(days=SWEEP_DAYS_BEFORE)
-        end = paid.date + dt.timedelta(days=SWEEP_DAYS_AFTER)
-        fits = [
-            s
-            for s in sweeps
-            if s.id not in taken
-            and s.account_id == paid.account_id
-            and s.amount_cents == -paid.amount_cents
-            and start <= s.date <= end
-        ]
-        if fits:
-            best = min(fits, key=lambda s: (abs((s.date - paid.date).days), s.id))
-            trade.sweep_transaction_id = best.id
-            taken.add(best.id)
-            linked += 1
-    return linked
+    return link_sweeps(session, list(waiting))
 
 
 def find_trades(session: Session, transaction_ids: set[int] | None = None) -> Found:

@@ -14,7 +14,7 @@ summary leaves both out (``dividends.kept_in_account``): they aren't take-home i
 saving.
 
 Its sweep is money out of the same account for exactly the same amount, from the day before to
-``SWEEP_DAYS_AFTER`` days after, with "sweep" in the description, like "CHASE IRA DEPOSIT SWEEP
+three days after, with "sweep" in the description (``sweeps.py``), like "CHASE IRA DEPOSIT SWEEP
 JPMORGAN CHASE BANK NA INTRA-DAY DEPOSIT". The closest date wins (then the one added first). A sweep
 keeps its own category: the pair only moved cash inside the account.
 
@@ -22,7 +22,6 @@ It runs after a bank file is imported, after a transaction is added by hand, and
 look through everything. Nothing here logs descriptions or amounts.
 """
 
-import datetime as dt
 import re
 from dataclasses import dataclass
 
@@ -33,27 +32,21 @@ from sqlalchemy.orm import Session
 from app.models import (
     Account,
     AccountKind,
-    BankTrade,
     CategoryGroup,
     CategorySource,
     Dividend,
-    Donation,
-    Paycheck,
     Transaction,
-    TransactionKind,
 )
 from app.services.accounts import INVESTMENT_KINDS
 from app.services.named_categories import find_or_make
+from app.services.sweeps import link_sweeps, regular
 
 CATEGORY = "Dividends"
-SWEEP_DAYS_BEFORE = 1
-SWEEP_DAYS_AFTER = 3
 DIVIDEND_WORDS = re.compile(r"(?<![a-z])dividends?(?![a-z])", re.I)
 SHORT_WORDS = re.compile(r"(?<![a-z])divs?(?![a-z])", re.I)  # only in investment accounts
 NOT_DIVIDEND_WORDS = re.compile(
     r"non-?\s?dividend|return of capital|exempt|(?<![a-z])div of(?![a-z])|division|payroll", re.I
 )
-SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I)
 # Where the payer's name ends: "JOHNSON & JOHNSON COMMON STOCK CASH DIV ..." -> "JOHNSON & JOHNSON".
 _PAYER_END = re.compile(
     r"\s+(common stock|((cash|qualified|ordinary) )?(dividends?|divs?))(?![a-z]).*$", re.I
@@ -76,22 +69,6 @@ def looks_like_dividend(description: str, account_kind: AccountKind) -> bool:
         return False
     short = account_kind in INVESTMENT_KINDS and SHORT_WORDS.search(description)
     return bool(DIVIDEND_WORDS.search(description) or short)
-
-
-def regular(query):
-    """Regular transactions not already a transfer, a paycheck's deposit or a donation."""
-    return query.where(
-        Transaction.kind == TransactionKind.NORMAL,
-        Transaction.transfer_pair_id.is_(None),
-        Transaction.id.not_in(
-            select(Paycheck.deposit_transaction_id).where(
-                Paycheck.deposit_transaction_id.is_not(None)
-            )
-        ),
-        Transaction.id.not_in(
-            select(Donation.transaction_id).where(Donation.transaction_id.is_not(None))
-        ),
-    )
 
 
 def _new_dividends(session: Session, ids: set[int] | None) -> list[Transaction]:
@@ -122,53 +99,13 @@ def file_under_dividends(session: Session, payment: Transaction) -> None:
 
 def _link_sweeps(session: Session) -> int:
     """Give every dividend still without one its sweep, if there's exactly-matching money out."""
-    open_dividends = session.execute(
+    waiting = session.execute(
         select(Dividend, Transaction)
         .join(Transaction, Transaction.id == Dividend.transaction_id)
         .where(Dividend.dismissed.is_(False), Dividend.sweep_transaction_id.is_(None))
         .order_by(Transaction.date, Transaction.id)
     ).all()
-    if not open_dividends:
-        return 0
-    used = (
-        select(Dividend.sweep_transaction_id)
-        .where(Dividend.sweep_transaction_id.is_not(None))
-        .union(
-            select(BankTrade.sweep_transaction_id).where(
-                BankTrade.sweep_transaction_id.is_not(None)
-            )
-        )
-    )
-    sweeps = [
-        t
-        for t in session.scalars(
-            regular(select(Transaction)).where(
-                Transaction.amount_cents < 0,
-                Transaction.account_id.in_({t.account_id for _, t in open_dividends}),
-                Transaction.id.not_in(used),
-            )
-        )
-        if SWEEP_WORDS.search(t.description)
-    ]
-    linked = 0
-    taken: set[int] = set()
-    for dividend, paid in open_dividends:
-        start = paid.date - dt.timedelta(days=SWEEP_DAYS_BEFORE)
-        end = paid.date + dt.timedelta(days=SWEEP_DAYS_AFTER)
-        fits = [
-            s
-            for s in sweeps
-            if s.id not in taken
-            and s.account_id == paid.account_id
-            and s.amount_cents == -paid.amount_cents
-            and start <= s.date <= end
-        ]
-        if fits:
-            best = min(fits, key=lambda s: (abs((s.date - paid.date).days), s.id))
-            dividend.sweep_transaction_id = best.id
-            taken.add(best.id)
-            linked += 1
-    return linked
+    return link_sweeps(session, list(waiting))
 
 
 def find_dividends(session: Session, transaction_ids: set[int] | None = None) -> Found:

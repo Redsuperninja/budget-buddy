@@ -65,12 +65,15 @@ the amount. Neither the trade nor the sweep counts as spending or income, and ne
 
 1. For each trade, type the **ticker** (like `ABT`) and the **number of shares** from your broker's trade
    confirmation, then click **Save**.
-2. The row then shows the **price per share** (the amount divided by the shares), and the shares appear under the
-   account above and on the **Stocks** page with the date you bought or sold.
+2. The row then shows the **price per share (with fees)**: the amount divided by the shares. The amount already
+   includes any commission, so it's what each share cost you (or brought in after fees), which is what counts for
+   taxes; it can differ a little from the trade price on your confirmation. The shares appear under the account
+   above and on the **Stocks** page with the date you bought or sold.
 3. Next time that company shows up, its ticker is already filled in: just add the shares.
 
 Imported this file before this existed? Click **Find trades in my transactions**. If a line isn't really a trade,
-click **Not a trade**: it then counts like any other transaction. Dividends and their sweeps are handled the same
+click **Not a trade**: it then counts like any other transaction. Cancelled or corrected trades, money market
+funds and bonds coming due aren't counted as trades. Dividends and their sweeps are handled the same
 way, on the Stocks page ([dividends](dividends.md)).
 
 ## Import your broker's positions file

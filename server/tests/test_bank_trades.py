@@ -121,6 +121,13 @@ def test_find_looks_through_older_transactions(client, ira, add_txn):
         ("FAKE GARAGE SALE SOLD ITEMS", "checking", False),  # not an investment account
         ("CHASE DEPOSIT SWEEP JPMORGAN CHASE BANK NA INTRA-DAY WITHDRWAL", "retirement", False),
         ("KENVUE INC COMMON STOCK CASH DIV ON 1 SHS", "retirement", False),  # a dividend
+        # A cancelled or corrected trade reverses money; it isn't the opposite trade.
+        (f"CXL {TRADE_LINE}", "retirement", False),
+        (f"{TRADE_LINE} CORRECTION", "retirement", False),
+        # Cash funds and bonds coming due aren't stock trades.
+        ("YOU BOUGHT JPMORGAN US GOVT MMKT", "brokerage", False),
+        ("SOLD TO COVER FAKECO", "brokerage", False),
+        ("FAKE BOND SOLD AT MATURITY", "brokerage", False),
     ],
 )
 def test_what_counts_as_a_trade(client, make_account, add_txn, description, kind, expected):

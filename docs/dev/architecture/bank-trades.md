@@ -34,7 +34,12 @@ NULL`), `security` (from the description), `dismissed`. Date, amount and account
   `find`; always after dividends.
 - **A trade** is a regular transaction (not a transfer, paycheck deposit or donation) in a brokerage, retirement or
   HSA account whose description has trade-confirmation wording (acting as principal/agent, (un)solicited,
-  commission field/equivalent, bought, sold), isn't a sweep and isn't a dividend.
+  commission field/equivalent), or a plain bought/sold without money market, MMKT, redemption, maturity or "to
+  cover" words; and isn't a sweep, a dividend, or a cancel/correction/reversal/rebill/adjustment (a reversal
+  would otherwise look like the opposite trade).
+- **Sweeps** are picked by `services/sweeps.py`, shared with dividends: a trade is never a sweep.
+- **Price per share** is the amount (commission included) / shares: cost basis on a buy, net proceeds on a
+  sale. Shown as "with fees", since it can differ from the trade price.
 - **Its sweep:** the opposite amount, same account, from 1 day before to 3 days after, "sweep" in the description,
   not already a dividend's or another trade's (dividends also skip trades' sweeps). Closest date, then first added.
 - **Budget:** a trade and its sweep are cash turning into shares (or back) inside the account, so the monthly
