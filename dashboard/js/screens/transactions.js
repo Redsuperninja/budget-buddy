@@ -1,4 +1,4 @@
-// Transactions: filter by account, month and how they were sorted, change a category, mark a gift, add one by hand.
+// Transactions: filter by account, month and how they were sorted (or show the ones with no category yet), change a category, mark a gift, add one by hand.
 
 import { createTransaction, listAccounts, listCategories, listTransactions, matchTransfers } from "../api/endpoints.js";
 import { currentMonth, monthRange, today } from "../dates.js";
@@ -18,13 +18,15 @@ export async function render(root) {
   const list = h("div", {});
   const accountFilter = select(pickOptions(accounts, "All accounts"));
   const monthFilter = h("input", { type: "month", value: currentMonth() });
-  const sortedFilter = select([["", "Any way"], ["rule", "Auto-sorted"], ["you", "Picked by you"]]);
+  const sortedFilter = select([["", "Any way"], ["none", "Not yet (uncategorized)"], ["rule", "Auto-sorted"],
+    ["you", "Picked by you"]]);
   const accountNames = new Map(accounts.map((a) => [a.id, a.name]));
 
   async function refresh() {
     const params = new URLSearchParams({ limit: "200" });
     if (accountFilter.value) params.set("account_id", accountFilter.value);
-    if (sortedFilter.value) params.set("sorted_by", sortedFilter.value);
+    if (sortedFilter.value === "none") params.set("uncategorized", "true");
+    else if (sortedFilter.value) params.set("sorted_by", sortedFilter.value);
     if (monthFilter.value) {
       const { from, to } = monthRange(monthFilter.value);
       params.set("date_from", from);
@@ -39,7 +41,7 @@ export async function render(root) {
           ? table(["Date", "What", "Account", "Amount", "Category", "Gift"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
                 categoryPicker(t, categories), charityCell(t, refresh)]), [3])
-          : empty("No transactions for this choice."),
+          : empty(sortedFilter.value === "none" ? "Everything here has a category." : "No transactions for this choice."),
         page.total > page.items.length
           ? empty(`Showing ${page.items.length} of ${page.total}. Pick a month to narrow it down.`) : null);
     } catch (err) {

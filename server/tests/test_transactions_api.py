@@ -175,6 +175,17 @@ def test_filters(client, add_txn, accounts):
     assert client.get(URL, params={"kind": "bogus"}).status_code == 422
 
 
+def test_uncategorized_filter(client, add_txn, accounts):
+    checking, _ = accounts
+    add_txn(checking, -1_000, description="Sorted", category_id=category_id(client))
+    add_txn(checking, -2_000, description="Waiting")
+    add_txn(checking, 500, description="Refund waiting", kind="refund")
+    add_txn(checking, 300, description="Opening balance", kind="adjustment")
+    items = client.get(URL, params={"uncategorized": True}).json()["items"]
+    # Balance adjustments never need a category, so they aren't waiting for one.
+    assert sorted(t["description"] for t in items) == ["Refund waiting", "Waiting"]
+
+
 def test_pagination(client, add_txn, accounts):
     for day in range(1, 8):
         add_txn(accounts[0], -day, date=f"2026-01-{day:02d}")

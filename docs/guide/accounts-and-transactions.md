@@ -69,6 +69,13 @@ Lists all the money coming in and going out, and lets you add more.
 2. Click the "Category" dropdown and pick one
 3. It saves automatically — you'll see "Saved"
 
+### Sort the ones with no category yet
+
+1. On the **Transactions** page, set **Category set** to **Not yet (uncategorized)**
+2. Pick a category in each row's dropdown. Each one saves as you go
+3. To see every month at once, clear the **Month** box. Transfers and balance adjustments don't need a category, so
+   they aren't listed
+
 ### Mark a payment as a gift
 
 If a payment was a gift, click **Mark as gift** in its row and pick the kind:
