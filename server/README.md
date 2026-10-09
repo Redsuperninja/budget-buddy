@@ -85,6 +85,7 @@ for pairing and joining; common rules are in
 | Dividends | [dividends.md](../docs/dev/architecture/dividends.md) |
 | Stocks | [stocks.md](../docs/dev/architecture/stocks.md) |
 | Stock CSV import | [stock-import.md](../docs/dev/architecture/stock-import.md) |
+| Positions file import | [positions.md](../docs/dev/architecture/positions.md) |
 | Other deductions, yearly tax summary, CSV export | [tax-summary.md](../docs/dev/architecture/tax-summary.md) |
 | Pairing, devices, home-network listener | [pairing.md](../docs/dev/architecture/pairing.md) |
 | Phone sync (`/api/sync/*`) | [sync.md](../docs/dev/architecture/sync.md) and the [sync contract](../docs/api/sync-contract.md) |

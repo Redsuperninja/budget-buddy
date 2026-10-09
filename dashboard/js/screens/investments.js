@@ -1,8 +1,8 @@
 // Investments: what you hold in each account (shares, cost, value at live or typed-in prices) and this year's
-// retirement and HSA contributions against the limits. Buying and selling are on the Stocks page; live prices
+// retirement and HSA contributions against the limits, and positions from your broker's file (positions-card.js). Buying and selling are on the Stocks page; live prices
 // are in live-prices.js (refreshed when this page opens and on Refresh, if turned on).
 
-import { retirementLimits, setStockPrice, stockHoldings } from "../api/endpoints.js";
+import { listAccounts, retirementLimits, setStockPrice, stockHoldings } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { taxYearHeader } from "../fields.js";
@@ -12,6 +12,7 @@ import { formatCents } from "../money.js";
 import { reload } from "../router.js";
 import { card, empty, note, table } from "../widgets.js";
 import { priceText, refreshButton, refreshIfOn, settingsCard } from "./live-prices.js";
+import { positionsCards } from "./positions-card.js";
 
 const money = (cents) => (cents === null ? "no price yet" : formatCents(cents));
 
@@ -65,7 +66,9 @@ function limitsCard(r) {
 export async function render(root, options) {
   const year = options.year || thisYear();
   const { enabled, note: refreshed } = await refreshIfOn();  // prices first, so the totals below use them
-  const [held, limits, settings] = await Promise.all([stockHoldings(), retirementLimits(year), settingsCard(year)]);
+  const accounts = await listAccounts();
+  const [held, limits, settings, positions] = await Promise.all(
+    [stockHoldings(), retirementLimits(year), settingsCard(year), positionsCards(accounts, year)]);
   fill(root,
     card("Your investments",
       note(held.note),
@@ -75,6 +78,7 @@ export async function render(root, options) {
         ` (cost ${formatCents(held.cost_basis_cents)})`),
       held.accounts.length ? null : empty("No shares held. Add purchases on the Stocks page (under Taxes).")),
     held.accounts.map(accountCard),
+    positions,
     priceForm(year),
     settings,
     limitsCard(limits));

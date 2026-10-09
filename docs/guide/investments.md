@@ -52,6 +52,20 @@ Under **Type a price**, type the symbol, the price of **one share** (from your b
 date, then click **Save price**. The new price replaces the old one, including a live one, and is marked
 *typed in*.
 
+## Import your broker's positions file
+
+Most brokers let you download your positions (also called holdings) as a CSV file. On the **Investments** page,
+under **Import a positions file**, pick the account, the day the file is from, and the file, then click
+**Preview** and **Save**.
+
+- Budget Buddy shows what the file says you hold, next to what your recorded purchases and sales add up to. If
+  they differ, a purchase or sale is probably missing on the Stocks page.
+- Prices in the file become your latest prices (shown as "from your broker's file"), unless you already have a
+  price from a later day.
+- It never changes your purchases, sales or gains. Saving a newer file for the same account replaces the old one;
+  **Forget this file** removes it.
+- Cash lines (like a money market fund marked `**`), short positions and notes at the bottom are skipped.
+
 ## Retirement and HSA contributions
 
 This part shows, for the year you pick, how much you've put in and how much room is left:

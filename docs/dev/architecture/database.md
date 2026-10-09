@@ -33,6 +33,7 @@
 | 0018 | Add an "Other Expenses" category |
 | 0019 | Dividends found in your transactions, with their deposit sweeps |
 | 0020 | Stock purchases and sales linked to the transaction that paid for them |
+| 0021 | Positions from a broker's file: what each account held on a day (a snapshot) |
 
 ## Adding a migration
 

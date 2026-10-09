@@ -33,7 +33,7 @@ class HoldingOut(Schema):
     cost_basis_cents: int  # what the shares still held cost, including fees
     price_cents: int | None  # your latest price, or None if you haven't entered one
     price_as_of: dt.date | None
-    price_source: str | None  # "you" (typed in) or "feed" (Finnhub, ADR-0010)
+    price_source: str | None  # "you" (typed in), "feed" (Finnhub, ADR-0010) or "file" (positions)
     price_fetched_at: dt.datetime | None  # UTC, feed prices only
     value_cents: int | None
     unrealized_gain_cents: int | None  # value minus cost; not taxed until sold
