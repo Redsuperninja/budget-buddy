@@ -27,7 +27,7 @@ ESTIMATE_NOTE = (
 )
 
 
-def _symbol(text: str) -> str:
+def clean_symbol(text: str) -> str:
     text = text.strip().upper()
     if (
         not text
@@ -46,7 +46,7 @@ def _shares_text(text: str) -> str:
     return text
 
 
-Symbol = Annotated[str, Field(strict=True, max_length=40), AfterValidator(_symbol)]
+Symbol = Annotated[str, Field(strict=True, max_length=40), AfterValidator(clean_symbol)]
 SharesMicro = Annotated[int, Field(strict=True, gt=0, lt=MAX_SHARES_MICRO)]
 SharesText = Annotated[str, Field(strict=True, max_length=40), AfterValidator(_shares_text)]
 NonNegativeCents = Annotated[int, Field(strict=True, ge=0, lt=MAX_ABS_CENTS)]

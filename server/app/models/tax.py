@@ -3,7 +3,15 @@ cents."""
 
 import datetime as dt
 
-from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.crypto.fields import EncryptedString
@@ -114,6 +122,26 @@ class StockSale(TimestampMixin, Base):
     sold_on: Mapped[dt.date] = mapped_column(Date)
     shares_micro: Mapped[int]
     proceeds_cents: Mapped[int]  # this lot's share of the order's proceeds
+
+
+class Position(TimestampMixin, Base):
+    """One line of a broker's positions file: what an account held on ``as_of``. Importing a
+    newer file for the account replaces all its lines (a snapshot). Separate from purchase lots,
+    so it never changes gains. See app/services/positions.py."""
+
+    __tablename__ = "positions"
+    __table_args__ = (
+        CheckConstraint("shares_micro > 0", name="shares_positive"),
+        UniqueConstraint("account_id", "symbol", name="uq_positions_account_id_symbol"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"))
+    symbol: Mapped[str] = mapped_column(String(16))
+    shares_micro: Mapped[int]
+    cost_basis_cents: Mapped[int | None]  # the file's total cost basis, if it has one
+    value_cents: Mapped[int | None]  # the file's current value, if it has one
+    as_of: Mapped[dt.date] = mapped_column(Date)
 
 
 class StockPrice(TimestampMixin, Base):

@@ -28,6 +28,7 @@ export async function refreshIfOn() {
 // "$245.10 live, 3:42 PM" or "$245.10 on 2026-10-08 (typed in)".
 export function priceText(x) {
   if (x.price_cents === null) return "";
+  if (x.price_source === "file") return `${formatCents(x.price_cents)} on ${x.price_as_of} (from your broker's file)`;
   if (x.price_source !== "feed") return `${formatCents(x.price_cents)} on ${x.price_as_of} (typed in)`;
   const at = x.price_fetched_at ? new Date(`${x.price_fetched_at}Z`).toLocaleTimeString([], { timeStyle: "short" }) : "";
   return `${formatCents(x.price_cents)} live, ${at}`;

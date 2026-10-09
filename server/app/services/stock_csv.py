@@ -15,9 +15,9 @@ from app.errors import ApiError
 from app.schemas.stock_import import Kind, StockColumns
 from app.schemas.stocks import LotCreate, SaleCreate
 from app.services.csv_columns import detect_date_format
+from app.services.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
 from app.services.csv_parsing import THOUSANDS, RowProblem, cell, parse_amount, parse_date
 
-HEADER_SEARCH_ROWS = 10
 NO_COLUMNS = (
     "We couldn't find the columns. The first row of the file needs column names: Symbol, Date, "
     "Shares (or Quantity), and Cost (or Amount). To import sales too, add a Type column that says "
@@ -70,35 +70,15 @@ class ParsedRow:
     trade: LotCreate | SaleCreate
 
 
-def _norm(name: str) -> str:
-    return " ".join(re.sub(r"[^a-z]", " ", name.casefold()).split())
-
-
 def _pick(names: list[str]) -> dict | None:
-    picked: dict = {}
     kind = next((i for i, n in enumerate(names) if n in _TYPE_NAMES), None)
-    if kind is not None:
-        picked["kind"] = kind
-    for role, words in _WORDS.items():
-        usable = [
-            i
-            for i, n in enumerate(names)
-            if i not in picked.values() and not any(w in n for w in _NOT.get(role, ()))
-        ]
-        for word in words:
-            col = next((i for i in usable if word in names[i]), None)
-            if col is not None:
-                picked[role] = col
-                break
-        else:
-            return None
-    return picked
+    return pick_columns(names, _WORDS, _NOT, picked={} if kind is None else {"kind": kind})
 
 
 def find_columns(rows: list[list[str]]) -> tuple[int, StockColumns]:
     """The header row's position (0-based) and the columns it names."""
     for index, row in enumerate(rows[:HEADER_SEARCH_ROWS]):
-        picked = _pick([_norm(c) for c in row])
+        picked = _pick([header_name(c) for c in row])
         if picked:
             dates = [r[picked["date"]] for r in rows[index + 1 :] if picked["date"] < len(r)]
             return index, StockColumns(**picked, date_format=detect_date_format(dates))
