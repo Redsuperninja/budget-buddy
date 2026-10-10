@@ -32,7 +32,8 @@ function importCard(accounts, year) {
   const asOf = h("input", { type: "date", value: today() });
   const fileInput = h("input", { type: "file", accept: ".csv,text/csv" });
   let bytes = null;
-  const query = () => new URLSearchParams({ account_id: accountSelect.value, as_of: asOf.value }).toString();
+  const query = (extra = {}) =>
+    new URLSearchParams({ account_id: accountSelect.value, as_of: asOf.value, ...extra }).toString();
 
   function showPreview(p) {
     const ok = p.rows.filter((r) => r.status === "ok");
@@ -40,7 +41,7 @@ function importCard(accounts, year) {
     const button = h("button", { class: "primary", type: "button", disabled: !p.positions, onclick: async () => {
       button.disabled = true;
       try {
-        await importPositions(query(), bytes);
+        await importPositions(query({ file_name: fileInput.files[0].name }), bytes);
         await reload({ year });
       } catch (err) {
         button.disabled = false;

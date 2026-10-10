@@ -34,6 +34,7 @@ JOINED_AREAS = frozenset(
         "deductions",
         "dividends",
         "donations",
+        "imports",
         "paychecks",
         "receipts",
         "retirement",

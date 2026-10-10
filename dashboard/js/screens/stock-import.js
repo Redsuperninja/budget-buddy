@@ -24,7 +24,7 @@ export function stockImportCard(accounts, year) {
     const button = h("button", { class: "primary", type: "button", disabled: !count, onclick: async () => {
       button.disabled = true;
       try {
-        const r = await importStockCsv(query({ skip_invalid_rows: skip.value }), bytes);
+        const r = await importStockCsv(query({ skip_invalid_rows: skip.value, file_name: fileInput.files[0].name }), bytes);
         await reload({ year, imported: `Done. ${r.purchases_added} purchase(s) and ${r.sales_added} sale(s) ` +
           `added; ${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.` });
       } catch (err) {

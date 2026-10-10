@@ -36,6 +36,7 @@ from app.services.csv_parsing import (
     read_rows,
 )
 from app.services.dividend_matching import find_dividends
+from app.services.imports import record
 from app.services.transfer_matching import match_transfers
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
@@ -169,6 +170,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
             "or choose to skip those rows.",
         )
     new = [(r, fp) for r, fp in p.rows if r.status == "new"]
+    import_id = record(session, "bank", account_id, choices.file_name, len(new)) if new else None
     match = load_matcher(session)
     added = [
         Transaction(
@@ -180,6 +182,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
             source=TransactionSource.CSV,
             kind=TransactionKind.NORMAL,
             import_fingerprint=fp,
+            import_id=import_id,
         )
         for r, fp in new
     ]

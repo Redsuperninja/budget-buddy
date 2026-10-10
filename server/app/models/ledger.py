@@ -102,6 +102,9 @@ class Transaction(TimestampMixin, Base):
     # The rule that sorted it. No foreign key (adding one would mean rebuilding this table, which
     # other tables point at); deleting a rule clears it in services/category_rules.py.
     sorted_by_rule_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    # The file import that added it (``imports``), so the import can be undone. No foreign key,
+    # like sorted_by_rule_id (migration 0022 only adds columns).
+    import_id: Mapped[int | None] = mapped_column(Integer, index=True)
     # Set when you undo a transfer link, so automatic matching never links it again.
     auto_transfer_off: Mapped[bool] = mapped_column(default=False, server_default="0")
     # The category (and how it was set) from before it was linked as a transfer, put back when the

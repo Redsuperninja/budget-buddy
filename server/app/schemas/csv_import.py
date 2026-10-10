@@ -70,6 +70,7 @@ class MappingChoices(Schema):
 class CommitChoices(MappingChoices):
     save_mapping: bool = False
     skip_invalid_rows: bool = False
+    file_name: str | None = Field(None, max_length=200)  # for the import history
 
 
 class PreviewRow(Schema):

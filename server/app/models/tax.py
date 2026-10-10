@@ -79,6 +79,7 @@ class StockLot(TimestampMixin, Base):
     # The transaction it was classified from (Transactions page), if any. No foreign key (see
     # migration 0020); deleting the transaction clears it.
     transaction_id: Mapped[int | None] = mapped_column(Integer, index=True, unique=True)
+    import_id: Mapped[int | None] = mapped_column(Integer, index=True)  # the file it came from
 
 
 class StockSaleOrder(TimestampMixin, Base):
@@ -99,6 +100,7 @@ class StockSaleOrder(TimestampMixin, Base):
     proceeds_cents: Mapped[int]  # total received, after fees
     # The transaction it was classified from, like ``StockLot.transaction_id``.
     transaction_id: Mapped[int | None] = mapped_column(Integer, index=True, unique=True)
+    import_id: Mapped[int | None] = mapped_column(Integer, index=True)  # the file it came from
 
 
 class StockSale(TimestampMixin, Base):
@@ -142,6 +144,7 @@ class Position(TimestampMixin, Base):
     cost_basis_cents: Mapped[int | None]  # the file's total cost basis, if it has one
     value_cents: Mapped[int | None]  # the file's current value, if it has one
     as_of: Mapped[dt.date] = mapped_column(Date)
+    import_id: Mapped[int | None] = mapped_column(Integer, index=True)  # the file it came from
 
 
 class StockPrice(TimestampMixin, Base):

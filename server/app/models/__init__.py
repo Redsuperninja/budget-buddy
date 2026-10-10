@@ -11,6 +11,7 @@ from app.models.enums import (
     TransactionKind,
     TransactionSource,
 )
+from app.models.imports import ImportBatch
 from app.models.ledger import (
     Account,
     BudgetPlan,
@@ -48,6 +49,7 @@ __all__ = [
     "Device",
     "Dividend",
     "Donation",
+    "ImportBatch",
     "DonationKind",
     "PairingNonce",
     "PairingSession",

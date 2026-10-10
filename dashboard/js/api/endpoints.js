@@ -40,6 +40,10 @@ const sendCsv = (path, bytes) => api("POST", path, { body: bytes, contentType: "
 export const previewCsv = (accountId, query, bytes) => sendCsv(`${csv(accountId)}/preview?${query}`, bytes);
 export const importCsv = (accountId, query, bytes) => sendCsv(`${csv(accountId)}?${query}`, bytes);
 
+// Import history (undo an import)
+export const listImports = () => api("GET", `${LOCAL}/imports`);
+export const removeImport = (id) => api("DELETE", `${LOCAL}/imports/${id}`);
+
 // Phones
 export const listDevices = () => api("GET", `${LOCAL}/devices`);
 export const revokeDevice = (id) => api("POST", `${LOCAL}/devices/${id}/revoke`);

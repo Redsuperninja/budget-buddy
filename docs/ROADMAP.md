@@ -71,6 +71,7 @@ items (20, 21).
 - [x] 5d. An "Other Expenses" category for spending that fits nowhere else — *backend-engineer*
 - [x] 5c. Match an account's balance to the bank (today, start of year, or any day) with one adjustment — *backend-engineer* + *finance-tax-expert*
 - [x] 6. Bank CSV import (checking/savings) with column mapping — *backend-engineer*
+- [x] 6b. Import history: see every imported file and remove an outdated one (undo) — *backend-engineer* + *security-reviewer*
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 7b. Pay deposits from bank files start a paycheck on the Paychecks page, linked to the deposit — *backend-engineer*
 - [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*

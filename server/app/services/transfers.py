@@ -33,12 +33,14 @@ def _transfer_category_id(session: Session) -> int | None:
     )
 
 
-def _unlink(transaction: Transaction, partner: Transaction | None) -> None:
-    for side in (transaction, partner):
+def unlink_sides(*sides: Transaction | None, remember: bool = True) -> None:
+    """Both sides back to normal transactions with their earlier categories. ``remember``: never
+    link them automatically again (an undo by you); False when the other side is just going away."""
+    for side in sides:
         if side is not None:
             side.transfer_pair_id = None
             side.kind = TransactionKind.NORMAL
-            side.auto_transfer_off = True
+            side.auto_transfer_off = side.auto_transfer_off or remember
             # Back to the category from before the link (none if it had none).
             side.category_id = side.pre_transfer_category_id
             side.category_source = side.pre_transfer_category_source
@@ -122,6 +124,6 @@ def unlink_transfer(session: Session, transaction_id: int) -> Transaction:
     transaction = get_transaction(session, transaction_id)
     if transaction.transfer_pair_id is None:
         raise ApiError(409, "not_a_transfer", "This transaction isn't linked as a transfer.")
-    _unlink(transaction, session.get(Transaction, transaction.transfer_pair_id))
+    unlink_sides(transaction, session.get(Transaction, transaction.transfer_pair_id))
     session.commit()
     return transaction
