@@ -5,6 +5,9 @@ also wait quietly in the corner of your screen (the tray, next to the clock) fro
 
 ## Get it
 
+The simplest way is the download: [Download and install Budget Buddy](install.md). To build it yourself from the
+Budget Buddy folder instead:
+
 1. Open the Budget Buddy folder, then the **launch** folder.
 2. Double-click **Build desktop app** and wait a few minutes until it says **Built**. (Someone may have done this
    for you already.)

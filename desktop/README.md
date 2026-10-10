@@ -23,6 +23,11 @@ Double-click **Build desktop app** in the [launch](../launch/) folder (or run `s
 `server/packaging/home-base.spec`). **Install desktop app** copies it to `%LOCALAPPDATA%\Programs\Budget Buddy` and
 adds Start menu and desktop shortcuts.
 
+## Make the release download
+
+`scripts\make-release.ps1` builds the app and packs it with `packaging\install.ps1`, the two `.bat` files and
+`packaging\READ ME FIRST.txt` into `dist\Budget-Buddy-<version>-Windows.zip` ([release.md](../docs/dev/release.md)).
+
 ## Check it
 
 ```powershell
