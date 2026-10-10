@@ -7,7 +7,7 @@ from app.errors import ApiError
 from app.models import StockLot, StockSale, StockSaleOrder
 from app.schemas.stocks import LotCreate, LotOut
 from app.services import stock_gains as gains
-from app.services.bank_trades import remember_symbol
+from app.services.bank_trades import find_trades, forget_recorded, remember_symbol
 from app.services.holdings_check import Snapshot, checked_by, snapshots
 from app.services.stock_records import (
     check_account,
@@ -79,13 +79,17 @@ def create_lot(session: Session, data: LotCreate) -> LotOut:
     # make a sale short of shares, so this can't fail.
     rematch(session, lot.symbol, lot.account_id)
     remember_symbol(session, lot.transaction_id, lot.symbol)  # a trade from the bank file
+    if lot.transaction_id is not None:
+        # Links its deposit sweep, if there is one. (Dividends already had first pick of the
+        # sweeps when the transactions were added.)
+        find_trades(session, {lot.transaction_id})
     session.commit()
     return lot_out(session, lot.id)
 
 
 def delete_lot(session: Session, lot_id: int) -> None:
     lot = get_lot(session, lot_id)
-    symbol, account_id = lot.symbol, lot.account_id
+    symbol, account_id, transaction_id = lot.symbol, lot.account_id, lot.transaction_id
     order_ids = select(StockSaleOrder.id).where(
         StockSaleOrder.symbol == symbol, in_account(StockSaleOrder.account_id, account_id)
     )
@@ -102,4 +106,5 @@ def delete_lot(session: Session, lot_id: int) -> None:
             f"Your sale of {exc.sale.symbol} on {exc.sale.sold_on.isoformat()} needs the shares "
             "from this purchase, so it can't be deleted. Delete that sale first.",
         ) from None
+    forget_recorded(session, transaction_id)
     session.commit()

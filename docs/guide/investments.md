@@ -71,8 +71,13 @@ the amount. Neither the trade nor the sweep counts as spending or income, and ne
    above and on the **Stocks** page with the date you bought or sold.
 3. Next time that company shows up, its ticker is already filled in: just add the shares.
 
-Imported this file before this existed? Click **Find trades in my transactions**. If a line isn't really a trade,
-click **Not a trade**: it then counts like any other transaction. Cancelled or corrected trades, money market
+A trade you marked yourself on the **Transactions** page (**Stock trade**) gets its sweep linked the same way, as
+soon as the sweep is there, and then shows up in this list too.
+
+Imported this file before this existed, or marked trades yourself before this? Click **Find trades in my
+transactions**. If a line isn't really a trade,
+click **Not a trade**: it then counts like any other transaction. Once you've recorded the shares, delete the
+purchase or sale on the **Stocks** page instead. Cancelled or corrected trades, money market
 funds and bonds coming due aren't counted as trades. Dividends and their sweeps are handled the same
 way, on the Stocks page ([dividends](dividends.md)).
 

@@ -50,33 +50,35 @@ def _not_taken():
     )
 
 
+def candidates(session: Session, account_ids: set[int]) -> list[Transaction]:
+    """Sweeps in these accounts not linked to anything yet."""
+    rows = session.scalars(
+        regular(select(Transaction)).where(Transaction.account_id.in_(account_ids), *_not_taken())
+    )
+    return [t for t in rows if SWEEP_WORDS.search(t.description)]
+
+
+def in_window(sweep: Transaction, paid: Transaction) -> bool:
+    start = paid.date - dt.timedelta(days=SWEEP_DAYS_BEFORE)
+    return start <= sweep.date <= paid.date + dt.timedelta(days=SWEEP_DAYS_AFTER)
+
+
 def link_sweeps(session: Session, waiting: list) -> int:
     """``waiting``: (record, paid transaction) pairs, oldest first, whose record's
     ``sweep_transaction_id`` is still empty. Links each one's sweep if found; returns the count."""
     if not waiting:
         return 0
-    sweeps = [
-        t
-        for t in session.scalars(
-            regular(select(Transaction)).where(
-                Transaction.account_id.in_({paid.account_id for _, paid in waiting}),
-                *_not_taken(),
-            )
-        )
-        if SWEEP_WORDS.search(t.description)
-    ]
+    sweeps = candidates(session, {paid.account_id for _, paid in waiting})
     linked = 0
     taken: set[int] = set()
     for record, paid in waiting:
-        start = paid.date - dt.timedelta(days=SWEEP_DAYS_BEFORE)
-        end = paid.date + dt.timedelta(days=SWEEP_DAYS_AFTER)
         fits = [
             s
             for s in sweeps
             if s.id not in taken
             and s.account_id == paid.account_id
             and s.amount_cents == -paid.amount_cents
-            and start <= s.date <= end
+            and in_window(s, paid)
         ]
         if fits:
             best = min(fits, key=lambda s: (abs((s.date - paid.date).days), s.id))

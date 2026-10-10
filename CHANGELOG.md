@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fixed: a stock trade you mark yourself on the Transactions page now gets its deposit sweep linked too, so the sweep no longer shows up under "needs a category". For trades marked before this fix, click **Find trades in my transactions** on the Investments page.
 - Fixed: a dividend's deposit sweep in a regular brokerage account no longer counts as unsorted money out (it only parks the cash, and "needs a category" never listed it, so it couldn't be sorted). Give it a category yourself and it counts there.
 - A green look: Budget Buddy's main color is now green, with a faintly green page in light mode and warm charcoal in dark mode. Charts lead with green (money in, needs, what you have), with orange for money going out and blue as the third color, all checked for color blindness.
 - New budget graphics on Home: **Spent** shows a ring of how much of your spending budget is used and what's left, and **Budget and actual by category** lists each category with a thin bar, what's left (or how much over, in red) and what you've spent of its budget. Savings categories read as goals ("to go", "extra").
