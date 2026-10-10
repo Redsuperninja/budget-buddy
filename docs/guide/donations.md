@@ -63,6 +63,23 @@ A few things to know:
 - If the charity gives you money back (a cancelled event, a double charge), Budget Buddy doesn't change the gift
   for you. Lower or remove it on the Donations tab.
 
+## Monthly or repeat giving
+
+Once you've sorted one payment into charity (the whole payment as the gift), Budget Buddy recognizes the next
+payment to the same charity in your bank file, or one you type in. It goes in **Charitable giving**, and when it's
+the **same amount** as your last gift there, it's also added on the **Donations** page as a cash gift, marked
+**Added automatically: a repeat gift**.
+
+- **Check it like any other gift.** Each gift of $250 or more needs a written letter (acknowledgment) from the
+  charity. If you got something back, like a tote bag or a dinner, lower the gift by what that was worth.
+- **A different amount** (a membership with perks, an event, a gift shop) is only put in Charitable giving. Use
+  **Mark as gift** on it and enter just the part that was a gift.
+- **If it isn't a gift,** click **Remove** on the Donations page. It won't be added back.
+- **Not repeated:** payments by check, Zelle, Venmo or transfer (their description says how you paid, not who), and
+  charities where you also had a part gift, like a fundraiser dinner. Enter those yourself.
+- "The same charity" means the payment's description starts the same way, like `FAKE FOOD BANK`.
+- A gift by check counts on the day you mailed it, not the day it cleared, so check the date near New Year.
+
 ## A present for someone (a personal gift)
 
 For a birthday or holiday present, pick **A personal gift** under **Kind of gift** and click **Save**. The

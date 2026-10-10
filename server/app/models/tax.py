@@ -40,6 +40,8 @@ class Donation(TimestampMixin, Base):
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True, unique=True
     )
     notes: Mapped[str | None] = mapped_column(EncryptedString("donations.notes"))
+    # Added by Budget Buddy for a repeat payment to a charity you gave to before (repeat_gifts.py).
+    auto_added: Mapped[bool] = mapped_column(default=False, server_default="0")
 
 
 class Dividend(TimestampMixin, Base):

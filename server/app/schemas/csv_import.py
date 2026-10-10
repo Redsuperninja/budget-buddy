@@ -104,6 +104,7 @@ class ImportResult(Schema):
     # Dividends found (filed under "Dividends") and deposit sweeps linked to one.
     dividends_found: int = 0
     dividend_sweeps_linked: int = 0
+    donations_added: int = 0  # repeat payments to a charity you gave to before
     skipped_duplicates: int
     skipped_invalid: int
     mapping_saved: bool
