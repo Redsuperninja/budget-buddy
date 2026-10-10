@@ -1,9 +1,10 @@
 // Home: a "Get started" checklist for someone new (home-start.js), the month at a glance (money tiles with a small
-// trend line each, and what needs you), where the income went, spending against budget, spending against last month,
-// month by month, and what you have and owe. Every chart can also be read as a table.
+// trend line each, and what needs you), spending pace and where the income went, spending against budget, spending
+// against last month, month by month, what was left over and net worth over time, and what you have and owe. Some
+// charts sit two to a row on wide screens; every chart can also be read as a table.
 
 import {
-  listAccounts, listImports, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, stockHoldings,
+  listAccounts, listImports, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, spendingPace, stockHoldings,
 } from "../api/endpoints.js";
 import { overBadge, overBudget } from "../category-groups.js";
 import { comparedWith, fromFirstActivity } from "../charts/months.js";
@@ -16,8 +17,12 @@ import { formatBp, percentUsed } from "../percent.js";
 import { reload } from "../router.js";
 import { categoriesChart, changesChart, groupsChart, trendChart } from "./home-charts.js";
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
+import { paceCard } from "./home-pace.js";
 import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
+import { leftOverChart, netWorthChart } from "./home-trends.js";
+
+const duo = (...cards) => h("div", { class: "duo" }, cards);
 
 const used = (c) => {
   const pct = percentUsed(c.actual_cents, c.budget_cents);
@@ -57,10 +62,11 @@ function freshness(imports) {
 export async function render(root, options) {
   const month = options.month || currentMonth();
   const days = comparedWith(month, today());
-  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction, soFar, before, imports] =
+  const [summary, trend, pace, accounts, waiting, deposits, positions, held, anyTransaction, soFar, before, imports] =
     await Promise.all([
     monthlySummary(month),
     monthlyTrend(month),
+    spendingPace(month),
     listAccounts(),
     listTransactions(new URLSearchParams({ uncategorized: "true", limit: "1" })),
     payDeposits(month.slice(0, 4)),
@@ -101,11 +107,12 @@ export async function render(root, options) {
         })),
     ]),
     hasTransactions && [
-      incomeSplitCard(summary),
+      duo(paceCard(pace, summary), incomeSplitCard(summary)),
       groupsChart(summary),
       categoriesChart(summary, budgetTable(summary), provisional),
       changesChart(soFar || summary, before, days),
       trendChart(months),
+      duo(leftOverChart({ months }), netWorthChart({ months })),
       balancesCard(accounts, held.accounts.length ? held.value_cents : null),
       empty("Budgets are the same every month, so changing one also changes how past months look."),
     ],

@@ -5,8 +5,9 @@ from fastapi import APIRouter, Query
 
 from app.deps import SessionDep, parse_month
 from app.errors import ApiError
-from app.schemas.summary import MonthlySummary, MonthlyTrend
+from app.schemas.summary import MonthlySummary, MonthlyTrend, SpendingPace
 from app.services import summary as service
+from app.services.spending_pace import spending_pace
 from app.services.trend import monthly_trend
 
 router = APIRouter(prefix="/api/local/summary", tags=["summary"])
@@ -31,3 +32,9 @@ def trend(
 ) -> MonthlyTrend:
     """Money in, spending and saving for ``months`` months up to and including ``end``."""
     return monthly_trend(session, *parse_month(end), months)
+
+
+@router.get("/pace")
+def pace(session: SessionDep, month: str = "") -> SpendingPace:
+    """Spending from the 1st through each day of ``month`` (up to today), and its budget."""
+    return spending_pace(session, *parse_month(month))

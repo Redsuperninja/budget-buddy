@@ -1,3 +1,4 @@
+import datetime as dt
 from typing import Literal
 
 from app.models import CategoryGroup
@@ -58,7 +59,22 @@ class TrendMonth(Schema):
     income_cents: int
     spending_cents: int  # can be negative when refunds were bigger than spending
     saved_cents: int  # can be negative when more came out of savings than went in
+    # What you have minus what you owe at the month's end: every account's balance (as on Home).
+    net_worth_cents: int
 
 
 class MonthlyTrend(Schema):
     months: list[TrendMonth]  # oldest first
+
+
+class PaceDay(Schema):
+    date: dt.date
+    spent_cents: int  # needs + wants spent from the 1st through this day (the summary's rules)
+
+
+class SpendingPace(Schema):
+    month: str  # "YYYY-MM"
+    days_in_month: int
+    budget_cents: int  # needs + wants budgets for the month
+    days: list[PaceDay]  # the 1st up to today (or the month's last day), oldest first
+    complete: bool  # the month is over (its last day is before today)

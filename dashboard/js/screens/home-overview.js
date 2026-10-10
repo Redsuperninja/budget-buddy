@@ -3,6 +3,7 @@
 
 import { balanceBars } from "../charts/balance-bars.js";
 import { chartCard } from "../charts/chart-card.js";
+import { fitted } from "../charts/fit.js";
 import { incomeSplitChart } from "../charts/income-split.js";
 import { incomeSplit } from "../charts/shares.js";
 import { h } from "../dom.js";
@@ -20,7 +21,8 @@ export function incomeSplitCard(summary) {
     [split.over ? "More out than in" : "Left over", formatCents(Math.abs(split.leftover)), ""]];
   return chartCard("Where your income went", {
     chart: split.total > 0
-      ? incomeSplitChart(summary.income_cents, parts, "This month's income split into needs, wants, savings and left over")
+      ? (width) => incomeSplitChart(summary.income_cents, parts,
+        "This month's income split into needs, wants, savings and left over", width)
       : empty("Nothing came in or went out this month yet."),
     legendNames: parts.map((p) => p.name),
     table: table(["Part", "Amount", "Share of income"], rows, [1, 2]),
@@ -38,7 +40,8 @@ export function balancesCard(accounts, investments) {
     chart: h("div", {},
       h("p", {}, h("span", { class: "muted" }, "Net worth (what you have minus what you owe): "),
         h("strong", { class: `big ${net < 0 ? "bad" : ""}` }, formatCents(net))),
-      balanceBars(rows, "Each account's balance: money you have to the right, money owed to the left")),
+      fitted((width) => balanceBars(rows, "Each account's balance: money you have to the right, money owed to the left",
+        width))),
     legendNames: ["Have", "Owe"],
     table: table(["Account", "Type", "Balance"],
       accounts.map((a) => [a.name, kindLabel(a.kind), formatBalance(a.balance_cents, a.kind)]), [2]),

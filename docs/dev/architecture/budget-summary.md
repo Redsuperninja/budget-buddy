@@ -10,7 +10,14 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
   `&through=YYYY-MM-DD` (a day in that month, else 422) counts only transactions up to and including it; Home uses
   it to compare this month so far with the same days of last month.
 - `GET /api/local/summary/trend?end=YYYY-MM&months=N` (1 to 24, default 12): income, spending and saved for each
-  month up to and including `end`, oldest first, by the same rules (`services/trend.py`). Used by the charts.
+  month up to and including `end`, oldest first, by the same rules (`services/trend.py`), plus `net_worth_cents`:
+  the sum of every transaction dated before the next month (every account's balance at the month's end, as on
+  Home; Home's figure also counts anything dated later, so the two can differ when future-dated transactions exist).
+  Used by the charts.
+- `GET /api/local/summary/pace?month=YYYY-MM`: `{month, days_in_month, budget_cents, days: [{date, spent_cents}],
+  complete}` (`complete`: the month's last day is before today),
+  needs + wants spent from the 1st through each day up to today (`monthly_summary(through=)` per day, so the same
+  rules), and the month's needs + wants budget (`services/spending_pace.py`). For the Home "Spending pace" chart.
 - `GET/PUT /api/local/budget/plan`: `{"planned_income_cents": int | null}`, the planned monthly income that
   percentage budgets are shares of (one row in `budget_plan`).
 

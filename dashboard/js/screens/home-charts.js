@@ -19,7 +19,7 @@ export function groupsChart(summary) {
   const groups = summary.groups.filter((g) => g.group !== "income");
   const rows = groups.map((g) => ({ label: groupLabel(g.group), actual: g.actual_cents, budget: g.budget_cents }));
   return chartCard("Needs, wants and savings", {
-    chart: budgetBars(rows, "Spent in each group this month, with its budget marked"),
+    chart: (width) => budgetBars(rows, "Spent in each group this month, with its budget marked", width),
     table: table(["Group", "Budget", "Actual", "Share of income received"], groups.map((g) =>
       [groupLabel(g.group), formatCents(g.budget_cents), formatCents(g.actual_cents), share(g.percent_of_income_bp)]),
       [1, 2, 3]),
@@ -51,7 +51,8 @@ export function trendChart(months) {
     { name: "Saved", values: months.map((m) => m.saved_cents) },
   ];
   return chartCard("Month by month", {
-    chart: lineChart(series, labels, `Money in, spending and saving for each of the last ${months.length} months`),
+    chart: (width) => lineChart(series, labels, `Money in, spending and saving for each of the last ${months.length} months`,
+      width),
     legendNames: series.map((sr) => sr.name),
     table: table(["Month", ...series.map((sr) => sr.name)], months.map((m, i) =>
       [labels[i], formatCents(m.income_cents), formatCents(m.spending_cents), formatCents(m.saved_cents)]), [1, 2, 3]),

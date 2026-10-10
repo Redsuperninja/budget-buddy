@@ -30,3 +30,28 @@ test("linear maps the range onto positions, either way up", () => {
   assert.equal(linear(range, 150, 550)(50), 350);
   assert.equal(linear(range, 200, 0)(25), 150); // a y axis grows upwards
 });
+
+test("an even pace spends the budget day by day, to the cent", async () => {
+  const { evenPace, projected } = await import("../js/charts/pace.js");
+  assert.equal(evenPace(30000, 10, 30), 10000);
+  assert.equal(evenPace(10000, 1, 3), 3333);
+  assert.equal(evenPace(10000, 5, 0), 0);
+  assert.equal(projected(12000, 10, 30), 36000);
+  assert.equal(projected(0, 0, 30), null);
+});
+
+test("month labels thin out when there isn't room", async () => {
+  const { labelEvery } = await import("../js/charts/line-chart.js");
+  assert.equal(labelEvery(12, 520), 1);
+  assert.equal(labelEvery(12, 250), 3);
+  assert.equal(labelEvery(1, 100), 1);
+});
+
+test("long labels are cut short to fit", async () => {
+  const { clip, clampWidth } = await import("../js/charts/fit.js");
+  assert.equal(clip("Groceries", 200), "Groceries");
+  assert.equal(clip("Restaurants and take-out", 70), "Restauran…");
+  assert.equal(clampWidth(0), 640);
+  assert.equal(clampWidth(100), 280);
+  assert.equal(clampWidth(2000), 960);
+});
