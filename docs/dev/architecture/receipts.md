@@ -16,6 +16,13 @@ Code: `services/receipts.py`, `services/receipt_images.py`, `routers/receipts.py
   never named after the shop.
 - `DELETE /api/local/receipts/{id}/image` removes the photo; the receipt details stay.
 
+## Dashboard
+
+**Money**, **Receipts** (`dashboard/js/screens/receipts.js`) lists the newest 200 with an `<img>` thumbnail from
+`GET .../{id}/image` (same origin, allowed by the dashboard's `img-src 'self'`; the image response keeps its own
+sandbox CSP), a link to open it, a download link when the browser can't decode it (HEIC), and Delete
+(`DELETE /api/local/receipts/{id}`, which removes the encrypted photo too).
+
 ## What happens to a photo
 
 - **Metadata is stripped first.** For JPEG and PNG only the picture (and its colour profile) is kept; location,

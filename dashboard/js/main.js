@@ -15,6 +15,7 @@ import * as join from "./screens/join.js";
 import * as otherComputers from "./screens/other-computers.js";
 import * as paychecks from "./screens/paychecks.js";
 import * as plan from "./screens/plan.js";
+import * as receipts from "./screens/receipts.js";
 import * as rules from "./screens/rules.js";
 import * as stocks from "./screens/stocks.js";
 import * as taxes from "./screens/taxes.js";
@@ -32,6 +33,7 @@ const sections = [
     { id: "investments", label: "Investments", render: investments.render },
     { id: "import", label: "Import files", render: importCsv.render },
     { id: "import-history", label: "Import history", render: importHistory.render },
+    { id: "receipts", label: "Receipts", render: receipts.render },
     { id: "rules", label: "Auto-sort", render: rules.render },
   ] },
   { id: "budget", label: "Budget", pages: [

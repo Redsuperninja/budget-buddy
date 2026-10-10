@@ -44,6 +44,11 @@ const activity = (accountId) => `${LOCAL}/accounts/${accountId}/activity-import`
 export const previewActivity = (accountId, bytes) => sendCsv(`${activity(accountId)}/preview`, bytes);
 export const importActivity = (accountId, query, bytes) => sendCsv(`${activity(accountId)}?${query}`, bytes);
 
+// Receipts (the image address is a link target, not a fetch)
+export const listReceipts = () => api("GET", `${LOCAL}/receipts?limit=200`);
+export const deleteReceipt = (id) => api("DELETE", `${LOCAL}/receipts/${id}`);
+export const receiptImageUrl = (id) => `${LOCAL}/receipts/${id}/image`;
+
 // Import history (undo an import)
 export const listImports = () => api("GET", `${LOCAL}/imports`);
 export const removeImport = (id) => api("DELETE", `${LOCAL}/imports/${id}`);
