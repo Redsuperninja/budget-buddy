@@ -38,6 +38,7 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
+from app.services.bank_trades import inside_account_ids
 from app.services.stock_records import trade_transaction_ids
 from app.services.transfers import pair_up
 
@@ -82,6 +83,7 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
             Transaction.id.not_in(trade_transaction_ids()),
             Transaction.id.not_in(select(Dividend.sweep_transaction_id).where(
                 Dividend.sweep_transaction_id.is_not(None))),
+            Transaction.id.not_in(inside_account_ids()),
             Transaction.category_id.is_(None) | Transaction.category_id.in_(transfer_categories),
         )
     )  # fmt: skip

@@ -21,6 +21,7 @@ from app.models import (
 )
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
+from app.services.bank_trades import inside_account_ids
 from app.services.category_learning import picked_by_hand
 from app.services.category_rules import load_matcher, rule_fields
 from app.services.stock_records import trade_transaction_ids
@@ -135,6 +136,13 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
             Transaction.category_id.is_(None),
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
             Transaction.id.not_in(trade_transaction_ids()),
+            Transaction.id.not_in(inside_account_ids()),
+            # A dividend's sweep only parks the cash: nothing to sort.
+            Transaction.id.not_in(
+                select(Dividend.sweep_transaction_id).where(
+                    Dividend.dismissed.is_(False), Dividend.sweep_transaction_id.is_not(None)
+                )
+            ),
         )
 
     if filters.hide_adjustments:
@@ -148,6 +156,7 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
                     shown, Dividend.sweep_transaction_id.is_not(None)
                 )
             ),
+            Transaction.id.not_in(inside_account_ids()),  # stock trades and their sweeps too
         )
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))

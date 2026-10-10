@@ -25,6 +25,7 @@ from app.schemas.csv_import import (
     PreviewRow,
 )
 from app.services.accounts import get_account
+from app.services.bank_trades import find_trades
 from app.services.category_rules import load_matcher, rule_fields
 from app.services.csv_columns import build_mapping, columns_used, detect_columns
 from app.services.csv_parsing import (
@@ -205,6 +206,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
     # Dividends and their deposit sweeps first, then card payments and moves between your
     # accounts in this file, matched with the other side.
     dividends = find_dividends(session, {t.id for t in added})
+    trades = find_trades(session, {t.id for t in added})  # stock trades and their sweeps
     matched = match_transfers(session, {t.id for t in added})
     gifts = repeat_gifts(session, {t.id for t in added})  # monthly giving to a charity you gave to
     session.commit()
@@ -214,6 +216,8 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
         dividends_found=dividends.dividends,
         dividend_sweeps_linked=dividends.sweeps,
         donations_added=gifts.recorded,
+        trades_found=trades.trades,
+        trade_sweeps_linked=trades.sweeps,
         categorized=sum(t.category_id is not None for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),

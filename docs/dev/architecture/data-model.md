@@ -15,6 +15,8 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `receipts` | id, date, merchant, total_cents, category_id, image_path (enc), transaction_id?, tax_deductible flag, notes (enc), client_id? (unique), deduction_kind?, device_id? (phone uploads) |
 | `positions` | one line of a broker's positions file: account_id (cascade), symbol (unique per account), shares_micro (> 0), cost_basis_cents?, value_cents?, as_of |
 | `imports` | one imported file: kind (bank/stocks/activity/positions), account_id?, file_name (enc), rows_added; rows it added carry `import_id` |
+| `bank_trades` | id, transaction_id (unique; the trade), sweep_transaction_id? (unique), security (company name), dismissed |
+| `security_symbols` | id, security (unique), symbol: the ticker you gave a company once |
 | `dividends` | id, transaction_id (unique; the dividend payment), sweep_transaction_id? (unique; its deposit sweep), payer, dismissed |
 | `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included), transaction_id? (unique; the payment it was classified from) |

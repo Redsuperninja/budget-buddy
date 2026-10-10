@@ -97,6 +97,10 @@ export const setStockPrice = (json) => api("POST", `${LOCAL}/stocks/prices`, { j
 export const priceFeed = () => api("GET", `${LOCAL}/price-feed`);
 export const savePriceFeed = (json) => api("PUT", `${LOCAL}/price-feed`, { json });
 export const refreshPrices = () => api("POST", `${LOCAL}/stocks/prices/refresh`);
+// Stock trades named in a bank file, with their deposit sweeps
+export const listBankTrades = () => api("GET", `${LOCAL}/stocks/bank-trades`);
+export const findBankTrades = () => api("POST", `${LOCAL}/stocks/bank-trades/find`);
+export const dismissBankTrade = (id) => api("POST", `${LOCAL}/stocks/bank-trades/${id}/dismiss`);
 // Positions from a broker's file (query: already-encoded text; bytes: the CSV file)
 export const listPositions = () => api("GET", `${LOCAL}/stocks/positions`);
 export const clearPositions = (accountId) => api("DELETE", `${LOCAL}/stocks/positions/${accountId}`);

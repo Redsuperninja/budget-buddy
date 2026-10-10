@@ -7,6 +7,7 @@ from app.errors import ApiError
 from app.models import StockLot, StockSale, StockSaleOrder
 from app.schemas.stocks import LotCreate, LotOut
 from app.services import stock_gains as gains
+from app.services.bank_trades import remember_symbol
 from app.services.stock_records import (
     check_account,
     check_trade_transaction,
@@ -72,6 +73,7 @@ def create_lot(session: Session, data: LotCreate) -> LotOut:
     # An earlier-dated purchase changes which shares FIFO sells first. Adding shares can never
     # make a sale short of shares, so this can't fail.
     rematch(session, lot.symbol, lot.account_id)
+    remember_symbol(session, lot.transaction_id, lot.symbol)  # a trade from the bank file
     session.commit()
     return lot_out(session, lot.id)
 

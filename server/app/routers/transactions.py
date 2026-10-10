@@ -15,6 +15,7 @@ from app.schemas.transactions import (
 )
 from app.services import gift_categories, transfers
 from app.services import transactions as service
+from app.services.bank_trades import find_trades
 from app.services.dividend_matching import find_dividends
 from app.services.repeat_gifts import repeat_gifts
 from app.services.transfer_matching import match_transfers
@@ -67,10 +68,11 @@ def list_transactions(
 def create_transaction(data: TransactionCreate, session: SessionDep) -> TransactionOut:
     transaction = service.create_transaction(session, data)
     found = find_dividends(session, {transaction.id})  # a dividend, or the sweep of one
+    trades = find_trades(session, {transaction.id})  # a stock trade, or its sweep
     # The other side of a transfer you entered.
     matched = match_transfers(session, {transaction.id})
     gifts = repeat_gifts(session, {transaction.id})  # a repeat gift to a charity
-    if matched or found.dividends or found.sweeps or gifts.filed:
+    if matched or found.dividends or found.sweeps or trades.trades or trades.sweeps or gifts.filed:
         session.commit()
     return transaction
 
