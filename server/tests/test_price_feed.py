@@ -1,6 +1,8 @@
 """Live prices from Finnhub (ADR-0010). Finnhub is faked: tests never touch the internet."""
 
 import datetime as dt
+import io
+import json
 import types
 import urllib.error
 
@@ -119,6 +121,27 @@ def test_problems_stop_with_a_plain_message(client, monkeypatch, code, words):
     buy(client, "FAKE")
     turn_on(client)
     assert words in client.post(REFRESH).json()["message"]
+
+
+def test_a_symbol_the_plan_doesnt_cover_is_skipped(client, monkeypatch):
+    """Finnhub answers 403 for a symbol behind a paid plan: that one has no price, the rest do."""
+    asked = []
+
+    def open_url(request, timeout):
+        symbol = request.full_url.split("symbol=")[1]
+        asked.append(symbol)
+        if symbol == "FUNDX":
+            raise urllib.error.HTTPError(request.full_url, 403, "no access", {}, None)
+        return io.BytesIO(json.dumps({"c": 10, "t": WHEN}).encode())
+
+    monkeypatch.setattr(price_feed, "_OPENER", types.SimpleNamespace(open=open_url))
+    buy(client, "FUNDX")
+    buy(client, "FAKE")
+    turn_on(client)
+    result = client.post(REFRESH).json()
+    assert (result["updated"], result["not_found"]) == (["FAKE"], ["FUNDX"])
+    assert result["message"] is None  # not "didn't accept your key"
+    assert asked == ["FAKE", "FUNDX"]
 
 
 @pytest.mark.parametrize(

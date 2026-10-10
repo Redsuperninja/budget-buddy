@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fixed: live prices stopped with "Finnhub didn't accept your key" when you held one symbol Finnhub's free plan doesn't cover (like a mutual fund). That symbol now just says "No price found", and the rest get their prices.
 - **Match everything again** on the Transactions page: looks through all your transactions again for dividends, stock trades, deposit sweeps and transfers with today's rules, so data you imported earlier is matched like new data. What you decided yourself stays.
 - One deposit sweep for several trades or dividends: when your broker sweeps a day's cash in one line (two purchases paid by one sweep for their total, say), the sweep is linked to all of them and no longer needs a category. A sweep you had already given a category stops counting once it's linked, also in past months. Restart Budget Buddy after updating (database change 0026).
 - Fixed: a credit card file that lists charges as positive numbers is now flipped for you, so the card shows what you owe (also on the charts and in net worth) and its payment links up with the payment from checking instead of needing a category. Imported one before? Undo it in Import history and import it again.

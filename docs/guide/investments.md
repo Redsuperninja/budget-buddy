@@ -142,7 +142,7 @@ This part shows, for the year you pick, how much you've put in and how much room
 | "Finnhub didn't accept your key." | Copy the key from your Finnhub dashboard again and save it. |
 | "Finnhub's free limit was reached." | Wait a minute and click **Refresh prices**. |
 | "Couldn't reach Finnhub." | Check your internet connection. The last prices are kept. |
-| "No price found for ..." | Finnhub doesn't have that symbol (often a mutual fund). Type its price in. |
+| "No price found for ..." | Finnhub's free plan doesn't have that symbol (often a mutual fund or a stock outside the US). Type its price in. |
 | "Enter the price of one share, like 245.10." | Type the price in dollars and cents. |
 | A holding is missing | It's only shown while you still hold shares. Check the purchases and sales on the Stocks page. |
 | "Budget Buddy doesn't have tax rules for [year] yet." | Contribution limits only work for years with a tax data file. |
