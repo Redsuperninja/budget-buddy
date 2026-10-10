@@ -20,6 +20,7 @@ Start page for developers and AI agents. Read only what your task needs.
 | Environment variables | [settings.md](settings.md) |
 | How to run tests, and CI | [testing.md](testing.md) |
 | How to make a release (the Windows download) | [release.md](release.md) |
+| Tech debt and the plan to restructure the repo | [tech-debt.md](tech-debt.md) |
 | Tax-year numbers | `server/app/tax_data/<year>.json`, explained in [tax-data.md](tax-data.md) |
 | How to run, check and lay out one part | That part's README |
 | What a person sees and does | [../guide/](../guide/) |
