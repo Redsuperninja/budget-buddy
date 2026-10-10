@@ -1,7 +1,8 @@
 # Dashboard
 
 The Budget Buddy web page for the computer: plain HTML, CSS and JavaScript (ES modules). No build step, no
-dependencies, nothing loaded from the internet. It is a separate part of the repo: it never imports server code and
+dependencies, nothing loaded from the internet. It fits phone screens too (a phone's browser can join like another
+computer, ADR-0009): under 40rem wide, tabs scroll in one row and wider tables show each row as a small card. It is a separate part of the repo: it never imports server code and
 talks to the Home Base only over its HTTP API (see [ADR-0005](../docs/adr/0005-dashboard-own-folder.md)).
 
 ## Run it
@@ -62,5 +63,5 @@ server route, add a function to `api/endpoints.js`.
 Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, the last 12 months, what you have and owe); **Money**: Transactions (with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
-Connect phone, Other computers (`other-computers.js`). `join.js` is the join page for another computer
+Connect phone, Other devices (`other-computers.js`: another computer or a phone's browser). `join.js` is the join page for another computer or phone
 ([ADR-0009](../docs/adr/0009-other-computers.md)).

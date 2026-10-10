@@ -82,7 +82,7 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   - **Stocks:** purchases and sales; gains and losses
 - **Devices** (only on the Budget Buddy computer)
   - **Connect phone:** pair your phone so it can see your budget
-  - **Other computers:** let another computer at home open Budget Buddy
+  - **Other devices:** open Budget Buddy in the web browser of another computer or a phone at home
 
 Receipts are added from the phone app.
 

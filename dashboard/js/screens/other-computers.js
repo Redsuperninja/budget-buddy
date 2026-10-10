@@ -13,12 +13,12 @@ function computerList() {
   async function show() {
     const computers = await listComputers();
     fill(box, computers.length
-      ? table(["Computer", "Address", "Joined", "Last used", "Works until", ""], computers.map((c) => [
+      ? table(["Computer or phone", "Address", "Joined", "Last used", "Works until", ""], computers.map((c) => [
           c.name, c.joined_from, c.paired_at.slice(0, 10),
           c.last_seen_at ? c.last_seen_at.slice(0, 16).replace("T", " ") : "not yet",
           c.expires_at.slice(0, 10),
           h("button", { class: "danger", type: "button", onclick: () => remove(c) }, "Remove")]))
-      : empty("No other computers are connected."));
+      : empty("No other computers or phones are connected."));
     return computers;
   }
   async function remove(c) {
@@ -46,12 +46,12 @@ export async function render(root) {
     const j = await newJoinCode();
     const countdown = h("p", { class: "muted" });
     fill(area,
-      h("p", {}, "On the other computer, open a web browser and go to:"),
+      h("p", {}, "On the other computer or phone, open a web browser and go to:"),
       h("p", { class: "big" }, j.address),
-      h("p", {}, "Then type this code and a name for that computer:"),
+      h("p", {}, "Then type this code and a name for it:"),
       h("p", { class: "big" }, j.code),
       countdown,
-      j.can_connect ? null : note(j.message || "Other computers may not be able to reach this one yet."),
+      j.can_connect ? null : note(j.message || "Other devices may not be able to reach this one yet."),
       empty("Don't share the code: it works once, for a short time."));
     const tick = () => {
       const left = j.expires_at - Math.floor(Date.now() / 1000);
@@ -60,7 +60,7 @@ export async function render(root) {
         return;
       }
       stopTimers();
-      fill(area, note("That code has expired. Click \"Allow another computer\" for a new one."));
+      fill(area, note("That code has expired. Click \"Allow another device\" for a new one."));
       show().catch(() => {});
     };
     tick();
@@ -69,20 +69,21 @@ export async function render(root) {
       try {
         if ((await show()).some((c) => !known.has(c.id))) {
           stopTimers();
-          fill(area, h("p", { class: "ok", role: "status" }, "New computer connected"));
+          fill(area, h("p", { class: "ok", role: "status" }, "Connected"));
         }
       } catch { /* try again in a few seconds */ }
     }, POLL_MS));
   }
 
   const button = h("button", { class: "primary", type: "button", onclick: () => allow().catch((err) => showError(area, err)) },
-    "Allow another computer");
+    "Allow another device");
   fill(root,
-    card("Use Budget Buddy on another computer",
-      h("p", {}, "Another computer on your home network can open Budget Buddy in its web browser. It needs a " +
-        "one-time code from this computer. It can do everything except connect phones or other computers."),
+    card("Use Budget Buddy in a web browser on another computer or phone",
+      h("p", {}, "A laptop, tablet or phone on your home Wi-Fi can open Budget Buddy in its web browser, with no app " +
+        "to install. It needs a one-time code from this computer. It can do everything except connect phones or " +
+        "other devices."),
       note("Only do this on a home network you trust. Pages travel over your Wi-Fi without extra encryption."),
       button, area),
-    card("Connected computers", box));
+    card("Connected computers and phones", box));
   await show();
 }

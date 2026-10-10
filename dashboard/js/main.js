@@ -49,7 +49,7 @@ const sections = [
   ] },
   { id: "devices", label: "Devices", pages: [
     { id: "phone", label: "Connect phone", render: connectPhone.render },
-    { id: "computers", label: "Other computers", render: otherComputers.render },
+    { id: "computers", label: "Other devices", render: otherComputers.render },
   ] },
 ];
 
