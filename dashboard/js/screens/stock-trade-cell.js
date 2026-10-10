@@ -1,18 +1,23 @@
 // Part of the Transactions screen: in a brokerage, retirement or HSA account, a payment can be recorded as a stock
 // purchase and a deposit as a stock sale (symbol, shares, total), linked to the transaction. Linked trades say
-// what they are; the shares and gains are on the Stocks page.
+// what they are, with Undo to delete the trade (the transaction stays); the shares and gains are on the Stocks page.
 
-import { createLot, createSale } from "../api/endpoints.js";
+import { createLot, createSale, deleteLot, deleteSale } from "../api/endpoints.js";
 import { fill, h } from "../dom.js";
 import { centsOrThrow, centsToInput } from "../money.js";
+import { removeButton } from "./remove-button.js";
 
 const INVESTMENT_KINDS = new Set(["brokerage", "retirement", "hsa"]);
 
-// Linked trades by transaction id -> "Bought 2 VTI" (lots and sales from the Stocks API).
+// Linked trades by transaction id -> { text: "Bought 2 VTI", remove } (lots and sales from the Stocks API).
 export function tradeLabels(lots, sales) {
   const labels = new Map();
-  for (const l of lots) if (l.transaction_id) labels.set(l.transaction_id, `Bought ${l.shares} ${l.symbol}`);
-  for (const s of sales) if (s.transaction_id) labels.set(s.transaction_id, `Sold ${s.shares} ${s.symbol}`);
+  for (const l of lots) {
+    if (l.transaction_id) labels.set(l.transaction_id, { text: `Bought ${l.shares} ${l.symbol}`, remove: () => deleteLot(l.id) });
+  }
+  for (const s of sales) {
+    if (s.transaction_id) labels.set(s.transaction_id, { text: `Sold ${s.shares} ${s.symbol}`, remove: () => deleteSale(s.id) });
+  }
   return labels;
 }
 
@@ -54,7 +59,12 @@ function tradeButton(cell, t, onSaved) {
 
 // accountKind: the transaction's account type; labels: from tradeLabels; onSaved redraws the list.
 export function stockTradeCell(t, accountKind, labels, onSaved) {
-  if (labels.has(t.id)) return h("a", { href: "#stocks" }, labels.get(t.id));
+  const trade = labels.get(t.id);
+  if (trade) {
+    return h("span", {}, h("a", { href: "#stocks" }, trade.text), " ",
+      removeButton(`Undo "${trade.text}"? The trade is deleted from the Stocks page; the transaction stays.`,
+        trade.remove, onSaved, "Undo"));
+  }
   if (t.kind !== "normal" || t.transfer_pair_id || !INVESTMENT_KINDS.has(accountKind)) return "";
   const cell = h("span", {});
   fill(cell, tradeButton(cell, t, onSaved));
