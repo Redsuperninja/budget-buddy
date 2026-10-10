@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query, status
 from app.deps import Offset, PathId, QueryId, SessionDep
 from app.models import CategorySource, TransactionKind
 from app.schemas.transactions import (
+    MatchedAgain,
     TransactionCreate,
     TransactionOut,
     TransactionPage,
@@ -17,6 +18,7 @@ from app.services import gift_categories, transfers
 from app.services import transactions as service
 from app.services.bank_trades import find_trades
 from app.services.dividend_matching import find_dividends
+from app.services.match_again import match_again
 from app.services.repeat_gifts import repeat_gifts
 from app.services.transfer_matching import match_transfers
 
@@ -84,6 +86,12 @@ def find_transfers(session: SessionDep) -> TransfersMatched:
     matched = match_transfers(session)
     session.commit()
     return TransfersMatched(matched=matched)
+
+
+@router.post("/match-again")
+def match_everything_again(session: SessionDep) -> MatchedAgain:
+    """Run every finder over all transactions again (services/match_again.py)."""
+    return match_again(session)
 
 
 @router.get("/{transaction_id}")

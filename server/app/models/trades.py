@@ -20,8 +20,9 @@ class BankTrade(TimestampMixin, Base):
     transaction_id: Mapped[int] = mapped_column(
         ForeignKey("transactions.id", ondelete="CASCADE"), unique=True
     )
+    # Several can share one sweep (services/combined_sweeps.py).
     sweep_transaction_id: Mapped[int | None] = mapped_column(
-        ForeignKey("transactions.id", ondelete="SET NULL"), unique=True
+        ForeignKey("transactions.id", ondelete="SET NULL"), index=True
     )
     security: Mapped[str] = mapped_column(String(100))  # "ABBOTT LABORATORIES"
     # "Not a trade": kept so it isn't found again, but left out of lists.

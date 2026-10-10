@@ -22,6 +22,7 @@ from app.schemas.transactions import TransactionCreate, TransactionPage, Transac
 from app.services.accounts import get_account
 from app.services.category_learning import picked_by_hand
 from app.services.category_rules import load_matcher, rule_fields
+from app.services.combined_sweeps import free_sweeps_of
 from app.services.transaction_roles import (
     bank_trade_sweeps,
     bank_trades,
@@ -236,6 +237,7 @@ def delete_transaction(session: Session, transaction_id: int) -> None:
             "This transaction is part of a transfer. Remove the transfer link before deleting "
             "this transaction.",
         )
+    free_sweeps_of(session, [transaction_id])  # a sweep it shared with other dividends or trades
     # A stock trade classified from it stays (the shares are real); only the link goes.
     for model in (StockLot, StockSaleOrder):
         session.execute(

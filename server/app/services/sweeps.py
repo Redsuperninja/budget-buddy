@@ -1,7 +1,7 @@
 """Deposit sweeps: the line next to a dividend or a stock trade that moves the same cash between
 the account and its sweep (like "CHASE DEPOSIT SWEEP JPMORGAN CHASE BANK NA INTRA-DAY DEPOSIT").
 Shared by ``dividend_matching`` and ``bank_trades``, so both pick sweeps the same way and never the
-same one.
+same one. A sweep for several at once is ``combined_sweeps``.
 
 A sweep is a regular transaction in the same account for exactly the opposite amount, from
 ``SWEEP_DAYS_BEFORE`` days before to ``SWEEP_DAYS_AFTER`` days after, with "sweep" in the

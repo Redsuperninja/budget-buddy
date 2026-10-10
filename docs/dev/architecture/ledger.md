@@ -54,6 +54,13 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 
 ## Routes (this computer only)
 
+- **Match everything again:** `POST /api/local/transactions/match-again` (`services/match_again.py`), in one savepoint,
+  picks every sweep link again (they're all automatic; a link the new pick leaves free is put back, so it only adds)
+  and runs the finders over all transactions: dividends, stock trades (and
+  recorded trades with a sweep nearby), sweeps one each then several at once, transfers. Dismissed dividends and
+  trades, transfer links and `auto_transfer_off`, categories and recorded shares are kept. Returns
+  `{dividends_found, trades_found, sweeps_linked, transfers_linked}`.
+
 - **Accounts:** `GET/POST /api/local/accounts`, `GET/PATCH/DELETE /api/local/accounts/{id}`.
   - `retirement_type` (`roth_ira`, `traditional_ira`, `401k`, `roth_401k`, `403b`, `other`) only on a `retirement`
     account (422 otherwise); changing the kind away from retirement clears it.

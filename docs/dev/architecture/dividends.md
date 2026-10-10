@@ -18,8 +18,8 @@ list, "not a dividend"), `services/named_categories.py` (the "Dividends" categor
 
 ## Table
 
-`dividends` (migration 0019): `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (unique,
-`ON DELETE SET NULL`), `payer` (from the description), `dismissed`. The date, amount and account are the
+`dividends` (migration 0019): `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (indexed,
+shared by several when one sweep covers them, migration 0026; `ON DELETE SET NULL`), `payer` (from the description), `dismissed`. The date, amount and account are the
 transaction's, never copied.
 
 ## Rules
@@ -40,8 +40,8 @@ transaction's, never copied.
 - A linked sweep doesn't show under "needs a category" (it only parks the cash). Stock trades and their sweeps
   work the same way ([bank-trades.md](bank-trades.md)).
 - **Its sweep** is a regular money-out transaction in the same account, for exactly the same amount, from 1 day
-  before to 3 days after, with the word "sweep" in it. Closest date wins, then the one added first; one sweep per
-  dividend. Sweeps keep their own category, and a linked sweep is never matched as a transfer.
+  before to 3 days after, with the word "sweep" in it. Closest date wins, then the one added first. One sweep can
+  also cover several dividends and trades whose amounts add up to it ([bank-trades.md](bank-trades.md)). Sweeps keep their own category, and a linked sweep is never matched as a transfer.
 - **Payer**: the description up to "common stock", "cash div", "qualified/ordinary dividend", "dividend" or "div".
 - Not handled yet: qualified vs ordinary (only the 1099-DIV knows), foreign tax paid, reversals (dismiss the
   dividend by hand), interest from sweep or money-market funds, January payments of dividends declared in the

@@ -38,6 +38,7 @@
 | 0023 | Retirement account types: Roth IRA, traditional IRA, 401(k), Roth 401(k), 403(b) or other |
 | 0024 | `donations.auto_added`: a donation recorded for you for a repeat gift to a charity |
 | 0025 | `bank_trades` (stock trades named in a bank file, with their sweeps) and `security_symbols` (a company's ticker) |
+| 0026 | A deposit sweep can be shared by several dividends and trades (`sweep_transaction_id` no longer unique) |
 
 ## Adding a migration
 

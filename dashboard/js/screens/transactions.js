@@ -5,7 +5,7 @@
 // hiding dividends, the "Mark as" column and the transaction type are power-user tools (All tools view).
 
 import {
-  createTransaction, listAccounts, listCategories, listLots, listSales, listTransactions, matchTransfers,
+  createTransaction, listAccounts, listCategories, listLots, listSales, listTransactions, matchAgain, matchTransfers,
 } from "../api/endpoints.js";
 import { currentMonth, monthRange, today } from "../dates.js";
 import { fill, h, showError } from "../dom.js";
@@ -100,6 +100,26 @@ export async function render(root, options = {}) {
     }
   } }, "Find transfers");
 
+  // Every finder again over all transactions, so older imports get today's matching (match_again.py).
+  const againNote = h("span", { class: "muted", role: "status" });
+  const again = h("button", { class: "plain", type: "button", onclick: async () => {
+    again.disabled = true;
+    againNote.textContent = " Matching...";
+    try {
+      const r = await matchAgain();
+      const found = r.dividends_found + r.trades_found + r.sweeps_linked + r.transfers_linked;
+      againNote.textContent = found
+        ? ` Done: ${r.dividends_found} new dividend(s), ${r.trades_found} new stock trade(s), ` +
+          `${r.sweeps_linked} deposit sweep(s) newly linked, ${r.transfers_linked} new transfer(s).`
+        : " Nothing new to match.";
+      await refresh();
+    } catch (err) {
+      againNote.textContent = ` ${err.message}`;
+    } finally {
+      again.disabled = false;
+    }
+  } }, "Match everything again");
+
   fill(root,
     card("Transactions",
       h("div", { class: "toolbar" }, h("label", {}, "Search", searchBox),
@@ -107,7 +127,9 @@ export async function render(root, options = {}) {
         h("label", {}, "Category", categoryFilter), h("label", {}, "Show", sortedFilter),
         advanced(h("label", { class: "check" }, hideDividends, "Hide dividends, stock trades and sweeps")),
         advanced(h("label", { class: "check" }, hideAdjustments, "Hide balance adjustments")),
-        advanced(h("span", {}, findTransfers, matchNote))),
+        advanced(h("span", {}, findTransfers, matchNote)),
+        h("span", { title: "Looks through all your transactions again for dividends, stock trades, deposit sweeps " +
+          "and transfers. What you decided yourself stays." }, again, againNote)),
       list),
     accounts.length
       ? formCard("Add a transaction", form([

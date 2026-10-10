@@ -23,10 +23,10 @@ INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money o
 - Recording uses the Stocks API (`POST /stocks/lots` or `/stocks/sales` with `transaction_id`); that also saves the
   company's ticker (`security_symbols`). Bank CSV import results gain `trades_found` and `trade_sweeps_linked`.
 
-## Tables (migration 0025)
+## Tables (migrations 0025, 0026)
 
-`bank_trades`: `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (unique, `ON DELETE SET
-NULL`), `security` (from the description), `dismissed`. Date, amount and account are the transaction's.
+`bank_trades`: `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (indexed, not unique since
+0026: several trades and dividends can share one sweep; `ON DELETE SET NULL`), `security` (from the description), `dismissed`. Date, amount and account are the transaction's.
 `security_symbols`: `security` (unique) to `symbol`.
 
 ## Rules
@@ -49,6 +49,10 @@ NULL`), `security` (from the description), `dismissed`. Date, amount and account
   sale. Shown as "with fees", since it can differ from the trade price.
 - **Its sweep:** the opposite amount, same account, from 1 day before to 3 days after, "sweep" in the description,
   not already a dividend's or another trade's (dividends also skip trades' sweeps). Closest date, then first added.
+- **One sweep for several:** after that, a free sweep is linked to a group of two or more trades and dividends still
+  without one, same account and window, whose amounts add up to exactly its opposite: smallest group, then oldest
+  payments; skipped with more than 10 waiting nearby (`services/combined_sweeps.py`). "Not a trade" on one member
+  frees the sweep from the whole group.
 - **Budget:** a trade and its sweep are cash turning into shares (or back) inside the account, so the monthly
   summary, "needs a category", transfer matching and "hide dividends" leave both out. A dividend's linked sweep is
   also left out of "needs a category".

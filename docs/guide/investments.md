@@ -71,6 +71,9 @@ the amount. Neither the trade nor the sweep counts as spending or income, and ne
    above and on the **Stocks** page with the date you bought or sold.
 3. Next time that company shows up, its ticker is already filled in: just add the shares.
 
+Some brokers sweep a day's cash in one line, like two purchases paid by one sweep for their total. Budget Buddy
+links that sweep to all of them when the amounts add up exactly.
+
 A trade you marked yourself on the **Transactions** page (**Stock trade**) gets its sweep linked the same way, as
 soon as the sweep is there, and then shows up in this list too.
 
