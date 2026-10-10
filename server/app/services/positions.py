@@ -10,10 +10,10 @@ saved. The file's date can't be in the future. Reading the file is in
 
 from dataclasses import dataclass
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.models import Account, ImportBatch, Position, StockLot, StockPrice, StockSaleOrder
+from app.models import Account, ImportBatch, Position, StockPrice
 from app.schemas.positions import (
     AccountPositionsOut,
     PositionOut,
@@ -25,6 +25,7 @@ from app.schemas.positions import (
 )
 from app.services.accounts import get_account
 from app.services.csv_parsing import decode_csv, detect_delimiter, read_rows
+from app.services.holdings_check import snapshots, waiting_bank_trades
 from app.services.imports import record
 from app.services.positions_csv import ParsedPosition, Skip, find_columns, parse_position
 from app.services.stock_holdings import value_cents
@@ -142,61 +143,52 @@ def commit(session: Session, data: bytes, choices: PositionsChoices) -> Position
     )
 
 
-def _recorded_shares(session: Session, position: Position) -> int:
-    """Shares bought minus shares sold in the position's account, dated on or before the file's
-    day, so a trade recorded after the file doesn't look missing."""
-    bought = session.scalar(
-        select(func.coalesce(func.sum(StockLot.shares_micro), 0)).where(
-            StockLot.account_id == position.account_id,
-            StockLot.symbol == position.symbol,
-            StockLot.acquired_on <= position.as_of,
-        )
-    )
-    sold = session.scalar(
-        select(func.coalesce(func.sum(StockSaleOrder.shares_micro), 0)).where(
-            StockSaleOrder.account_id == position.account_id,
-            StockSaleOrder.symbol == position.symbol,
-            StockSaleOrder.sold_on <= position.as_of,
-        )
-    )
-    return bought - sold
-
-
 def list_positions(session: Session) -> PositionsOut:
+    """Each account's positions file next to your records on its day (``holdings_check``): every
+    symbol in the file, then any you hold by your records that the file leaves out."""
     prices = {p.symbol: p.price_cents for p in session.scalars(select(StockPrice))}
+    files = snapshots(session)
     rows = session.execute(
         select(Position, Account.name)
         .join(Account, Account.id == Position.account_id)
         .order_by(Account.name, Position.symbol)
     ).all()
+    lines = {(p.account_id, p.symbol): p for p, _ in rows}
     accounts: dict[int, AccountPositionsOut] = {}
     for position, name in rows:
-        group = accounts.setdefault(
-            position.account_id,
-            AccountPositionsOut(
-                account_id=position.account_id,
-                account_name=name,
-                as_of=position.as_of,
-                positions=[],
-                value_cents=0,
-            ),
+        if position.account_id in accounts:
+            continue
+        snap = files[position.account_id]
+        group = AccountPositionsOut(
+            account_id=position.account_id,
+            account_name=name,
+            as_of=snap.as_of,
+            positions=[],
+            value_cents=0,
+            bank_trades_waiting=waiting_bank_trades(session, position.account_id, snap.as_of),
         )
-        value = position.value_cents
-        if value is None and position.symbol in prices:
-            value = value_cents(position.shares_micro, prices[position.symbol])
-        mine = _recorded_shares(session, position)
-        group.positions.append(
-            PositionOut(
-                symbol=position.symbol,
-                shares_micro=position.shares_micro,
-                shares=micro_to_text(position.shares_micro),
-                cost_basis_cents=position.cost_basis_cents,
-                value_cents=value,
-                recorded_shares_micro=mine,
-                matches=mine == position.shares_micro,
+        accounts[position.account_id] = group
+        for symbol, file_shares, mine in snap.compare():
+            line = lines.get((position.account_id, symbol))
+            value = line.value_cents if line else None
+            if line and value is None and symbol in prices:
+                value = value_cents(line.shares_micro, prices[symbol])
+            shares = file_shares or 0
+            group.positions.append(
+                PositionOut(
+                    symbol=symbol,
+                    shares_micro=shares,
+                    shares=micro_to_text(shares),
+                    cost_basis_cents=line.cost_basis_cents if line else None,
+                    value_cents=value,
+                    recorded_shares_micro=mine,
+                    recorded_shares=micro_to_text(mine),
+                    matches=mine == shares,
+                    in_file=file_shares is not None,
+                )
             )
-        )
-        group.value_cents = _add(group.value_cents, value)
+            if line:
+                group.value_cents = _add(group.value_cents, value)
     return PositionsOut(accounts=list(accounts.values()))
 
 

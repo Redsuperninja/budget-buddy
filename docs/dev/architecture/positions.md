@@ -13,7 +13,13 @@ the future).
 - `POST /api/local/stocks/positions/import/preview`: columns found, positions (one per symbol), skipped lines.
 - `POST /api/local/stocks/positions/import`: replace the account's snapshot; returns counts and `prices_updated`.
 - `GET /api/local/stocks/positions`: each account's snapshot, with `recorded_shares_micro` (that account's
-  purchases minus sales of the symbol dated on or before `as_of`, so later trades don't look missing) and `matches`.
+  purchases minus sales of the symbol dated on or before `as_of`, so later trades don't look missing) and `matches`,
+  both ways: symbols you hold by your records that the file leaves out are added with `in_file: false` and 0
+  shares. Each account has `bank_trades_waiting` (bank-file trades on or before `as_of` with no shares yet).
+- Stock purchases and sales (`GET /stocks/lots`, `/stocks/sales`, the gains summary) carry `checked_by`:
+  `"transaction"` (linked to a transaction), `"positions_file"` (the account's file agrees for that symbol, same
+  shares or none on both sides, and is dated on or after the trade) or null. Worked out each time in
+  `services/holdings_check.py`, never stored.
 - `DELETE /api/local/stocks/positions/{account_id}`: forget an account's snapshot.
 
 ## Rules

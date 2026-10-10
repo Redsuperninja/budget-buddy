@@ -1,5 +1,6 @@
 // Part of the Investments screen: positions from your broker's file (a snapshot per account), next to what your
-// recorded purchases and sales add up to, and importing a new positions file (preview first).
+// recorded purchases and sales add up to (both ways: symbols the file leaves out are listed too), and importing a
+// new positions file (preview first).
 
 import { clearPositions, importPositions, listPositions, previewPositions } from "../api/endpoints.js";
 import { today } from "../dates.js";
@@ -11,6 +12,17 @@ import { advanced, card, empty, note, select, table } from "../widgets.js";
 
 const money = (cents) => (cents === null ? "" : formatCents(cents));
 
+// Your recorded shares on the file's day next to the broker's, and what to look for when they differ.
+function recordsCell(p) {
+  if (p.matches) return "Same";
+  const text = !p.in_file
+    ? `${p.recorded_shares} shares, but the broker doesn't list it: a sale may be missing`
+    : p.recorded_shares_micro < p.shares_micro
+      ? `${p.recorded_shares} shares: fewer than the broker, a purchase may be missing`
+      : `${p.recorded_shares} shares: more than the broker, a sale may be missing`;
+  return h("span", { class: "bad" }, text);
+}
+
 function accountTable(group, year) {
   const forget = h("button", { class: "plain", type: "button", onclick: async () => {
     await clearPositions(group.account_id);
@@ -18,9 +30,13 @@ function accountTable(group, year) {
   } }, "Forget this file");
   return h("div", {},
     h("h3", {}, `${group.account_name}, as of ${group.as_of}`),
-    table(["Symbol", "Shares", "Cost", "Value", "Your records"], group.positions.map((p) => [
-      p.symbol, p.shares, money(p.cost_basis_cents), money(p.value_cents),
-      p.matches ? "Same" : h("span", { class: "bad" }, `${p.recorded_shares_micro / 1e6} shares: a trade may be missing`),
+    group.bank_trades_waiting
+      ? note(`${group.bank_trades_waiting} trade(s) from your bank file in this account still need their shares. ` +
+          "Add them under Stock trades from your bank file below; the check updates as you do.")
+      : null,
+    table(["Symbol", "Broker says", "Cost", "Value", "Your records"], group.positions.map((p) => [
+      p.symbol, p.in_file ? p.shares : "Not in the file", money(p.cost_basis_cents), money(p.value_cents),
+      recordsCell(p),
     ]), [2, 3]),
     h("p", {}, h("strong", {}, `Value: ${group.value_cents === null ? "not known for every line" : formatCents(group.value_cents)}`),
       " ", forget));
