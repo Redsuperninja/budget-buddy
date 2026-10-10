@@ -16,6 +16,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem;
   background: var(--card); border-bottom: 1px solid var(--line); }
 h1 { font-size: 1.25rem; margin: 0; }
+a { color: var(--accent); }
 h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
 h3 { font-size: 1rem; margin: 1rem 0 0.5rem; }
 nav { display: flex; flex-wrap: wrap; gap: 0.25rem; }
@@ -30,6 +31,7 @@ nav button[aria-current="page"] { background: var(--accent); color: var(--accent
   border-bottom: 2px solid var(--accent); font-weight: 600; }
 main { max-width: 64rem; margin: 0 auto; padding: 1rem; }
 footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 1.5rem 1rem; }
+footer p { margin: 0.25rem 0; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
 .cards .card { margin: 0; }
@@ -47,7 +49,19 @@ form { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)
 form .wide { grid-column: 1 / -1; }
 label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; color: var(--muted); }
 label.check { flex-direction: row; align-items: center; gap: 0.5rem; }
-label.theme { flex-direction: row; align-items: center; gap: 0.5rem; margin-left: auto; }
+/* Settings menu in the header (js/settings-menu.js): Colors and View. */
+details.settings { margin-left: auto; position: relative; }
+details.settings summary { cursor: pointer; padding: 0.4rem 0.75rem; border: 1px solid var(--line); border-radius: 6px;
+  list-style: none; }
+details.settings summary::-webkit-details-marker { display: none; }
+.settings-panel { position: absolute; right: 0; top: calc(100% + 0.4rem); z-index: 10; width: 18rem; max-width: 90vw;
+  display: grid; gap: 0.6rem; padding: 0.9rem; background: var(--card); border: 1px solid var(--line);
+  border-radius: 10px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); }
+.settings-panel p { margin: 0; }
+/* Simple view (the default) hides power-user tools; Settings, View, All tools shows them (js/view.js). The page
+   you are on keeps its tab even when it is a power-user page, so a link to it still makes sense. */
+:root:not([data-view="all"]) .advanced:not([aria-current]) { display: none !important; }
+:root[data-view="all"] .simple-only { display: none !important; }
 input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--text); min-width: 0; }
 button.primary, button.danger, button.plain, a.button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; }
@@ -94,6 +108,13 @@ img.thumb { display: block; width: 4.5rem; height: 4.5rem; object-fit: cover; bo
 ul.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 ul.todo .count { display: inline-block; min-width: 1.8rem; padding: 0.1rem 0.45rem; border-radius: 999px;
   background: var(--warn-bg); text-align: center; font-weight: 600; }
+/* Home: the "Get started" checklist (js/screens/home-start.js). */
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+ol.steps li { display: flex; gap: 0.75rem; align-items: baseline; }
+ol.steps .step-mark { flex: none; min-width: 3.5rem; text-align: center; font-size: 0.8rem; font-weight: 600;
+  padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--warn-bg); }
+ol.steps li.done { color: var(--muted); }
+ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px solid var(--good); }
 .leftover { --series: light-dark(#c3c8d1, #4a5262); }
 .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
 .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem;

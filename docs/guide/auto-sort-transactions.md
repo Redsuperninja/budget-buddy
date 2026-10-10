@@ -18,7 +18,8 @@ Upper and lower case don't matter, so "netflix" also matches "NETFLIX.COM 866-55
 
 ## Add a rule
 
-1. Open the dashboard, click **Money** at the top, then the **Auto-sort** tab.
+1. Open the dashboard and turn on the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view (**Settings** at the top right, **View**, **All tools**). Click
+   **Money** at the top, then the **Auto-sort** tab.
 2. Under **Add a rule**, type the text to look for. Copy it from a transaction's description; a short,
    distinctive part works best (at least 2 characters).
 3. Pick the category and click **Add rule**.
@@ -52,7 +53,7 @@ if you don't want it. Budget Buddy never learns a rule that would override one y
 
 - On the **Auto-sort** page, the **Sorted** column shows how many transactions each rule sorted, and **Auto-sorted
   transactions** lists the newest 100 with the rule that sorted each one.
-- On the **Transactions** page, set **Category set** to **Auto-sorted** (or **Picked by you**) to see them by
+- On the **Transactions** page, set **Show** to **Sorted automatically** (or **Sorted by you**) to see them by
   month. Auto-sorted rows say *auto-sorted* next to the category.
 - If a rule got one wrong, just pick the right category. That counts as your choice from then on.
 

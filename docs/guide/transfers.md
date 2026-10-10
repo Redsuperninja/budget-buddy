@@ -48,7 +48,7 @@ Budget Buddy leaves a pair for you when it can't be sure:
 - the money leaves a credit card or loan (a cash advance, balance transfer or loan payout): link those yourself;
 - you unlinked them before.
 
-Click **Find transfers** on the Transactions page to look through everything again, for example after adding an
+Click **Find transfers** on the Transactions page (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view) to look through everything again, for example after adding an
 account. To link a pair by hand, or undo a link, use the transfer options on the transaction. Undoing a link puts
 back the category each side had before (so it counts as spending or income again), and Budget Buddy never links
 those two automatically again.

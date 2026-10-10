@@ -78,18 +78,19 @@ Lists all the money coming in and going out, and lets you add more.
 ### Balance adjustments are hidden
 
 Opening balances and "match the bank" fixes are balance adjustments. They aren't spending or income, so the
-**Transactions** list hides them unless you untick **Hide balance adjustments**.
+**Transactions** list hides them unless you untick **Hide balance adjustments** (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view).
 
 ### Sort the ones with no category yet
 
-1. On the **Transactions** page, set **Category set** to **Not yet (uncategorized)**
+1. On the **Transactions** page, set **Show** to **Needs a category** (or click "transactions need a category" on
+   **Home**, which does this for you)
 2. Pick a category in each row's dropdown. Each one saves as you go
 3. To see every month at once, clear the **Month** box. Transfers and balance adjustments don't need a category, so
    they aren't listed
 
 ### Mark a payment as a gift
 
-If a payment was a gift, click **Mark as gift** in its row and pick the kind:
+If a payment was a gift, click **Mark as gift** in its row (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view) and pick the kind:
 
 - **To a charity:** check the charity's name, the date you gave it, and how much of the payment was the gift,
   then click **Save**. The gift is added to your [donations](donations.md) for that tax year and the payment

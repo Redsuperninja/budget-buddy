@@ -1,6 +1,7 @@
 // Investments: what you hold in each account (shares, cost, value at live or typed-in prices) and this year's
 // retirement and HSA contributions against the limits, and positions from your broker's file (positions-card.js). Buying and selling are on the Stocks page; live prices
-// are in live-prices.js (refreshed when this page opens and on Refresh, if turned on).
+// are in live-prices.js (refreshed when this page opens and on Refresh, if turned on). Importing a positions file and the
+// live prices settings are power-user tools (All tools view).
 
 import { listAccounts, retirementLimits, setStockPrice, stockHoldings } from "../api/endpoints.js";
 import { thisYear, today } from "../dates.js";
@@ -10,7 +11,7 @@ import { form } from "../form.js";
 import { kindLabel, retirementTypeLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { reload } from "../router.js";
-import { card, empty, note, table } from "../widgets.js";
+import { advanced, card, empty, note, table } from "../widgets.js";
 import { priceText, refreshButton, refreshIfOn, settingsCard } from "./live-prices.js";
 import { positionsCards } from "./positions-card.js";
 
@@ -18,7 +19,7 @@ const money = (cents) => (cents === null ? "no price yet" : formatCents(cents));
 
 function accountCard(group) {
   const type = retirementTypeLabel(group.retirement_type) || (group.account_kind ? kindLabel(group.account_kind) : "");
-  const kind = type ? ` (${type})` : "";
+  const kind = type ? `: ${type}` : "";
   return card(`${group.account_name}${kind}`,
     group.taxed ? null : empty("Not taxed when you sell inside this account."),
     table(["Symbol", "Shares", "Cost", "Price", "Value", "Gain or loss (not sold)"], group.holdings.map((x) => [
@@ -81,6 +82,6 @@ export async function render(root, options) {
     held.accounts.map(accountCard),
     positions,
     priceForm(year),
-    settings,
+    advanced(settings),
     limitsCard(limits));
 }

@@ -55,6 +55,16 @@ Met by `LocalAccessMiddleware` (`app/network.py`) plus the CSP:
 Server tests use a fake dashboard folder (`fake_dashboard` in `server/tests/conftest.py`), never the real one
 ([../testing.md](../testing.md)).
 
+## Simple view and All tools
+
+The dashboard starts in a **simple view** so a first-time user sees only everyday pages and controls. Power-user
+pieces (Import history, Auto-sort, Find transfers, the gift and stock-trade column, transaction type, positions
+import, live price settings) carry the `advanced` class; `app.css` hides them unless `<html data-view="all">`,
+which the header **Settings** menu sets (`js/view.js`, remembered in `localStorage` per browser). It is a display
+choice only: the API, the data and every route are the same in both views, and a link to a hidden page still
+opens it. Home also shows a **Get started** checklist (`screens/home-start.js`) until there are accounts,
+transactions and budgets, and hides its charts until the first transaction.
+
 ## Charts
 
 Home shows money tiles with SVG meters (`screens/home-tiles.js`; inline styles are blocked by the CSP), a "needs

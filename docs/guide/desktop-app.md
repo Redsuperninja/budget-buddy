@@ -13,8 +13,8 @@ also wait quietly in the corner of your screen (the tray, next to the clock) fro
 ## Use it
 
 Open **Budget Buddy** from the Start menu or the desktop. A small blue **B** icon appears in the tray, and the
-Budget Buddy window opens a second or two later. Everything works as in the browser, including **Colors** (light,
-dark, or match your computer), downloading the tax summary, and printing.
+Budget Buddy window opens a second or two later. Everything works as in the browser, including **Settings** (the simple view or
+All tools, and light, dark, or match your computer), downloading the tax summary, and printing.
 
 When you close the window, Budget Buddy stops and your data is saved. The tray icon stays, using almost nothing,
 so you can open it again with a double-click.

@@ -1,8 +1,9 @@
-// Starts the dashboard: the sections of the navigation bar and the pages inside each, in order. Another
-// computer that hasn't joined yet (no CSRF token in the page) sees only the join page (ADR-0009).
+// Starts the dashboard: the sections of the navigation bar and the pages inside each, in order. Pages marked
+// advanced only get a tab in the All tools view (Settings, View). Another computer
+// or phone that hasn't joined yet (no CSRF token in the page) sees only the join page (ADR-0009).
 
 import { start } from "./router.js";
-import { addThemePicker } from "./theme-picker.js";
+import { addSettingsMenu } from "./settings-menu.js";
 import * as accounts from "./screens/accounts.js";
 import * as categories from "./screens/categories.js";
 import * as connectPhone from "./screens/connect-phone.js";
@@ -32,9 +33,9 @@ const sections = [
     { id: "accounts", label: "Accounts", render: accounts.render },
     { id: "investments", label: "Investments", render: investments.render },
     { id: "import", label: "Import files", render: importCsv.render },
-    { id: "import-history", label: "Import history", render: importHistory.render },
+    { id: "import-history", label: "Import history", render: importHistory.render, advanced: true },
     { id: "receipts", label: "Receipts", render: receipts.render },
-    { id: "rules", label: "Auto-sort", render: rules.render },
+    { id: "rules", label: "Auto-sort", render: rules.render, advanced: true },
   ] },
   { id: "budget", label: "Budget", pages: [
     { id: "categories", label: "Categories", render: categories.render },
@@ -52,6 +53,6 @@ const sections = [
   ] },
 ];
 
-addThemePicker();
+addSettingsMenu();
 if (joinedOrLocal) start(onThisComputer ? sections : sections.filter((s) => s.id !== "devices"));
 else join.render(document.getElementById("view"));

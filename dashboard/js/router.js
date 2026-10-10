@@ -1,5 +1,6 @@
 // Navigation: a few section buttons on top, and a row of page tabs under them when a section has more
-// than one page. The #hash names the page, so old links like #donations still work. Screens can redraw
+// than one page. The #hash names the page, so old links like #donations still work, and can carry choices for
+// it (#transactions?sorted=none). Pages marked advanced get a tab only in the All tools view. Screens can redraw
 // themselves with reload() or register clean-up (stopping timers) with onLeave().
 
 import { fill, h, showError } from "./dom.js";
@@ -11,7 +12,9 @@ let nav;
 let subnav;
 let view;
 
-const currentId = () => location.hash.slice(1) || pages[0].id;
+const hashParts = () => location.hash.slice(1).split("?");
+const currentId = () => hashParts()[0] || pages[0].id;
+const hashOptions = () => Object.fromEntries(new URLSearchParams(hashParts()[1] || ""));
 const go = (id) => { location.hash = id; };
 
 export const onLeave = (fn) => leaveHandlers.push(fn);
@@ -32,8 +35,8 @@ function showTabs(section, page) {
     subnav.hidden = true;
     return;
   }
-  fill(subnav, section.pages.map(({ id, label }) =>
-    h("button", { type: "button", "data-id": id, onclick: () => go(id) }, label)));
+  fill(subnav, section.pages.map(({ id, label, advanced }) =>
+    h("button", { type: "button", "data-id": id, class: advanced ? "advanced" : null, onclick: () => go(id) }, label)));
   subnav.setAttribute("aria-label", `${section.label} pages`);
   subnav.hidden = false;
   markCurrent(subnav, page.id);
@@ -55,7 +58,7 @@ async function show(id, options = {}) {
   }
 }
 
-// table: [{ id, label, pages: [{ id, label, render(root, options) }, ...] }, ...]
+// table: [{ id, label, pages: [{ id, label, render(root, options), advanced? }, ...] }, ...]
 // A section button opens its first page.
 export function start(table) {
   sections = table;
@@ -66,6 +69,6 @@ export function start(table) {
   for (const { id, label, pages: [first] } of sections) {
     nav.append(h("button", { type: "button", "data-id": id, onclick: () => go(first.id) }, label));
   }
-  window.addEventListener("hashchange", () => show(currentId()));
-  show(currentId());
+  window.addEventListener("hashchange", () => show(currentId(), hashOptions()));
+  show(currentId(), hashOptions());
 }

@@ -4,6 +4,12 @@ import { h } from "./dom.js";
 
 export const empty = (text) => h("p", { class: "muted" }, text);
 export const note = (text) => h("div", { class: "note" }, text);
+// Marks a page piece as a power-user tool: shown only in the All tools view (Settings, View).
+export function advanced(el) {
+  el.classList.add("advanced");
+  return el;
+}
+
 export const card = (title, ...children) =>
   h("section", { class: "card" }, title ? h("h2", {}, title) : null, children);
 
@@ -19,8 +25,10 @@ export function select(options, { value, ...attrs } = {}) {
 }
 
 // rows: lists of cells (text or nodes). rightAligned: column numbers to right-align (numbers).
-export function table(headers, rows, rightAligned = []) {
-  const cls = (i) => (rightAligned.includes(i) ? "num" : null);
+// advancedColumns: column numbers shown only in the All tools view.
+export function table(headers, rows, rightAligned = [], advancedColumns = []) {
+  const cls = (i) => [rightAligned.includes(i) ? "num" : "", advancedColumns.includes(i) ? "advanced" : ""]
+    .join(" ").trim() || null;
   return h("div", { class: "scroll" }, h("table", {},
     h("thead", {}, h("tr", {}, headers.map((t, i) => h("th", { class: cls(i) }, t)))),
     h("tbody", {}, rows.map((row) => h("tr", {}, row.map((cell, i) => h("td", { class: cls(i) }, cell)))))));

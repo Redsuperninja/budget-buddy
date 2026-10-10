@@ -38,8 +38,8 @@ Imported your files before this was added? Click **Find dividends** once to look
 
 ## Hide them from your transactions
 
-Dividends and their sweeps can crowd the **Transactions** list. Tick **Hide dividends and sweeps** to leave them
-out. Untick it to see them again.
+Dividends and their sweeps can crowd the **Transactions** list. Tick **Hide dividends and sweeps** (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools)
+view) to leave them out. Untick it to see them again.
 
 ## Something went wrong?
 

@@ -4,6 +4,7 @@
 import { importCsv, listAccounts, previewCsv } from "../api/endpoints.js";
 import { fill, h, showError } from "../dom.js";
 import { pickOptions } from "../fields.js";
+import { everydayFirst } from "../labels.js";
 import { formatCents } from "../money.js";
 import { card, empty, note, select, table } from "../widgets.js";
 import { activityImportCard } from "./activity-import.js";
@@ -18,7 +19,7 @@ export async function render(root) {
     return;
   }
   const result = h("div", {});
-  const accountSelect = select(pickOptions(accounts));
+  const accountSelect = select(pickOptions(everydayFirst(accounts)));
   const fileInput = h("input", { type: "file", accept: ".csv,text/csv" });
   let bytes = null; // the chosen file
   let choices = {}; // column choices sent with every request (empty = let Budget Buddy guess)
