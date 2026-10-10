@@ -128,6 +128,7 @@ items (20, 21).
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
 
 ## Phase 7: Bank data (ADR-0006: free and open source first)
+- [x] 26b. Brokerage activity CSV: every row a transaction, buys and sells linked as stock trades, dividends filed — *backend-engineer* + *finance-tax-expert*
 - [ ] 26. Bank-file import (OFX/QFX): balances, bank transaction IDs, brokerage holdings — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
 - [ ] 27. Auto-import folder for new bank files — *backend-engineer* + *security-reviewer*
 - [ ] 28. Optional live connection with your own free developer key (Teller, then Plaid) — *backend-engineer* + *security-reviewer*

@@ -16,7 +16,7 @@ Open http://127.0.0.1:8766/ on your computer and use the buttons along the top (
 - [ ] **Suggested budget:** does the plan make sense for the demo data? Try "Use as percentages of income".
 - [ ] **Auto-sort:** add a rule (for example `GROCERY` to Groceries), then import a bank file or click "Sort transactions now".
 - [ ] **Transactions:** add a purchase (choose "Money out", amount `12.34`). Add a refund.
-- [ ] **CSV import:** on **Import bank file**, choose `scripts\sample-bank-statement.csv`, check the preview, then import. Do it again: rows already there should be skipped.
+- [ ] **CSV import:** on **Import files**, choose `scripts\sample-bank-statement.csv`, check the preview, then import. Do it again: rows already there should be skipped.
 - [ ] **Paychecks:** add one whose numbers don't add up. Is the message clear?
 - [ ] **Donations:** look at the year summary for this year. Does the "proof to keep" list make sense?
 - [ ] **Stocks:** look at the gains for this year. Add a sale of more shares than you own.

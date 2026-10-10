@@ -50,7 +50,7 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
   - **Transactions:** money coming in and going out; add more; sort a payment into charity
   - **Accounts:** your bank and savings accounts; match a balance to your bank
   - **Investments:** what you hold in each account and what it's worth; retirement and HSA contributions
-  - **Import bank file:** download a CSV from your bank and import it
+  - **Import files:** import a CSV from your bank, or your broker's activity file
   - **Auto-sort:** rules that put transactions in the right category for you
 - **Budget**
   - **Categories:** budget categories and monthly budgets, as amounts or percentages of income

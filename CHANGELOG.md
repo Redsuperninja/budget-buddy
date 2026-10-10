@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Brokerage activity import: on **Import files** (the old Import bank file page), import your broker's activity or history CSV into a brokerage, IRA, 401(k) or HSA account. Every row becomes a transaction, buys and sells with a symbol and shares are also recorded as stock trades, and dividends are filed, so nothing needs sorting by hand. It shows in Import history, where it can be undone.
 - Import history: **Money**, **Import history** lists every file you imported (bank, stock trades, positions) with its account, name and what it added. **Remove** undoes one: what it added is deleted and transfers it was part of go back to normal.
 - Remove stock trades: **Delete** next to each purchase and sale on the Stocks page ("Sales you entered" lists every sale, including retirement and HSA ones), and **Undo** next to a "Bought ..." or "Sold ..." trade on the Transactions page (the transaction stays). Budget Buddy asks first, and says so if a sale still needs a purchase.
 - A new Home page: four money tiles (in, spent with a budget meter, saved with your savings rate, left over), a **Needs your attention** list that links to what's waiting, a bar showing where your income went (needs, wants, savings, left over), and your net worth with a bar for each account's balance.

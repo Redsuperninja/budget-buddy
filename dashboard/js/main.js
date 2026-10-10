@@ -30,7 +30,7 @@ const sections = [
     { id: "transactions", label: "Transactions", render: transactions.render },
     { id: "accounts", label: "Accounts", render: accounts.render },
     { id: "investments", label: "Investments", render: investments.render },
-    { id: "import", label: "Import bank file", render: importCsv.render },
+    { id: "import", label: "Import files", render: importCsv.render },
     { id: "import-history", label: "Import history", render: importHistory.render },
     { id: "rules", label: "Auto-sort", render: rules.render },
   ] },
