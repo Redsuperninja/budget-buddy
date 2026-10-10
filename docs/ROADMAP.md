@@ -5,8 +5,8 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 
 ## What's next (milestones)
 
-Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom, except that **D (easy start)
-comes next**, at the owner's request (2026-10-07), alongside what's left of B.
+Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom. D (easy start) is done; the first
+Windows release (G) is being prepared alongside what's left of B (2026-10-09).
 
 **A. Tester preview** (now): people can try the Home Base with demo data and connect a phone.
 - [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [testing guide](guide/set-up-for-testing.md).
@@ -29,7 +29,7 @@ computer has no friendly screen and the phone only shows sample data.
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
    #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
 
-**D. Easy start (next).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
+**D. Easy start (done).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
 1. ~~**22a. One start script:**~~ sets itself up on first run, starts the Home Base, opens the dashboard, and stops
    cleanly; replaces the separate setup and start steps for everyday use.
 2. ~~**22. Desktop app ([ADR-0008](adr/0008-desktop-app.md)):**~~ `Budget Buddy.exe` with its own window

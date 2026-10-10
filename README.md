@@ -1,41 +1,49 @@
 # Budget Buddy
 
-A private, local-first budgeting and tax-prep helper.
+A private, local-first budgeting and tax-prep helper. Your money records stay on your own computer, encrypted,
+with no cloud, no account and no bank passwords.
 
-- **Home Base** (runs on your computer): stores your checking, savings, paychecks,
-  receipts, stock sales and donations in an encrypted database that never leaves your house.
-- **Phone app** (iPhone & Android): snap receipts as you go and see your budget breakdown.
-  Every 1–3 days it reminds you to **sync**: be on home Wi-Fi, open the app, tap **Sync**. That's it.
+![Budget Buddy's Home page: money in, spent, saved and left over (demo data)](docs/showcase/images/home.png)
+
+- **Home Base** (runs on your computer): stores your accounts, transactions, paychecks, receipts, stock sales and
+  donations in an encrypted database that never leaves your house.
+- **Dashboard**: a simple view for everyday use, and **All tools** for people who want full control.
+- **On your phone**: open Budget Buddy in your phone's web browser at home, with nothing to install. (A phone app for
+  receipt photos and offline viewing is in testing.)
 
 > Budget Buddy organizes your records and estimates numbers to help you prepare.
 > It is not tax advice. Check important decisions with a tax professional.
+
+**Showcase:** [What Budget Buddy is (plain English)](docs/showcase/overview.md) ·
+[How it works (technical)](docs/showcase/technical.md)
 
 ## What it does
 
 | Area | Features |
 | --- | --- |
-| Money in | Paychecks (gross, taxes withheld, net, 401k/HSA) |
-| Accounts | Checking & savings — import bank CSV exports or enter manually |
-| Devices | Phone app over home Wi-Fi; the dashboard on other computers at home after a one-time code |
-| Spending | Receipts (photo + amount + category), auto-categorized transactions |
-| Budget | Suggested budget from your real income & spending, monthly targets vs. actual |
-| Investments | Stocks and funds in brokerage, retirement and HSA accounts; value at live prices (optional, from Finnhub) or prices you enter; 401(k), IRA and HSA limits |
-| Taxes | Charitable donations (typed in, or sorted from a payment), stock purchases and sales (oldest shares first, short/long-term gains, possible wash-sale flags), other deductions, year-end summary export |
+| Getting started | A **Get started** checklist on Home; a simple view, with **All tools** one switch away in **Settings** |
+| Money in | Paychecks (gross, taxes withheld, net, 401k/HSA), started for you from pay deposits in your bank file |
+| Accounts | Checking, savings, cards, loans, brokerage, retirement and HSA: import bank CSV exports or enter by hand |
+| Spending | Auto-sorted transactions (rules, and ones learned from your choices), transfers between your accounts linked for you, receipts from the phone app |
+| Budget | Suggested 50/30/20 budget from your real income and spending, monthly targets vs. actual, charts |
+| Investments | Holdings by account at live prices (optional, Finnhub) or prices you enter; broker activity and positions files; 401(k), IRA and HSA limits |
+| Taxes | Donations, stock gains (oldest shares first, short/long-term, possible wash sales), dividends, other deductions, a yearly summary to download or print |
+| Devices | Phones and other computers at home join with a one-time code |
 
 ## Quick start
 
-**On your computer:**
+**Windows (easiest):** download `Budget-Buddy-<version>-Windows.zip` from the Releases page, unzip it, and
+double-click **Install Budget Buddy** ([guide](docs/guide/install.md)). No Python needed.
 
-1. Install Python 3.12 or newer.
-2. **Windows:** open the **launch** folder and double-click **Start Budget Buddy**. It sets itself up the first
-   time, starts the Home Base, and opens the dashboard ([guide](docs/guide/start-budget-buddy.md)). For Budget
-   Buddy as its own app with a tray icon, double-click **Build desktop app**, then **Install desktop app**
-   ([guide](docs/guide/desktop-app.md)).
-   **macOS/Linux:** from `server/`, run `python3 -m venv .venv`, `.venv/bin/pip install -e .`, then
-   `.venv/bin/python -m app`, and open <http://127.0.0.1:8765/>.
-3. Add accounts, transactions, and connect your phone.
+**From source on Windows:** install Python 3.12 or newer, open the **launch** folder and double-click **Start
+Budget Buddy**. It sets itself up the first time, starts the Home Base and opens the dashboard
+([guide](docs/guide/start-budget-buddy.md)). For the desktop app with a tray icon, double-click **Build desktop
+app**, then **Install desktop app** ([guide](docs/guide/desktop-app.md)).
 
-Step-by-step help for everything: [the user guide](docs/guide/README.md).
+**macOS/Linux (from source):** from `server/`, run `python3 -m venv .venv`, `.venv/bin/pip install -e .`, then
+`.venv/bin/python -m app`, and open <http://127.0.0.1:8765/>.
+
+Then follow the **Get started** list on Home. Step-by-step help for everything: [the user guide](docs/guide/README.md).
 
 ## How it's organized
 
@@ -46,7 +54,7 @@ budget-buddy/
 ├── mobile/        Phone app: Expo (React Native), iPhone + Android
 ├── desktop/       Windows app: the dashboard in its own window, and a light tray icon
 ├── launch/        What you double-click: start, build and install the desktop app (and the built app)
-├── docs/          User guides (guide/), developer docs (dev/), sync contract, decisions (ADRs), roadmap
+├── docs/          User guides (guide/), showcase, developer docs (dev/), sync contract, decisions (ADRs), roadmap
 ├── scripts/       Setup, testing and demo-data helpers (see scripts/README.md)
 └── .claude/agents Specialized AI agents that build & maintain this project
 ```
@@ -54,12 +62,14 @@ budget-buddy/
 - All the docs at a glance: [docs/README.md](docs/README.md)
 - How it's built (for developers): [docs/dev/README.md](docs/dev/README.md)
 - Roadmap and what's next: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Try it out (early preview, demo data only): [docs/guide/set-up-for-testing.md](docs/guide/set-up-for-testing.md)
+- Try it out with made-up demo data: [docs/guide/set-up-for-testing.md](docs/guide/set-up-for-testing.md)
+- Make a release (the Windows download): [docs/dev/release.md](docs/dev/release.md)
 - How the project is built and managed (agents, PRs): [docs/dev/workflow.md](docs/dev/workflow.md)
 
 ## Status
 
-Early development. See the roadmap for what's done and what's next.
+Early release (0.1). Windows download available; phones use the browser for now. See the roadmap for what's
+next.
 
 ## Built with Claude
 

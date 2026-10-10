@@ -1,6 +1,8 @@
 # Open the dashboard
 
-The Budget Buddy dashboard is a web page that shows your budget, accounts, and spending. It runs on your computer and works only on that computer.
+The Budget Buddy dashboard is a web page that shows your budget, accounts, and spending. It runs on your Budget
+Buddy computer; a phone or another computer at home can open it too once you connect it with a one-time code.
+If you installed the [desktop app](desktop-app.md), it shows the same pages in its own window.
 
 ## Open it in your browser
 
