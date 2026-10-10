@@ -36,8 +36,8 @@ account's balance is the plain sum of its transactions.
 **For `credit_card` and `loan` accounts a negative balance means money owed. Charges are negative, and payments
 and refunds are positive.** A card payment from checking is a linked transfer: -X on checking, +X on the card.
 This makes net worth the plain sum of every account's balance. CSV import must flip card issuers that export
-charges as positive numbers (the `flip_sign` choice, saved with the account's mapping;
-[csv-import.md](csv-import.md)). The dashboard and phone show a negative card or loan balance as "$50.00 owed".
+charges as positive numbers (the `flip_sign` choice, saved with the account's mapping, and noticed by itself for
+card accounts; [csv-import.md](csv-import.md)). The dashboard and phone show a negative card or loan balance as "$50.00 owed".
 
 Worked example (fake data, also a test in `server/tests/test_accounts_api.py`):
 

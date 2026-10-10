@@ -18,6 +18,11 @@ Query parameters override the guesses (both routes): `delimiter`, `header_rows`,
 (e.g. `DD/MM/YYYY`), `flip_sign=true` (for card issuers that list charges as positive). The import route also
 takes `save_mapping` and `skip_invalid_rows`.
 
+For a `credit_card` account, unless `flip_sign` is given, the file is checked after reading
+(`services/card_signs.py`): it is flipped when most payment lines ("PAYMENT THANK YOU", "AUTOPAY", ...) are
+money out, or, with no payment lines, when at least 80% of 3 or more amounts are money in. The preview then
+has `mapping.flip_sign` turned over and says so in `message`; saving the mapping keeps the flip.
+
 ## Rules
 
 - **Duplicates.** Each imported row stores a fingerprint (`transactions.import_fingerprint`, unique) of account,
