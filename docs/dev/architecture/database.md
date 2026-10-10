@@ -35,6 +35,7 @@
 | 0020 | Stock purchases and sales linked to the transaction that paid for them |
 | 0021 | Positions from a broker's file: what each account held on a day (a snapshot) |
 | 0022 | Import history: each imported file, and what it added, so an import can be undone |
+| 0023 | Retirement account types: Roth IRA, traditional IRA, 401(k), Roth 401(k), 403(b) or other |
 
 ## Adding a migration
 

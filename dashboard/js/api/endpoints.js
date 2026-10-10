@@ -9,6 +9,7 @@ const LOCAL = "/api/local";
 export const setAccountBalance = (id, json) => api("POST", `${LOCAL}/accounts/${id}/balance`, { json });
 export const listAccounts = () => api("GET", `${LOCAL}/accounts`);
 export const createAccount = (json) => api("POST", `${LOCAL}/accounts`, { json });
+export const updateAccount = (id, json) => api("PATCH", `${LOCAL}/accounts/${id}`, { json });
 
 // Categories and the monthly summary
 export const listCategories = () => api("GET", `${LOCAL}/categories`);

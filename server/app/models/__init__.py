@@ -8,6 +8,7 @@ from app.models.enums import (
     CategorySource,
     DeductionKind,
     DonationKind,
+    RetirementType,
     TransactionKind,
     TransactionSource,
 )
@@ -56,6 +57,7 @@ __all__ = [
     "Paycheck",
     "Receipt",
     "RemoteComputer",
+    "RetirementType",
     "SeenNonce",
     "StockLot",
     "StockPrice",

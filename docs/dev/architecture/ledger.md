@@ -41,6 +41,8 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 ## Routes (this computer only)
 
 - **Accounts:** `GET/POST /api/local/accounts`, `GET/PATCH/DELETE /api/local/accounts/{id}`.
+  - `retirement_type` (`roth_ira`, `traditional_ira`, `401k`, `roth_401k`, `403b`, `other`) only on a `retirement`
+    account (422 otherwise); changing the kind away from retirement clears it.
   - `balance_cents` is the sum of the account's transactions; record a starting balance as an `adjustment`.
   - An account with transactions can't be deleted.
   - `POST /api/local/accounts/{id}/balance` `{date, balance_cents | balance}`: the bank's balance at the end of

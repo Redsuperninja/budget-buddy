@@ -7,7 +7,7 @@ import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { taxYearHeader } from "../fields.js";
 import { form } from "../form.js";
-import { kindLabel } from "../labels.js";
+import { kindLabel, retirementTypeLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { reload } from "../router.js";
 import { card, empty, note, table } from "../widgets.js";
@@ -17,7 +17,8 @@ import { positionsCards } from "./positions-card.js";
 const money = (cents) => (cents === null ? "no price yet" : formatCents(cents));
 
 function accountCard(group) {
-  const kind = group.account_kind ? ` (${kindLabel(group.account_kind)})` : "";
+  const type = retirementTypeLabel(group.retirement_type) || (group.account_kind ? kindLabel(group.account_kind) : "");
+  const kind = type ? ` (${type})` : "";
   return card(`${group.account_name}${kind}`,
     group.taxed ? null : empty("Not taxed when you sell inside this account."),
     table(["Symbol", "Shares", "Cost", "Price", "Value", "Gain or loss (not sold)"], group.holdings.map((x) => [

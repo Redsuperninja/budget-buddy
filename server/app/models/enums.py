@@ -13,6 +13,17 @@ class AccountKind(StrEnum):
     OTHER = "other"
 
 
+class RetirementType(StrEnum):
+    """What kind of retirement account it is (only for ``AccountKind.RETIREMENT``)."""
+
+    TRADITIONAL_IRA = "traditional_ira"
+    ROTH_IRA = "roth_ira"
+    K401 = "401k"
+    ROTH_401K = "roth_401k"
+    B403 = "403b"
+    OTHER = "other"
+
+
 class CategoryGroup(StrEnum):
     NEEDS = "needs"
     WANTS = "wants"

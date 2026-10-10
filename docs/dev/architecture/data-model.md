@@ -5,7 +5,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 
 | Table | Key fields |
 | --- | --- |
-| `accounts` | id, name, kind (checking/savings/brokerage/credit_card/cash/loan/retirement/hsa/other), institution, last4 (enc), notes (enc) |
+| `accounts` | id, name, kind (checking/savings/brokerage/credit_card/cash/loan/retirement/hsa/other), retirement_type? (roth_ira/traditional_ira/401k/roth_401k/403b/other; retirement accounts only), institution, last4 (enc), notes (enc) |
 | `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique), category_source? (rule/you), sorted_by_rule_id? |
 | `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents, budget_percent_bp? (share of income, 1 to 10,000) |
