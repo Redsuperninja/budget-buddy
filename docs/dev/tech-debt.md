@@ -59,7 +59,7 @@ here changes what the app does.
 | `docs/guide/` (32 files, testers and users mixed) | `docs/guide/` for users only, grouped by the dashboard's sections; tester guides move to `docs/testing/` | Users never land on "start three PowerShell windows" |
 | `docs/ROADMAP.md` (done and future mixed, long) | Keep only what's next; move finished milestones to `docs/history.md` | The roadmap fits on one screen |
 | `docs/showcase/` | Keep; refresh screenshots each release from the smoke test above | The showcase never goes stale |
-| `desktop/packaging/` (spec, installer, read-me) and `server/packaging/` | `packaging/windows/` at the root with both specs and the installer | Releasing lives in one place |
+| Done: `desktop/packaging/` (spec, installer, read-me) and `server/packaging/` | `packaging/windows/` at the root with both specs and the installer | Releasing lives in one place |
 | `mobile/` (Expo app in testing, not shipped) | Keep, but say "in testing" at the top of `mobile/README.md` and in the root README until it ships | Sets expectations; phones use the browser for now |
 
 Move files with `git mv` in small PRs, update links in the same PR, and run the markdown link check (any

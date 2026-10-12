@@ -56,6 +56,7 @@ budget-buddy/
 ├── launch/        What you double-click: start, build and install the desktop app (and the built app)
 ├── docs/          User guides (guide/), showcase, developer docs (dev/), sync contract, decisions (ADRs), roadmap
 ├── scripts/       What launch/ runs; testing/, release/ and dev/ tools (see scripts/README.md)
+├── packaging/     The Windows download: both build recipes, the installer and its read-me (windows/)
 └── .claude/agents Specialized AI agents that build & maintain this project
 ```
 

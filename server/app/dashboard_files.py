@@ -27,7 +27,7 @@ CONTENT_TYPES = {".js": "text/javascript", ".css": "text/css"}
 def default_dashboard_dir() -> Path:
     """``<repo>/dashboard``, found from this file (so it doesn't depend on the current folder).
 
-    The packaged Home Base (``server/packaging/home-base.spec``) has the dashboard bundled in.
+    The packaged Home Base (``packaging/windows/home-base.spec``) has the dashboard bundled in.
     """
     bundle = getattr(sys, "_MEIPASS", None)
     if getattr(sys, "frozen", False) and bundle:

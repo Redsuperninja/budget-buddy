@@ -1,7 +1,7 @@
 """Fill a TEST Home Base with made-up demo data, through its normal API.
 
 Everything here is fake: no real names, employers, charities or accounts. Dates are relative to
-today, so the last three months always have activity. Run it via scripts/load-demo-data.ps1.
+today, so the last three months always have activity. Run it via scripts/testing/load-demo-data.ps1.
 
 Only talks to 127.0.0.1 on the test port (8766 by default), never the real Home Base on 8765.
 """

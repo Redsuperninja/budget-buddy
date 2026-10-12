@@ -15,7 +15,6 @@ $Name = "Budget-Buddy-$Version-Windows"
 $Stage = Join-Path $RepoRoot "build\release\$Name"
 $DistDir = Join-Path $RepoRoot "dist"
 $Zip = Join-Path $DistDir "$Name.zip"
-$Packaging = Join-Path $DesktopDir "packaging"
 
 if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
 New-Item -ItemType Directory -Force $Stage, $DistDir | Out-Null
@@ -25,7 +24,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Set-Content -Path (Join-Path $Stage "Budget Buddy\version.txt") -Encoding ASCII -Value $Version
 foreach ($file in "install.ps1", "Install Budget Buddy.bat", "Uninstall Budget Buddy.bat", "READ ME FIRST.txt") {
-    Copy-Item (Join-Path $Packaging $file) $Stage
+    Copy-Item (Join-Path $PackagingDir $file) $Stage
 }
 
 if (Test-Path $Zip) { Remove-Item -Force $Zip }

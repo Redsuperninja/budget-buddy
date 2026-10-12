@@ -13,7 +13,7 @@ Expo phone app isn't published to app stores yet.
 | `Uninstall Budget Buddy.bat` | Removes the app, its shortcuts, the Apps entry and Start with Windows. Never the data folder |
 | `READ ME FIRST.txt` | Plain-English install, first steps, phone, update and remove |
 
-The sources are in `desktop/packaging/`; `scripts/release/install-desktop.ps1` uses the same `install.ps1` for a build
+The sources are in `packaging/windows/`, with both PyInstaller recipes; `scripts/release/install-desktop.ps1` uses the same `install.ps1` for a build
 from source.
 
 ## Checklist
