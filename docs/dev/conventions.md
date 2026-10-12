@@ -15,7 +15,8 @@ reviewers check them.
   desktop app starts the Home Base as its own program). When two parts need the
   same small helper, each keeps its own copy with its own tests; the no-repetition rule applies inside a part.
 - **Shared code lives in one obvious place:**
-  - Server: business logic in `services/` (one module per area), request/response shapes in `schemas/`,
+  - Server: business logic in `services/` (one package per area, one module per job; routers, schemas and
+    tests use the same areas, see [server.md](architecture/server.md#areas)), request/response shapes in `schemas/`,
     small cross-cutting helpers next to what uses them (e.g. `app/crypto/`, `app/bodylimit.py`).
   - Web dashboard (`dashboard/js/`): one module per screen, plus shared modules for API calls
     (`api/endpoints.js` holds every route string), building the page, money, dates, labels, and charts

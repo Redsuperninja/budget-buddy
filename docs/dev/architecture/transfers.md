@@ -1,6 +1,6 @@
 # Transfers: matching and kinds
 
-Code: `services/transfers.py` (link, unlink, `pair_up`), `services/transfer_matching.py` (automatic matching),
+Code: `services/ledger/transfers.py` (link, unlink, `pair_up`), `services/ledger/transfer_matching.py` (automatic matching),
 `app/transfer_types.py` (kinds), migration 0016 (`transactions.auto_transfer_off`). Routes and lock rules:
 [ledger.md](ledger.md). User guide: [docs/guide/transfers.md](../../guide/transfers.md).
 
@@ -30,5 +30,5 @@ Buddy's choice). Linking (automatic or by hand) keeps each side's previous categ
 `transfer_type` on each side of a linked transfer, worked out from the two accounts (never stored): where the
 money went decides first (`card_payment`, `loan_payment`, `to_savings`, `to_investments`, `to_retirement`,
 `to_hsa`), else where it came from (`from_savings`, `from_investments`, `from_retirement`, `from_hsa`), else
-`between_accounts`. It's a label; what counts as saved is `services/savings_transfers.py` (into savings-type
+`between_accounts`. It's a label; what counts as saved is `services/ledger/savings_transfers.py` (into savings-type
 accounts from everyday ones).

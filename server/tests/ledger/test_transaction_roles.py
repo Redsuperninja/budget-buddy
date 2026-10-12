@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from test_bank_trades import TRADE_LINE
 
 from app.models import BankTrade, Dividend, Transaction
-from app.services import transaction_roles as roles
+from app.services.ledger import transaction_roles as roles
 
 EVERY_ROLE = [
     roles.paycheck_deposits(),

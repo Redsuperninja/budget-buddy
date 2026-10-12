@@ -44,7 +44,7 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
   Neither are dividends paid inside a retirement account or HSA, or their deposit sweeps
   ([dividends.md](dividends.md)), stock trades, recorded or found in a bank file, and a bank-file trade's sweep
   ([stocks.md](stocks.md), [bank-trades.md](bank-trades.md)), or any other dividend's sweep while it has no
-  category. All of these come from `services/transaction_roles.py` ([ledger.md](ledger.md#transaction-roles)).
+  category. All of these come from `services/ledger/transaction_roles.py` ([ledger.md](ledger.md#transaction-roles)).
 - The category's group decides where a transaction goes: `income` is income; `needs` and `wants` add up to
   `spending_cents`; `savings` is `saved_cents`. Spending and savings are shown as money out, positive.
   **Refunds lower spending** (or savings) in their category and are never income. Spending can go
@@ -60,7 +60,7 @@ Code: `services/categories.py`, `services/summary.py` and their routers. Transac
   of the month's actual income (`null` for the income group or when no income came in). This is the 50/30/20
   check.
 - Paychecks never add income by themselves ([paychecks.md](paychecks.md)).
-- **Transfers into savings count as saved** (roadmap 10b, `services/savings_transfers.py`): a linked transfer
+- **Transfers into savings count as saved** (roadmap 10b, `services/ledger/savings_transfers.py`): a linked transfer
   from an everyday account into a `savings`, `brokerage`, `retirement` or `hsa` account adds to `saved_cents`
   and the savings group's actual; a transfer back out lowers it. Moves between two of those kinds, and
   payments to cards and loans, don't count. The amount is also reported as `saved_by_transfer_cents`. It

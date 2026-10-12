@@ -2,7 +2,7 @@
 money into savings, investments, retirement or an HSA, or money taken back out of them.
 
 It's worked out (never stored), so changing an account's type relabels its transfers. It's a label
-only: whether money counts as saved is decided in ``services/savings_transfers.py``.
+only: whether money counts as saved is decided in ``services/ledger/savings_transfers.py``.
 """
 
 from enum import StrEnum

@@ -21,7 +21,7 @@ from app.models import (
     TransactionKind,
 )
 from app.services import stock_gains as gains
-from app.services.accounts import INVESTMENT_KINDS, TAX_FREE_KINDS, get_account
+from app.services.ledger.accounts import INVESTMENT_KINDS, TAX_FREE_KINDS, get_account
 
 
 def to_gains_lot(row: StockLot) -> gains.Lot:

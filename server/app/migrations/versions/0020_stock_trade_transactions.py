@@ -3,7 +3,7 @@
 ``stock_lots.transaction_id`` and ``stock_sale_orders.transaction_id``: the bank or brokerage
 transaction a purchase or sale was classified from on the Transactions page. No foreign keys
 (adding one would mean rebuilding these tables, which ``stock_sales`` points at); deleting the
-transaction clears the link in services/transactions.py.
+transaction clears the link in services/ledger/transactions.py.
 
 Revision ID: 0020
 Revises: 0019

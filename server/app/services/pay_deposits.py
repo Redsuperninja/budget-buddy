@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 
 from app.models import Account, Category, CategoryGroup, Transaction, TransactionKind
 from app.schemas.paychecks import PayDeposit
+from app.services.ledger.transaction_roles import none_of, paycheck_deposits
 from app.services.paychecks import DEPOSIT_ACCOUNT_KINDS
-from app.services.transaction_roles import none_of, paycheck_deposits
 
 _PAY = "payroll|direct dep|dir dep|salary|paycheck|pay check|wages"
 PAY_WORDS = re.compile(rf"(?<![a-z])({_PAY})(?![a-z])", re.I)

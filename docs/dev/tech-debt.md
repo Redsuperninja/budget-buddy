@@ -16,7 +16,7 @@ here changes what the app does.
 
 ## 2. Code debt (server)
 
-1. ~~**One idea of "what a transaction is".**~~ Done: `services/transaction_roles.py` holds every role (paycheck
+1. ~~**One idea of "what a transaction is".**~~ Done: `services/ledger/transaction_roles.py` holds every role (paycheck
    deposit, donation, stock trade, bank-file trade, dividend, sweep) and `none_of(...)`, and every query uses it
    ([ledger.md](architecture/ledger.md#transaction-roles)). A stored `role` column wasn't needed.
 2. **Dividends and bank trades are the same shape** (a payment, its sweep, a name, `dismissed`). Now that sweeps are

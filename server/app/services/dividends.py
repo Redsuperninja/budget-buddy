@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 from app.errors import not_found
 from app.models import Account, Category, Dividend, Transaction, TransactionKind
 from app.schemas.dividends import DividendOut, DividendsOut
-from app.services.accounts import TAX_FREE_KINDS
 from app.services.combined_sweeps import free_sweep
 from app.services.dividend_matching import CATEGORY
+from app.services.ledger.accounts import TAX_FREE_KINDS
 
 
 def list_dividends(session: Session, tax_year: int) -> DividendsOut:

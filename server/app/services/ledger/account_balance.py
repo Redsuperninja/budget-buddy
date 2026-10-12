@@ -17,8 +17,8 @@ from sqlalchemy.orm import Session
 
 from app.models import Transaction, TransactionKind, TransactionSource
 from app.money import cents_to_display
-from app.schemas.accounts import BalanceSet, BalanceSetResult
-from app.services.accounts import get_account
+from app.schemas.ledger.accounts import BalanceSet, BalanceSetResult
+from app.services.ledger.accounts import get_account
 
 
 def balance_on(session: Session, account_id: int, day: dt.date) -> int:

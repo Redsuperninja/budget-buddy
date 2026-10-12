@@ -35,14 +35,14 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
-from app.services.transaction_roles import (
+from app.services.ledger.transaction_roles import (
     cash_inside_account,
     dividend_sweeps,
     donations,
     none_of,
     paycheck_deposits,
 )
-from app.services.transfers import pair_up
+from app.services.ledger.transfers import pair_up
 
 WINDOW_DAYS = 5
 _WORDS = r"(?<![a-z])(?:{})(?![a-z])"

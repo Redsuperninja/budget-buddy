@@ -23,8 +23,8 @@ from app.schemas.paychecks import (
     PaycheckUpdate,
     SocialSecurityCheck,
 )
-from app.services.accounts import get_account
-from app.services.transactions import get_transaction
+from app.services.ledger.accounts import get_account
+from app.services.ledger.transactions import get_transaction
 from app.tax_data import UnsupportedTaxYearError, load_tax_year
 
 TAX_FIELDS = ("federal_tax_cents", "state_tax_cents", "social_security_cents", "medicare_cents")

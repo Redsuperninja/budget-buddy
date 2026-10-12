@@ -16,10 +16,10 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import BankTrade, Dividend
-from app.schemas.transactions import MatchedAgain
+from app.schemas.ledger.transactions import MatchedAgain
 from app.services.bank_trades import find_trades
 from app.services.dividend_matching import find_dividends
-from app.services.transfer_matching import match_transfers
+from app.services.ledger.transfer_matching import match_transfers
 
 MODELS = (Dividend, BankTrade)
 _RUNNING = threading.Lock()

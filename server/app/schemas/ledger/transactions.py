@@ -106,7 +106,7 @@ class TransfersMatched(Schema):
 
 
 class MatchedAgain(Schema):
-    """What "match everything again" found (services/match_again.py)."""
+    """What "match everything again" found (services/ledger/match_again.py)."""
 
     dividends_found: int  # new dividends
     trades_found: int  # new stock trades from a bank file

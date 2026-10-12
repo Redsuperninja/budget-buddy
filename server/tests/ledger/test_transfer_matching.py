@@ -161,7 +161,7 @@ def test_unlinking_is_remembered(client, accounts):
 
 
 def test_find_transfers_in_older_data(client, accounts, monkeypatch):
-    from app.routers import transactions as router
+    from app.routers.ledger import transactions as router
 
     monkeypatch.setattr(router, "match_transfers", lambda session, only=None: 0)
     add(client, accounts["checking"], -9_000)

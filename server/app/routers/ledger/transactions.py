@@ -5,7 +5,7 @@ from fastapi import APIRouter, Query, status
 
 from app.deps import Offset, PathId, QueryId, SessionDep
 from app.models import CategorySource, TransactionKind
-from app.schemas.transactions import (
+from app.schemas.ledger.transactions import (
     MatchedAgain,
     TransactionCreate,
     TransactionOut,
@@ -14,13 +14,14 @@ from app.schemas.transactions import (
     TransferLink,
     TransfersMatched,
 )
-from app.services import gift_categories, transfers
-from app.services import transactions as service
+from app.services import gift_categories
 from app.services.bank_trades import find_trades
 from app.services.dividend_matching import find_dividends
-from app.services.match_again import match_again
+from app.services.ledger import transactions as service
+from app.services.ledger import transfers
+from app.services.ledger.match_again import match_again
+from app.services.ledger.transfer_matching import match_transfers
 from app.services.repeat_gifts import repeat_gifts
-from app.services.transfer_matching import match_transfers
 
 router = APIRouter(prefix="/api/local/transactions", tags=["transactions"])
 
@@ -82,7 +83,8 @@ def create_transaction(data: TransactionCreate, session: SessionDep) -> Transact
 # Declared before "/{transaction_id}" so the path isn't read as an ID.
 @router.post("/match-transfers")
 def find_transfers(session: SessionDep) -> TransfersMatched:
-    """Link every clear transfer pair among all transactions (services/transfer_matching.py)."""
+    """Link every clear transfer pair among all transactions
+    (services/ledger/transfer_matching.py)."""
     matched = match_transfers(session)
     session.commit()
     return TransfersMatched(matched=matched)
@@ -90,7 +92,7 @@ def find_transfers(session: SessionDep) -> TransfersMatched:
 
 @router.post("/match-again")
 def match_everything_again(session: SessionDep) -> MatchedAgain:
-    """Run every finder over all transactions again (services/match_again.py)."""
+    """Run every finder over all transactions again (services/ledger/match_again.py)."""
     return match_again(session)
 
 

@@ -1,15 +1,15 @@
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.accounts import (
+from app.schemas.ledger.accounts import (
     AccountCreate,
     AccountOut,
     AccountUpdate,
     BalanceSet,
     BalanceSetResult,
 )
-from app.services import account_balance
-from app.services import accounts as service
+from app.services.ledger import account_balance
+from app.services.ledger import accounts as service
 
 router = APIRouter(prefix="/api/local/accounts", tags=["accounts"])
 
