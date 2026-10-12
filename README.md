@@ -55,7 +55,7 @@ budget-buddy/
 ├── desktop/       Windows app: the dashboard in its own window, and a light tray icon
 ├── launch/        What you double-click: start, build and install the desktop app (and the built app)
 ├── docs/          User guides (guide/), showcase, developer docs (dev/), sync contract, decisions (ADRs), roadmap
-├── scripts/       Setup, testing and demo-data helpers (see scripts/README.md)
+├── scripts/       What launch/ runs; testing/, release/ and dev/ tools (see scripts/README.md)
 └── .claude/agents Specialized AI agents that build & maintain this project
 ```
 

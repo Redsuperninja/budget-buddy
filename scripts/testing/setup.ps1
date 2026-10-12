@@ -2,7 +2,7 @@
 # Installs the Home Base (Python) and the phone app's tools (Node.js). Safe to run again.
 # For everyday use you don't need this: "launch\Start Budget Buddy.bat" sets itself up.
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
+#   powershell -ExecutionPolicy Bypass -File scripts\testing\setup.ps1
 
 . "$PSScriptRoot\test-settings.ps1"
 
@@ -26,6 +26,6 @@ try {
 
 Write-Host ""
 Write-Host "All set. Next:" -ForegroundColor Green
-Write-Host "  1. scripts\start-test-server.ps1   (leave that window open)"
-Write-Host "  2. scripts\load-demo-data.ps1      (fills it with made-up data)"
+Write-Host "  1. scripts\testing\start-test-server.ps1   (leave that window open)"
+Write-Host "  2. scripts\testing\load-demo-data.ps1      (fills it with made-up data)"
 Write-Host "See docs\guide\set-up-for-testing.md for the full walkthrough."

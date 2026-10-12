@@ -15,7 +15,7 @@ You need a Windows computer and a phone on the same home Wi-Fi. This setup takes
 2. Navigate to the Budget Buddy folder
 3. Run this command:
    ```powershell
-   powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
+   powershell -ExecutionPolicy Bypass -File scripts\testing\setup.ps1
    ```
    You'll see "All set" when it's done
 

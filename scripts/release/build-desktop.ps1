@@ -3,12 +3,12 @@
 #   home-base\                  the packaged Home Base it starts (server\, with the dashboard files)
 # Nobody needs Python to run the result. Then install-desktop.ps1 adds it to the Start menu.
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\build-desktop.ps1 [-Into <folder>]
+#   powershell -ExecutionPolicy Bypass -File scripts\release\build-desktop.ps1 [-Into <folder>]
 # -Into builds into <folder>\Budget Buddy instead (for example to test a build while another one runs).
 
 param([string]$Into)
 
-. "$PSScriptRoot\paths.ps1"
+. "$PSScriptRoot\..\paths.ps1"
 
 $Dist = if ($Into) { $Into } else { $LaunchDir }
 $Out = Join-Path $Dist "Budget Buddy"

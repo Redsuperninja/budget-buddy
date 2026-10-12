@@ -1,5 +1,5 @@
 # PyInstaller recipe for "Budget Buddy.exe", the desktop app (roadmap 22, ADR-0008). Built by
-# scripts\build-desktop.ps1, which puts the packaged Home Base (server\packaging\home-base.spec) in its
+# scripts\release\build-desktop.ps1, which puts the packaged Home Base (server\packaging\home-base.spec) in its
 # home-base folder. One folder, not one file: it starts faster.
 from pathlib import Path
 

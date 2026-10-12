@@ -1,5 +1,5 @@
 # Fill the TEST Home Base with made-up demo data (accounts, three months of spending, paychecks,
-# donations, stocks). Start scripts\start-test-server.ps1 in another window first.
+# donations, stocks). Start scripts\testing\start-test-server.ps1 in another window first.
 
 . "$PSScriptRoot\test-settings.ps1"
 Assert-SetUp

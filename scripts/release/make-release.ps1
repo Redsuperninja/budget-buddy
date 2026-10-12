@@ -3,9 +3,9 @@
 # nobody needs Python or this repository to use it. The version comes from server\app\__init__.py.
 # (docs/dev/release.md has the full checklist; .github/workflows/release.yml runs this for a v* tag.)
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\make-release.ps1
+#   powershell -ExecutionPolicy Bypass -File scripts\release\make-release.ps1
 
-. "$PSScriptRoot\paths.ps1"
+. "$PSScriptRoot\..\paths.ps1"
 
 $Match = Select-String -Path (Join-Path $ServerDir "app\__init__.py") -Pattern '__version__ = "([^"]+)"'
 if (-not $Match) { throw "No __version__ in server\app\__init__.py." }

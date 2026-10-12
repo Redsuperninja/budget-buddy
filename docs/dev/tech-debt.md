@@ -55,7 +55,7 @@ here changes what the app does.
 
 | Today | Proposed | Why |
 | --- | --- | --- |
-| `launch/` (double-click) and `scripts/` (what they run, plus tester, developer and release tools) | `launch/` unchanged; `scripts/` split into `scripts/testing/` (demo data, test server, pairing), `scripts/dev/`, `scripts/release/` (build, install, make-release) | One look tells you who a script is for |
+| Done: `launch/` (double-click) and `scripts/` (what they run, plus tester, developer and release tools) | `launch/` unchanged; `scripts/` split into `scripts/testing/` (demo data, test server, pairing), `scripts/dev/`, `scripts/release/` (build, install, make-release) | One look tells you who a script is for |
 | `docs/guide/` (32 files, testers and users mixed) | `docs/guide/` for users only, grouped by the dashboard's sections; tester guides move to `docs/testing/` | Users never land on "start three PowerShell windows" |
 | `docs/ROADMAP.md` (done and future mixed, long) | Keep only what's next; move finished milestones to `docs/history.md` | The roadmap fits on one screen |
 | `docs/showcase/` | Keep; refresh screenshots each release from the smoke test above | The showcase never goes stale |
