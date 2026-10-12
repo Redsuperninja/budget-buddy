@@ -180,7 +180,7 @@ def test_matched_saving_counts_as_saved(client, accounts):
 
 
 def test_a_donation_is_left_alone(client, accounts, monkeypatch):
-    from app.schemas import donations as donation_schemas
+    from app.schemas.tax import donations as donation_schemas
 
     monkeypatch.setattr(donation_schemas, "_today", lambda: __import__("datetime").date(2030, 1, 1))
     gift = add(client, accounts["checking"], -4_000, description="ONLINE PAYMENT FAKE CHARITY")

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError, not_found
 from app.models import Account, AccountKind, Paycheck, Transaction, TransactionKind
 from app.money import cents_to_display
-from app.schemas.paychecks import (
+from app.schemas.tax.paychecks import (
     PaycheckCreate,
     PaycheckPage,
     PaycheckSummary,

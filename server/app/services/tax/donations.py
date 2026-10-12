@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app import tax_data
 from app.errors import ApiError, not_found
 from app.models import Donation, DonationKind, Receipt
-from app.schemas.donations import (
+from app.schemas.tax.donations import (
     DonationCreate,
     DonationOut,
     DonationPage,
@@ -22,14 +22,14 @@ from app.schemas.donations import (
     DonationUpdate,
     ProofThresholds,
 )
-from app.services.donation_payments import (
+from app.services.tax.donation_payments import (
     check_payment,
     commit,
     file_new_link,
     part_gift_proof,
     payment_amounts,
 )
-from app.services.donation_proof import donation_proof, year_proof
+from app.services.tax.donation_proof import donation_proof, year_proof
 
 DISCLAIMER = (
     "This is an estimate to help you keep the right records. It isn't tax advice. Some gifts "

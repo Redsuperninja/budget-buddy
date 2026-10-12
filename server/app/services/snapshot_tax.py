@@ -6,8 +6,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Deduction, Donation
-from app.services.deductions import label
 from app.services.investing import stock_sales
+from app.services.tax.deductions import label
 
 TAX_DISCLAIMER = "These totals help you get ready for tax time. They aren't tax advice."
 

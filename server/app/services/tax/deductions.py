@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Deduction, DeductionKind, Receipt
-from app.schemas.deductions import DeductionCreate, DeductionUpdate
+from app.schemas.tax.deductions import DeductionCreate, DeductionUpdate
 
 Where = Literal["itemized", "adjustment", "credit", "other"]
 

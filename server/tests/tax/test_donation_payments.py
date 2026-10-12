@@ -7,9 +7,9 @@ from alembic import command
 from sqlalchemy import text
 
 from app.db import alembic_config, create_db_engine
-from app.schemas import donations as donation_schemas
-from app.services import donations as donation_service
-from app.services.donation_payments import part_gift_proof
+from app.schemas.tax import donations as donation_schemas
+from app.services.tax import donations as donation_service
+from app.services.tax.donation_payments import part_gift_proof
 
 URL = "/api/local/donations"
 TXN_URL = "/api/local/transactions"

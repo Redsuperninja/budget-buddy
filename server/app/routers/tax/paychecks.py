@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status
 
 from app.deps import Offset, PathId, SessionDep
-from app.schemas.paychecks import (
+from app.schemas.tax.paychecks import (
     DepositLink,
     PaycheckCreate,
     PaycheckOut,
@@ -13,8 +13,8 @@ from app.schemas.paychecks import (
     PaycheckUpdate,
     PayDeposit,
 )
-from app.services import paychecks as service
-from app.services.pay_deposits import waiting_deposits
+from app.services.tax import paychecks as service
+from app.services.tax.pay_deposits import waiting_deposits
 
 router = APIRouter(prefix="/api/local/paychecks", tags=["paychecks"])
 

@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Response
 
 from app.deps import SessionDep
-from app.schemas.tax_summary import TaxSummary
-from app.services import tax_export, tax_summary
+from app.schemas.tax.tax_summary import TaxSummary
+from app.services.tax import tax_export, tax_summary
 
 router = APIRouter(prefix="/api/local/tax-summary", tags=["tax summary"])
 
