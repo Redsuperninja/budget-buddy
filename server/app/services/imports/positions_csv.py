@@ -8,7 +8,7 @@ stars are dropped. Error messages never repeat a cell's contents.
 from dataclasses import dataclass
 
 from app.errors import ApiError
-from app.schemas.stocks import clean_symbol
+from app.schemas.investing.stocks import clean_symbol
 from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
 from app.services.imports.csv_parsing import THOUSANDS, parse_amount
 from app.shares import shares_to_micro

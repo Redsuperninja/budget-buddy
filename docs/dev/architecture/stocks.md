@@ -1,8 +1,8 @@
 # Stocks: lots, sales, and gains (roadmap #12)
 
-Code: `services/stock_records.py` (converters, filters, account checks, re-matching), `services/stock_lots.py`,
-`services/stock_sales.py` (sales and the yearly gains summary), `services/stock_gains.py` (pure math, no
-database), `routers/stocks.py`. Estimates, not tax advice. User guide:
+Code: `services/investing/stock_records.py` (converters, filters, account checks, re-matching), `services/investing/stock_lots.py`,
+`services/investing/stock_sales.py` (sales and the yearly gains summary), `services/investing/stock_gains.py` (pure math, no
+database), `routers/investing/stocks.py`. Estimates, not tax advice. User guide:
 [docs/guide/stocks.md](../../guide/stocks.md).
 
 ## Routes (this computer only)

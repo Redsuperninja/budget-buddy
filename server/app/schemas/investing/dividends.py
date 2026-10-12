@@ -1,4 +1,5 @@
-"""Dividends found in your transactions (``services/dividend_matching``). Amounts are cents."""
+"""Dividends found in your transactions (``services/investing/dividend_matching``). Amounts are
+cents."""
 
 import datetime as dt
 

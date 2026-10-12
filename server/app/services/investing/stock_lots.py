@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import StockLot, StockSale, StockSaleOrder
-from app.schemas.stocks import LotCreate, LotOut
-from app.services import stock_gains as gains
-from app.services.bank_trades import find_trades, forget_recorded, remember_symbol
-from app.services.holdings_check import Snapshot, checked_by, snapshots
-from app.services.stock_records import (
+from app.schemas.investing.stocks import LotCreate, LotOut
+from app.services.investing import stock_gains as gains
+from app.services.investing.bank_trades import find_trades, forget_recorded, remember_symbol
+from app.services.investing.holdings_check import Snapshot, checked_by, snapshots
+from app.services.investing.stock_records import (
     check_account,
     check_trade_transaction,
     get_lot,

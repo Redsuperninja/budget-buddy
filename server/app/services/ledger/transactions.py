@@ -21,7 +21,7 @@ from app.models import (
 from app.schemas.ledger.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.budget.category_learning import picked_by_hand
 from app.services.budget.category_rules import load_matcher, rule_fields
-from app.services.combined_sweeps import free_sweeps_of
+from app.services.investing.combined_sweeps import free_sweeps_of
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transaction_roles import (
     bank_trade_sweeps,
@@ -74,7 +74,8 @@ class TransactionFilters:
     # Only ones still waiting for a category: regular payments and refunds with none yet.
     # Transfers, balance adjustments and stock trades don't need one, so they're left out.
     uncategorized: bool = False
-    # Leave out dividends and the deposit sweeps linked to them (services/dividend_matching.py).
+    # Leave out dividends and the deposit sweeps linked to them
+    # (services/investing/dividend_matching.py).
     hide_dividends: bool = False
     # Leave out balance adjustments (opening balances and "match the bank" fixes).
     hide_adjustments: bool = False

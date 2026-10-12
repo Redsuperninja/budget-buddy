@@ -26,7 +26,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import PriceFeed, StockLot, StockPrice, StockSale
-from app.schemas.price_feed import PriceFeedIn, PriceFeedOut, RefreshResult
+from app.schemas.investing.price_feed import PriceFeedIn, PriceFeedOut, RefreshResult
 
 QUOTE_URL = "https://finnhub.io/api/v1/quote"
 TIMEOUT_SECONDS = 5

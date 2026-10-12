@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Path
 
 from app.deps import SessionDep
-from app.schemas.retirement import RetirementOut
-from app.services import retirement as service
+from app.schemas.investing.retirement import RetirementOut
+from app.services.investing import retirement as service
 
 router = APIRouter(prefix="/api/local/retirement", tags=["retirement"])
 

@@ -1,5 +1,5 @@
 // Part of the Stocks screen: the purchases and sales you entered, each with what backs it up (a linked transaction,
-// or the account's broker positions file agreeing; server services/holdings_check.py), and a "Show: Not verified
+// or the account's broker positions file agreeing; server services/investing/holdings_check.py), and a "Show: Not verified
 // yet" filter to find the ones to check. Each can be deleted.
 
 import { deleteLot, deleteSale } from "../api/endpoints.js";

@@ -14,7 +14,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models import Account, ImportBatch, Position, StockPrice
-from app.schemas.positions import (
+from app.schemas.investing.positions import (
     AccountPositionsOut,
     PositionOut,
     PositionPreviewRow,
@@ -23,12 +23,12 @@ from app.schemas.positions import (
     PositionsPreview,
     PositionsResult,
 )
-from app.services.holdings_check import snapshots, waiting_bank_trades
 from app.services.imports.csv_parsing import decode_csv, detect_delimiter, read_rows
 from app.services.imports.history import record
 from app.services.imports.positions_csv import ParsedPosition, Skip, find_columns, parse_position
+from app.services.investing.holdings_check import snapshots, waiting_bank_trades
+from app.services.investing.stock_holdings import value_cents
 from app.services.ledger.accounts import get_account
-from app.services.stock_holdings import value_cents
 from app.shares import micro_to_text
 
 MAX_SKIPPED_SHOWN = 100

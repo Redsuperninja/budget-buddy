@@ -1,7 +1,7 @@
 # Investments: holdings, prices, retirement limits
 
-Code: `services/stock_holdings.py`, `services/retirement.py`, `routers/stocks.py` (holdings, prices),
-`routers/retirement.py`, `services/price_feed.py`, tables `stock_prices` (migration 0015) and `price_feed`
+Code: `services/investing/stock_holdings.py`, `services/investing/retirement.py`, `routers/investing/stocks.py` (holdings, prices),
+`routers/investing/retirement.py`, `services/investing/price_feed.py`, tables `stock_prices` (migration 0015) and `price_feed`
 (migration 0017). Dashboard: `screens/investments.js` (Money,
 Investments). User guide: [docs/guide/investments.md](../../guide/investments.md). Estimates, not tax advice.
 
@@ -19,7 +19,7 @@ Investments). User guide: [docs/guide/investments.md](../../guide/investments.md
 `POST /api/local/stocks/prices` `{symbol, price_cents | price, as_of}` saves a typed-in price (one row per
 symbol, replaced each time; `source` "you"). 204.
 
-## Live prices (`services/price_feed.py`, [ADR-0010](../../adr/0010-live-stock-prices.md))
+## Live prices (`services/investing/price_feed.py`, [ADR-0010](../../adr/0010-live-stock-prices.md))
 
 - `GET/PUT /api/local/price-feed` `{enabled, api_key?}` (table `price_feed`, one row, migration 0017): this
   computer only (not on the joined computers' allow-list); off by default; the key is encrypted at rest, only

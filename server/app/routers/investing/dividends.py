@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Path, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.dividends import DividendsFound, DividendsOut
-from app.services import dividends as service
-from app.services.combined_sweeps import link_combined
-from app.services.dividend_matching import find_dividends
+from app.schemas.investing.dividends import DividendsFound, DividendsOut
+from app.services.investing import dividends as service
+from app.services.investing.combined_sweeps import link_combined
+from app.services.investing.dividend_matching import find_dividends
 
 router = APIRouter(prefix="/api/local/dividends", tags=["dividends"])
 

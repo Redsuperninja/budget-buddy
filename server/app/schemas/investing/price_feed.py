@@ -1,4 +1,4 @@
-"""Live prices from Finnhub (services/price_feed.py, ADR-0010)."""
+"""Live prices from Finnhub (services/investing/price_feed.py, ADR-0010)."""
 
 from typing import Annotated
 

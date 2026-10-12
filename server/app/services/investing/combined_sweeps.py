@@ -24,7 +24,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.models import BankTrade, Dividend, Transaction
-from app.services.sweeps import SWEEP_DAYS_AFTER, SWEEP_DAYS_BEFORE, candidates, in_window
+from app.services.investing.sweeps import SWEEP_DAYS_AFTER, SWEEP_DAYS_BEFORE, candidates, in_window
 
 MAX_NEAR = 10
 

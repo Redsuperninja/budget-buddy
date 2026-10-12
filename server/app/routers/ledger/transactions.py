@@ -15,8 +15,8 @@ from app.schemas.ledger.transactions import (
     TransfersMatched,
 )
 from app.services import gift_categories
-from app.services.bank_trades import find_trades
-from app.services.dividend_matching import find_dividends
+from app.services.investing.bank_trades import find_trades
+from app.services.investing.dividend_matching import find_dividends
 from app.services.ledger import transactions as service
 from app.services.ledger import transfers
 from app.services.ledger.match_again import match_again

@@ -1,4 +1,5 @@
-"""Positions from a broker's file (``services/positions``): what an account held on a day."""
+"""Positions from a broker's file (``services/investing/positions``): what an account held on a
+day."""
 
 import datetime as dt
 from typing import Literal
@@ -77,7 +78,7 @@ class AccountPositionsOut(Schema):
     positions: list[PositionOut]
     value_cents: int | None  # None if any position has no value
     # Trades named in a bank file in this account, on or before the file's day, still without
-    # shares: the usual reason the shares don't match (services/holdings_check.py).
+    # shares: the usual reason the shares don't match (services/investing/holdings_check.py).
     bank_trades_waiting: int = 0
 
 

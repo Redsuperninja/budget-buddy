@@ -14,7 +14,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Donation, DonationKind
-from app.services import deductions, stock_sales
+from app.services import deductions
+from app.services.investing import stock_sales
 from app.services.tax_summary import build
 from app.spreadsheet import formula_safe
 

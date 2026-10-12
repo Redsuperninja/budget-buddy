@@ -34,11 +34,8 @@ from app.schemas.imports.activity_import import (
     ActivityPreviewRow,
     ActivityResult,
 )
-from app.schemas.stocks import LotCreate
-from app.services import stock_gains as gains
-from app.services.bank_trades import find_trades
+from app.schemas.investing.stocks import LotCreate
 from app.services.budget.category_rules import load_matcher, rule_fields
-from app.services.dividend_matching import find_dividends
 from app.services.imports.activity_csv import ActivityRow, SharesOnly, find_columns, parse_row
 from app.services.imports.csv_parsing import (
     RowProblem,
@@ -48,9 +45,12 @@ from app.services.imports.csv_parsing import (
     read_rows,
 )
 from app.services.imports.history import record
+from app.services.investing import stock_gains as gains
+from app.services.investing.bank_trades import find_trades
+from app.services.investing.dividend_matching import find_dividends
+from app.services.investing.stock_records import rematch
 from app.services.ledger.accounts import INVESTMENT_KINDS, get_account
 from app.services.ledger.transfer_matching import match_transfers
-from app.services.stock_records import rematch
 from app.shares import micro_to_text
 
 PREVIEW_ROWS = 50

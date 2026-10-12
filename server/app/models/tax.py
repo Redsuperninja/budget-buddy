@@ -20,7 +20,7 @@ from app.models.enums import DeductionKind, DonationKind
 
 # Share counts can be fractional, so they're stored as whole millionths of a share
 # (1.5 shares -> 1_500_000), never as floats. Gains and short/long-term are calculated, not
-# stored (see app/services/stock_gains.py).
+# stored (see app/services/investing/stock_gains.py).
 SHARES_SCALE = 1_000_000
 
 
@@ -47,7 +47,8 @@ class Donation(TimestampMixin, Base):
 class Dividend(TimestampMixin, Base):
     """A dividend paid into one of your accounts: a money-in transaction that looks like one, and
     the deposit sweep that moved the same cash on (if found). The date and amount are the
-    transaction's, so they're never stored twice. See app/services/dividend_matching.py."""
+    transaction's, so they're never stored twice. See
+    app/services/investing/dividend_matching.py."""
 
     __tablename__ = "dividends"
 
@@ -55,7 +56,7 @@ class Dividend(TimestampMixin, Base):
     transaction_id: Mapped[int] = mapped_column(
         ForeignKey("transactions.id", ondelete="CASCADE"), unique=True
     )
-    # Several can share one sweep (services/combined_sweeps.py).
+    # Several can share one sweep (services/investing/combined_sweeps.py).
     sweep_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True
     )
@@ -109,8 +110,8 @@ class StockSaleOrder(TimestampMixin, Base):
 class StockSale(TimestampMixin, Base):
     """Shares sold out of one lot: the part of a ``StockSaleOrder`` matched to that lot.
 
-    Rebuilt by ``app.services.stock_records.rematch`` whenever a lot or sale of the same symbol
-    and account changes, so FIFO order always follows the dates.
+    Rebuilt by ``app.services.investing.stock_records.rematch`` whenever a lot or sale of the same
+    symbol and account changes, so FIFO order always follows the dates.
     """
 
     __tablename__ = "stock_sales"
@@ -132,7 +133,7 @@ class StockSale(TimestampMixin, Base):
 class Position(TimestampMixin, Base):
     """One line of a broker's positions file: what an account held on ``as_of``. Importing a
     newer file for the account replaces all its lines (a snapshot). Separate from purchase lots,
-    so it never changes gains. See app/services/positions.py."""
+    so it never changes gains. See app/services/investing/positions.py."""
 
     __tablename__ = "positions"
     __table_args__ = (

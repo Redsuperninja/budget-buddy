@@ -1,8 +1,8 @@
 # Positions from a broker's file (roadmap #12g)
 
-Code: `services/imports/positions_csv.py` (find columns, read a line), `services/positions.py` (preview, import, list,
-clear), `services/imports/csv_headers.py` (header matching shared with the stock import), `schemas/positions.py`,
-`routers/positions.py`. Upload checks are the bank import's (`CsvBody`). User guide:
+Code: `services/imports/positions_csv.py` (find columns, read a line), `services/investing/positions.py` (preview, import, list,
+clear), `services/imports/csv_headers.py` (header matching shared with the stock import), `schemas/investing/positions.py`,
+`routers/investing/positions.py`. Upload checks are the bank import's (`CsvBody`). User guide:
 [docs/guide/investments.md](../../guide/investments.md).
 
 ## Routes (this computer, or a joined one: the `stocks` area)
@@ -19,7 +19,7 @@ the future).
 - Stock purchases and sales (`GET /stocks/lots`, `/stocks/sales`, the gains summary) carry `checked_by`:
   `"transaction"` (linked to a transaction), `"positions_file"` (the account's file agrees for that symbol, same
   shares or none on both sides, and is dated on or after the trade) or null. Worked out each time in
-  `services/holdings_check.py`, never stored.
+  `services/investing/holdings_check.py`, never stored.
 - `DELETE /api/local/stocks/positions/{account_id}`: forget an account's snapshot.
 
 ## Rules

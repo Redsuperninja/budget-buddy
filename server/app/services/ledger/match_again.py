@@ -17,8 +17,8 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError
 from app.models import BankTrade, Dividend
 from app.schemas.ledger.transactions import MatchedAgain
-from app.services.bank_trades import find_trades
-from app.services.dividend_matching import find_dividends
+from app.services.investing.bank_trades import find_trades
+from app.services.investing.dividend_matching import find_dividends
 from app.services.ledger.transfer_matching import match_transfers
 
 MODELS = (Dividend, BankTrade)

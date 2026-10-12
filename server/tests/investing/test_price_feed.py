@@ -8,7 +8,7 @@ import urllib.error
 
 import pytest
 
-from app.services import price_feed
+from app.services.investing import price_feed
 
 FEED = "/api/local/price-feed"
 REFRESH = "/api/local/stocks/prices/refresh"

@@ -4,7 +4,7 @@ import datetime as dt
 
 import pytest
 
-from app.services.stock_gains import (
+from app.services.investing.stock_gains import (
     WASH_SALE_WINDOW_DAYS,
     Lot,
     NotEnoughShares,

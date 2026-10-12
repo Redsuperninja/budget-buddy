@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from app.errors import ApiError
 from app.schemas.imports.activity_import import ActivityColumns
 from app.schemas.imports.stock_import import Kind
-from app.schemas.stocks import LotCreate, SaleCreate
+from app.schemas.investing.stocks import LotCreate, SaleCreate
 from app.services.imports.csv_columns import detect_date_format
 from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
 from app.services.imports.csv_parsing import (
