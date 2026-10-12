@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryGroup
-from app.schemas.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
+from app.schemas.budget.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
 
 
 def _name_taken() -> ApiError:

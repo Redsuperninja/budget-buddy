@@ -55,6 +55,7 @@ Modules not yet moved into an area are still at the top too.
 | --- | --- |
 | `ledger/` | Accounts, transactions, balances, transaction roles, transfers between your own accounts |
 | `imports/` | Reading files: bank, brokerage activity, stock and positions CSVs; card sign flipping; the import history |
+| `budget/` | Categories, auto-sort rules and what they learn, the monthly summary, trends, spending pace, the suggested budget and the budget plan |
 
 ## Local API: common rules
 

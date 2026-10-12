@@ -1,14 +1,14 @@
 """Month-by-month totals for the dashboard's charts: money in, spending and saving, using the
-monthly summary's own rules (services/summary.py), so the charts match the monthly page; and net
-worth at each month's end, the sum of every transaction dated before the next month (the balances
-on Home are the same sums, up to today)."""
+monthly summary's own rules (services/budget/summary.py), so the charts match the monthly page;
+and net worth at each month's end, the sum of every transaction dated before the next month (the
+balances on Home are the same sums, up to today)."""
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Transaction
-from app.schemas.summary import MonthlyTrend, TrendMonth
-from app.services.summary import month_range, monthly_summary
+from app.schemas.budget.summary import MonthlyTrend, TrendMonth
+from app.services.budget.summary import month_range, monthly_summary
 
 
 def months_ending(year: int, month: int, count: int) -> list[tuple[int, int]]:

@@ -1,7 +1,7 @@
 # Dividends from your transactions (roadmap #12e)
 
 Code: `services/dividend_matching.py` (find dividends, file them, link sweeps), `services/dividends.py` (yearly
-list, "not a dividend"), `services/named_categories.py` (the "Dividends" category, shared with gift categories),
+list, "not a dividend"), `services/budget/named_categories.py` (the "Dividends" category, shared with gift categories),
 `schemas/dividends.py`, `routers/dividends.py`. Estimates, not tax advice. User guide:
 [docs/guide/dividends.md](../../guide/dividends.md).
 

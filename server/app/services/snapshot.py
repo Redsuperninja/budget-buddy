@@ -16,11 +16,11 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import CategoryGroup, Paycheck, Transaction
-from app.schemas.summary import MonthlySummary
+from app.schemas.budget.summary import MonthlySummary
+from app.services.budget.summary import monthly_summary
 from app.services.envelope import CONTRACT
 from app.services.ledger import accounts as account_service
 from app.services.snapshot_tax import tax_summary
-from app.services.summary import monthly_summary
 
 CURRENCY = "USD"  # the app has no currency setting yet; amounts are US dollars
 TRANSACTION_DAYS = 60

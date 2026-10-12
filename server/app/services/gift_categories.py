@@ -18,8 +18,8 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
+from app.services.budget.named_categories import find_or_make
 from app.services.ledger.transactions import get_transaction
-from app.services.named_categories import find_or_make
 
 CHARITY = "Charitable giving"
 PERSONAL = "Gifts"

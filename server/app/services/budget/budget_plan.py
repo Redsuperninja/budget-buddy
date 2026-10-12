@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.models import BudgetPlan, Category, CategoryGroup
 from app.percent import share_of
-from app.schemas.budget_plan import BudgetPlanIn, BudgetPlanOut
+from app.schemas.budget.budget_plan import BudgetPlanIn, BudgetPlanOut
 
 PLAN_ID = 1
 IncomeSource = Literal["planned", "actual"]

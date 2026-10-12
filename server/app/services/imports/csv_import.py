@@ -31,7 +31,7 @@ from app.schemas.imports.csv_import import (
     PreviewRow,
 )
 from app.services.bank_trades import find_trades
-from app.services.category_rules import load_matcher, rule_fields
+from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.dividend_matching import find_dividends
 from app.services.imports.card_signs import FLIPPED, looks_flipped
 from app.services.imports.csv_columns import build_mapping, columns_used, detect_columns

@@ -4,7 +4,7 @@ import pytest
 from test_categories_summary_api import CATS, cid
 
 from app.models import CategoryGroup
-from app.services.budget_engine import group_amounts, months_before, split, split_savings
+from app.services.budget.budget_engine import group_amounts, months_before, split, split_savings
 
 SUGGEST = "/api/local/budget/suggestion"
 NEEDS, WANTS, SAVINGS = CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS

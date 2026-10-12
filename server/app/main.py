@@ -23,9 +23,6 @@ from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
 from app.routers import (
     bank_trades,
-    budget_plan,
-    categories,
-    category_rules,
     dashboard,
     deductions,
     dividends,
@@ -41,10 +38,10 @@ from app.routers import (
     remote_computers,
     retirement,
     stocks,
-    summary,
     sync,
     tax_summary,
 )
+from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.imports import activity_import, csv_import, history, stock_import
 from app.routers.ledger import accounts, transactions
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions

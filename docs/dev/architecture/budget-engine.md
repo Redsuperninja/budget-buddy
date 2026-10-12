@@ -1,6 +1,6 @@
 # Suggested budget (budget engine)
 
-Code: `services/budget_engine.py`, routes in `routers/budget_plan.py`. Roadmap item 10. Builds on the
+Code: `services/budget/budget_engine.py`, routes in `routers/budget/budget_plan.py`. Roadmap item 10. Builds on the
 [monthly summary](budget-summary.md) and its percentage budgets.
 
 ## Routes (this computer only)

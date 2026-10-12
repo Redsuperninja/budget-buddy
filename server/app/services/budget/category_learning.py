@@ -16,7 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import CategoryRule, CategorySource, Transaction, TransactionKind
-from app.services.category_rules import apply_to_uncategorized
+from app.services.budget.category_rules import apply_to_uncategorized
 
 LEARN_AFTER = 3
 MIN_LETTERS = 3
