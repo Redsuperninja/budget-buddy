@@ -56,9 +56,11 @@ All under `js/` (each file starts with a one-line purpose):
 | `theme.js` | Light, dark or match the computer (`data-theme`). Colors live in `app.css` as `light-dark()` pairs, the same green theme in both (`--accent` fills, `--link` is text, `--accent-soft` for meter tracks) |
 | `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |
 | `settings-menu.js` | The header's **Settings** menu with the View and Colors pickers |
-| `screens/*.js` | One file per screen, each exporting `render(root, options)`; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens; `category-picker.js` is the category dropdown shared by Transactions and Auto-sort; `account-balance.js` is the Accounts screen's "Match your bank's balance"; `live-prices.js` is the Investments screen's live prices (ADR-0010); `bank-trades-card.js` is its list of stock trades from a bank file, with ticker, shares and price per share |
+| `remove-button.js` | A **Delete** (or **Remove**, **Undo**) button that asks first, then runs the removal; used on Money and Taxes screens |
+| `screens/<section>/*.js` | One folder per navigation section (`home`, `money`, `budget`, `tax`, `devices`, as in `main.js`), one file per screen, each exporting `render(root, options)`, with that screen's parts beside it; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens; `category-picker.js` is the category dropdown shared by Transactions and Auto-sort; `account-balance.js` is the Accounts screen's "Match your bank's balance"; `live-prices.js` is the Investments screen's live prices (ADR-0010); `bank-trades-card.js` is its list of stock trades from a bank file, with ticker, shares and price per share |
 
-To add a screen: create `screens/<name>.js` with a `render` function and add one line to its section in `main.js`.
+To add a screen: create `screens/<section>/<name>.js` with a `render` function and add one line to its section in
+`main.js`. A part used by screens in more than one section goes in `js/` (like `remove-button.js`).
 Keep the top row short: add a page to an existing section rather than a new section. Keep the simple view calm:
 a page, card, column or field only power users need is marked `advanced` (see `view.js`). To call a new
 server route, add a function to `api/endpoints.js`.

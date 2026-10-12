@@ -38,7 +38,7 @@ here changes what the app does.
 
 ## 3. Code debt (dashboard)
 
-1. **Group `dashboard/js/screens/` (36 files) by section:** `screens/home/`, `money/`, `budget/`, `taxes/`,
+1. **Done: grouped `dashboard/js/screens/` (36 files) by section:** `screens/home/`, `money/`, `budget/`, `taxes/`,
    `devices/`, with each section's parts next to its page (for example `money/transactions.js` with
    `give-to-charity.js`, `stock-trade-cell.js` and `category-picker.js`). `main.js` already lists pages by section,
    so the folders follow it one to one.
