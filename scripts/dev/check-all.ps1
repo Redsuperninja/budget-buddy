@@ -34,6 +34,10 @@ Check "Phone" "mobile" "node_modules" @({ npx tsc --noEmit }, { npm test -- --si
 Check "Desktop" "desktop" ".venv\Scripts\pytest.exe" @(
     { .venv\Scripts\ruff check . }, { .venv\Scripts\ruff format --check . }, { .venv\Scripts\pytest -q }
 )
+# Every dashboard page in a real (headless) browser, against a throwaway Home Base with demo data.
+Check "Pages" "server" ".venv\Scripts\python.exe" @(
+    { powershell -NoProfile -ExecutionPolicy Bypass -File "$Root\scripts\dev\check-pages.ps1" }
+)
 
 Write-Host ""
 foreach ($part in $results.Keys) {

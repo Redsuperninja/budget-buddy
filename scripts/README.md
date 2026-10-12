@@ -47,4 +47,5 @@ in the test data folder, so made-up data can't end up in real data.
 | Script | What it does |
 | --- | --- |
 | `check-all.ps1` | Runs every part's checks, as CI does, and lists which passed ([testing.md](../docs/dev/testing.md)). |
+| `check-pages.ps1` (`check-pages.mjs`) | Opens every dashboard page in headless Edge or Chrome against a throwaway Home Base with demo data (temporary folder, deleted after), and fails on a script error, a file that didn't load, an error on the page or an empty page. `check-all.ps1` runs it too. |
 | `tidy-branches.ps1` | Tidies local branches after their pull requests merge ([workflow.md](../docs/dev/workflow.md)). |

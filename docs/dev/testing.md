@@ -30,6 +30,7 @@ tests catch it; each reads the other side's files or a published example, never 
 | The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/devices/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
 | Pairing and sync encryption | The §4.7 vectors, in `server/tests/contract_vectors.py` and the phone's `pairing.test.ts` |
 | The desktop app's copies of the data folder rule and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
+| A dashboard screen breaks when it runs (a moved file, a renamed field the screen reads) | `scripts\dev\check-pages.ps1`: every page in a headless browser against a Home Base with demo data (needs Edge or Chrome; not in CI yet) |
 | The dashboard outgrows what the Home Base serves (past its file limit the page disappears) | `test_the_real_dashboard_is_served_whole_with_room_to_grow` in `server/tests/test_dashboard_serving.py` |
 
 Changing one of these on purpose: change the published example (or route) and both sides in the same branch.
@@ -83,7 +84,8 @@ A new logic module in the dashboard joins the `--test-coverage-include` list in 
 
 Node's built-in runner reads the files with `fs` (no browser, no packages). `tests/static-rules.test.js`
 enforces the safety rules (no `innerHTML`, no inline script or style, no internet addresses, route strings only
-in `js/api/`); `money.test.js`, `dates.test.js` and `percent.test.js` cover the logic. Details: [dashboard/README.md](../../dashboard/README.md).
+in `js/api/`); `money.test.js`, `dates.test.js` and `percent.test.js` cover the logic. The screens themselves run in a
+real browser in `scripts\dev\check-pages.ps1` (above). Details: [dashboard/README.md](../../dashboard/README.md).
 
 ## Phone tests
 
