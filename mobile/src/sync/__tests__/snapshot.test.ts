@@ -6,56 +6,20 @@ import {
   SNAPSHOT_UPDATE_MESSAGE,
 } from '../snapshot';
 
-/** The example from docs/api/sync-contract.md §5.2, verbatim. */
-const CONTRACT_EXAMPLE = {
-  contract: 1,
-  server_id: 'Zk3pR7tQ1xYb9mWc2nLs5Q',
-  generated_at: '2026-10-02T18:30:00Z',
-  currency: 'USD',
-  period: { month: '2026-10', start: '2026-10-01', end: '2026-10-31', days_elapsed: 2, days_in_month: 31 },
-  income: {
-    expected_cents: 520000,
-    received_cents: 260000,
-    last_paycheck: { pay_date: '2026-10-01', net_cents: 260000 },
-  },
-  budget: {
-    target_cents: 520000,
-    actual_cents: 171245,
-    groups: [
-      {
-        group: 'needs', name: 'Needs', target_cents: 260000, actual_cents: 158000,
-        categories: [
-          { id: 1, name: 'Rent', target_cents: 150000, actual_cents: 150000 },
-          { id: 2, name: 'Groceries', target_cents: 60000, actual_cents: 8000 },
-        ],
-      },
-      {
-        group: 'wants', name: 'Wants', target_cents: 156000, actual_cents: 3245,
-        categories: [{ id: 7, name: 'Eating out', target_cents: 30000, actual_cents: 3245 }],
-      },
-      {
-        group: 'savings', name: 'Savings', target_cents: 104000, actual_cents: 10000,
-        categories: [{ id: 12, name: 'Emergency fund', target_cents: 50000, actual_cents: 10000 }],
-      },
-    ],
-  },
-  transactions: [
-    { id: 981, date: '2026-10-02', description: 'Corner Cafe', amount_cents: -3245, category_id: 7, account_id: 1 },
-    { id: 975, date: '2026-10-01', description: 'Paycheck', amount_cents: 260000, category_id: null, account_id: 1 },
-  ],
-  accounts: [
-    { id: 1, name: 'Everyday checking', kind: 'checking', balance_cents: 342150, balance_as_of: '2026-10-02' },
-    { id: 2, name: 'Rainy day', kind: 'savings', balance_cents: 1250000, balance_as_of: '2026-09-30' },
-  ],
-  tax: {
-    year: 2026,
-    donations_total_cents: 45000,
-    realized_gains: { short_term_cents: -12000, long_term_cents: 84000, is_estimate: true },
-    deductions: [{ kind: 'medical', label: 'Medical', amount_cents: 23000, is_estimate: false }],
-    disclaimer: "These totals help you get ready for tax time. They aren't tax advice.",
-  },
-  settings: { reminder_days_default: 2, reminder_days_allowed: [1, 2, 3] },
-};
+// Jest runs in Node; the app's tsconfig leaves Node's types out, so name the two globals used here.
+declare const require: (name: string) => any;
+declare const __dirname: string;
+
+/** The example from docs/api/sync-contract/05-snapshot.md §5.2, read from the doc itself. The server's
+ * tests read the same block (server/tests/contract_example.py), so all three stay in step. */
+function contractExample(): unknown {
+  const { readFileSync } = require('fs');
+  const { join } = require('path');
+  const doc = join(__dirname, '..', '..', '..', '..', 'docs', 'api', 'sync-contract', '05-snapshot.md');
+  const blocks = [...readFileSync(doc, 'utf8').matchAll(/```json\r?\n([\s\S]*?)```/g)];
+  expect(blocks).toHaveLength(1);
+  return JSON.parse(blocks[0][1]);
+}
 
 /** Deep copy of the sample, edited by `mutate`. */
 function broken(mutate: (s: any) => void): unknown {
@@ -84,7 +48,7 @@ describe('parseSnapshot', () => {
   });
 
   it('accepts the example from the sync contract', () => {
-    expect(parseSnapshot(CONTRACT_EXAMPLE).ok).toBe(true);
+    expect(parseSnapshot(contractExample()).ok).toBe(true);
   });
 
   it('accepts an empty-database snapshot (zeros, empty lists, three empty groups)', () => {

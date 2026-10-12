@@ -10,11 +10,13 @@ on:
 #    paths:
 #      - "mobile/**"
 #      - ".github/workflows/mobile-ci.yml"
+#      - "docs/api/**"
 #  push:
 #    branches: [main]
 #    paths:
 #      - "mobile/**"
 #      - ".github/workflows/mobile-ci.yml"
+#      - "docs/api/**"
 
 permissions:
   contents: read

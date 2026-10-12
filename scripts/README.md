@@ -19,6 +19,8 @@ files are small clients of the Home Base's this-computer-only API and never impo
 | `test-settings.ps1` | testers | Test settings (port 8766, test data folder) on top of `paths.ps1`. |
 | `_local_api.py` | developers | `LocalApi(base).call(method, path, json=, body=, content_type=)`: sends the Origin header and write token, fetches the token once, raises `ApiError` with a plain-English reason (`NotRunning` if nothing answers). |
 | `_testguard.py` | developers | The test-only guard (below). |
+| `dev\check-all.ps1` | developers | Runs every part's checks, as CI does, and lists which passed ([testing.md](../docs/dev/testing.md)). |
+| `dev	idy-branches.ps1` | developers | Tidies local branches after their pull requests merge ([workflow.md](../docs/dev/workflow.md)). |
 
 ## The test-only guard
 

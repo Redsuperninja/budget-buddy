@@ -6,8 +6,10 @@ import hmac
 import http.server
 import json
 import os
+import re
 import threading
 import urllib.parse
+from pathlib import Path
 
 import pytest
 
@@ -108,11 +110,46 @@ def test_process_alive():
     assert not genuine.process_alive(2**30)
 
 
+# The handshake's published example (docs/api/desktop-handshake.md); the server's tests read it too.
+DOC = Path(__file__).resolve().parents[2] / "docs" / "api" / "desktop-handshake.md"
+EXAMPLE = json.loads(re.search(r"```json\n(.*?)```", DOC.read_text(encoding="utf-8"), re.S)[1])
+
+
 def test_same_data_folder_rule_as_the_home_base(monkeypatch, tmp_path):
-    """Pinned to the server's rule: server/app/config.py default_data_dir, BUDGET_BUDDY_DATA_DIR."""
-    monkeypatch.setenv("BUDGET_BUDDY_DATA_DIR", str(tmp_path / "chosen"))
+    rule = EXAMPLE["data_folder"]
+    monkeypatch.setenv(rule["override_variable"], str(tmp_path / "chosen"))
     assert genuine.data_dir() == tmp_path / "chosen"
-    monkeypatch.delenv("BUDGET_BUDDY_DATA_DIR")
+    monkeypatch.delenv(rule["override_variable"])
+    monkeypatch.setattr(genuine.sys, "platform", "win32")
+    variable, *rest = rule["windows"]
+    monkeypatch.setenv(variable, str(tmp_path))
+    assert genuine.data_dir() == tmp_path.joinpath(*rest)
     monkeypatch.setattr(genuine.sys, "platform", "linux")
     monkeypatch.setattr(genuine.Path, "home", lambda: tmp_path)
-    assert genuine.data_dir() == tmp_path / ".local" / "share" / "budget-buddy"
+    assert genuine.data_dir() == tmp_path.joinpath(*rule["elsewhere"])
+
+
+def test_same_running_file_and_proof_as_the_home_base(folder, monkeypatch):
+    """A stand-in that answers exactly the example's proof, for the example's key and nonce."""
+    assert genuine.FILE_NAME == EXAMPLE["running_file"]
+    asked = []
+
+    class Example(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            asked.append(self.path)
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(json.dumps({"proof": EXAMPLE["proof"]}).encode())
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), Example)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    monkeypatch.setattr(genuine.secrets, "token_hex", lambda _n: EXAMPLE["nonce"])
+    try:
+        write(folder, server.server_port, key=EXAMPLE["key"])
+        assert genuine.is_budget_buddy(server.server_port)
+        assert asked == [f"{EXAMPLE['proof_path']}?nonce={EXAMPLE['nonce']}"]
+    finally:
+        server.shutdown()
