@@ -1,7 +1,7 @@
 """The sync contract's published test vectors (section 4.7). Fake keys and data only.
 
 Shared so the pairing and sync tests check the same bytes. Tests using them live in
-tests/test_envelope_vectors.py.
+tests/devices/test_envelope_vectors.py.
 """
 
 from app.crypto.b64url import b64u_decode

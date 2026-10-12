@@ -16,19 +16,19 @@ from sqlalchemy.orm import Session
 from app.crypto.b64url import b64u_decode, b64u_encode
 from app.errors import ApiError
 from app.models import Device, PairingNonce, PairingSession
-from app.services import envelope
-from app.services.devices import hash_token
-from app.services.envelope import (
+from app.services.devices import envelope
+from app.services.devices.envelope import (
     REPLAY_MESSAGE,
     SERVER_ERROR_MESSAGE,
     EncryptedError,
 )
-from app.services.pairing_sessions import (
+from app.services.devices.pairing_sessions import (
     active_session,
     end_session,
     hash_code,
     purge_ended_sessions,
 )
+from app.services.devices.phones import hash_token
 
 MAX_WRONG_CODES = 5
 PAIR_PATH = "/api/pair"

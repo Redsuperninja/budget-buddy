@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.crypto.b64url import b64u_encode
 from app.models import Device, Receipt, SeenNonce
-from app.services import envelope, snapshot, sync_receipts
+from app.services.devices import envelope, snapshot, sync_receipts
 
 RECEIPTS = "/api/sync/receipts"
 

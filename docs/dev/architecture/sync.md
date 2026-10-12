@@ -18,8 +18,8 @@ each side implements it.
 
 ## Server side (roadmap #15)
 
-Code: `routers/sync.py`, `services/sync.py`, `sync_context.py`, `sync_receipts.py`, `snapshot.py`,
-`snapshot_tax.py`, and `services/envelope.py` (opening and sealing, shared with `/api/pair`).
+Code: `routers/devices/sync.py`, `services/devices/sync.py`, `sync_context.py`, `sync_receipts.py`, `snapshot.py`,
+`snapshot_tax.py`, and `services/devices/envelope.py` (opening and sealing, shared with `/api/pair`).
 
 - The phone's token is checked **before** the body is read. The body is read with a hard limit that stops at the
   limit (`app/bodylimit.py`): 16 KiB, or 12 MiB for receipts.

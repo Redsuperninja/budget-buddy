@@ -205,7 +205,7 @@ def test_unexpected_failure_is_a_fixed_encrypted_server_error(phone, monkeypatch
     def boom(*_args, **_kwargs):
         raise RuntimeError("secret detail /home/user/budget.db")
 
-    monkeypatch.setattr("app.services.sync.snapshot.build_snapshot", boom)
+    monkeypatch.setattr("app.services.devices.sync.snapshot.build_snapshot", boom)
     response, nonce = phone.call(SNAPSHOT)
     assert response.status_code == 500
     assert "secret detail" not in response.text

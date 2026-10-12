@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.crypto.b64url import b64u_encode
 from app.models import Receipt
-from app.services.receipt_images import MAX_IMAGE_BYTES, jpeg_size
+from app.services.devices.receipt_images import MAX_IMAGE_BYTES, jpeg_size
 
 PATH = "/api/sync/receipts"
 

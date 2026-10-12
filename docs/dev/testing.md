@@ -27,7 +27,7 @@ tests catch it; each reads the other side's files or a published example, never 
 | What could break | Checked by |
 | --- | --- |
 | A route the dashboard, phone app, desktop app or scripts call is renamed or removed | `server/tests/test_callers_match_routes.py` (reads `dashboard/js/api/endpoints.js` and the others' source) |
-| The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
+| The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/devices/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
 | Pairing and sync encryption | The §4.7 vectors, in `server/tests/contract_vectors.py` and the phone's `pairing.test.ts` |
 | The desktop app's copies of the data folder rule and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
 | The dashboard outgrows what the Home Base serves (past its file limit the page disappears) | `test_the_real_dashboard_is_served_whole_with_room_to_grow` in `server/tests/test_dashboard_serving.py` |

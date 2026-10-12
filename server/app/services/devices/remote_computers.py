@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from app.crypto.hashing import hash_secret
 from app.errors import ApiError, not_found
 from app.models import RemoteComputer
-from app.schemas.remote_computers import ComputerOut
+from app.schemas.devices.remote_computers import ComputerOut
 
 CODE_TTL_SECONDS = 600
 MAX_WRONG_TRIES = 5

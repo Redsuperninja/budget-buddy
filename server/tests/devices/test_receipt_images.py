@@ -5,7 +5,7 @@ import struct
 import fake_images as img
 import pytest
 
-from app.services.receipt_images import (
+from app.services.devices.receipt_images import (
     HEIC,
     JPEG,
     MAX_IMAGE_BYTES,

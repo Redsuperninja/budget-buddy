@@ -17,7 +17,7 @@ import anyio
 from starlette.requests import cookie_parser
 from starlette.types import Scope
 
-from app.services.remote_computers import COOKIE_NAME
+from app.services.devices.remote_computers import COOKIE_NAME
 
 JOIN_PATH = "/api/remote/join"
 TOKEN_OK = "dashboard_token_ok"

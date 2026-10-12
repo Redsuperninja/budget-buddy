@@ -1,6 +1,6 @@
 # Receipts and receipt photos
 
-Code: `services/receipts.py`, `services/receipt_images.py`, `routers/receipts.py`; files through
+Code: `services/devices/receipts.py`, `services/devices/receipt_images.py`, `routers/devices/receipts.py`; files through
 `EncryptedFileStore` (`app/crypto/files.py`). Phone uploads arrive through sync ([sync.md](sync.md)).
 
 ## Routes (this computer only)

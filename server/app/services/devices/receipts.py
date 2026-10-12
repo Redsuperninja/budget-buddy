@@ -24,8 +24,8 @@ from app.crypto.files import FILE_SUFFIX
 from app.db import SessionLocal
 from app.errors import ApiError, not_found
 from app.models import Category, Receipt, Transaction
-from app.schemas.receipts import ReceiptCreate, ReceiptPage, ReceiptUpdate
-from app.services.receipt_images import ImageKind, clean_image, detect_kind
+from app.schemas.devices.receipts import ReceiptCreate, ReceiptPage, ReceiptUpdate
+from app.services.devices.receipt_images import ImageKind, clean_image, detect_kind
 
 logger = logging.getLogger(__name__)
 

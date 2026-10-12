@@ -12,8 +12,8 @@ The phone keeps both in secure storage. The dashboard immediately shows "New pho
 
 ## Server side (roadmap #14)
 
-`services/pairing_sessions.py` (sessions, server ID, listener wishes) and `services/pairing.py` (the
-`/api/pair` handshake), using `services/envelope.py` to open and seal.
+`services/devices/pairing_sessions.py` (sessions, server ID, listener wishes) and `services/devices/pairing.py` (the
+`/api/pair` handshake), using `services/devices/envelope.py` to open and seal.
 
 - `POST /api/local/pairing` (this computer only) makes a session: a 16-byte one-time code (only its SHA-256 is
   stored), a fresh X25519 keypair (`pair_sk` stored encrypted, erased when the session ends), valid for 10

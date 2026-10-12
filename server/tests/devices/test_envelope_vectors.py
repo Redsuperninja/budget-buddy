@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from app.crypto.b64url import b64u_decode, b64u_encode
 from app.errors import ApiError
 from app.models import Device, PairingSession
-from app.services import devices as device_service
-from app.services import envelope
+from app.services.devices import envelope
+from app.services.devices import phones as device_service
 
 
 def test_vector_1_request_box_opens():

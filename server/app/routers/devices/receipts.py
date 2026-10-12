@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, Query, Request, Response, status
 from app.crypto import EncryptedFileStore
 from app.deps import Offset, PathId, SessionDep
 from app.errors import ApiError
-from app.schemas.receipts import ReceiptCreate, ReceiptOut, ReceiptPage, ReceiptUpdate
-from app.services import receipts as service
-from app.services.receipt_images import MAX_IMAGE_BYTES, ImageRejected, too_large
+from app.schemas.devices.receipts import ReceiptCreate, ReceiptOut, ReceiptPage, ReceiptUpdate
+from app.services.devices import receipts as service
+from app.services.devices.receipt_images import MAX_IMAGE_BYTES, ImageRejected, too_large
 
 router = APIRouter(prefix="/api/local/receipts", tags=["receipts"])
 
