@@ -4,7 +4,7 @@ import datetime as dt
 
 import pytest
 
-from app.services.csv_parsing import clean_description, parse_amount, parse_date
+from app.services.imports.csv_parsing import clean_description, parse_amount, parse_date
 
 
 @pytest.mark.parametrize(

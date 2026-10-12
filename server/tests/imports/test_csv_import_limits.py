@@ -6,7 +6,7 @@ from csv_helpers import CHECKING_CSV, ok, send, txns
 from sqlalchemy import inspect
 
 from app.db import alembic_config, create_db_engine, run_migrations
-from app.services import csv_import, csv_parsing
+from app.services.imports import csv_import, csv_parsing
 
 
 def test_file_too_large(client, checking, monkeypatch):

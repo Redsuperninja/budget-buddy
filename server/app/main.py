@@ -22,18 +22,15 @@ from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
 from app.routers import (
-    activity_import,
     bank_trades,
     budget_plan,
     categories,
     category_rules,
-    csv_import,
     dashboard,
     deductions,
     dividends,
     donations,
     health,
-    imports,
     instance,
     pair,
     pairing,
@@ -43,12 +40,12 @@ from app.routers import (
     receipts,
     remote_computers,
     retirement,
-    stock_import,
     stocks,
     summary,
     sync,
     tax_summary,
 )
+from app.routers.imports import activity_import, csv_import, history, stock_import
 from app.routers.ledger import accounts, transactions
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
@@ -135,7 +132,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(summary.router)
     app.include_router(csv_import.router)
     app.include_router(activity_import.router)
-    app.include_router(imports.router)
+    app.include_router(history.router)
     app.include_router(paychecks.router)
     app.include_router(receipts.router)
     app.include_router(donations.router)

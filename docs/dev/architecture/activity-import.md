@@ -1,7 +1,7 @@
 # Brokerage activity import (roadmap 26b)
 
-Code: `services/activity_csv.py` (columns by name, one row), `services/activity_import.py` (preview, duplicates,
-add and sort), `schemas/activity_import.py`, `routers/activity_import.py`. Shared: decoding, amounts, dates and
+Code: `services/imports/activity_csv.py` (columns by name, one row), `services/imports/activity_import.py` (preview, duplicates,
+add and sort), `schemas/imports/activity_import.py`, `routers/imports/activity_import.py`. Shared: decoding, amounts, dates and
 fingerprints (`csv_parsing`), header matching (`csv_headers`), Buy/Sell wording and share signs (`stock_csv`),
 upload checks (`CsvBody`). Dashboard: **Money**, **Import files** (`screens/activity-import.js`). User guide:
 [docs/guide/import-brokerage-activity.md](../../guide/import-brokerage-activity.md).

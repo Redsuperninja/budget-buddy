@@ -1,7 +1,7 @@
 # Positions from a broker's file (roadmap #12g)
 
-Code: `services/positions_csv.py` (find columns, read a line), `services/positions.py` (preview, import, list,
-clear), `services/csv_headers.py` (header matching shared with the stock import), `schemas/positions.py`,
+Code: `services/imports/positions_csv.py` (find columns, read a line), `services/positions.py` (preview, import, list,
+clear), `services/imports/csv_headers.py` (header matching shared with the stock import), `schemas/positions.py`,
 `routers/positions.py`. Upload checks are the bank import's (`CsvBody`). User guide:
 [docs/guide/investments.md](../../guide/investments.md).
 

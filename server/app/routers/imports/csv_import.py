@@ -10,8 +10,13 @@ from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.deps import PathId, SessionDep
 from app.errors import ApiError
-from app.schemas.csv_import import CommitChoices, ImportPreview, ImportResult, MappingChoices
-from app.services import csv_import as service
+from app.schemas.imports.csv_import import (
+    CommitChoices,
+    ImportPreview,
+    ImportResult,
+    MappingChoices,
+)
+from app.services.imports import csv_import as service
 
 router = APIRouter(prefix="/api/local/accounts/{account_id}/csv-import", tags=["csv import"])
 

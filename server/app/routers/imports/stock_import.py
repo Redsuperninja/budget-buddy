@@ -9,14 +9,14 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from app.deps import SessionDep
-from app.routers.csv_import import CsvBody
-from app.schemas.stock_import import (
+from app.routers.imports.csv_import import CsvBody
+from app.schemas.imports.stock_import import (
     StockCommitChoices,
     StockImportChoices,
     StockImportPreview,
     StockImportResult,
 )
-from app.services import stock_import as service
+from app.services.imports import stock_import as service
 
 router = APIRouter(prefix="/api/local/stocks/import", tags=["stocks"])
 

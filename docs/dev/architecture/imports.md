@@ -1,6 +1,6 @@
 # Import history and undo (roadmap 6b)
 
-Code: `models/imports.py`, `services/imports.py`, `schemas/imports.py`, `routers/imports.py`; recorded by
+Code: `models/imports.py`, `services/imports/history.py`, `schemas/imports/history.py`, `routers/imports/history.py`; recorded by
 `csv_import.commit` (kind `bank`), `stock_import.commit` (`stocks`), `positions.commit` (`positions`) and the
 brokerage activity import (`activity`). Dashboard: **Money**, **Import history** (`screens/import-history.js`). User
 guide: [docs/guide/import-history.md](../../guide/import-history.md).

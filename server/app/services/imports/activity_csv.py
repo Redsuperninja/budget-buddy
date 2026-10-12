@@ -13,13 +13,19 @@ from dataclasses import dataclass
 from pydantic import ValidationError
 
 from app.errors import ApiError
-from app.schemas.activity_import import ActivityColumns
-from app.schemas.stock_import import Kind
+from app.schemas.imports.activity_import import ActivityColumns
+from app.schemas.imports.stock_import import Kind
 from app.schemas.stocks import LotCreate, SaleCreate
-from app.services.csv_columns import detect_date_format
-from app.services.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
-from app.services.csv_parsing import RowProblem, cell, clean_description, parse_amount, parse_date
-from app.services.stock_csv import shares_and_sign, trade_kind
+from app.services.imports.csv_columns import detect_date_format
+from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
+from app.services.imports.csv_parsing import (
+    RowProblem,
+    cell,
+    clean_description,
+    parse_amount,
+    parse_date,
+)
+from app.services.imports.stock_csv import shares_and_sign, trade_kind
 
 NO_COLUMNS = (
     "We couldn't find the columns. A brokerage activity file needs column names for the date, the "

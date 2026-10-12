@@ -1,4 +1,4 @@
-"""Import history (services/imports.py)."""
+"""Import history (services/imports/history.py)."""
 
 import datetime as dt
 from typing import Literal

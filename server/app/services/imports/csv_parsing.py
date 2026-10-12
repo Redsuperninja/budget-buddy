@@ -20,7 +20,7 @@ from collections import Counter
 
 from app.errors import ApiError
 from app.money import dollars_to_cents
-from app.schemas.csv_import import DATE_FORMATS, CsvMapping
+from app.schemas.imports.csv_import import DATE_FORMATS, CsvMapping
 from app.spreadsheet import formula_safe
 
 MAX_ROWS = 10_000

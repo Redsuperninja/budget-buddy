@@ -1,8 +1,8 @@
 # Bank CSV import
 
-Code: `services/csv_parsing.py` (decode, read rows, amounts, dates, fingerprint), `services/csv_columns.py`
-(guessing which column is what, date-format detection), `services/csv_import.py` (limits, preview, commit,
-saved mapping), `routers/csv_import.py`. User guide: [docs/guide/](../../guide/).
+Code: `services/imports/csv_parsing.py` (decode, read rows, amounts, dates, fingerprint), `services/imports/csv_columns.py`
+(guessing which column is what, date-format detection), `services/imports/csv_import.py` (limits, preview, commit,
+saved mapping), `routers/imports/csv_import.py`. User guide: [docs/guide/](../../guide/).
 
 ## Routes (this computer only)
 
@@ -19,7 +19,7 @@ Query parameters override the guesses (both routes): `delimiter`, `header_rows`,
 takes `save_mapping` and `skip_invalid_rows`.
 
 For a `credit_card` account, unless `flip_sign` is given, the file is checked after reading
-(`services/card_signs.py`): it is flipped when most payment lines ("PAYMENT THANK YOU", "AUTOPAY", ...) are
+(`services/imports/card_signs.py`): it is flipped when most payment lines ("PAYMENT THANK YOU", "AUTOPAY", ...) are
 money out, or, with no payment lines, when at least 80% of 3 or more amounts are money in. The preview then
 has `mapping.flip_sign` turned over and says so in `message`; saving the mapping keeps the flip.
 

@@ -4,7 +4,7 @@ card shows what you owe and its payment pairs with the checking side. Every file
 import pytest
 from csv_helpers import ok, send, txns
 
-from app.services.card_signs import looks_flipped
+from app.services.imports.card_signs import looks_flipped
 
 CARD_FILE = (
     "Date,Description,Amount\r\n"
