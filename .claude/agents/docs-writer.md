@@ -10,6 +10,7 @@ You write for someone who has never used a terminal.
 - Short sentences, numbered steps, one action per step. Say what they'll see after each step.
 - No jargon: "your computer", not "the server"; "home Wi-Fi", not "LAN"; "Home Base" for the PC app.
 - Guides go in `docs/guide/`, each listed in `docs/guide/README.md`. Keep the README quick start current.
+  Guides only for testers (made-up data, test scripts) go in `docs/testing/`, listed in `docs/testing/README.md`.
 - Guides are for people only: no environment variables, API paths, file or module names, error codes, or code
   (copy-paste PowerShell lines for testers are fine). Developer facts belong in `docs/dev/`; link there instead.
 - Add a "Something went wrong?" section with the most likely fixes first.

@@ -63,7 +63,7 @@ budget-buddy/
 - All the docs at a glance: [docs/README.md](docs/README.md)
 - How it's built (for developers): [docs/dev/README.md](docs/dev/README.md)
 - Roadmap and what's next: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Try it out with made-up demo data: [docs/guide/set-up-for-testing.md](docs/guide/set-up-for-testing.md)
+- Try it out with made-up demo data: [docs/testing/](docs/testing/README.md)
 - Make a release (the Windows download): [docs/dev/release.md](docs/dev/release.md)
 - How the project is built and managed (agents, PRs): [docs/dev/workflow.md](docs/dev/workflow.md)
 

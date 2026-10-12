@@ -11,12 +11,9 @@ Set up Budget Buddy on your Windows computer, then use the dashboard (web page) 
 1. [Download and install Budget Buddy](install.md) — The easy way on Windows: download, unzip, double-click Install.
 2. [Start Budget Buddy](start-budget-buddy.md) — For everyday use: double-click to start; how to stop it.
 3. [The desktop app](desktop-app.md) — Budget Buddy in its own window, with a tray icon; ready when Windows starts.
+4. [Open the dashboard](open-the-dashboard.md) — What you'll see; the tabs along the top; folding boxes up; where to type the address.
 
-**Trying it out with made-up data?**
-
-1. [Set up for testing](set-up-for-testing.md) — Install Python, Node and Expo Go; run the setup script; add a firewall rule (first time only).
-2. [Start a test session](start-a-test-session.md) — Open three windows; load demo data; start your phone app.
-3. [Open the dashboard](open-the-dashboard.md) — What you'll see; the tabs along the top; folding boxes up; where to type the address.
+**Trying it out with made-up data?** The tester guides are in [docs/testing](../testing/README.md).
 
 ## Your money on the computer
 
@@ -65,6 +62,5 @@ Your data stays on your computer. Learn how to protect it and move it if needed.
 
 ## Testing and feedback
 
-If you're trying out early versions of Budget Buddy.
-
-1. [What to test](what-to-test.md) — What's ready; the checklist; how to report bugs.
+Trying out early versions of Budget Buddy? See [docs/testing](../testing/README.md): setting up, a test session,
+and what to test and how to report bugs.

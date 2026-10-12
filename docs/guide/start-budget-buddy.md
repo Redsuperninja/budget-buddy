@@ -1,7 +1,7 @@
 # Start Budget Buddy
 
 For everyday use with your own money. (Trying it out with made-up data? See
-[Start a test session](start-a-test-session.md) instead.)
+[Start a test session](../testing/start-a-test-session.md) instead.)
 
 ## The first time
 

@@ -25,8 +25,8 @@ small clients of the Home Base's this-computer-only API and never import the ser
 | `_local_api.py` | `LocalApi(base).call(method, path, json=, body=, content_type=)`: sends the Origin header and write token, fetches the token once, raises `ApiError` with a plain-English reason (`NotRunning` if nothing answers). |
 | `_testguard.py` | The test-only guard (below). |
 
-Step-by-step instructions are in [set-up-for-testing.md](../docs/guide/set-up-for-testing.md) and
-[start-a-test-session.md](../docs/guide/start-a-test-session.md).
+Step-by-step instructions are in [set-up-for-testing.md](../docs/testing/set-up-for-testing.md) and
+[start-a-test-session.md](../docs/testing/start-a-test-session.md).
 
 ### The test-only guard
 
