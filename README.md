@@ -21,11 +21,11 @@ with no cloud, no account and no bank passwords.
 
 | Area | Features |
 | --- | --- |
-| Getting started | A **Get started** checklist on Home; a simple view, with **All tools** one switch away in **Settings** |
+| Getting started | A **Get started** checklist on Home; a simple view, with **All tools** one switch away in **Settings**; every box folds up, and remembers it |
 | Money in | Paychecks (gross, taxes withheld, net, 401k/HSA), started for you from pay deposits in your bank file |
 | Accounts | Checking, savings, cards, loans, brokerage, retirement and HSA: import bank CSV exports or enter by hand |
-| Spending | Auto-sorted transactions (rules, and ones learned from your choices), transfers between your accounts linked for you, receipts from the phone app |
-| Budget | Suggested 50/30/20 budget from your real income and spending, monthly targets vs. actual, charts |
+| Spending | Search and filter by category; auto-sorted transactions (rules, and ones learned from your choices), transfers between your accounts linked for you, receipts from the phone app |
+| Budget | Suggested 50/30/20 budget from your real income and spending, monthly targets vs. actual, charts, this month against last month, categories grouped by kind |
 | Investments | Holdings by account at live prices (optional, Finnhub) or prices you enter; broker activity and positions files; 401(k), IRA and HSA limits |
 | Taxes | Donations, stock gains (oldest shares first, short/long-term, possible wash sales), dividends, other deductions, a yearly summary to download or print |
 | Devices | Phones and other computers at home join with a one-time code |

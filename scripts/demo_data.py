@@ -14,6 +14,11 @@ from _local_api import ApiError, LocalApi
 from _testguard import refuse_unless_test_server
 
 DEMO_CHECKING = "Demo Everyday Checking"
+# Everyday spending changes a little from month to month (percent of the listed amount, by
+# months back), so the Home charts that compare months have something to show. Bills like rent
+# stay the same.
+EVERYDAY = {"Groceries", "Transportation", "Dining Out", "Shopping", "Entertainment", "Utilities"}
+MONTH_PERCENT = {2: 112, 1: 94, 0: 103}
 
 
 def months_back(today: dt.date, n: int) -> dt.date:
@@ -174,6 +179,8 @@ def load(api: LocalApi, today: dt.date) -> None:
             (27, "credit_card", -5150, "DEMO BISTRO", "Dining Out"),
         ]
         for d, account, cents, description, category in spending:
+            if category in EVERYDAY:
+                cents = -(-cents * MONTH_PERCENT[n] // 100)  # whole cents
             if happened(day(d)):
                 tx(account, day(d), cents, description, category)
         if happened(day(20)):

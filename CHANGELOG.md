@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- New screenshots in the README and the showcase tour, showing the folding boxes, the new Home charts and the Transactions search. The demo data's everyday spending now changes a little from month to month, so the month-to-month charts have something to show.
 - For maintainers: GitHub CI is paused until 2026-11-22 (it runs only by hand). When it's back it runs on pull requests into `main` and on `main`, not on stacked branches.
 - Check your stock records: the broker's positions file is now compared both ways (a stock you still hold by your records but the broker doesn't list is flagged), says whether a purchase or a sale may be missing, and counts bank-file trades still waiting for their shares. On the Stocks page each purchase and sale says what backs it up (a transaction, the broker's positions file, or **Not verified yet**), and **Show: Not verified yet** lists only those.
 - Stock trades from your bank file: lines like `ABBOTT LABORATORIES UNSOLICITED WE ARE ACTING AS PRINCIPAL ...` (Chase / J.P. Morgan) are found as purchases and sales and linked with their **deposit sweep** (`... INTRA-DAY WITHDRWAL`). Neither counts as spending or income or needs a category. The Investments page lists them with the date, company and amount; add the ticker and shares once to see the price per share and the holding (the ticker is remembered for that company's next trade). Dividend sweeps no longer show under "needs a category".
