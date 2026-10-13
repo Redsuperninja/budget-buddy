@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- A green look: Budget Buddy's main color is now green, with a faintly green page in light mode and warm charcoal in dark mode. Charts lead with green (money in, needs, what you have), with orange for money going out and blue as the third color, all checked for color blindness.
 - Light and dark look alike: in dark mode the current section and the main buttons are the same blue with white text as in light mode (they were pale blue with black text), links are easier to read in light mode, and the yellow count badges match.
 - Home flags spending that's over budget ("+17% Dining Out is $34.50 over budget") under **Needs your attention**, says when you last imported a file so you know how fresh the numbers are, and a category's bar in **Budget and actual by category** opens its transactions.
 - New screenshots in the README and the showcase tour, showing the folding boxes, the new Home charts and the Transactions search. The demo data's everyday spending now changes a little from month to month, so the month-to-month charts have something to show.
