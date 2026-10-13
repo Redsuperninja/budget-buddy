@@ -8,7 +8,8 @@ description = "Budget Buddy for Windows: the dashboard in its own window, and a 
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-dynamic = ["version"]
+# Not the release version: that one lives only in server/app/__init__.py (docs/dev/release.md).
+version = "0"
 dependencies = [
     "pywebview>=6.0",  # BSD: the window, using Windows' built-in Edge WebView2
     "pystray>=0.19",  # LGPL-3.0, used unchanged as a separate package: the tray icon
@@ -23,9 +24,6 @@ dev = [
 ]
 # Makes "Budget Buddy.exe". GPL with an exception that allows building apps like this one.
 build = ["pyinstaller>=6.10"]
-
-[tool.setuptools.dynamic]
-version = { attr = "budget_buddy_desktop.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["budget_buddy_desktop*"]

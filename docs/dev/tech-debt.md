@@ -10,9 +10,9 @@ here changes what the app does.
    branches are the biggest risk right now: every new change has to be rebased through them.
 2. **Cut 0.1.0.** Move the long `## Unreleased` list in `CHANGELOG.md` under `## 0.1.0 - <date>`, tag it, and let the
    release workflow build the download ([release.md](release.md)). From then on, one changelog section per release.
-3. **One version number.** `server/app/__init__.py` and `desktop/budget_buddy_desktop/__init__.py` both hold
-   `__version__`; `make-release.ps1` only checks they match. Keep one `VERSION` file at the root and read it in both
-   `pyproject.toml` files (and the mobile `app.json` when the phone app ships).
+3. ~~**One version number.**~~ Done: `server/app/__init__.py` holds the only `__version__`; the desktop package has a
+   fixed placeholder (it never shows its version), and `make-release.ps1` and the release workflow read the server's.
+   (A root `VERSION` file doesn't work: setuptools won't read files outside a part's folder.)
 
 ## 2. Code debt (server)
 

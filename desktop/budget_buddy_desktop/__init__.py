@@ -11,5 +11,3 @@ developing):
 This part never imports the server's code (docs/dev/conventions.md): it starts the Home Base program
 and talks to it over HTTP.
 """
-
-__version__ = "0.1.0"
