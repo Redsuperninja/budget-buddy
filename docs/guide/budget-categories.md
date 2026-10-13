@@ -19,6 +19,11 @@ You can add a category, rename it, and set a monthly budget for it (the amount y
 Income categories have no budget: your income is what the rest of the budget is measured against. Names can't repeat, and upper or lower case doesn't make a name different. You
 can't move a category to a different kind. If you picked the wrong kind, make a new category instead.
 
+On the **Categories** page (under **Budget**) your categories are listed by kind: **Needs**, **Wants**,
+**Savings**, **Income**, then **Transfer**. Each kind's title line says how many categories it has and what their
+monthly budgets add up to (amounts and percentages of income are added separately). Click a kind's title to fold
+its list up; Budget Buddy remembers that in this browser.
+
 A budget can't be negative. Budgets apply to every month, so changing one also changes what past months
 show. A budget can also be a percentage of your income: see [Budget by percentage of income](budget-by-percentage.md).
 

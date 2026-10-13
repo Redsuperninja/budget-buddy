@@ -16,17 +16,20 @@ export function advanced(el) {
 
 // A card with a title folds up when you click its title, and stays the way you left it (folds.js). A card without a
 // title is a plain box. formCard starts folded: forms to add something, so the lists come first.
-export function foldCard(title, { open = true } = {}, ...children) {
-  const id = foldId(title);
+// fold: the folding box itself. id names it in folds.js; summary is what shows when it's folded.
+export function fold(id, summary, { open = true, cls = "" } = {}, ...children) {
   const storage = browserStorage();
-  const el = h("details", { class: "card fold", open: isOpen(loadFolds(storage), id, open) },
-    h("summary", {}, h("h2", {}, title)), children);
-  // Also fires once as the page draws an open card: only a change from what's remembered is saved.
+  const el = h("details", { class: `fold ${cls}`.trim(), open: isOpen(loadFolds(storage), id, open) },
+    h("summary", {}, summary), children);
+  // Also fires once as the page draws an open box: only a change from what's remembered is saved.
   el.addEventListener("toggle", () => {
     if (el.open !== isOpen(loadFolds(storage), id, open)) saveFold(storage, id, el.open);
   });
   return el;
 }
+
+export const foldCard = (title, { open = true } = {}, ...children) =>
+  fold(foldId(title), h("h2", {}, title), { open, cls: "card" }, ...children);
 
 export const card = (title, ...children) =>
   (title ? foldCard(title, {}, ...children) : h("section", { class: "card" }, children));

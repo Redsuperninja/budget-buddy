@@ -1,11 +1,12 @@
-// Categories: rename, change the monthly budget (an amount or a percentage of income), add a new
-// one, and the planned monthly income that percentages are shares of. Income categories have no budget:
+// Categories, in a folding list per group: rename, change the monthly budget (an amount or a percentage of
+// income), add a new one, and the planned monthly income that percentages are shares of. Income categories have no budget:
 // income is what the rest of the budget is measured against.
 
 import { createCategory, getBudgetPlan, listCategories, saveBudgetPlan, updateCategory } from "../api/endpoints.js";
 import { fill, h } from "../dom.js";
 import { form, saveWithNote } from "../form.js";
-import { card, empty, formCard, note, table } from "../widgets.js";
+import { byGroup } from "../category-groups.js";
+import { card, empty, fold, formCard, note, table } from "../widgets.js";
 import { GROUPS, groupLabel } from "../labels.js";
 import { centsToInput, formatCents, parseDollars } from "../money.js";
 import { formatBp, parsePercent } from "../percent.js";
@@ -38,7 +39,19 @@ function editableRow(c) {
   const save = h("button", { class: "plain", type: "button", onclick: () => saveWithNote(note, async () => {
     await updateCategory(c.id, { name: name.value, ...(isIncome ? {} : budgetBody(budget.value)) });
   }) }, "Save");
-  return [name, groupLabel(c.group), budget, h("span", {}, save, note)];
+  return [name, budget, h("span", {}, save, note)];
+}
+
+const totalText = (g) => [g.budget_cents ? formatCents(g.budget_cents) : null,
+  g.budget_percent_bp ? `${formatBp(g.budget_percent_bp)} of income` : null].filter(Boolean).join(" + ");
+
+// One folding list per group, its title saying how many categories it has and what their budgets add up to.
+function groupFold(g) {
+  const count = g.categories.length === 1 ? "1 category" : `${g.categories.length} categories`;
+  const total = g.group === "income" || g.group === "transfer" ? "" : ` · ${totalText(g) || "no budget"} a month`;
+  return fold(`categories-${g.group}`, [h("h3", {}, groupLabel(g.group)), h("span", { class: "muted" }, count + total)],
+    { cls: "group" },
+    table(["Name", "Monthly budget ($ or %)", ""], g.categories.map(editableRow)));
 }
 
 function percentTotalNote(categories) {
@@ -70,7 +83,7 @@ export async function render(root) {
   fill(root,
     card("Categories",
       categories.length
-        ? table(["Name", "Group", "Monthly budget ($ or %)", ""], categories.map(editableRow))
+        ? byGroup(categories).map(groupFold)
         : empty("No categories yet."),
       percentTotalNote(categories),
       empty("Type an amount like 250.00, or a percentage of income like 15%. Income categories have no budget: your " +
