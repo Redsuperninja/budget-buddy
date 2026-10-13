@@ -52,3 +52,8 @@ export function centsOrThrow(text, what = "amount") {
   if (cents === null) throw new Error(`Please enter the ${what} as a number, like 12.50.`);
   return cents;
 }
+
+// Money in and money out of a list of signed amounts in cents: { in, out }, both positive.
+export function inAndOut(amounts) {
+  return amounts.reduce((t, a) => (a > 0 ? { ...t, in: t.in + a } : { ...t, out: t.out - a }), { in: 0, out: 0 });
+}

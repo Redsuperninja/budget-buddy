@@ -54,8 +54,15 @@ Lists all the money coming in and going out, and lets you add more.
 
 ### Filter transactions
 
+- **Search:** type part of a description (like `GROCERY`) and the list shows only matching transactions as you
+  type. Upper or lower case doesn't matter.
 - **Account:** Click to see transactions from one account only
-- **Month:** Click to see transactions from one month only
+- **Month:** Click to see transactions from one month only. Clear it to search every month.
+- **Category:** Click to see one category only, like everything in Dining Out
+
+When the whole list fits on the page, a line under it says how many transactions there are and how much came in
+and went out. On **Home**, click **Show as table** under **Budget and actual by category** and click a category's
+name to open its transactions for that month.
 
 ### Add a transaction
 
@@ -109,4 +116,5 @@ Either way the payment still counts once as spending in your budget. [Sort a pay
 
 **I can't find a transaction**
 
-Use the filters at the top (Account or Month) to narrow down your search. Transactions are shown newest first.
+Type part of its description in **Search**, and clear **Month** to look through every month. The other
+filters (Account, Category) narrow it down further. Transactions are shown newest first.

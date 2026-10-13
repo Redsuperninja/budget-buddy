@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  bankBalanceToCents, centsOrThrow, centsToInput, formatBalance, formatCents, parseDollars,
+  bankBalanceToCents, centsOrThrow, centsToInput, formatBalance, formatCents, inAndOut, parseDollars,
 } from "../js/money.js";
 
 test("formatCents shows dollars with two decimals and thousands separators", () => {
@@ -70,4 +70,9 @@ test("bankBalanceToCents: cards and loans are typed as what you owe", () => {
   ];
   for (const [typed, kind, cents] of cases) assert.equal(bankBalanceToCents(typed, kind), cents, `${typed} ${kind}`);
   assert.throws(() => bankBalanceToCents("lots", "checking"), /balance as a number/);
+});
+
+test("inAndOut adds money in and money out separately, both positive", () => {
+  assert.deepEqual(inAndOut([]), { in: 0, out: 0 });
+  assert.deepEqual(inAndOut([260000, -150000, -11865, 0, 6000]), { in: 266000, out: 161865 });
 });
