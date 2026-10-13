@@ -20,7 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import BankTrade, Position, StockLot, StockSaleOrder, Transaction
-from app.services.stock_records import trade_transaction_ids
+from app.services.transaction_roles import none_of, stock_trades
 
 CheckedBy = Literal["transaction", "positions_file"] | None
 
@@ -54,7 +54,7 @@ def waiting_bank_trades(session: Session, account_id: int, as_of: dt.date) -> in
                 BankTrade.dismissed.is_(False),
                 Transaction.account_id == account_id,
                 Transaction.date <= as_of,
-                Transaction.id.not_in(trade_transaction_ids()),
+                *none_of(stock_trades()),
             )
         )
         or 0

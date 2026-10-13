@@ -10,8 +10,8 @@ income category "Dividends" (made the first time), unless you or an auto-sort ru
 a category.
 
 Inside a retirement account or HSA, a dividend and its sweep stay in the account, so the monthly
-summary leaves both out (``dividends.kept_in_account``): they aren't take-home income or new
-saving.
+summary leaves both out (``transaction_roles.dividends_kept_inside``): they aren't take-home
+income or new saving.
 
 Its sweep is money out of the same account for exactly the same amount, from the day before to
 three days after, with "sweep" in the description (``sweeps.py``), like "CHASE IRA DEPOSIT SWEEP
@@ -40,6 +40,7 @@ from app.models import (
 from app.services.accounts import INVESTMENT_KINDS
 from app.services.named_categories import find_or_make
 from app.services.sweeps import link_sweeps, regular
+from app.services.transaction_roles import dividends, none_of
 
 CATEGORY = "Dividends"
 DIVIDEND_WORDS = re.compile(r"(?<![a-z])dividends?(?![a-z])", re.I)
@@ -77,7 +78,7 @@ def _new_dividends(session: Session, ids: set[int] | None) -> list[Transaction]:
         .join(Account, Account.id == Transaction.account_id)
         .where(
             Transaction.amount_cents > 0,
-            Transaction.id.not_in(select(Dividend.transaction_id)),
+            *none_of(dividends(include_dismissed=True)),
         )
     )
     if ids is not None:

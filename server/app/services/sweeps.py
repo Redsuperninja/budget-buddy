@@ -15,8 +15,16 @@ import re
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import BankTrade, Dividend, Donation, Paycheck, Transaction, TransactionKind
-from app.services.stock_records import trade_transaction_ids
+from app.models import Transaction, TransactionKind
+from app.services.transaction_roles import (
+    bank_trade_sweeps,
+    bank_trades,
+    dividend_sweeps,
+    donations,
+    none_of,
+    paycheck_deposits,
+    stock_trades,
+)
 
 SWEEP_DAYS_BEFORE = 1
 SWEEP_DAYS_AFTER = 3
@@ -28,32 +36,18 @@ def regular(query):
     return query.where(
         Transaction.kind == TransactionKind.NORMAL,
         Transaction.transfer_pair_id.is_(None),
-        Transaction.id.not_in(
-            select(Paycheck.deposit_transaction_id).where(
-                Paycheck.deposit_transaction_id.is_not(None)
-            )
-        ),
-        Transaction.id.not_in(
-            select(Donation.transaction_id).where(Donation.transaction_id.is_not(None))
-        ),
+        *none_of(paycheck_deposits(), donations()),
     )
 
 
 def _not_taken():
-    """Conditions: not a linked sweep already, and not a trade itself (a trade is never a sweep).
-    Separate conditions, since SQLite can't nest one UNION inside another."""
-    return [
-        Transaction.id.not_in(
-            select(Dividend.sweep_transaction_id).where(Dividend.sweep_transaction_id.is_not(None))
-        ),
-        Transaction.id.not_in(
-            select(BankTrade.sweep_transaction_id).where(
-                BankTrade.sweep_transaction_id.is_not(None)
-            )
-        ),
-        Transaction.id.not_in(select(BankTrade.transaction_id)),
-        Transaction.id.not_in(trade_transaction_ids()),
-    ]
+    """Conditions: not a linked sweep already, and not a trade itself (a trade is never a sweep)."""
+    return none_of(
+        dividend_sweeps(),
+        bank_trade_sweeps(),
+        bank_trades(include_dismissed=True),
+        stock_trades(),
+    )
 
 
 def link_sweeps(session: Session, waiting: list) -> int:

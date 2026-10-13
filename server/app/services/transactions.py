@@ -11,7 +11,6 @@ from app.models import (
     Category,
     CategoryGroup,
     CategorySource,
-    Dividend,
     Paycheck,
     StockLot,
     StockSaleOrder,
@@ -21,10 +20,16 @@ from app.models import (
 )
 from app.schemas.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.accounts import get_account
-from app.services.bank_trades import inside_account_ids
 from app.services.category_learning import picked_by_hand
 from app.services.category_rules import load_matcher, rule_fields
-from app.services.stock_records import trade_transaction_ids
+from app.services.transaction_roles import (
+    bank_trade_sweeps,
+    bank_trades,
+    cash_inside_account,
+    dividend_sweeps,
+    dividends,
+    none_of,
+)
 
 # Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
 # so unlink first.
@@ -135,28 +140,16 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
         query = query.where(
             Transaction.category_id.is_(None),
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
-            Transaction.id.not_in(trade_transaction_ids()),
-            Transaction.id.not_in(inside_account_ids()),
             # A dividend's sweep only parks the cash: nothing to sort.
-            Transaction.id.not_in(
-                select(Dividend.sweep_transaction_id).where(
-                    Dividend.dismissed.is_(False), Dividend.sweep_transaction_id.is_not(None)
-                )
-            ),
+            *none_of(*cash_inside_account(), dividend_sweeps()),
         )
 
     if filters.hide_adjustments:
         query = query.where(Transaction.kind != TransactionKind.ADJUSTMENT)
     if filters.hide_dividends:
-        shown = Dividend.dismissed.is_(False)
+        # Bank-file stock trades and their sweeps too.
         query = query.where(
-            Transaction.id.not_in(select(Dividend.transaction_id).where(shown)),
-            Transaction.id.not_in(
-                select(Dividend.sweep_transaction_id).where(
-                    shown, Dividend.sweep_transaction_id.is_not(None)
-                )
-            ),
-            Transaction.id.not_in(inside_account_ids()),  # stock trades and their sweeps too
+            *none_of(dividends(), dividend_sweeps(), bank_trades(), bank_trade_sweeps())
         )
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))

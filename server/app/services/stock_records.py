@@ -101,18 +101,6 @@ def check_trade_transaction(session: Session, values: dict, is_buy: bool) -> Non
     values["account_id"] = transaction.account_id
 
 
-def trade_transaction_ids():
-    """Ids of transactions classified as stock trades: cash turning into shares (or back) inside
-    an investment account, so the monthly summary leaves them out."""
-    return (
-        select(StockLot.transaction_id)
-        .where(StockLot.transaction_id.is_not(None))
-        .union(
-            select(StockSaleOrder.transaction_id).where(StockSaleOrder.transaction_id.is_not(None))
-        )
-    )
-
-
 def untaxed_account_ids(session: Session) -> set[int]:
     """Retirement and HSA accounts: selling inside them isn't taxed."""
     return set(session.scalars(select(Account.id).where(Account.kind.in_(TAX_FREE_KINDS))))

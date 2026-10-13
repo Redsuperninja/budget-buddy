@@ -13,7 +13,8 @@ handled by ``dividend_matching``, which runs first.)
   with "sweep" in it, not already a dividend's or another trade's. Closest date wins, then the one
   added first.
 - A trade and its sweep only move cash into shares (or back) inside the account, so the monthly
-  summary, "needs a category" and transfer matching leave both out (``inside_account_ids``).
+  summary, "needs a category" and transfer matching leave both out
+  (``transaction_roles.cash_inside_account``).
 - The shares, ticker and price come from the stock purchase or sale recorded from the trade
   (``StockLot`` / ``StockSaleOrder.transaction_id``): on the Investments page you type the ticker
   (remembered per company, ``SecuritySymbol``) and the shares; the price is the amount / shares.
@@ -29,10 +30,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models import Account, BankTrade, Dividend, SecuritySymbol, Transaction
+from app.models import Account, BankTrade, SecuritySymbol, Transaction
 from app.services.accounts import INVESTMENT_KINDS
 from app.services.dividend_matching import looks_like_dividend
 from app.services.sweeps import SWEEP_WORDS, link_sweeps, regular
+from app.services.transaction_roles import bank_trades, dividends, none_of
 
 # Trade-confirmation wording, which only trades carry.
 CONFIRMATION_WORDS = re.compile(
@@ -87,8 +89,7 @@ def _new_trades(session: Session, ids: set[int] | None) -> list[Transaction]:
         .where(
             Account.kind.in_(INVESTMENT_KINDS),
             Transaction.amount_cents != 0,
-            Transaction.id.not_in(select(BankTrade.transaction_id)),
-            Transaction.id.not_in(select(Dividend.transaction_id)),
+            *none_of(bank_trades(include_dismissed=True), dividends(include_dismissed=True)),
         )
     )
     if ids is not None:
@@ -128,21 +129,6 @@ def find_trades(session: Session, transaction_ids: set[int] | None = None) -> Fo
     except IntegrityError:
         return Found()
     return found
-
-
-def inside_account_ids():
-    """Ids of trades and their sweeps: cash turning into shares or back inside an account, never
-    spending, income or a transfer."""
-    shown = BankTrade.dismissed.is_(False)
-    return (
-        select(BankTrade.transaction_id)
-        .where(shown)
-        .union(
-            select(BankTrade.sweep_transaction_id).where(
-                shown, BankTrade.sweep_transaction_id.is_not(None)
-            )
-        )
-    )
 
 
 def remember_symbol(session: Session, transaction_id: int | None, symbol: str) -> None:

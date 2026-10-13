@@ -28,7 +28,7 @@ from sqlalchemy.orm import Session
 from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.services.category_learning import shop_key
 from app.services.gift_categories import CHARITY, file_under
-from app.services.stock_records import trade_transaction_ids
+from app.services.transaction_roles import donations, none_of, stock_trades
 
 # First words of a description that say how you paid, not who you paid.
 NOT_A_PAYEE = frozenset(
@@ -95,10 +95,7 @@ def _new_payments(session: Session, ids: set[int]) -> list[Transaction]:
                 Transaction.kind == TransactionKind.NORMAL,
                 Transaction.amount_cents < 0,
                 Transaction.transfer_pair_id.is_(None),
-                Transaction.id.not_in(
-                    select(Donation.transaction_id).where(Donation.transaction_id.is_not(None))
-                ),
-                Transaction.id.not_in(trade_transaction_ids()),
+                *none_of(donations(), stock_trades()),
             )
         )
     )

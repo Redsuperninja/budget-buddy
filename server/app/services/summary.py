@@ -15,9 +15,9 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
   (``savings_transfers``). They add to the savings group but to no category.
 - A percentage budget is a share of the month's budget income (``budget_plan.budget_income``).
 - A dividend paid inside a retirement account or HSA, and its deposit sweep, are left out: the
-  cash stays in the account (``dividends.kept_in_account``).
+  cash stays in the account (``transaction_roles.dividends_kept_inside``).
 - A transaction classified as a stock purchase or sale is left out too: cash turned into shares
-  (or back) inside an investment account (``stock_records.trade_transaction_ids``).
+  (or back) inside an investment account (``transaction_roles.stock_trades``).
 """
 
 import datetime as dt
@@ -28,11 +28,9 @@ from sqlalchemy.orm import Session
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.percent import percent_bp
 from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
-from app.services.bank_trades import inside_account_ids
 from app.services.budget_plan import budget_for, budget_income
-from app.services.dividends import kept_in_account
 from app.services.savings_transfers import saved_by_transfer
-from app.services.stock_records import trade_transaction_ids
+from app.services.transaction_roles import cash_inside_account, dividends_kept_inside, none_of
 
 _SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
 _REPORTED = (CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS, CategoryGroup.INCOME)
@@ -64,9 +62,7 @@ def monthly_summary(
             Transaction.date >= start,
             Transaction.date < end,
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
-            kept_in_account(Transaction.id),
-            Transaction.id.not_in(trade_transaction_ids()),
-            Transaction.id.not_in(inside_account_ids()),  # bank-file trades and their sweeps
+            *none_of(*dividends_kept_inside(), *cash_inside_account()),
         )
         .group_by(Transaction.category_id, Transaction.kind)
     ).all()

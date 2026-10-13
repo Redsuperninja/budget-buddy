@@ -32,7 +32,7 @@ transaction's, never copied.
   "Dividends" (made the first time; `category_source` stays null, as for transfers) unless you or a rule already
   set its category, or "Dividends" names one of your non-income categories.
 - **Budget**: in a retirement account or HSA (`TAX_FREE_KINDS`), a dividend and its linked sweep are left out of
-  the monthly summary (`dividends.kept_in_account`), so they're neither income nor saved; the budget engine and
+  the monthly summary (`transaction_roles.dividends_kept_inside`), so they're neither income nor saved; the budget engine and
   trend use the same summary. Elsewhere a dividend is income and its sweep keeps its own category.
 - **Totals** only count dividends whose payment is still money in and `normal`. Two `find` runs at once: the
   second adds nothing (a savepoint catches the unique-constraint clash).

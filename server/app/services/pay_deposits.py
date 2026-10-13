@@ -16,9 +16,10 @@ import re
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Account, Category, CategoryGroup, Paycheck, Transaction, TransactionKind
+from app.models import Account, Category, CategoryGroup, Transaction, TransactionKind
 from app.schemas.paychecks import PayDeposit
 from app.services.paychecks import DEPOSIT_ACCOUNT_KINDS
+from app.services.transaction_roles import none_of, paycheck_deposits
 
 _PAY = "payroll|direct dep|dir dep|salary|paycheck|pay check|wages"
 PAY_WORDS = re.compile(rf"(?<![a-z])({_PAY})(?![a-z])", re.I)
@@ -42,9 +43,6 @@ def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
         c.id: bool(PAY_CATEGORY.search(c.name))
         for c in session.scalars(select(Category).where(Category.group == CategoryGroup.INCOME))
     }
-    linked = select(Paycheck.deposit_transaction_id).where(
-        Paycheck.deposit_transaction_id.is_not(None)
-    )
     rows = session.scalars(
         select(Transaction)
         .join(Account, Account.id == Transaction.account_id)
@@ -54,7 +52,7 @@ def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
             Transaction.transfer_pair_id.is_(None),
             Transaction.amount_cents > 0,
             Transaction.date.between(dt.date(year, 1, 1), dt.date(year, 12, 31)),
-            Transaction.id.not_in(linked),
+            *none_of(paycheck_deposits()),
         )
         .order_by(Transaction.date.desc(), Transaction.id.desc())
     )
