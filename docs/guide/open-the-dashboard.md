@@ -28,8 +28,13 @@ The **Home** page shows your month at a glance:
   have two months, each tile also has a small line showing that number month by month (point at it for the
   amounts). While a month is still going, the line shows the months before it, since a part month would always
   look like a dip.
-- **Needs your attention:** transactions with no category, pay deposits to fill in, and investment positions
-  that don't match your recorded trades. Click one to go there. "All caught up" means nothing's waiting.
+- **Needs your attention:** transactions with no category, pay deposits to fill in, investment positions
+  that don't match your recorded trades, and any needs or wants category that's over its budget this month (like
+  "+17% Dining Out is $34.50 over budget"). A budget set as a percentage of income is only checked once the month is
+  over, unless you've set a planned monthly income on the Categories page: until then, its share of the pay that's
+  come in so far isn't the month's budget yet. Click one to go there. "All caught up" means nothing's waiting.
+- **Last file imported:** next to the month, when you last imported a file from your bank or broker, so you know
+  how up to date the numbers are.
 - **Where your income went:** one bar the length of your income, split into needs, wants and savings, with what's
   left over in gray. If you spent and saved more than came in, a line marks where your income ran out.
 - **What you have and owe:** your net worth, and a bar for each account: money you have to the right, money you
@@ -39,7 +44,7 @@ It also has these charts:
 
 - **Needs, wants and savings** and **Budget and actual by category:** a bar for what you've spent this month,
   and a short upright line where your budget is. If the bar goes past the line, you're over budget (the amount
-  on the right also says "over").
+  on the right also says "over"). Click a category's bar to see its transactions for the month.
 - **Compared with last month:** for each needs or wants category whose spending changed, a bar to the right if you
   spent more than last month and to the left if you spent less, with the amount in words. While the month is still
   going, it compares this month so far with the same days of last month (the 1st to the 13th against the 1st to

@@ -3,10 +3,11 @@
 // month by month, and what you have and owe. Every chart can also be read as a table.
 
 import {
-  listAccounts, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, stockHoldings,
+  listAccounts, listImports, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, stockHoldings,
 } from "../api/endpoints.js";
+import { overBadge, overBudget } from "../category-groups.js";
 import { comparedWith, fromFirstActivity } from "../charts/months.js";
-import { currentMonth, today } from "../dates.js";
+import { agoText, currentMonth, daysBetween, localDate, monthName, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { empty, table } from "../widgets.js";
 import { groupLabel } from "../labels.js";
@@ -44,10 +45,20 @@ function budgetTable(summary) {
     summary.categories.some((c) => c.budget_percent_bp !== null) ? empty(incomeBasis(summary)) : null);
 }
 
+// When a file was last imported, so it's clear how up to date these numbers are.
+function freshness(imports) {
+  if (!imports.length) return null;
+  const last = imports.map((i) => localDate(i.created_at)).sort().at(-1);
+  return h("p", { class: "muted fresh" },
+    `Last file imported ${monthName(last)} ${Number(last.slice(8))} (${agoText(daysBetween(last, today()))}).`, " ",
+    h("a", { href: "#import" }, "Import a newer one"));
+}
+
 export async function render(root, options) {
   const month = options.month || currentMonth();
   const days = comparedWith(month, today());
-  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction, soFar, before] = await Promise.all([
+  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction, soFar, before, imports] =
+    await Promise.all([
     monthlySummary(month),
     monthlyTrend(month),
     listAccounts(),
@@ -58,6 +69,7 @@ export async function render(root, options) {
     listTransactions(new URLSearchParams({ limit: "1" })),
     days.through ? monthlySummary(month, days.through) : null,
     monthlySummary(days.previous, days.previousThrough),
+    listImports(),
   ]);
   const months = fromFirstActivity(trend.months);
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
@@ -69,7 +81,7 @@ export async function render(root, options) {
   fill(root,
     startCard({ accounts: accounts.length > 0, transactions: hasTransactions,
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) }),
-    h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker)),
+    h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker), freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
     monthTiles(summary, days.through ? months.slice(0, -1) : months),
     hasTransactions && attentionCard([
@@ -79,6 +91,13 @@ export async function render(root, options) {
         text: deposits.length === 1 ? "pay deposit to fill in on Paychecks" : "pay deposits to fill in on Paychecks" },
       { count: mismatched, href: "#investments", text: mismatched === 1
         ? "position doesn't match your recorded trades" : "positions don't match your recorded trades" },
+      // Mid-month, a percentage of the income received so far isn't the month's budget yet.
+      ...overBudget(summary.categories, { skipPercent: Boolean(days.through) && summary.budget_income_source === "actual" })
+        .map((c) => ({
+          count: 1, badge: overBadge(c.over_percent),
+          href: `#transactions?category=${c.category_id}&month=${summary.month}`,
+          text: `${c.name} is ${formatCents(c.over_cents)} over budget`,
+        })),
     ]),
     hasTransactions && [
       incomeSplitCard(summary),

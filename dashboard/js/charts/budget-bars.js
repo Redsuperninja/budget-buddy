@@ -1,5 +1,6 @@
 // Spent against budget: one bar per row for what was spent, and a short dark line where the budget is.
-// rows: [{ label, actual, budget }] in cents. Hovering a row shows the exact amounts.
+// rows: [{ label, actual, budget, href? }] in cents. Hovering a row shows the exact amounts; with href, clicking it
+// opens that page (left out of the Tab order: the same links are in the chart's table, for keyboards and screen readers).
 
 import { formatCents, shortDollars } from "../money.js";
 import { percentUsed } from "../percent.js";
@@ -23,13 +24,14 @@ function row(r, i, x) {
   const spent = Math.max(0, r.actual);
   const over = r.budget > 0 && r.actual > r.budget;
   const value = `${shortDollars(spent)}${r.budget > 0 ? ` of ${shortDollars(r.budget)}` : ""}${over ? " (over)" : ""}`;
-  return s("g", { class: "row" },
+  const g = s("g", { class: r.href ? "row linked" : "row" },
     s("title", {}, rowTitle(r)),
     s("rect", { class: "hit", x: 0, y: top, width: WIDTH, height: ROW }),
     s("text", { class: "label", x: 0, y: top + 21 }, r.label),
     spent > 0 ? s("rect", { class: "bar", x: BAR_X, y: top + 10, width: x(spent) - BAR_X, height: 14, rx: 3 }) : null,
     r.budget > 0 ? s("line", { class: "budget-mark", x1: x(r.budget), x2: x(r.budget), y1: top + 5, y2: top + 29 }) : null,
     s("text", { x: BAR_END + 10, y: top + 21 }, value));
+  return r.href ? s("a", { href: r.href, tabindex: "-1" }, g) : g;
 }
 
 export function budgetBars(rows, description) {

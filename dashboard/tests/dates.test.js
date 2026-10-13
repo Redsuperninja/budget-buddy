@@ -32,3 +32,24 @@ test("monthName gives the whole month name for sentences", async () => {
   assert.equal(monthName("2026-09"), "September");
   assert.equal(monthName("2025-12"), "December");
 });
+
+test("days between dates, and in words", async () => {
+  const { agoText, daysBetween } = await import("../js/dates.js");
+  assert.equal(daysBetween("2026-10-13", "2026-10-13"), 0);
+  assert.equal(daysBetween("2026-10-02T21:15:00", "2026-10-13"), 11);
+  assert.equal(daysBetween("2026-02-28", "2026-03-01"), 1);
+  assert.equal(daysBetween("2025-12-31", "2026-01-01"), 1);
+  assert.equal(daysBetween("2026-03-07", "2026-03-09"), 2); // across the clocks changing
+  assert.equal(agoText(0), "today");
+  assert.equal(agoText(-1), "today");
+  assert.equal(agoText(1), "yesterday");
+  assert.equal(agoText(12), "12 days ago");
+});
+
+test("a UTC time becomes this computer's date", async () => {
+  const { localDate } = await import("../js/dates.js");
+  assert.equal(localDate("2026-10-13T02:30:00", 360), "2026-10-12"); // 6 hours behind UTC: still the evening before
+  assert.equal(localDate("2026-10-13T02:30:00", 0), "2026-10-13");
+  assert.equal(localDate("2026-10-13T22:30:00", -120), "2026-10-14"); // 2 hours ahead
+  assert.match(localDate("2026-10-13T12:00:00"), /^2026-10-1[2-4]$/);
+});
