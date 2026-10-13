@@ -21,7 +21,7 @@ Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
 `money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `folds.test.js`, `category-groups.test.js`,
-`labels.test.js` and `charts.test.js` cover the logic.
+`labels.test.js`, `charts.test.js` and `months.test.js` cover the logic.
 
 ## What the server expects
 
@@ -50,7 +50,7 @@ All under `js/` (each file starts with a one-line purpose):
 | `dates.js` | Today, current month, month ranges |
 | `labels.js` | Plain-English names for account types, groups and so on; `everydayFirst()` orders accounts for pickers |
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
-| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
+| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `change-bars.js` (spending against last month), `months.js` (trend trimming, sparklines, which days to compare; pure and tested), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
 | `prefs.js` | A remembered choice from a short list, shown as an attribute on `<html>` (pure, tested); used by `theme.js` and `view.js` |
 | `theme.js` | Light, dark or match the computer (`data-theme`). Colors live in `app.css` as `light-dark()` pairs |
 | `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |
@@ -62,7 +62,7 @@ Keep the top row short: add a page to an existing section rather than a new sect
 a page, card, column or field only power users need is marked `advanced` (see `view.js`). To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, the last 12 months, what you have and owe); **Money**: Transactions (with a Charity column to
+Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, compared with last month, month by month, what you have and owe); **Money**: Transactions (with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
 Connect phone, Other devices (`other-computers.js`: another computer or a phone's browser). `join.js` is the join page for another computer or phone

@@ -1,14 +1,16 @@
-// The charts on Home: needs/wants/savings against budget, spending categories against budget, and the
-// last 12 months of money in, spending and saving. Each can switch to a table.
+// The charts on Home: needs/wants/savings against budget, spending categories against budget, spending against
+// last month, and money in, spending and saving month by month. Each can switch to a table.
 
 import { budgetBars } from "../charts/budget-bars.js";
+import { changeBars, changeText } from "../charts/change-bars.js";
 import { chartCard } from "../charts/chart-card.js";
 import { lineChart } from "../charts/line-chart.js";
-import { monthLabel } from "../dates.js";
+import { dayOfMonth, hasMoney, spendingChanges } from "../charts/months.js";
+import { monthLabel, monthName } from "../dates.js";
 import { groupLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { formatBp } from "../percent.js";
-import { empty, table } from "../widgets.js";
+import { card, empty, table } from "../widgets.js";
 
 const share = (bp) => (bp === null ? "" : formatBp(bp));
 
@@ -36,18 +38,45 @@ export function categoriesChart(summary, budgetTable) {
   });
 }
 
-export function trendChart(trend) {
-  const labels = trend.months.map((m) => monthLabel(m.month));
+// months: the trend from its first month with anything in it (months.js fromFirstActivity), at most 12.
+export function trendChart(months) {
+  const labels = months.map((m) => monthLabel(m.month));
   const series = [
-    { name: "Money in", values: trend.months.map((m) => m.income_cents) },
-    { name: "Spent", values: trend.months.map((m) => m.spending_cents) },
-    { name: "Saved", values: trend.months.map((m) => m.saved_cents) },
+    { name: "Money in", values: months.map((m) => m.income_cents) },
+    { name: "Spent", values: months.map((m) => m.spending_cents) },
+    { name: "Saved", values: months.map((m) => m.saved_cents) },
   ];
-  return chartCard("The last 12 months", {
-    chart: lineChart(series, labels, "Money in, spending and saving for each of the last 12 months"),
+  return chartCard("Month by month", {
+    chart: lineChart(series, labels, `Money in, spending and saving for each of the last ${months.length} months`),
     legendNames: series.map((sr) => sr.name),
-    table: table(["Month", ...series.map((sr) => sr.name)], trend.months.map((m, i) =>
+    table: table(["Month", ...series.map((sr) => sr.name)], months.map((m, i) =>
       [labels[i], formatCents(m.income_cents), formatCents(m.spending_cents), formatCents(m.saved_cents)]), [1, 2, 3]),
-    note: empty("Point at a month to see its numbers."),
+    note: empty(`${months.length === 1 ? "Your first month" : `The last ${months.length} months`}. ` +
+      "Point at a month to see its numbers."),
+  });
+}
+
+// Spending in each category against last month: the same days of it while this month is still going.
+// days: comparedWith(...) from months.js.
+export function changesChart(current, previous, days) {
+  const lastName = monthName(days.previous);
+  let which = `this month against ${lastName}`;
+  if (days.through && days.through.endsWith("-01")) which = `the 1st of this month against the 1st of ${lastName}`;
+  else if (days.through) {
+    which = `the 1st to the ${dayOfMonth(days.through)} of this month against the same days of ${lastName}` +
+      (days.previousThrough.slice(8) < days.through.slice(8) ? ` (up to the ${dayOfMonth(days.previousThrough)})` : "");
+  }
+  // Last month with no money in it (the first month you used Budget Buddy) would make everything look like "more".
+  if (!hasMoney(previous)) {
+    return card("Compared with last month", empty(`Nothing to compare with yet: ${lastName} has no transactions.`));
+  }
+  const rows = spendingChanges(current, previous);
+  const unsorted = current.unassigned_out_cents || previous.unassigned_out_cents
+    ? " Spending without a category isn't included: give it one on the Transactions page." : "";
+  return chartCard("Compared with last month", {
+    chart: rows.length ? changeBars(rows, `How spending in each category changed: ${which}`)
+      : empty("Spending in every category you've sorted is the same as last month."),
+    table: table(["Category", "Change"], rows.map((r) => [r.label, changeText(r.cents)]), [1]),
+    note: empty(`Needs and wants: ${which}. Bars to the right mean you spent more, to the left less.${unsorted}`),
   });
 }

@@ -26,3 +26,9 @@ export function monthLabel(month) {
   const [year, m] = month.split("-");
   return m === "01" ? `Jan ${year}` : MONTHS[Number(m) - 1];
 }
+
+const NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+  "November", "December"];
+
+// "2026-09" -> "September", for sentences.
+export const monthName = (month) => NAMES[Number(month.split("-")[1]) - 1];

@@ -1,18 +1,19 @@
-// Home: a "Get started" checklist for someone new (home-start.js), the month at a glance (money tiles and what needs
-// you), where the income went, spending against budget,
-// the last 12 months, and what you have and owe. Every chart can also be read as a table.
+// Home: a "Get started" checklist for someone new (home-start.js), the month at a glance (money tiles with a small
+// trend line each, and what needs you), where the income went, spending against budget, spending against last month,
+// month by month, and what you have and owe. Every chart can also be read as a table.
 
 import {
   listAccounts, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, stockHoldings,
 } from "../api/endpoints.js";
-import { currentMonth } from "../dates.js";
+import { comparedWith, fromFirstActivity } from "../charts/months.js";
+import { currentMonth, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { empty, table } from "../widgets.js";
 import { groupLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { formatBp, percentUsed } from "../percent.js";
 import { reload } from "../router.js";
-import { categoriesChart, groupsChart, trendChart } from "./home-charts.js";
+import { categoriesChart, changesChart, groupsChart, trendChart } from "./home-charts.js";
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
 import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
@@ -43,7 +44,8 @@ function budgetTable(summary) {
 
 export async function render(root, options) {
   const month = options.month || currentMonth();
-  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction] = await Promise.all([
+  const days = comparedWith(month, today());
+  const [summary, trend, accounts, waiting, deposits, positions, held, anyTransaction, soFar, before] = await Promise.all([
     monthlySummary(month),
     monthlyTrend(month),
     listAccounts(),
@@ -52,7 +54,10 @@ export async function render(root, options) {
     listPositions(),
     stockHoldings(),
     listTransactions(new URLSearchParams({ limit: "1" })),
+    days.through ? monthlySummary(month, days.through) : null,
+    monthlySummary(days.previous, days.previousThrough),
   ]);
+  const months = fromFirstActivity(trend.months);
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
   picker.addEventListener("change", () => { if (picker.value) reload({ month: picker.value }); });
   const mismatched = positions.accounts.flatMap((a) => a.positions).filter((p) => !p.matches).length;
@@ -63,7 +68,8 @@ export async function render(root, options) {
     startCard({ accounts: accounts.length > 0, transactions: hasTransactions,
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) }),
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker)),
-    monthTiles(summary),
+    // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
+    monthTiles(summary, days.through ? months.slice(0, -1) : months),
     hasTransactions && attentionCard([
       { count: waiting.total, href: "#transactions?sorted=none",
         text: waiting.total === 1 ? "transaction needs a category" : "transactions need a category" },
@@ -76,7 +82,8 @@ export async function render(root, options) {
       incomeSplitCard(summary),
       groupsChart(summary),
       categoriesChart(summary, budgetTable(summary)),
-      trendChart(trend),
+      changesChart(soFar || summary, before, days),
+      trendChart(months),
       balancesCard(accounts, held.accounts.length ? held.value_cents : null),
       empty("Budgets are the same every month, so changing one also changes how past months look."),
     ],

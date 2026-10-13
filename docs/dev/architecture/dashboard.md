@@ -81,9 +81,13 @@ covered 100%, adds up amount and percentage budgets apart, never counting a perc
 
 Home shows money tiles with SVG meters (`screens/home-tiles.js`; inline styles are blocked by the CSP), a "needs
 your attention" list, where the income went (`charts/income-split.js`: one bar split into needs, wants, savings and
-a neutral gray left over), spending against budget (by group and by category), the last 12 months of money in,
+a neutral gray left over), spending against budget (by group and by category), spending against last month
+(`charts/change-bars.js`: more = series 2 to the right, less = series 1 to the left, always with "more" or "less"
+in words; the same days of last month while the month is going, via the summary's `through`), month by month (from
+the first month with activity, up to 12) of money in,
 spending and saving, and balances as bars either side of zero with net worth (`charts/balance-bars.js`; have =
-series 1, owe = series 2). Their maths is in `charts/shares.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
+series 1, owe = series 2). Each money tile has a sparkline of its own number over the same months.
+Their maths is in `charts/shares.js` and `charts/months.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
 the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The
 three series colors are a color-blind-checked set for both light and dark (checked with the dataviz palette

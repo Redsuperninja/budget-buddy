@@ -3,6 +3,7 @@
 
 import { h } from "../dom.js";
 import { formatCents } from "../money.js";
+import { sparkPoints } from "../charts/months.js";
 import { percentOf } from "../charts/shares.js";
 import { s as svg } from "../charts/svg.js";
 import { card } from "../widgets.js";
@@ -17,27 +18,44 @@ function meter(used, label) {
   share > 0 ? svg("rect", { class: "meter-fill", x: 0, y: 0, width: Math.min(1, share) * 100, height: 6, rx: 3 }) : null);
 }
 
-function tile(label, value, extra, cls = "") {
-  return h("div", { class: `card tile ${cls}` }, h("div", { class: "muted" }, label), h("div", { class: "big" }, value), extra);
+// A small line of the same number over the months before (at least two), drawn in the space of a line of text.
+function spark(values, label) {
+  if (values.length < 2) return null;
+  const words = `${label}, month by month: ${values.map((v) => formatCents(v)).join(", ")}`;
+  return svg("svg", { class: "spark series-1", viewBox: "0 0 100 24", preserveAspectRatio: "none", role: "img",
+    "aria-label": words },
+  svg("title", {}, words),
+  svg("polyline", { points: sparkPoints(values, 100, 22), transform: "translate(0 1)", "vector-effect": "non-scaling-stroke" }));
 }
 
-export function monthTiles(s) {
+function tile(label, value, extra, cls = "", trend = null) {
+  return h("div", { class: `card tile ${cls}` }, h("div", { class: "muted" }, label), h("div", { class: "big" }, value),
+    trend, extra);
+}
+
+// s: the month's summary; months: the trend, oldest first, ending with this month (fromFirstActivity).
+export function monthTiles(s, months = []) {
+  const line = (pick, label) => spark(months.map(pick), label);
   const leftover = s.income_cents - s.spending_cents - s.saved_cents;
   const spentShare = s.spending_budget_cents > 0 ? s.spending_cents / s.spending_budget_cents : null;
   const saveRate = percentOf(s.saved_cents, s.income_cents);
   return h("div", { class: "cards tiles" },
     tile("Money in", formatCents(s.income_cents),
-      h("div", { class: "muted" }, "What everything below is measured against")),
+      h("div", { class: "muted" }, "What everything below is measured against"), "",
+      line((m) => m.income_cents, "Money in")),
     tile("Spent", formatCents(s.spending_cents), spentShare === null
       ? h("div", { class: "muted" }, "No spending budget set")
       : h("div", {}, meter(spentShare, `${Math.round(spentShare * 100)}% of the spending budget`),
-          h("div", { class: "muted" }, `${Math.round(spentShare * 100)}% of ${formatCents(s.spending_budget_cents)} planned`))),
+          h("div", { class: "muted" }, `${Math.round(spentShare * 100)}% of ${formatCents(s.spending_budget_cents)} planned`)),
+      "", line((m) => m.spending_cents, "Spent")),
     tile("Saved", formatCents(s.saved_cents), saveRate === null ? null
       : h("div", {}, meter(saveRate / 100, `${saveRate}% of income saved`),
-          h("div", { class: "muted" }, `${saveRate}% of what came in`))),
+          h("div", { class: "muted" }, `${saveRate}% of what came in`)),
+      "", line((m) => m.saved_cents, "Saved")),
     tile(leftover < 0 ? "More out than in" : "Left over", formatCents(Math.abs(leftover)),
       h("div", { class: "muted" }, leftover < 0 ? "Spent and saved more than came in" : "Not spent or saved yet"),
-      leftover < 0 ? "bad-tile" : "good-tile"));
+      leftover < 0 ? "bad-tile" : "good-tile",
+      line((m) => m.income_cents - m.spending_cents - m.saved_cents, "Left over")));
 }
 
 // items: [{ count, text, href }] - only the ones with something to do are shown.

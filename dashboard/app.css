@@ -119,6 +119,8 @@ img.thumb { display: block; width: 4.5rem; height: 4.5rem; object-fit: cover; bo
 /* Home: money tiles with a thin meter, and the "needs your attention" list. */
 .tiles .tile { display: flex; flex-direction: column; gap: 0.35rem; }
 .tile.good-tile .big { color: var(--good); } .tile.bad-tile .big { color: var(--bad); }
+.spark { display: block; width: 100%; height: 1.5rem; overflow: visible; }
+.spark polyline { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .meter { display: block; width: 100%; height: 6px; }
 .meter .meter-track { fill: var(--line); }
 .meter .meter-fill { fill: var(--accent); }
