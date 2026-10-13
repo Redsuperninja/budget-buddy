@@ -72,6 +72,8 @@ export async function render(root, options) {
     listImports(),
   ]);
   const months = fromFirstActivity(trend.months);
+  // Mid-month, a percentage of the income received so far isn't the month's budget yet.
+  const provisional = Boolean(days.through) && summary.budget_income_source === "actual";
   const picker = h("input", { type: "month", value: summary.month, "aria-label": "Month" });
   picker.addEventListener("change", () => { if (picker.value) reload({ month: picker.value }); });
   const mismatched = positions.accounts.flatMap((a) => a.positions).filter((p) => !p.matches).length;
@@ -83,7 +85,7 @@ export async function render(root, options) {
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) }),
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker), freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
-    monthTiles(summary, days.through ? months.slice(0, -1) : months),
+    monthTiles(summary, days.through ? months.slice(0, -1) : months, provisional),
     hasTransactions && attentionCard([
       { count: waiting.total, href: "#transactions?sorted=none",
         text: waiting.total === 1 ? "transaction needs a category" : "transactions need a category" },
@@ -91,8 +93,7 @@ export async function render(root, options) {
         text: deposits.length === 1 ? "pay deposit to fill in on Paychecks" : "pay deposits to fill in on Paychecks" },
       { count: mismatched, href: "#investments", text: mismatched === 1
         ? "position doesn't match your recorded trades" : "positions don't match your recorded trades" },
-      // Mid-month, a percentage of the income received so far isn't the month's budget yet.
-      ...overBudget(summary.categories, { skipPercent: Boolean(days.through) && summary.budget_income_source === "actual" })
+      ...overBudget(summary.categories, { skipPercent: provisional })
         .map((c) => ({
           count: 1, badge: overBadge(c.over_percent),
           href: `#transactions?category=${c.category_id}&month=${summary.month}`,
@@ -102,7 +103,7 @@ export async function render(root, options) {
     hasTransactions && [
       incomeSplitCard(summary),
       groupsChart(summary),
-      categoriesChart(summary, budgetTable(summary)),
+      categoriesChart(summary, budgetTable(summary), provisional),
       changesChart(soFar || summary, before, days),
       trendChart(months),
       balancesCard(accounts, held.accounts.length ? held.value_cents : null),

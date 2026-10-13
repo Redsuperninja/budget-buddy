@@ -23,8 +23,8 @@ after you connect them with a one-time code ([use Budget Buddy on another comput
 
 The **Home** page shows your month at a glance:
 
-- **Four tiles:** money in (what everything else is measured against), what you spent (with a bar for how much of
-  your spending budget that is), what you saved (and what share of your income), and what's left over. Once you
+- **Four tiles:** money in (what everything else is measured against), what you spent (with a ring for how much of
+  your spending budget that is, and what's left), what you saved (and what share of your income), and what's left over. Once you
   have two months, each tile also has a small line showing that number month by month (point at it for the
   amounts). While a month is still going, the line shows the months before it, since a part month would always
   look like a dip.
@@ -42,9 +42,11 @@ The **Home** page shows your month at a glance:
 
 It also has these charts:
 
-- **Needs, wants and savings** and **Budget and actual by category:** a bar for what you've spent this month,
-  and a short upright line where your budget is. If the bar goes past the line, you're over budget (the amount
-  on the right also says "over"). Click a category's bar to see its transactions for the month.
+- **Needs, wants and savings:** a bar for what you've spent this month, and a short upright line where your budget
+  is. If the bar goes past the line, you're over budget (the amount on the right also says "over").
+- **Budget and actual by category:** each category with a thin bar filling up as you spend, what's left (or how
+  much you're over, in red) and what you've spent of its budget. Savings categories read as goals: "$200.00 to go",
+  and saving more than planned says "extra". Click a category's name to see its transactions for the month.
 - **Compared with last month:** for each needs or wants category whose spending changed, a bar to the right if you
   spent more than last month and to the left if you spent less, with the amount in words. While the month is still
   going, it compares this month so far with the same days of last month (the 1st to the 13th against the 1st to

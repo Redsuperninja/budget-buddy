@@ -134,6 +134,19 @@ img.thumb { display: block; width: 4.5rem; height: 4.5rem; object-fit: cover; bo
 .tile.good-tile .big { color: var(--good); } .tile.bad-tile .big { color: var(--bad); }
 .spark { display: block; width: 100%; height: 1.5rem; overflow: visible; }
 .spark polyline { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+/* Home's spending ring (js/charts/meter.js) beside its words, and the categories as progress rows. */
+.ring-row { display: flex; align-items: center; gap: 0.75rem; }
+.ring { flex: none; width: 3.75rem; height: 3.75rem; }
+.ring .ring-track { fill: none; stroke: var(--accent-soft); stroke-width: 8; }
+.ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; }
+.ring.over .ring-fill { stroke: var(--bad); }
+.ring text { fill: var(--text); font-size: 15px; font-weight: 600; }
+ul.progress-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+ul.progress-rows li { display: grid; gap: 0.35rem; }
+.progress-head { display: flex; justify-content: space-between; gap: 1rem; font-weight: 600; }
+.progress-head a { color: var(--text); text-decoration: none; }
+.progress-head a:hover { text-decoration: underline; }
 .meter { display: block; width: 100%; height: 6px; }
 .meter .meter-track { fill: var(--accent-soft); }
 .meter .meter-fill { fill: var(--accent); }
@@ -148,7 +161,7 @@ ol.steps .step-mark { flex: none; min-width: 3.5rem; text-align: center; font-si
   padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--warn-bg); }
 ol.steps li.done { color: var(--muted); }
 ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px solid var(--good); }
-.leftover { --series: light-dark(#c3c8d1, #4a5262); }
+.leftover { --series: light-dark(#c6cec8, #4f4e47); }
 .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
 .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem;
   background: var(--series); }

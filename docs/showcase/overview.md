@@ -30,14 +30,16 @@ does either. Your records sit on your computer, encrypted, and your phone joins 
 ![Home: money in, spent, saved and left over, with charts](images/home.png)
 
 Four numbers answer the questions people actually ask: *How much came in? How much did I spend? How much did I
-save? What's left?* A small line under each shows how it went over the past months. Below them, **Needs your
+save? What's left?* A ring shows how much of your spending budget is used, and a small line under each number
+shows how it went over the past months. Below them, **Needs your
 attention** lists anything waiting for you (like a payment with no category); one click takes you there.
 
-### See how this month compares
+### Every budget at a glance, and how this month compares
 
-![Home with most boxes folded, showing spending compared with last month and month by month](images/home-insights.png)
+![Home with most boxes folded, showing each category's budget and spending compared with last month](images/home-insights.png)
 
-**Compared with last month** shows, for each kind of spending, whether you spent more or less than last month,
+**Budget and actual by category** shows each category with a thin bar filling up as you spend and what's left
+(red when it's over; savings read as goals, like "$200.00 to go"). **Compared with last month** shows, for each kind of spending, whether you spent more or less than last month,
 counting the same days so a half-finished month isn't compared with a whole one. **Month by month** shows money in,
 spending and saving over time. Every box folds up to its title with one click (or **Fold all**), and Budget Buddy
 remembers what you folded, so the page shows what you care about.
@@ -61,8 +63,9 @@ broker files, live stock prices, transfer matching and more. Nothing is lost eit
 
 ![Home in dark mode](images/home-dark.png)
 
-Budget Buddy follows your computer's light or dark setting, or you can pick one in **Settings**. Both use the same
-colors, tuned for their background, so nothing changes meaning when you switch.
+Budget Buddy is green, and follows your computer's light or dark setting (or pick one in **Settings**): a faintly
+green page in light, warm charcoal in dark. Both use the same colors, tuned for their background, so nothing changes
+meaning when you switch, and the chart colors are checked for color blindness.
 
 ### Tax time without the shoebox
 
