@@ -4,8 +4,10 @@
   color-scheme: light dark;
   --bg: light-dark(#f6f7f9, #14171d); --card: light-dark(#ffffff, #1e232c); --text: light-dark(#1d2330, #e8ebf0);
   --muted: light-dark(#5d6677, #a0a8b6); --line: light-dark(#d9dde4, #343b48);
-  --accent: light-dark(#1f6feb, #5b9bff); --accent-text: light-dark(#ffffff, #0b0f16);
-  --good: light-dark(#187a3b, #5fd08a); --bad: light-dark(#b3261e, #ff8a80); --warn-bg: light-dark(#fff4d6, #3a3112);
+  /* One blue in both modes: --accent fills buttons and the current section (white text on it, 4.6:1 or more),
+     --link is the same blue as text on the page (5:1 or more on the page and on cards). */
+  --accent: light-dark(#1f6feb, #2b6cd9); --accent-text: #ffffff; --link: light-dark(#1a64d6, #6ea8ff);
+  --good: light-dark(#187a3b, #5fd08a); --bad: light-dark(#b3261e, #ff8a80); --warn-bg: light-dark(#fff4d6, #45381a);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px; line-height: 1.45;
 }
@@ -16,7 +18,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem;
   background: var(--card); border-bottom: 1px solid var(--line); }
 h1 { font-size: 1.25rem; margin: 0; }
-a { color: var(--accent); }
+a { color: var(--link); }
 h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
 h3 { font-size: 1rem; margin: 1rem 0 0.5rem; }
 nav { display: flex; flex-wrap: wrap; gap: 0.25rem; }
@@ -35,7 +37,7 @@ footer p { margin: 0.25rem 0; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
 /* "Fold all" and "Open all" above a long page (js/fold-all.js). */
 .fold-all { display: flex; justify-content: flex-end; gap: 1rem; margin: -0.25rem 0 0.5rem; }
-button.link { background: none; border: 0; padding: 0.2rem 0; font: inherit; font-size: 0.9rem; color: var(--accent);
+button.link { background: none; border: 0; padding: 0.2rem 0; font: inherit; font-size: 0.9rem; color: var(--link);
   cursor: pointer; text-decoration: underline; }
 details.about { margin: 0.5rem 0; }
 details.about > summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; width: fit-content; }
@@ -96,7 +98,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem; }
 .qr { background: #fff; padding: 0.5rem; border-radius: 8px; width: 18rem; max-width: 100%; height: auto; display: block; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
 
 /* Charts (js/charts/). Series colors are a color-blind-checked set, light and dark (dataviz palette
    slots 1-3); text always uses the text colors, never a series color. */
