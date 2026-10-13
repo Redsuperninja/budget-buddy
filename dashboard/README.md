@@ -43,6 +43,7 @@ All under `js/` (each file starts with a one-line purpose):
 | `dom.js` | `h()`, `fill()`, `showError()` (textContent only, never `innerHTML`), `browserStorage()` |
 | `widgets.js` | `card` (with a title it folds up; `formCard` starts folded; `fold` for a folding group inside a card), `statCard`, `table` (optional power-user columns), `select`, `empty`, `note`, `aboutNote` (a folded explanation), `advanced` (marks a piece as All tools only) |
 | `folds.js` | Which cards you folded, remembered in this browser (pure, tested) |
+| `fold-all.js` | **Fold all** and **Open all** above a page with three or more folding cards (the router adds it) |
 | `category-groups.js` | Categories by group with each group's budget totals (pure, tested) |
 | `form.js` | The `form()` engine (a field with `advanced: true` shows only in All tools, so it needs a default) and `saveWithNote()` |
 | `fields.js` | Shared form fields: account picker (everyday accounts first) and category picker, tax-year header (says "not tax advice" once), text-to-value helpers |
