@@ -1,15 +1,20 @@
 name: desktop-ci
 
+# Paused until 2026-11-22 (docs/dev/testing.md#ci): only runs by hand (Actions, Run workflow).
+# To bring it back, delete `workflow_dispatch:` and uncomment the lines under it: checks then run
+# on pull requests into main and on main itself, never on stacked branches.
 on:
-  pull_request:
-    paths:
-      - "desktop/**"
-      - ".github/workflows/desktop-ci.yml"
-  push:
-    branches: [main]
-    paths:
-      - "desktop/**"
-      - ".github/workflows/desktop-ci.yml"
+  workflow_dispatch:
+#  pull_request:
+#    branches: [main]
+#    paths:
+#      - "desktop/**"
+#      - ".github/workflows/desktop-ci.yml"
+#  push:
+#    branches: [main]
+#    paths:
+#      - "desktop/**"
+#      - ".github/workflows/desktop-ci.yml"
 
 permissions:
   contents: read

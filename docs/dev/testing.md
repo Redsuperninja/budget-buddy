@@ -17,7 +17,12 @@ On macOS/Linux use `.venv/bin/...`. Run the tests you touched first (`pytest -q 
 
 ## CI (`.github/workflows/`)
 
-Each part has its own workflow, triggered only by changes to that part's folder (or the workflow file):
+**Paused until 2026-11-22:** the four workflows below only run by hand (GitHub, Actions, pick one, **Run
+workflow**), so PRs can merge while CI is being fixed up. Run each part's checks locally before merging. To bring
+CI back, delete `workflow_dispatch:` in each file and uncomment the lines under it.
+
+Once back, each part has its own workflow, run on pull requests **into `main`** and on pushes to `main` (never on
+stacked branches), and only when that part's folder (or the workflow file) changed:
 
 - `server-ci.yml`: Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
 - `dashboard-ci.yml`: Node 22; `npm run coverage` (`node --test` with coverage; no dependencies to install).

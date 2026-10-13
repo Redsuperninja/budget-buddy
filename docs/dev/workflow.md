@@ -37,7 +37,8 @@ those commits and decides which ones become pull requests and get merged on GitH
 4. **Commit:** `release-manager` commits the work to its local branch (aim for < ~400 changed lines), ticks the
    roadmap box, and adds a changelog line. Nothing is pushed.
 5. **Owner review:** the project owner reviews the local branch and decides when it's pushed, opened as a PR, and merged
-   (after CI passes). Agents only push or merge when the owner asks.
+   (after CI passes; CI is paused until 2026-11-22, see [testing.md](testing.md#ci-githubworkflows)). Agents only
+   push or merge when the owner asks.
 6. **Clean up:** PRs are squash-merged, and GitHub deletes the branch automatically after the merge. The merged
    PR keeps the full record (commits, description, reviews, checks), and its branch can be restored from the PR
    page if ever needed. Then run `scripts\dev\tidy-branches.ps1 -Apply` (without `-Apply` it only shows what it
@@ -48,7 +49,8 @@ those commits and decides which ones become pull requests and get merged on GitH
 - **Changes reach `main` only through a pull request.** The repo is private on GitHub's free plan, which has no
   branch protection or rulesets, so this is enforced on each computer by the `.githooks/pre-push` hook (refuses
   pushing to `main` and deleting it). Turn it on once per clone: `git config core.hooksPath .githooks`.
-  Moving to GitHub Pro (or a public repo) would let GitHub enforce it too, with the CI checks required.
+  Moving to GitHub Pro (or a public repo) would let GitHub enforce it too, with the CI checks required: until
+  then a failed check shows on the PR but can't stop the merge.
 - **Coverage** can't drop below the floors in [testing.md](testing.md#coverage-rules); CI fails if it does.
 - **Merged branches are deleted** by GitHub automatically ("Automatically delete head branches" is on).
 
