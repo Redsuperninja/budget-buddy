@@ -4,6 +4,7 @@
 // themselves with reload() or register clean-up (stopping timers) with onLeave().
 
 import { fill, h, showError } from "./dom.js";
+import { foldAllBar } from "./fold-all.js";
 
 let sections = [];
 let pages = [];
@@ -53,6 +54,8 @@ async function show(id, options = {}) {
   fill(view, root);
   try {
     await page.render(root, options);
+    const bar = foldAllBar(root);
+    if (bar && root.isConnected) view.prepend(bar);
   } catch (err) {
     showError(root, err);
   }

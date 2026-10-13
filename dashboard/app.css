@@ -33,6 +33,10 @@ main { max-width: 64rem; margin: 0 auto; padding: 1rem; }
 footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 1.5rem 1rem; }
 footer p { margin: 0.25rem 0; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+/* "Fold all" and "Open all" above a long page (js/fold-all.js). */
+.fold-all { display: flex; justify-content: flex-end; gap: 1rem; margin: -0.25rem 0 0.5rem; }
+button.link { background: none; border: 0; padding: 0.2rem 0; font: inherit; font-size: 0.9rem; color: var(--accent);
+  cursor: pointer; text-decoration: underline; }
 details.about { margin: 0.5rem 0; }
 details.about > summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; width: fit-content; }
 /* A card with a title folds up (js/widgets.js foldCard): click the title. The arrow points down when open. */

@@ -76,7 +76,8 @@ you open one, a row of tabs appears just below the buttons. Click a tab to switc
 **Fold up what you don't need.** Click the title of any box (like **Month by month**) to fold it up to just
 its title, and click again to open it. Budget Buddy remembers which boxes you folded, in this browser. Boxes for
 adding something (**Add a transaction**, **Add a category**, **Type a price** and so on) start folded, so your
-lists come first: click the title to open the form. Longer explanations sit under **About these numbers**.
+lists come first: click the title to open the form. On a page with several boxes, **Fold all** (top right) folds
+them all so you can see every title at once, and **Open all** opens them again. Longer explanations sit under **About these numbers**.
 Printing a page shows everything, folded or not.
 
 - **Home:** your monthly budget: money in, money spent, money saved, how much of each budget you've used, what
