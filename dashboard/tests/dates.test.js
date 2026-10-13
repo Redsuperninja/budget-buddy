@@ -25,3 +25,10 @@ test("monthLabel gives short chart labels, with the year on January", async () =
   assert.equal(monthLabel("2026-12"), "Dec");
   assert.equal(monthLabel("2027-01"), "Jan 2027");
 });
+
+test("monthName gives the whole month name for sentences", async () => {
+  const { monthName } = await import("../js/dates.js");
+  assert.equal(monthName("2026-01"), "January");
+  assert.equal(monthName("2026-09"), "September");
+  assert.equal(monthName("2025-12"), "December");
+});

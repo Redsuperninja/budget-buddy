@@ -1,8 +1,10 @@
+import datetime as dt
 from typing import Annotated
 
 from fastapi import APIRouter, Query
 
 from app.deps import SessionDep, parse_month
+from app.errors import ApiError
 from app.schemas.summary import MonthlySummary, MonthlyTrend
 from app.services import summary as service
 from app.services.trend import monthly_trend
@@ -11,8 +13,14 @@ router = APIRouter(prefix="/api/local/summary", tags=["summary"])
 
 
 @router.get("/monthly")
-def monthly_summary(session: SessionDep, month: str = "") -> MonthlySummary:
-    return service.monthly_summary(session, *parse_month(month))
+def monthly_summary(
+    session: SessionDep, month: str = "", through: dt.date | None = None
+) -> MonthlySummary:
+    """The month's totals; with ``through`` (a day in that month), only up to and including it."""
+    year, number = parse_month(month)
+    if through is not None and (through.year, through.month) != (year, number):
+        raise ApiError(422, "validation_error", "Pick a day in the same month.")
+    return service.monthly_summary(session, year, number, through=through)
 
 
 @router.get("/trend")

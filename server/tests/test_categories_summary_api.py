@@ -287,3 +287,21 @@ def test_category_write_needs_matching_origin(make_client):
     c = make_client(headers={"Origin": "http://evil.example"})
     assert c.post(CATS, json={"name": "Z", "group": "needs"}).status_code == 403
     assert c.get(CATS).status_code == 200
+
+
+def test_summary_through_a_day_counts_only_up_to_it(client, add_txn, accounts):
+    groceries = cid(client, "Groceries")
+    for date in ["2026-01-01", "2026-01-15", "2026-01-16", "2026-01-31"]:
+        add_txn(accounts[0], -1_000, date=date, category_id=groceries)
+    response = client.get(SUMMARY, params={"month": "2026-01", "through": "2026-01-15"})
+    assert response.status_code == 200, response.text
+    assert response.json()["spending_cents"] == 2_000
+    last_day = client.get(SUMMARY, params={"month": "2026-01", "through": "2026-01-31"}).json()
+    assert last_day["spending_cents"] == summary(client)["spending_cents"] == 4_000
+
+
+@pytest.mark.parametrize("through", ["2026-02-01", "2025-12-31", "9999-12-31", "2026-01", "x"])
+def test_summary_through_must_be_a_day_in_that_month(client, through):
+    response = client.get(SUMMARY, params={"month": "2026-01", "through": through})
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"

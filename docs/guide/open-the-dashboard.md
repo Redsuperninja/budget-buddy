@@ -24,7 +24,10 @@ after you connect them with a one-time code ([use Budget Buddy on another comput
 The **Home** page shows your month at a glance:
 
 - **Four tiles:** money in (what everything else is measured against), what you spent (with a bar for how much of
-  your spending budget that is), what you saved (and what share of your income), and what's left over.
+  your spending budget that is), what you saved (and what share of your income), and what's left over. Once you
+  have two months, each tile also has a small line showing that number month by month (point at it for the
+  amounts). While a month is still going, the line shows the months before it, since a part month would always
+  look like a dip.
 - **Needs your attention:** transactions with no category, pay deposits to fill in, and investment positions
   that don't match your recorded trades. Click one to go there. "All caught up" means nothing's waiting.
 - **Where your income went:** one bar the length of your income, split into needs, wants and savings, with what's
@@ -37,7 +40,13 @@ It also has these charts:
 - **Needs, wants and savings** and **Budget and actual by category:** a bar for what you've spent this month,
   and a short upright line where your budget is. If the bar goes past the line, you're over budget (the amount
   on the right also says "over").
-- **The last 12 months:** lines for money in, spending and saving. Point at a month to see its exact numbers.
+- **Compared with last month:** for each needs or wants category whose spending changed, a bar to the right if you
+  spent more than last month and to the left if you spent less, with the amount in words. While the month is still
+  going, it compares this month so far with the same days of last month (the 1st to the 13th against the 1st to
+  the 13th), so a half-finished month isn't compared with a whole one. Spending without a category isn't included
+  (the chart says so when there is some), and in your first month there's nothing to compare with yet.
+- **Month by month:** lines for money in, spending and saving, from your first month with any money in it (up to
+  12 months). Point at a month to see its exact numbers.
 
 Click **Show as table** on any chart to see the same numbers as a list.
 
@@ -64,7 +73,7 @@ right and set **Colors** to **Match my computer**, **Light** or **Dark**. Your c
 The buttons at the top each open a section. **Money**, **Budget** and **Taxes** have a few pages each: when
 you open one, a row of tabs appears just below the buttons. Click a tab to switch pages.
 
-**Fold up what you don't need.** Click the title of any box (like **The last 12 months**) to fold it up to just
+**Fold up what you don't need.** Click the title of any box (like **Month by month**) to fold it up to just
 its title, and click again to open it. Budget Buddy remembers which boxes you folded, in this browser. Boxes for
 adding something (**Add a transaction**, **Add a category**, **Type a price** and so on) start folded, so your
 lists come first: click the title to open the form. Longer explanations sit under **About these numbers**.
