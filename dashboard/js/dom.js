@@ -32,3 +32,12 @@ export function fill(el, ...children) {
 }
 
 export const showError = (el, err) => fill(el, h("p", { class: "error", role: "alert" }, err.message));
+
+// This browser's storage for remembered choices, or null when the browser blocks it.
+export function browserStorage() {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}

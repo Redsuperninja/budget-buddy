@@ -65,6 +65,16 @@ choice only: the API, the data and every route are the same in both views, and a
 opens it. Home also shows a **Get started** checklist (`screens/home-start.js`) until there are accounts,
 transactions and budgets, and hides its charts until the first transaction.
 
+## Folding cards
+
+Every card with a title is a `<details>` (`widgets.js` `foldCard`): clicking the title folds it to one line. A
+card's open or folded state is remembered per browser in `localStorage` (`js/folds.js`, pure and covered 100%),
+keyed by its title without digits, so "Dividends in 2026" keeps its state next year. Only a change from what's
+remembered is saved, so a card's default can still change later. `formCard` starts folded (forms that add
+something; "Add an account" stays open until there is one), and `aboutNote` folds a long explanation under
+**About these numbers** (never a warning or the "not tax advice" line). In print, `::details-content` shows every
+folded card. A card without a title is a plain `<section>`.
+
 ## Charts
 
 Home shows money tiles with SVG meters (`screens/home-tiles.js`; inline styles are blocked by the CSP), a "needs

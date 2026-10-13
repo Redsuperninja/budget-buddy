@@ -64,6 +64,12 @@ right and set **Colors** to **Match my computer**, **Light** or **Dark**. Your c
 The buttons at the top each open a section. **Money**, **Budget** and **Taxes** have a few pages each: when
 you open one, a row of tabs appears just below the buttons. Click a tab to switch pages.
 
+**Fold up what you don't need.** Click the title of any box (like **The last 12 months**) to fold it up to just
+its title, and click again to open it. Budget Buddy remembers which boxes you folded, in this browser. Boxes for
+adding something (**Add a transaction**, **Add a category**, **Type a price** and so on) start folded, so your
+lists come first: click the title to open the form. Longer explanations sit under **About these numbers**.
+Printing a page shows everything, folded or not.
+
 - **Home:** your monthly budget: money in, money spent, money saved, how much of each budget you've used, what
   share of your income went to needs, wants and savings, and your account balances
 - **Money**

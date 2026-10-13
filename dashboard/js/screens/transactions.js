@@ -10,7 +10,7 @@ import { currentMonth, monthRange, today } from "../dates.js";
 import { fill, h, showError } from "../dom.js";
 import { accountField, categoryField, idOrNull, pickOptions } from "../fields.js";
 import { form } from "../form.js";
-import { advanced, card, empty, select, table } from "../widgets.js";
+import { advanced, card, empty, formCard, select, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { categoryPicker } from "./category-picker.js";
 import { charityCell } from "./give-to-charity.js";
@@ -90,7 +90,7 @@ export async function render(root, options = {}) {
         advanced(h("span", {}, findTransfers, matchNote))),
       list),
     accounts.length
-      ? card("Add a transaction", form([
+      ? formCard("Add a transaction", form([
           accountField(accounts),
           { name: "date", label: "Date", type: "date", value: today(), required: true },
           { name: "direction", label: "Money", options: [["out", "Money out (spent)"], ["in", "Money in (received)"]] },

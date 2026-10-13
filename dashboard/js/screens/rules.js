@@ -7,7 +7,7 @@ import { categoryField, idOrNull } from "../fields.js";
 import { form, saveWithNote } from "../form.js";
 import { reload } from "../router.js";
 import { formatCents } from "../money.js";
-import { card, empty, table } from "../widgets.js";
+import { card, empty, formCard, table } from "../widgets.js";
 import { categoryPicker } from "./category-picker.js";
 
 const SHOWN = 100;
@@ -72,7 +72,7 @@ export async function render(root) {
         "They never change a category you picked. To sort older transactions that have no category yet:"),
       sortNowButton()),
     autoSortedCard(autoSorted, rules, categories),
-    card("Add a rule", form([
+    formCard("Add a rule", form([
       { name: "pattern", label: "Description contains", required: true, maxlength: 100,
         placeholder: "GROCERY MART" },
       categoryField(categories),

@@ -6,7 +6,7 @@ import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { accountField, idOrNull, taxYearHeader } from "../fields.js";
 import { form } from "../form.js";
-import { card, empty, note, table } from "../widgets.js";
+import { card, empty, formCard, note, table } from "../widgets.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
 import { dividendsCard } from "./dividends-card.js";
@@ -58,11 +58,11 @@ export async function render(root, options) {
         : empty("No sales in this year.")),
     dividends,
     tradeRecordCards(lots, sales, accountName, year),
-    card("Add a purchase", tradeForm({
+    formCard("Add a purchase", tradeForm({
       dateName: "acquired_on", dateLabel: "Date bought", moneyName: "cost_basis",
       moneyLabel: "Total cost including fees", submitLabel: "Add purchase", save: createLot,
       moneyKey: "cost_basis_cents", moneyWhat: "cost" })),
-    card("Add a sale", tradeForm({
+    formCard("Add a sale", tradeForm({
       dateName: "sold_on", dateLabel: "Date sold", moneyName: "proceeds",
       moneyLabel: "Total received after fees", submitLabel: "Add sale", save: createSale,
       moneyKey: "proceeds_cents", moneyWhat: "amount received" })),

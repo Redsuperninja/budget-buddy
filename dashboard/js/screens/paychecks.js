@@ -6,7 +6,7 @@ import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { accountField, idOrNull, taxYearHeader } from "../fields.js";
 import { form } from "../form.js";
-import { card, empty, table } from "../widgets.js";
+import { card, empty, formCard, table } from "../widgets.js";
 import { centsToInput, formatCents, parseDollars } from "../money.js";
 import { reload } from "../router.js";
 import { payDepositsCard } from "./pay-deposits.js";
@@ -66,7 +66,7 @@ export async function render(root, options) {
 // The pay-stub form; with a deposit, it starts from that deposit and links the paycheck to it.
 function addPaycheckCard(accounts, year, deposit) {
   const start = { net_cents: deposit ? centsToInput(deposit.amount_cents) : "" };
-  return card(deposit ? `Fill in the paycheck paid on ${deposit.date}` : "Add a paycheck",
+  return (deposit ? card : formCard)(deposit ? `Fill in the paycheck paid on ${deposit.date}` : "Add a paycheck",
     empty("Copy the numbers from your pay stub. Gross minus every deduction must equal take-home pay."),
     form([
       { name: "pay_date", label: "Pay date", type: "date", value: deposit ? deposit.date : today(), required: true },
