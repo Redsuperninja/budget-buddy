@@ -1,3 +1,6 @@
+import { formatCents } from "./money.js";
+import { formatBp } from "./percent.js";
+
 // Categories sorted into their groups (needs, wants, savings, income, then transfer), each with how many it has and
 // what its monthly budgets add up to: amounts and percentages kept apart, since a percentage depends on income.
 
@@ -32,3 +35,33 @@ export function overBudget(categories, { skipPercent = false } = {}) {
 
 // The badge for how far over: "+17%", or "<1%" when it rounds down to nothing.
 export const overBadge = (percent) => (percent > 0 ? `+${percent}%` : "<1%");
+
+// What's left of a month's budget for a category: { state: "left" | "over" | "none", cents }. Refunds bigger than
+// the spending leave the whole budget; with no budget, cents is what was spent.
+export function budgetLeft(actual, budget) {
+  const spent = Math.max(0, actual);
+  if (budget <= 0) return { state: "none", cents: spent };
+  return spent > budget ? { state: "over", cents: spent - budget } : { state: "left", cents: budget - spent };
+}
+
+// The words around a budget's meter or ring: { right, below, alarm, used }.
+// row: { actual, budget, saving?, percent_bp? } in cents. saving reads as a goal ("to go", "extra", never alarming,
+// and money taken out says so). provisional: the month is still going and percentage budgets follow the pay received
+// so far, so a percentage budget is only "so far" and never alarming (percent_bp marks one).
+// used: the share to draw (0 or more), rounded down when shown as a percentage elsewhere.
+export function budgetWords(row, { provisional = false } = {}) {
+  const { actual, budget, saving = false, percent_bp: bp = null } = row;
+  const soFar = provisional && bp !== null;
+  const tail = soFar ? " so far" : "";
+  const used = budget > 0 ? Math.max(0, actual) / budget : 0;
+  const did = saving ? "saved" : "spent";
+  const below = saving && actual < 0 ? `${formatCents(-actual)} taken out`
+    : `${formatCents(Math.max(0, actual))} ${did}${budget > 0 ? ` of ${formatCents(budget)}${tail}` : ""}`;
+  if (budget <= 0) {
+    return { right: soFar ? `${formatBp(bp)} of income` : "No budget", below, alarm: false, used };
+  }
+  const left = budgetLeft(actual, budget);
+  const words = saving ? { left: "to go", over: "extra" } : { left: "left", over: "over" };
+  return { right: `${formatCents(left.cents)} ${words[left.state]}${tail}`, below,
+    alarm: left.state === "over" && !saving && !soFar, used: saving ? Math.min(1, used) : used };
+}

@@ -51,7 +51,7 @@ All under `js/` (each file starts with a one-line purpose):
 | `dates.js` | Today, current month, month ranges |
 | `labels.js` | Plain-English names for account types, groups and so on; `everydayFirst()` orders accounts for pickers |
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
-| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `change-bars.js` (spending against last month), `months.js` (trend trimming, sparklines, which days to compare; pure and tested), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
+| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `budget-bars.js` (spent against budget), `progress-rows.js` (each category's left/over with a meter), `meter.js` (meter and ring), `change-bars.js` (spending against last month), `months.js` (trend trimming, sparklines, which days to compare; pure and tested), `line-chart.js` + `hover.js` (months, with a hover guide), `chart-card.js` ("Show as table" switch and legend) |
 | `prefs.js` | A remembered choice from a short list, shown as an attribute on `<html>` (pure, tested); used by `theme.js` and `view.js` |
 | `theme.js` | Light, dark or match the computer (`data-theme`). Colors live in `app.css` as `light-dark()` pairs, the same green theme in both (`--accent` fills, `--link` is text, `--accent-soft` for meter tracks) |
 | `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |

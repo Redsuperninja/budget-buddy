@@ -5,18 +5,10 @@ import { h } from "../dom.js";
 import { formatCents } from "../money.js";
 import { sparkPoints } from "../charts/months.js";
 import { percentOf } from "../charts/shares.js";
+import { budgetWords } from "../category-groups.js";
+import { meter, ring } from "../charts/meter.js";
 import { s as svg } from "../charts/svg.js";
 import { card } from "../widgets.js";
-
-// A thin bar showing how much of something is used (0 to 1+); over 1 shows as full and "over". An SVG, since the
-// page's security rules don't allow inline styles.
-function meter(used, label) {
-  const share = Math.max(0, used);
-  return svg("svg", { class: `meter${share > 1 ? " over" : ""}`, viewBox: "0 0 100 6", preserveAspectRatio: "none",
-    role: "img", "aria-label": label },
-  svg("rect", { class: "meter-track", x: 0, y: 0, width: 100, height: 6, rx: 3 }),
-  share > 0 ? svg("rect", { class: "meter-fill", x: 0, y: 0, width: Math.min(1, share) * 100, height: 6, rx: 3 }) : null);
-}
 
 // A small line of the same number over the months before (at least two), drawn in the space of a line of text.
 function spark(values, label) {
@@ -33,21 +25,32 @@ function tile(label, value, extra, cls = "", trend = null) {
     trend, extra);
 }
 
-// s: the month's summary; months: the trend, oldest first, ending with this month (fromFirstActivity).
-export function monthTiles(s, months = []) {
+// The Spent tile's ring and words. Any percentage spending budget makes the total only "so far" while provisional.
+function spentRing(s, provisional) {
+  const percent = s.categories.some((c) => (c.group === "needs" || c.group === "wants") && c.budget_percent_bp !== null);
+  if (s.spending_budget_cents <= 0) {
+    return h("div", { class: "muted" }, provisional && percent ? "Budgets follow your pay as it comes in"
+      : "No spending budget set");
+  }
+  const w = budgetWords({ actual: s.spending_cents, budget: s.spending_budget_cents, percent_bp: percent ? 1 : null },
+    { provisional });
+  const shown = `${Math.floor(w.used * 100)}%`;
+  return h("div", { class: "ring-row" },
+    ring(w.used, `${shown} of the spending budget`, shown, w.alarm),
+    h("div", { class: "muted" }, `of ${formatCents(s.spending_budget_cents)}`, h("br"), w.right));
+}
+
+// s: the month's summary; months: the trend, oldest first, ending with this month (fromFirstActivity);
+// provisional: the month is going and percentage budgets follow the pay received so far (budgetWords).
+export function monthTiles(s, months = [], provisional = false) {
   const line = (pick, label) => spark(months.map(pick), label);
   const leftover = s.income_cents - s.spending_cents - s.saved_cents;
-  const spentShare = s.spending_budget_cents > 0 ? s.spending_cents / s.spending_budget_cents : null;
   const saveRate = percentOf(s.saved_cents, s.income_cents);
   return h("div", { class: "cards tiles" },
     tile("Money in", formatCents(s.income_cents),
       h("div", { class: "muted" }, "What everything below is measured against"), "",
       line((m) => m.income_cents, "Money in")),
-    tile("Spent", formatCents(s.spending_cents), spentShare === null
-      ? h("div", { class: "muted" }, "No spending budget set")
-      : h("div", {}, meter(spentShare, `${Math.round(spentShare * 100)}% of the spending budget`),
-          h("div", { class: "muted" }, `${Math.round(spentShare * 100)}% of ${formatCents(s.spending_budget_cents)} planned`)),
-      "", line((m) => m.spending_cents, "Spent")),
+    tile("Spent", formatCents(s.spending_cents), spentRing(s, provisional), "", line((m) => m.spending_cents, "Spent")),
     tile("Saved", formatCents(s.saved_cents), saveRate === null ? null
       : h("div", {}, meter(saveRate / 100, `${saveRate}% of income saved`),
           h("div", { class: "muted" }, `${saveRate}% of what came in`)),

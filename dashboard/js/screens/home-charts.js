@@ -2,6 +2,7 @@
 // last month, and money in, spending and saving month by month. Each can switch to a table.
 
 import { budgetBars } from "../charts/budget-bars.js";
+import { progressRows } from "../charts/progress-rows.js";
 import { changeBars, changeText } from "../charts/change-bars.js";
 import { chartCard } from "../charts/chart-card.js";
 import { lineChart } from "../charts/line-chart.js";
@@ -27,14 +28,15 @@ export function groupsChart(summary) {
   });
 }
 
-export function categoriesChart(summary, budgetTable) {
+// provisional: the month is going and percentage budgets follow the pay received so far (category-groups budgetWords).
+export function categoriesChart(summary, budgetTable, provisional = false) {
   const rows = summary.categories
     .filter((c) => c.group !== "income" && (c.budget_cents > 0 || c.actual_cents !== 0))
-    .map((c) => ({ label: c.name, actual: c.actual_cents, budget: c.budget_cents,
+    .map((c) => ({ label: c.name, actual: c.actual_cents, budget: c.budget_cents, saving: c.group === "savings",
+      percent_bp: c.budget_percent_bp,
       href: `#transactions?category=${c.category_id}&month=${summary.month}` }));
   return chartCard("Budget and actual by category", {
-    chart: rows.length ? budgetBars(rows, "Spent in each category this month, with its budget marked")
-      : empty("Nothing spent or budgeted yet this month."),
+    chart: rows.length ? progressRows(rows, { provisional }) : empty("Nothing spent or budgeted yet this month."),
     table: budgetTable,
     note: empty("Click a category to see its transactions."),
   });

@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { byGroup, overBadge, overBudget } from "../js/category-groups.js";
+import { budgetLeft, budgetWords, byGroup, overBadge, overBudget } from "../js/category-groups.js";
 
 const cat = (name, group, budget_cents = 0, budget_percent_bp = null) => ({ name, group, budget_cents, budget_percent_bp });
 
@@ -52,4 +52,45 @@ test("the over-budget badge never says +0%", () => {
   assert.equal(overBadge(0), "<1%");
   const [tiny] = overBudget([row(1, "Food", "needs", 10_000, 10_001)]);
   assert.equal(overBadge(tiny.over_percent), "<1%");
+});
+
+test("what's left of a budget, or how far over", () => {
+  assert.deepEqual(budgetLeft(21_200, 60_000), { state: "left", cents: 38_800 });
+  assert.deepEqual(budgetLeft(60_000, 60_000), { state: "left", cents: 0 });
+  assert.deepEqual(budgetLeft(23_450, 20_000), { state: "over", cents: 3_450 });
+  assert.deepEqual(budgetLeft(-2_399, 15_000), { state: "left", cents: 15_000 }); // refunds bigger than spending
+  assert.deepEqual(budgetLeft(4_000, 0), { state: "none", cents: 4_000 });
+  assert.deepEqual(budgetLeft(-500, 0), { state: "none", cents: 0 });
+});
+
+test("budget words: spending left and over", () => {
+  assert.deepEqual(budgetWords({ actual: 21_216, budget: 60_000 }),
+    { right: "$387.84 left", below: "$212.16 spent of $600.00", alarm: false, used: 0.3536 });
+  assert.deepEqual(budgetWords({ actual: 23_450, budget: 20_000 }),
+    { right: "$34.50 over", below: "$234.50 spent of $200.00", alarm: true, used: 1.1725 });
+  assert.deepEqual(budgetWords({ actual: 4_000, budget: 0 }),
+    { right: "No budget", below: "$40.00 spent", alarm: false, used: 0 });
+});
+
+test("budget words: refunds bigger than spending use nothing", () => {
+  assert.deepEqual(budgetWords({ actual: -2_399, budget: 15_000 }),
+    { right: "$150.00 left", below: "$0.00 spent of $150.00", alarm: false, used: 0 });
+});
+
+test("budget words: savings are goals, never alarming, and money taken out says so", () => {
+  assert.deepEqual(budgetWords({ actual: 35_000, budget: 30_000, saving: true }),
+    { right: "$50.00 extra", below: "$350.00 saved of $300.00", alarm: false, used: 1 });
+  assert.deepEqual(budgetWords({ actual: 0, budget: 20_000, saving: true }),
+    { right: "$200.00 to go", below: "$0.00 saved of $200.00", alarm: false, used: 0 });
+  assert.equal(budgetWords({ actual: -5_000, budget: 20_000, saving: true }).below, "$50.00 taken out");
+});
+
+test("budget words: a percentage budget mid-month is only so far", () => {
+  const row = { actual: 40_000, budget: 30_000, percent_bp: 1_500 };
+  assert.deepEqual(budgetWords(row, { provisional: true }),
+    { right: "$100.00 over so far", below: "$400.00 spent of $300.00 so far", alarm: false, used: 4 / 3 });
+  assert.equal(budgetWords(row).alarm, true);
+  assert.deepEqual(budgetWords({ actual: 4_000, budget: 0, percent_bp: 1_500 }, { provisional: true }),
+    { right: "15% of income", below: "$40.00 spent", alarm: false, used: 0 });
+  assert.equal(budgetWords({ actual: 1, budget: 100 }, { provisional: true }).right, "$0.99 left"); // amounts aren't "so far"
 });

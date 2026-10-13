@@ -92,8 +92,11 @@ wants categories over budget (`category-groups.js` `overBudget`, with the percen
 than "+0%"; percentage budgets are skipped while the month is going and budgets follow actual income, since a share of
 part of a month's pay isn't the month's budget), and the
 toolbar says when a file was last imported (`imports` list; its UTC `created_at` becomes a local date with
-`dates.localDate`). Category bars link to `#transactions?category=&month=` (an SVG `<a>` left out of the Tab order;
-the chart's table has the same links for keyboards and screen readers).
+`dates.localDate`). Budget and actual by category is a list of progress rows (`charts/progress-rows.js`: name linking to
+`#transactions?category=&month=`, "left"/"over" from `category-groups.budgetLeft`, a meter, "spent of"; savings read
+as goals, "to go"/"extra", never red), and the Spent tile has a ring (`charts/meter.js` `ring`, the meter's circular
+form: theme green on its lighter step, red once over). Group bars (`budget-bars.js`) still link per row when given
+an `href` (an SVG `<a>` left out of the Tab order).
 Their maths is in `charts/shares.js` and `charts/months.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
 the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The
