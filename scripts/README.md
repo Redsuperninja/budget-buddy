@@ -13,7 +13,7 @@ files are small clients of the Home Base's this-computer-only API and never impo
 | `setup.ps1` | testers | One-time install of the Home Base (with developer tools) and the phone app's tools. |
 | `start-test-server.ps1` | testers | Starts a TEST Home Base on port 8766 with its own data folder (`-Reset` starts over). |
 | `start-phone-app.ps1` | testers | Starts the phone app for Expo Go. |
-| `load-demo-data.ps1` (`demo_data.py`) | testers | Fills the empty test Home Base with made-up accounts, spending and paychecks. |
+| `load-demo-data.ps1` (`demo_data.py`) | testers | Fills the empty test Home Base with made-up accounts, spending and paychecks (three months; everyday spending varies a little each month, so month-to-month charts have something to show). |
 | `import-csv.ps1` (`import_csv.py`) | testers | Previews a bank CSV (try `sample-bank-statement.csv`), then imports it after you confirm. |
 | `pair-phone.ps1` (`pair_phone.py`) | testers | Starts pairing and shows the QR code for the phone to scan. |
 | `test-settings.ps1` | testers | Test settings (port 8766, test data folder) on top of `paths.ps1`. |
