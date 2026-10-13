@@ -62,7 +62,7 @@ Keep the top row short: add a page to an existing section rather than a new sect
 a page, card, column or field only power users need is marked `advanced` (see `view.js`). To call a new
 server route, add a function to `api/endpoints.js`.
 
-Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, compared with last month, month by month, what you have and owe); **Money**: Transactions (with a Charity column to
+Screens, by section: **Home** (a Get started checklist for someone new in `home-start.js`, money tiles, what needs you, where the income went, budget charts, compared with last month, month by month, what you have and owe); **Money**: Transactions (search, filters by account, month, category and how it was sorted, a totals line, and options like `#transactions?category=3&month=2026-10` that Home's category links use; with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
 Connect phone, Other devices (`other-computers.js`: another computer or a phone's browser). `join.js` is the join page for another computer or phone

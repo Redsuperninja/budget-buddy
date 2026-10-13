@@ -32,13 +32,15 @@ const incomeBasis = (s) => (s.budget_income_source === "planned"
     "Set a planned monthly income on the Categories page to keep them steady.");
 
 // Income isn't budgeted: it's what the budgets are measured against, shown in "Money in" above.
+// Each category name opens its transactions for the month.
 function budgetTable(summary) {
   const budgeted = summary.categories.filter((c) => c.group !== "income");
   if (!budgeted.length) return empty("No categories yet.");
+  const link = (c) => h("a", { href: `#transactions?category=${c.category_id}&month=${summary.month}` }, c.name);
   return h("div", {},
     table(["Category", "Group", "Budget (monthly)", "Actual this month", "Used"],
       budgeted.map((c) =>
-        [c.name, groupLabel(c.group), budgetCell(c), formatCents(c.actual_cents), used(c)]), [2, 3, 4]),
+        [link(c), groupLabel(c.group), budgetCell(c), formatCents(c.actual_cents), used(c)]), [2, 3, 4]),
     summary.categories.some((c) => c.budget_percent_bp !== null) ? empty(incomeBasis(summary)) : null);
 }
 
