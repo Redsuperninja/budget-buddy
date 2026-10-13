@@ -1,6 +1,7 @@
 # Accounts and transactions (the ledger)
 
-Code: `services/accounts.py`, `services/transactions.py`, `routers/accounts.py`, `routers/transactions.py`.
+Code: `services/accounts.py`, `services/transactions.py`, `services/transaction_roles.py`, `routers/accounts.py`,
+`routers/transactions.py`.
 Common API rules: [server.md](server.md).
 
 ## Transaction kinds and what counts as income or spending
@@ -13,6 +14,19 @@ Common API rules: [server.md](server.md).
 - `adjustment`: corrects a balance, including the **opening balance** of a new account. **Adjustments
   (including opening balances) change balances but are never counted as income or spending.** They have
   no category, so they can't slip in through a category group.
+
+## Transaction roles
+
+Besides its kind and category, a transaction can be **used as** something, recorded by a link from another
+table: a paycheck's deposit, a donation, a stock purchase or sale, a trade or dividend found in a bank file, or
+the deposit sweep next to one. `services/transaction_roles.py` is the one place that knows those links. Each
+role is a select of transaction ids, and `none_of(...)` turns roles into conditions (one `NOT IN` each, since
+SQLite can't nest one `UNION` inside another). The monthly summary, "needs a category", transfer matching,
+sweep and trade finding, repeat gifts and pay deposits all leave roles out through it, so a new role is added
+there once. Two groups are named: `cash_inside_account()` (stock trades, bank-file trades and their sweeps:
+never spending, income or a transfer) and `dividends_kept_inside()` (a dividend in a retirement account or HSA,
+and its sweep). A dismissed dividend or bank trade loses its sweep, so a linked sweep always belongs to one
+that's shown.
 
 ## Signs and balances
 

@@ -1,6 +1,6 @@
 # Stock trades in a bank file, and their deposit sweeps
 
-Code: `services/bank_trades.py` (find trades, link sweeps, `inside_account_ids`, remember tickers),
+Code: `services/bank_trades.py` (find trades, link sweeps, remember tickers),
 `services/bank_trade_list.py` (the list with price per share, "not a trade"), `models/trades.py`,
 `schemas/bank_trades.py`, `routers/bank_trades.py`. Dashboard: `screens/bank-trades-card.js` on Investments.
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).

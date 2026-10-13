@@ -1,5 +1,5 @@
-"""Dividends: the yearly list and totals, "not a dividend", and which ones the monthly summary
-leaves out. Finding them is in ``dividend_matching``."""
+"""Dividends: the yearly list and totals, and "not a dividend". Finding them is in
+``dividend_matching``; which ones the monthly summary leaves out is in ``transaction_roles``."""
 
 import datetime as dt
 
@@ -47,23 +47,6 @@ def list_dividends(session: Session, tax_year: int) -> DividendsOut:
         total_cents=sum(d.amount_cents for d in dividends),
         taxed_cents=sum(d.amount_cents for d in dividends if d.taxed),
     )
-
-
-def kept_in_account(column):
-    """A condition on a transaction id column: true unless it's a dividend paid inside a
-    retirement account or HSA, or that dividend's deposit sweep. That cash stays in the account,
-    so it isn't take-home income or new saving, and the monthly summary leaves it out."""
-    inside = (
-        select(Dividend)
-        .join(Transaction, Transaction.id == Dividend.transaction_id)
-        .join(Account, Account.id == Transaction.account_id)
-        .where(Dividend.dismissed.is_(False), Account.kind.in_(TAX_FREE_KINDS))
-    )
-    paid = inside.with_only_columns(Dividend.transaction_id)
-    swept = inside.with_only_columns(Dividend.sweep_transaction_id).where(
-        Dividend.sweep_transaction_id.is_not(None)
-    )
-    return column.not_in(paid) & column.not_in(swept)
 
 
 def dismiss(session: Session, dividend_id: int) -> None:

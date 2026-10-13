@@ -32,14 +32,16 @@ from app.models import (
     AccountKind,
     Category,
     CategoryGroup,
-    Dividend,
-    Donation,
-    Paycheck,
     Transaction,
     TransactionKind,
 )
-from app.services.bank_trades import inside_account_ids
-from app.services.stock_records import trade_transaction_ids
+from app.services.transaction_roles import (
+    cash_inside_account,
+    dividend_sweeps,
+    donations,
+    none_of,
+    paycheck_deposits,
+)
 from app.services.transfers import pair_up
 
 WINDOW_DAYS = 5
@@ -76,14 +78,7 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
             Transaction.transfer_pair_id.is_(None),
             Transaction.auto_transfer_off.is_(False),
             Transaction.amount_cents != 0,
-            Transaction.id.not_in(select(Paycheck.deposit_transaction_id).where(
-                Paycheck.deposit_transaction_id.is_not(None))),
-            Transaction.id.not_in(select(Donation.transaction_id).where(
-                Donation.transaction_id.is_not(None))),
-            Transaction.id.not_in(trade_transaction_ids()),
-            Transaction.id.not_in(select(Dividend.sweep_transaction_id).where(
-                Dividend.sweep_transaction_id.is_not(None))),
-            Transaction.id.not_in(inside_account_ids()),
+            *none_of(paycheck_deposits(), donations(), dividend_sweeps(), *cash_inside_account()),
             Transaction.category_id.is_(None) | Transaction.category_id.in_(transfer_categories),
         )
     )  # fmt: skip

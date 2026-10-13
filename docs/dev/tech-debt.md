@@ -16,12 +16,9 @@ here changes what the app does.
 
 ## 2. Code debt (server)
 
-1. **One idea of "what a transaction is".** Whether a transaction is spending, income, a transfer, a paycheck
-   deposit, a donation, a dividend, a stock trade or a sweep is worked out by chains of `NOT IN (...)` subqueries
-   repeated in `services/summary.py`, `transactions.py` (the uncategorized filter), `transfer_matching.py`,
-   `repeat_gifts.py`, `dividend_matching.py`, `sweeps.py` and `bank_trades.py`. Each new feature adds another link
-   in every chain (and SQLite can't nest unions, which bit us once). Fix: one module, `services/transaction_roles.py`,
-   with `role_conditions(...)` (or a stored `role` column kept up to date) that every caller uses. Biggest win.
+1. ~~**One idea of "what a transaction is".**~~ Done: `services/transaction_roles.py` holds every role (paycheck
+   deposit, donation, stock trade, bank-file trade, dividend, sweep) and `none_of(...)`, and every query uses it
+   ([ledger.md](architecture/ledger.md#transaction-roles)). A stored `role` column wasn't needed.
 2. **Dividends and bank trades are the same shape** (a payment, its sweep, a name, `dismissed`). Now that sweeps are
    shared (`services/sweeps.py`), also share "find, file, dismiss" so a third kind (interest, fees) is a small
    addition.
