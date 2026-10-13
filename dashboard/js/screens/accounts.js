@@ -8,7 +8,7 @@ import { form } from "../form.js";
 import { ACCOUNT_KINDS, RETIREMENT_TYPES } from "../labels.js";
 import { formatBalance } from "../money.js";
 import { reload } from "../router.js";
-import { card, empty, table } from "../widgets.js";
+import { card, empty, foldCard, table } from "../widgets.js";
 import { balanceCard } from "./account-balance.js";
 import { accountTypeCell } from "./account-type.js";
 
@@ -21,7 +21,7 @@ export async function render(root, options) {
             formatBalance(a.balance_cents, a.kind), a.transaction_count]), [3, 4])
       : empty("No accounts yet.")),
     accounts.length ? balanceCard(accounts, options.balanceDone) : null,
-    card("Add an account",
+    foldCard("Add an account", { open: !accounts.length },
       form([
         { name: "name", label: "Name", required: true, maxlength: 100, placeholder: "Everyday checking" },
         { name: "kind", label: "Type", options: ACCOUNT_KINDS },

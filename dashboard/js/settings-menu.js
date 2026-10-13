@@ -1,18 +1,10 @@
 // The "Settings" menu in the page header: Colors (Match my computer, Light, Dark) and View (Simple or All
 // tools). Applies the saved choices as soon as the page starts.
 
-import { h } from "./dom.js";
+import { browserStorage, h } from "./dom.js";
 import { THEMES, applyTheme, loadTheme, saveTheme } from "./theme.js";
 import { VIEWS, applyView, loadView, saveView } from "./view.js";
 import { select } from "./widgets.js";
-
-function browserStorage() {
-  try {
-    return window.localStorage;
-  } catch {
-    return null;
-  }
-}
 
 // A labelled picker that applies and remembers its choice.
 function picker(label, name, choices, { load, save, apply }) {

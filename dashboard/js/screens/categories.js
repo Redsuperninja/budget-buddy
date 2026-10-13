@@ -5,7 +5,7 @@
 import { createCategory, getBudgetPlan, listCategories, saveBudgetPlan, updateCategory } from "../api/endpoints.js";
 import { fill, h } from "../dom.js";
 import { form, saveWithNote } from "../form.js";
-import { card, empty, note, table } from "../widgets.js";
+import { card, empty, formCard, note, table } from "../widgets.js";
 import { GROUPS, groupLabel } from "../labels.js";
 import { centsToInput, formatCents, parseDollars } from "../money.js";
 import { formatBp, parsePercent } from "../percent.js";
@@ -77,7 +77,7 @@ export async function render(root) {
         "income is what everything else is measured against. " +
         "A category's group can't be changed once made. A budget applies to every month.")),
     plannedIncomeCard(plan),
-    card("Add a category", form([
+    formCard("Add a category", form([
       { name: "name", label: "Name", required: true, maxlength: 100 },
       { name: "group", label: "Group", options: GROUPS },
       { name: "budget", label: "Monthly budget ($ or %; not for income)", value: "0", inputmode: "decimal" },

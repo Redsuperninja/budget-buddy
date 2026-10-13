@@ -11,7 +11,7 @@ import { form } from "../form.js";
 import { kindLabel, retirementTypeLabel } from "../labels.js";
 import { formatCents } from "../money.js";
 import { reload } from "../router.js";
-import { advanced, card, empty, note, table } from "../widgets.js";
+import { aboutNote, advanced, card, empty, formCard, table } from "../widgets.js";
 import { priceText, refreshButton, refreshIfOn, settingsCard } from "./live-prices.js";
 import { bankTradesCard } from "./bank-trades-card.js";
 import { positionsCards } from "./positions-card.js";
@@ -32,7 +32,7 @@ function accountCard(group) {
 }
 
 function priceForm(year) {
-  return card("Type a price",
+  return formCard("Type a price",
     empty("Type the latest price of one share, from your broker's website or app. It replaces the last price, " +
       "live or typed in. Use this for funds live prices don't cover."),
     form([
@@ -74,7 +74,7 @@ export async function render(root, options) {
     settingsCard(year), positionsCards(accounts, year), bankTradesCard()]);
   fill(root,
     card("Your investments",
-      note(held.note),
+      aboutNote(held.note),
       refreshed ? h("p", { class: "muted", role: "status" }, refreshed) : null,
       refreshButton(year, enabled),
       h("p", {}, h("strong", {}, `All accounts: ${money(held.value_cents)}`),

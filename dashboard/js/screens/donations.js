@@ -6,7 +6,7 @@ import { thisYear, today } from "../dates.js";
 import { fill, h } from "../dom.js";
 import { taxYearHeader } from "../fields.js";
 import { form, saveWithNote } from "../form.js";
-import { card, empty, statCard, table } from "../widgets.js";
+import { card, empty, formCard, statCard, table } from "../widgets.js";
 import { donationKindLabel } from "../labels.js";
 import { centsOrThrow, formatCents } from "../money.js";
 import { reload } from "../router.js";
@@ -52,7 +52,7 @@ export async function render(root, options) {
       empty("Tip: to turn a payment into a gift, click Mark as gift on the Transactions page (under Money). " +
         "If a charity gave you money back, lower or remove the gift here."),
       empty(`Tax data last reviewed ${summary.tax_data_last_reviewed}.`)),
-    card("Add a donation", form([
+    formCard("Add a donation", form([
       { name: "date", label: "Date you gave it", type: "date", value: today(), required: true },
       { name: "organization", label: "Charity", required: true, maxlength: 200 },
       { name: "kind", label: "Type",
