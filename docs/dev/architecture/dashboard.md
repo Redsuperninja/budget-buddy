@@ -87,7 +87,13 @@ a neutral gray left over), spending against budget (by group and by category), s
 in words; the same days of last month while the month is going, via the summary's `through`), month by month (from
 the first month with activity, up to 12) of money in,
 spending and saving, and balances as bars either side of zero with net worth (`charts/balance-bars.js`; have =
-series 1, owe = series 2). Each money tile has a sparkline of its own number over the same months.
+series 1, owe = series 2). Each money tile has a sparkline of its own number over the same months. "Needs your attention" adds needs and
+wants categories over budget (`category-groups.js` `overBudget`, with the percent over as the badge, "<1%" rather
+than "+0%"; percentage budgets are skipped while the month is going and budgets follow actual income, since a share of
+part of a month's pay isn't the month's budget), and the
+toolbar says when a file was last imported (`imports` list; its UTC `created_at` becomes a local date with
+`dates.localDate`). Category bars link to `#transactions?category=&month=` (an SVG `<a>` left out of the Tab order;
+the chart's table has the same links for keyboards and screen readers).
 Their maths is in `charts/shares.js` and `charts/months.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
 the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The

@@ -57,6 +57,13 @@ Budget Buddy starts in a **simple view** with only the everyday pages and button
 open **Settings** and switch **View** to **All tools**. That adds import history, automatic sorting rules,
 broker files, live stock prices, transfer matching and more. Nothing is lost either way; it's just tidied away.
 
+### Light or dark
+
+![Home in dark mode](images/home-dark.png)
+
+Budget Buddy follows your computer's light or dark setting, or you can pick one in **Settings**. Both use the same
+colors, tuned for their background, so nothing changes meaning when you switch.
+
 ### Tax time without the shoebox
 
 ![The yearly tax summary](images/tax-summary.png)

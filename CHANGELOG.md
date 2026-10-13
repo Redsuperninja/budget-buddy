@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Light and dark look alike: in dark mode the current section and the main buttons are the same blue with white text as in light mode (they were pale blue with black text), links are easier to read in light mode, and the yellow count badges match.
+- Home flags spending that's over budget ("+17% Dining Out is $34.50 over budget") under **Needs your attention**, says when you last imported a file so you know how fresh the numbers are, and a category's bar in **Budget and actual by category** opens its transactions.
 - New screenshots in the README and the showcase tour, showing the folding boxes, the new Home charts and the Transactions search. The demo data's everyday spending now changes a little from month to month, so the month-to-month charts have something to show.
 - For maintainers: GitHub CI is paused until 2026-11-22 (it runs only by hand). When it's back it runs on pull requests into `main` and on `main`, not on stacked branches.
 - Check your stock records: the broker's positions file is now compared both ways (a stock you still hold by your records but the broker doesn't list is flagged), says whether a purchase or a sale may be missing, and counts bank-file trades still waiting for their shares. On the Stocks page each purchase and sale says what backs it up (a transaction, the broker's positions file, or **Not verified yet**), and **Show: Not verified yet** lists only those.

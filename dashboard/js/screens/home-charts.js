@@ -30,11 +30,13 @@ export function groupsChart(summary) {
 export function categoriesChart(summary, budgetTable) {
   const rows = summary.categories
     .filter((c) => c.group !== "income" && (c.budget_cents > 0 || c.actual_cents !== 0))
-    .map((c) => ({ label: c.name, actual: c.actual_cents, budget: c.budget_cents }));
+    .map((c) => ({ label: c.name, actual: c.actual_cents, budget: c.budget_cents,
+      href: `#transactions?category=${c.category_id}&month=${summary.month}` }));
   return chartCard("Budget and actual by category", {
     chart: rows.length ? budgetBars(rows, "Spent in each category this month, with its budget marked")
       : empty("Nothing spent or budgeted yet this month."),
     table: budgetTable,
+    note: empty("Click a category to see its transactions."),
   });
 }
 

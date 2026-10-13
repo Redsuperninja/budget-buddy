@@ -32,3 +32,21 @@ const NAMES = ["January", "February", "March", "April", "May", "June", "July", "
 
 // "2026-09" -> "September", for sentences.
 export const monthName = (month) => NAMES[Number(month.split("-")[1]) - 1];
+
+// Whole days from "YYYY-MM-DD..." (a date, or the date part of a date and time) to `today` ("YYYY-MM-DD").
+export function daysBetween(from, today) {
+  const day = (text) => Date.UTC(...text.slice(0, 10).split("-").map((n, i) => Number(n) - (i === 1 ? 1 : 0)));
+  return Math.round((day(today) - day(from)) / 86_400_000);
+}
+
+// "today", "yesterday" or "12 days ago".
+export function agoText(days) {
+  if (days <= 0) return "today";
+  return days === 1 ? "yesterday" : `${days} days ago`;
+}
+
+// The local "YYYY-MM-DD" of a time the Home Base saved in UTC without saying so ("2026-10-13T02:30:00").
+// offsetMinutes: this computer's offset from UTC as getTimezoneOffset() gives it (minutes behind UTC).
+export function localDate(utcText, offsetMinutes = new Date(`${utcText}Z`).getTimezoneOffset()) {
+  return new Date(Date.parse(`${utcText}Z`) - offsetMinutes * 60_000).toISOString().slice(0, 10);
+}

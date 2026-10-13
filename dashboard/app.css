@@ -116,6 +116,9 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 .chart .dot { fill: var(--series); stroke: var(--card); stroke-width: 2; }
 .chart .hit { fill: transparent; pointer-events: all; }
 .chart .row:hover .hit { fill: var(--line); opacity: 0.35; }
+.chart .linked { cursor: pointer; }
+.chart .linked:hover text.label { text-decoration: underline; }
+.toolbar .fresh { margin: 0 0 0.5rem auto; }
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }
 .chart .tip-box { fill: var(--card); stroke: var(--line); }
 .chart .tip text { fill: var(--text); }

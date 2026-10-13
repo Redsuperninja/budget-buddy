@@ -58,10 +58,11 @@ export function monthTiles(s, months = []) {
       line((m) => m.income_cents - m.spending_cents - m.saved_cents, "Left over")));
 }
 
-// items: [{ count, text, href }] - only the ones with something to do are shown.
+// items: [{ count, text, href, badge? }] - only the ones with something to do are shown. The badge (like "+18%")
+// shows instead of the count.
 export function attentionCard(items) {
   const todo = items.filter((i) => i.count > 0);
   if (!todo.length) return card(null, h("p", { class: "ok" }, "All caught up: nothing needs you right now."));
   return card("Needs your attention", h("ul", { class: "todo" }, todo.map((i) =>
-    h("li", {}, h("span", { class: "count" }, String(i.count)), " ", h("a", { href: i.href }, i.text)))));
+    h("li", {}, h("span", { class: "count" }, i.badge || String(i.count)), " ", h("a", { href: i.href }, i.text)))));
 }
