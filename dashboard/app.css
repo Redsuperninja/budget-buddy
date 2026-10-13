@@ -2,11 +2,14 @@
    setting data-theme="light" or "dark" on <html>. light-dark() takes the light value first. */
 :root {
   color-scheme: light dark;
-  --bg: light-dark(#f6f7f9, #14171d); --card: light-dark(#ffffff, #1e232c); --text: light-dark(#1d2330, #e8ebf0);
-  --muted: light-dark(#5d6677, #a0a8b6); --line: light-dark(#d9dde4, #343b48);
-  /* One blue in both modes: --accent fills buttons and the current section (white text on it, 4.6:1 or more),
-     --link is the same blue as text on the page (5:1 or more on the page and on cards). */
-  --accent: light-dark(#1f6feb, #2b6cd9); --accent-text: #ffffff; --link: light-dark(#1a64d6, #6ea8ff);
+  /* Green theme: a faintly green page in light, warm charcoal in dark (never blue-black). */
+  --bg: light-dark(#f3f6f2, #1a1a17); --card: light-dark(#ffffff, #262622); --text: light-dark(#1c2420, #ecebe6);
+  --muted: light-dark(#5a665e, #a9a89f); --line: light-dark(#d8e0da, #3a3a34); --header: light-dark(#e9f4ec, #22221e);
+  /* One green in both modes: --accent fills buttons and the current section, with white text on it (4.9:1),
+     --link is the same green as text on the page (5:1 or more on the page and on cards), and --accent-soft is a
+     lighter step of it for the unfilled part of a meter or ring. */
+  --accent: #1f8050; --accent-text: #ffffff; --link: light-dark(#1a7347, #6fd3a0);
+  --accent-soft: light-dark(#d6ebdd, #2f4337);
   --good: light-dark(#187a3b, #5fd08a); --bad: light-dark(#b3261e, #ff8a80); --warn-bg: light-dark(#fff4d6, #45381a);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px; line-height: 1.45;
@@ -16,7 +19,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem;
-  background: var(--card); border-bottom: 1px solid var(--line); }
+  background: var(--header); border-bottom: 1px solid var(--line); }
 h1 { font-size: 1.25rem; margin: 0; }
 a { color: var(--link); }
 h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
@@ -24,7 +27,7 @@ h3 { font-size: 1rem; margin: 1rem 0 0.5rem; }
 nav { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 nav button { background: none; border: 1px solid transparent; color: var(--text); padding: 0.4rem 0.75rem;
   border-radius: 6px; font: inherit; cursor: pointer; }
-nav button[aria-current="page"] { background: var(--accent); color: var(--accent-text); }
+nav button[aria-current="page"] { background: var(--accent); color: var(--accent-text); border-radius: 999px; }
 /* Page tabs inside the current section (Money, Budget, Taxes). */
 .subnav { max-width: 64rem; margin: 0 auto; padding: 0.75rem 1rem 0; border-bottom: 1px solid var(--line); }
 .subnav[hidden] { display: none; }
@@ -100,11 +103,12 @@ button:disabled { opacity: 0.5; cursor: default; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
 
-/* Charts (js/charts/). Series colors are a color-blind-checked set, light and dark (dataviz palette
-   slots 1-3); text always uses the text colors, never a series color. */
-.series-1 { --series: light-dark(#2a78d6, #3987e5); }
+/* Charts (js/charts/). Series colors are a color-blind-checked set, light and dark (every pair checked with the
+   dataviz palette validator against the cards): green leads (money in, needs, what you have, spending less), orange
+   is money going out (spent, wants, owed, spending more), blue the third. Text always uses the text colors. */
+.series-1 { --series: light-dark(#2ea36a, #24a86f); }
 .series-2 { --series: light-dark(#eb6834, #d95926); }
-.series-3 { --series: light-dark(#1baf7a, #199e70); }
+.series-3 { --series: light-dark(#2a78d6, #3987e5); }
 .chart { display: block; width: 100%; height: auto; overflow: visible; }
 .chart text { fill: var(--muted); font-size: 12px; }
 .chart text.label { fill: var(--text); }
@@ -131,7 +135,7 @@ img.thumb { display: block; width: 4.5rem; height: 4.5rem; object-fit: cover; bo
 .spark { display: block; width: 100%; height: 1.5rem; overflow: visible; }
 .spark polyline { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .meter { display: block; width: 100%; height: 6px; }
-.meter .meter-track { fill: var(--line); }
+.meter .meter-track { fill: var(--accent-soft); }
 .meter .meter-fill { fill: var(--accent); }
 .meter.over .meter-fill { fill: var(--bad); }
 ul.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }

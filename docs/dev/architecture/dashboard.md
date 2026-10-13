@@ -97,9 +97,12 @@ the chart's table has the same links for keyboards and screen readers).
 Their maths is in `charts/shares.js` and `charts/months.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
 the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The
-three series colors are a color-blind-checked set for both light and dark (checked with the dataviz palette
+three series colors (green, orange, blue) are a color-blind-checked set for both light and dark (checked with the dataviz palette
 validator against the card colors); text never uses a series color, and the line ends carry the series names.
 
-Light and dark use the same palette, stepped for each background, never flipped: `--accent` is the one blue that
-fills buttons and the current section, with white text in both (4.6:1 or more), and `--link` is that blue as text
-on the page (5:1 or more on the page and on cards). Good, bad and the yellow note keep their hue in both.
+Light and dark use the same green palette, stepped for each background, never flipped: a faintly green page
+(`--bg`, `--header`) in light and warm charcoal in dark. `--accent` is the one green that fills buttons and the current
+section, with white text in both (4.9:1), `--link` is that green as text on the page (5:1 or more on the page and
+on cards), and `--accent-soft` is its lighter step for the unfilled part of a meter. Good, bad and the yellow note
+keep their hue in both. Chart series: green, orange, blue (every pair passes the validator's color-blind checks in
+both modes; a lime green was tried and fails against orange).
