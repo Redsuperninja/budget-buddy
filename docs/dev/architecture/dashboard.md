@@ -93,3 +93,7 @@ the CSP and the safety tests are unchanged; the only web address in them is the 
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The
 three series colors are a color-blind-checked set for both light and dark (checked with the dataviz palette
 validator against the card colors); text never uses a series color, and the line ends carry the series names.
+
+Light and dark use the same palette, stepped for each background, never flipped: `--accent` is the one blue that
+fills buttons and the current section, with white text in both (4.6:1 or more), and `--link` is that blue as text
+on the page (5:1 or more on the page and on cards). Good, bad and the yellow note keep their hue in both.
