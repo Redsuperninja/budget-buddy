@@ -20,7 +20,7 @@ node --test
 Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no packages):
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
-`money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `folds.test.js`,
+`money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `folds.test.js`, `category-groups.test.js`,
 `labels.test.js` and `charts.test.js` cover the logic.
 
 ## What the server expects
@@ -41,8 +41,9 @@ All under `js/` (each file starts with a one-line purpose):
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |
 | `dom.js` | `h()`, `fill()`, `showError()` (textContent only, never `innerHTML`), `browserStorage()` |
-| `widgets.js` | `card` (with a title it folds up; `formCard` starts folded), `statCard`, `table` (optional power-user columns), `select`, `empty`, `note`, `aboutNote` (a folded explanation), `advanced` (marks a piece as All tools only) |
+| `widgets.js` | `card` (with a title it folds up; `formCard` starts folded; `fold` for a folding group inside a card), `statCard`, `table` (optional power-user columns), `select`, `empty`, `note`, `aboutNote` (a folded explanation), `advanced` (marks a piece as All tools only) |
 | `folds.js` | Which cards you folded, remembered in this browser (pure, tested) |
+| `category-groups.js` | Categories by group with each group's budget totals (pure, tested) |
 | `form.js` | The `form()` engine (a field with `advanced: true` shows only in All tools, so it needs a default) and `saveWithNote()` |
 | `fields.js` | Shared form fields: account picker (everyday accounts first) and category picker, tax-year header (says "not tax advice" once), text-to-value helpers |
 | `money.js` | Cents to dollars and typed dollars to cents (string logic, no float maths) |

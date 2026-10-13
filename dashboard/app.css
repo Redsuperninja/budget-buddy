@@ -39,13 +39,18 @@ details.about > summary { cursor: pointer; color: var(--muted); font-size: 0.9re
 details.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 0.6rem;
   margin: -0.25rem -0.25rem 0; padding: 0.25rem; border-radius: 6px; }
 details.fold > summary::-webkit-details-marker { display: none; }
-details.fold > summary::before { content: ""; flex: none; width: 0.45rem; height: 0.45rem; margin: 0 0.15rem;
+details.fold > summary::before { content: ""; align-self: center; flex: none; width: 0.45rem; height: 0.45rem; margin: 0 0.15rem;
   border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg);
   transition: transform 0.15s; }
 details.fold[open] > summary::before { transform: rotate(45deg); }
 details.fold > summary:hover { background: color-mix(in srgb, var(--line) 40%, transparent); }
 details.fold > summary h2 { margin: 0; }
 details.fold[open] > summary { margin-bottom: 0.75rem; }
+/* A folding group inside a card (Categories: Needs, Wants, ...): a title line with its count and total. */
+details.fold.group { border-top: 1px solid var(--line); padding: 0.5rem 0; }
+details.fold.group > summary { flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+details.fold.group > summary h3 { margin: 0; }
+details.fold.group table { table-layout: fixed; } /* the groups' columns line up */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
 .cards .card { margin: 0; }
 .big { font-size: 1.5rem; font-weight: 600; }

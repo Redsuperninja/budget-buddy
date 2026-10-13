@@ -73,7 +73,9 @@ keyed by its title without digits, so "Dividends in 2026" keeps its state next y
 remembered is saved, so a card's default can still change later. `formCard` starts folded (forms that add
 something; "Add an account" stays open until there is one), and `aboutNote` folds a long explanation under
 **About these numbers** (never a warning or the "not tax advice" line). In print, `::details-content` shows every
-folded card. A card without a title is a plain `<section>`.
+folded card. A card without a title is a plain `<section>`. `fold()` is the
+folding box itself, for groups inside a card: Categories lists one per group (`category-groups.js`, pure and
+covered 100%, adds up amount and percentage budgets apart, never counting a percentage category's stored cents).
 
 ## Charts
 
