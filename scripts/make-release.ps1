@@ -7,18 +7,9 @@
 
 . "$PSScriptRoot\paths.ps1"
 
-function Read-Version($File) {
-    $match = Select-String -Path $File -Pattern '__version__ = "([^"]+)"'
-    if (-not $match) { throw "No __version__ in $File." }
-    return $match.Matches[0].Groups[1].Value
-}
-
-$Version = Read-Version (Join-Path $ServerDir "app\__init__.py")
-$DesktopVersion = Read-Version (Join-Path $DesktopDir "budget_buddy_desktop\__init__.py")
-if ($Version -ne $DesktopVersion) {
-    Write-Host "The Home Base is version $Version but the desktop app is $DesktopVersion. Make them match first." -ForegroundColor Yellow
-    exit 1
-}
+$Match = Select-String -Path (Join-Path $ServerDir "app\__init__.py") -Pattern '__version__ = "([^"]+)"'
+if (-not $Match) { throw "No __version__ in server\app\__init__.py." }
+$Version = $Match.Matches[0].Groups[1].Value
 
 $Name = "Budget-Buddy-$Version-Windows"
 $Stage = Join-Path $RepoRoot "build\release\$Name"

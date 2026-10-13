@@ -19,8 +19,8 @@ from source.
 ## Checklist
 
 1. On `main`, with every part's checks green ([testing.md](testing.md)).
-2. Set the version in **both** `server/app/__init__.py` and `desktop/budget_buddy_desktop/__init__.py` (the
-   script refuses a mismatch). Move the `## Unreleased` lines in `CHANGELOG.md` under `## <version> - <date>`.
+2. Set the version in `server/app/__init__.py`, the only place it lives (the zip name and the installer's
+   `version.txt` come from it). Move the `## Unreleased` lines in `CHANGELOG.md` under `## <version> - <date>`.
 3. Build and try it locally: `powershell -ExecutionPolicy Bypass -File scripts\make-release.ps1`, unzip
    `dist\Budget-Buddy-<version>-Windows.zip` somewhere new, run **Install Budget Buddy**, open it from the Start
    menu, check Home's Get started list, then uninstall from Windows Settings, Apps.
