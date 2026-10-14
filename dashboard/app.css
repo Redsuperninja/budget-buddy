@@ -172,6 +172,8 @@ ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px 
 .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem;
   margin-bottom: 1rem; }
 .duo > .card { margin: 0; min-width: 0; }
+/* Investments, "Deposit sweeps to check": the match picker never pushes the table wider than the card. */
+select.sweep-pick { width: 20rem; max-width: 100%; }
 p.lead { margin: 0 0 0.5rem; font-size: 1.02rem; }
 .leftover { --series: light-dark(#c6cec8, #4f4e47); }
 .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }

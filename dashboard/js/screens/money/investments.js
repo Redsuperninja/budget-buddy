@@ -14,6 +14,7 @@ import { reload } from "../../router.js";
 import { aboutNote, advanced, card, empty, formCard, table } from "../../widgets.js";
 import { priceText, refreshButton, refreshIfOn, settingsCard } from "./live-prices.js";
 import { bankTradesCard } from "./bank-trades-card.js";
+import { sweepCheckCard } from "./sweep-check-card.js";
 import { positionsCards } from "./positions-card.js";
 
 const money = (cents) => (cents === null ? "no price yet" : formatCents(cents));
@@ -70,8 +71,9 @@ export async function render(root, options) {
   const year = options.year || thisYear();
   const { enabled, note: refreshed } = await refreshIfOn();  // prices first, so the totals below use them
   const accounts = await listAccounts();
-  const [held, limits, settings, positions, trades] = await Promise.all([stockHoldings(), retirementLimits(year),
-    settingsCard(year), positionsCards(accounts, year), bankTradesCard()]);
+  const [held, limits, settings, positions, trades, sweeps] = await Promise.all([stockHoldings(), retirementLimits(year),
+    settingsCard(year), positionsCards(accounts, year), bankTradesCard(),
+    sweepCheckCard()]);
   fill(root,
     card("Your investments",
       aboutNote(held.note),
@@ -82,6 +84,7 @@ export async function render(root, options) {
       held.accounts.length ? null : empty("No shares held. Add purchases on the Stocks page (under Taxes).")),
     held.accounts.map(accountCard),
     trades,
+    sweeps,
     positions,
     priceForm(year),
     advanced(settings),

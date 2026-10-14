@@ -84,6 +84,27 @@ purchase or sale on the **Stocks** page instead. Cancelled or corrected trades, 
 funds and bonds coming due aren't counted as trades. Dividends and their sweeps are handled the same
 way, on the Stocks page ([dividends](dividends.md)).
 
+### Deposit sweeps to check
+
+Budget Buddy only links a sweep by itself when it's sure: the line says "sweep", it's in the same account, it's
+for exactly the opposite amount, and it's from a day before to three days after the dividend or trade. Your broker
+may do things a little differently, like sweeping a week later or a few cents off. The **Deposit sweeps to
+check** box on the **Investments** page shows what's left over:
+
+- For each account, how many dividends and trades it has, how many already have their sweep, and how many sweep
+  lines aren't linked to anything. When these don't add up, it says what's missing.
+- Each sweep line that isn't linked, with the dividends and trades it could go with: in the same account, moving
+  the cash the other way, up to two weeks away, and for the same amount or close to it (within $1, or 1% of a
+  bigger amount). The same amount comes first. Pick the one it goes with and click **Link**. Changed your mind?
+  Click **Undo** right away.
+
+Link only when you're sure it's the same money: once linked, the sweep's whole amount stops counting in your
+budget and it no longer needs a category. If the amounts are a little apart, Budget Buddy says by how much and asks
+first, because that difference won't be counted anywhere. A dividend's sweep you already gave a category (say,
+savings) still counts there. A sweep line in a different account (like your checking account) can't be linked:
+that's real money moving between your accounts. Only lines with the word "sweep" in them are listed. **Match
+everything again** on the Transactions page keeps the links you made here.
+
 ## Import your broker's positions file
 
 Most brokers let you download your positions (also called holdings) as a CSV file. On the **Investments** page
