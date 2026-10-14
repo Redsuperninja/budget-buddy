@@ -94,12 +94,22 @@ function parseOrThrow(input: unknown): Snapshot {
     transactions: arr(root.transactions, 'transactions').map((t, i) =>
       parseTransaction(t, `transactions[${i}]`),
     ),
-    accounts: arr(root.accounts, 'accounts')
-      .map((a, i) => parseAccount(a, `accounts[${i}]`))
-      .filter((a): a is SnapshotAccount => a !== null),
+    ...accountsOf(root),
     tax: parseTax(root.tax, 'tax'),
     settings: parseSettings(root.settings, 'settings'),
   };
+}
+
+/** The accounts this app can show, and how many it can't (also counting ones a saved copy skipped). */
+function accountsOf(root: Record<string, unknown>): { accounts: SnapshotAccount[]; skipped_accounts?: number } {
+  const raw = arr(root.accounts, 'accounts');
+  const accounts = raw
+    .map((a, i) => parseAccount(a, `accounts[${i}]`))
+    .filter((a): a is SnapshotAccount => a !== null);
+  const before = typeof root.skipped_accounts === 'number' && Number.isInteger(root.skipped_accounts)
+    ? Math.max(0, root.skipped_accounts) : 0;
+  const skipped = raw.length - accounts.length + before;
+  return skipped > 0 ? { accounts, skipped_accounts: skipped } : { accounts };
 }
 
 /**

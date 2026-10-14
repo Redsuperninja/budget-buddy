@@ -30,6 +30,11 @@ export interface Snapshot {
   };
   transactions: SnapshotTransaction[];
   accounts: SnapshotAccount[];
+  /**
+   * Accounts of a kind this app version can't show yet (contract §7.1 drops them). Counted on the
+   * phone, never sent by the Home Base, and kept when a saved snapshot is read again.
+   */
+  skipped_accounts?: number;
   tax: TaxSummary;
   settings: SyncSettings;
 }
