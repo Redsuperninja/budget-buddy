@@ -13,6 +13,19 @@ Your phone syncs by itself once, right after you connect it. If a sync doesn't w
 the phone and a message tells you what to do. To see what each part of the Home screen means, read
 [What your phone's Home screen shows](phone-home-screen.md).
 
+## Reminders to sync
+Your phone can remind you when it hasn't synced for a while. After your first sync it asks once whether it may
+remind you: tap **Allow reminders**, then say yes when your phone asks about notifications.
+
+In **Settings**, under **Remind me to sync**, pick **Every day**, **Every 2 days** or **Every 3 days** (your
+computer's suggestion is marked and used until you pick), or **Off**. The reminder comes that many days after your
+last sync, and if you still haven't synced, once more on each of the next two days. Never at night: one due between
+9 PM and 9 AM waits until 9 AM. Each sync starts the count again.
+
+The reminder only says it's time to sync, and how many receipts are waiting if any: no amounts or other budget
+details appear on your lock screen. It's made by your phone itself; nothing is sent to your computer or anywhere
+else.
+
 ## What goes to your phone
 - This month's budget: how much you planned and spent in Needs, Wants and Savings.
 - The last 60 days of transactions (date, short description, amount).

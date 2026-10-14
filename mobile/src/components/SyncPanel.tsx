@@ -2,8 +2,10 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
 
+import { ReminderOffer } from '@/components/ReminderOffer';
 import { BigButton, Card } from '@/components/Screen';
 import { getNeedsAttention } from '@/sync/credentials';
+import { shouldOfferReminders } from '@/sync/reminders';
 import { runSync } from '@/sync/runSync';
 import { useSnapshot } from '@/sync/store';
 import { useTheme } from '@/theme';
@@ -30,6 +32,7 @@ export function SyncPanel() {
   const { saveSnapshot } = useSnapshot();
   const [status, setStatus] = useState<Status>({ name: 'idle' });
   const [needsAttention, setNeedsAttention] = useState(false);
+  const [offerReminders, setOfferReminders] = useState(false);
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -49,6 +52,8 @@ export function SyncPanel() {
     if (outcome.ok) {
       setNeedsAttention(false);
       setStatus({ name: 'done' });
+      const offer = await shouldOfferReminders();
+      if (mounted.current) setOfferReminders(offer);
     } else {
       setNeedsAttention(outcome.needsAttention);
       setStatus({ name: 'error', message: outcome.message });
@@ -76,6 +81,7 @@ export function SyncPanel() {
           </Text>
         </Card>
       ) : null}
+      {offerReminders ? <ReminderOffer onDone={() => setOfferReminders(false)} /> : null}
       {needsAttention ? <PairAgainButton /> : null}
     </>
   );

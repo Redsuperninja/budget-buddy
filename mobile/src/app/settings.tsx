@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { BigButton, BodyText, Card, Screen } from '@/components/Screen';
 import { LastSynced } from '@/components/SnapshotNotices';
 import { SyncPanel } from '@/components/SyncPanel';
+import { SyncReminders } from '@/components/SyncReminders';
 import { loadCredentials } from '@/sync/credentials';
 
 export default function SettingsScreen() {
@@ -33,6 +34,7 @@ export default function SettingsScreen() {
       </Card>
       <LastSynced />
       <SyncPanel />
+      <SyncReminders />
       <BigButton
         label={computer ? 'Connect to a different computer' : 'Connect to your computer'}
         onPress={() => router.push('/pair')}

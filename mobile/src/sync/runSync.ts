@@ -5,6 +5,7 @@
 import Constants from 'expo-constants';
 
 import { loadCredentials } from './credentials';
+import { rescheduleReminders } from './reminders';
 import { PAIR_MESSAGES, PairError, NEEDS_ATTENTION_CODES } from './pairErrors';
 import type { PairErrorCode } from './pairErrors';
 import type { Snapshot } from './snapshot';
@@ -25,7 +26,12 @@ export function runSync(save: (snapshot: Snapshot) => Promise<string | null>): P
     try {
       const creds = await loadCredentials();
       if (!creds) return { ok: false, message: NOT_CONNECTED_MESSAGE, code: 'not_connected', needsAttention: false };
-      await syncNow(creds, { save, appVersion: Constants.expoConfig?.version ?? '1.0.0' });
+      const { snapshot } = await syncNow(creds, { save, appVersion: Constants.expoConfig?.version ?? '1.0.0' });
+      // Contract §9: fresh reminders, counted from this sync.
+      await rescheduleReminders({
+        lastSyncedAt: new Date().toISOString(),
+        suggestedDays: snapshot.settings.reminder_days_default,
+      });
       return { ok: true };
     } catch (e) {
       const err = e instanceof PairError ? e : new PairError('something_wrong');
