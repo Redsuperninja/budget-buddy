@@ -139,3 +139,24 @@ export function cleanUpPhotos(): Promise<void> {
 export async function waitingCount(): Promise<number> {
   return (await listReceipts()).filter((r) => r.state === 'waiting').length;
 }
+
+/** False when there's a saved list this phone can't open (its key is gone, say after a restore). */
+export async function queueReadable(): Promise<boolean> {
+  try {
+    await loadList();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Throw away every waiting receipt and photo. Offered only when the list can't be opened: then nothing
+ * in it can be read or sent, and new photos couldn't be added.
+ */
+export function clearQueue(): Promise<void> {
+  return inTurn(async () => {
+    await AsyncStorage.removeItem(QUEUE_KEY);
+    for (const id of listPhotoIds()) deletePhoto(id);
+  });
+}

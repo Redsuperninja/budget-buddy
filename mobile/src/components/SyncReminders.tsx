@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text } from 'react-native';
 
+import { ChoiceChips } from '@/components/Field';
 import { BodyText, Card } from '@/components/Screen';
 import { useSnapshot } from '@/sync/store';
 import {
@@ -54,32 +55,15 @@ export function SyncReminders() {
         A reminder on this phone when it hasn't synced for a while, so your budget here stays up to date. Never at
         night (9 PM to 9 AM).
       </BodyText>
-      <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
-        {REMINDER_CHOICES.map((option) => {
-          const selected = shown === option;
-          const label = reminderLabel(option) + (option === suggested ? ' (suggested)' : '');
-          return (
-            <Pressable
-              key={option}
-              accessibilityRole="radio"
-              accessibilityLabel={label}
-              accessibilityState={{ checked: selected, disabled: choice === undefined }}
-              disabled={choice === undefined}
-              onPress={() => void choose(option)}
-              style={{
-                minHeight: t.minTouchSize,
-                justifyContent: 'center',
-                paddingHorizontal: t.spacing.md,
-                borderRadius: t.radius.md,
-                borderWidth: 2,
-                borderColor: selected ? t.colors.primary : t.colors.border,
-                backgroundColor: selected ? t.colors.primary : t.colors.surface,
-              }}>
-              <Text style={{ fontSize: t.fontSizes.body, color: selected ? t.colors.onPrimary : t.colors.text }}>{label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ChoiceChips
+        choices={REMINDER_CHOICES.map((option) => ({
+          value: option,
+          label: reminderLabel(option) + (option === suggested ? ' (suggested)' : ''),
+        }))}
+        selected={shown}
+        disabled={choice === undefined}
+        onChoose={(option) => void choose(option)}
+      />
       {message ? (
         <Text accessibilityRole="alert" style={{ fontSize: t.fontSizes.body, color: t.colors.negative }}>
           {message}

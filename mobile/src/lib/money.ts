@@ -29,3 +29,15 @@ export function formatCents(cents: number, currency = 'USD'): string {
 
   return `${negative ? '-' : ''}${dollars}.${fraction.toString().padStart(2, '0')}`;
 }
+
+/**
+ * Typed dollars to whole cents with string logic only (no float maths): "12.34", "$1,234.5", ".50" and
+ * "12." all work. Returns null for anything else, a negative amount, or more than 2 decimal places.
+ */
+export function parseDollars(text: string): number | null {
+  const t = text.trim().replace(/^\$/, '').replace(/,/g, '');
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(t)) return null;
+  const [whole, fraction = ''] = t.split('.');
+  if (fraction.length > 2 || whole.length > 9) return null;
+  return Number(whole || '0') * 100 + Number((fraction + '00').slice(0, 2));
+}

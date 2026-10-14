@@ -1,18 +1,20 @@
 import { useEffect } from 'react';
 
+import { sweepPhotoCaches } from '@/receipts/photo';
 import { cleanUpPhotos, waitingCount } from '@/receipts/receiptQueue';
 import { rescheduleReminders } from '@/sync/reminders';
 import { useSnapshot } from '@/sync/store';
 
 /**
- * At app start, once the saved snapshot is read: reminders made fresh (contract §9), and photo files no
- * queued receipt lists cleaned up.
+ * At app start, once the saved snapshot is read: reminders made fresh (contract §9), photo files no
+ * queued receipt lists cleaned up, and any plain photo the camera left behind deleted.
  */
 export function ReminderKeeper() {
   const { loading, lastSyncedAt, snapshot, isSample } = useSnapshot();
   useEffect(() => {
     if (loading) return;
     void (async () => {
+      sweepPhotoCaches();
       await cleanUpPhotos();
       await rescheduleReminders({
         lastSyncedAt,

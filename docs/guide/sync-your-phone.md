@@ -37,7 +37,9 @@ else.
 It never includes account numbers, your notes, receipt photos, or employer names.
 
 ## Receipts
-Taking receipt photos on the phone and sending them to your computer is coming in a later version.
+Receipts you photographed on the phone go to your computer first, then your budget comes back. One your computer
+can't use stays on the phone with a short reason, so you can take it again. See
+[Take receipt photos](take-receipt-photos.md).
 
 ## Is it private?
 Yes. Everything is scrambled with a key that only your phone and your computer have, even on your own Wi-Fi.
