@@ -31,6 +31,10 @@ Yes. Everything is scrambled with a key that only your phone and your computer h
 Each message works only once, so nobody can record one and send it again. Only phones on your home network can
 reach your computer for syncing.
 
+The budget kept on your phone is scrambled too, with a key that never leaves the phone, so it isn't readable in a
+phone backup. If you restore your phone from a backup or move to a new phone, the app shows sample data until you
+sync again on your home Wi-Fi.
+
 ## Lost your phone?
 Remove it on your computer right away: see [Manage connected phones](manage-connected-phones.md).
 

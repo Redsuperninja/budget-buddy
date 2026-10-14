@@ -12,8 +12,12 @@ Folder: `mobile/` ([mobile/README.md](../../../mobile/README.md) for running it,
   Pairing: [pairing.md](pairing.md). Syncing: [sync.md](sync.md).
 - **Reminders:** a local notification when the last sync is older than the chosen interval (default 2 days,
   adjustable 1–3); rules in sync contract §9.
-- **Storage:** keys and tokens in `expo-secure-store` only; the snapshot in AsyncStorage (no keys in it).
-  Encrypting the saved snapshot is issue #19.
+- **Storage:** keys and tokens in `expo-secure-store` only. The snapshot is in AsyncStorage, always encrypted
+  (`src/sync/cacheCrypto.ts`, `snapshotDisk.ts`): `nacl.secretbox` with a fresh nonce each save and its own 32-byte
+  key in secure store (`budgetbuddy.cache_key.v1`, `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, so never in a backup), stored
+  as `budgetbuddy.snapshot.v2` = `{"v":1,"n","c"}`. A copy that won't open counts as "nothing saved"; an older
+  plain `budgetbuddy.snapshot.v1` is deleted as soon as it is read, then saved again sealed; saves run one at a time. No secure random source: nothing is saved.
+  Android app backup is off (`app.json` `allowBackup: false`).
 
 If the phone can't reach the Home Base it says so in plain words ("Make sure your computer is on and Budget
 Buddy is running").

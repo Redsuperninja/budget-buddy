@@ -9,7 +9,7 @@ import { SAMPLE_BANNER_TEXT } from '@/components/SnapshotNotices';
 import { oldMonthNotice, phoneMonth } from '@/lib/months';
 import { SAMPLE_SNAPSHOT } from '@/sync/sampleSnapshot';
 import { SNAPSHOT_INVALID_MESSAGE } from '@/sync/snapshot';
-import { SNAPSHOT_STORAGE_KEY, SnapshotProvider } from '@/sync/store';
+import { LEGACY_SNAPSHOT_KEY, SNAPSHOT_STORAGE_KEY, SnapshotProvider } from '@/sync/store';
 
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -91,7 +91,7 @@ describe('Home screen', () => {
     const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
     copy.period = { month, start: `${month}-01`, end: `${month}-${days}`, days_elapsed: days, days_in_month: days };
     await AsyncStorage.setItem(
-      SNAPSHOT_STORAGE_KEY,
+      LEGACY_SNAPSHOT_KEY, // a plain copy from before encryption, sealed on first read
       JSON.stringify({ snapshot: copy, last_synced_at: new Date().toISOString() }),
     );
   }
@@ -121,7 +121,7 @@ describe('Home screen', () => {
     real.transactions[0].description = 'Lakeside Bakery';
     const syncedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 60_000).toISOString();
     await AsyncStorage.setItem(
-      SNAPSHOT_STORAGE_KEY,
+      LEGACY_SNAPSHOT_KEY, // a plain copy from before encryption, sealed on first read
       JSON.stringify({ snapshot: real, last_synced_at: syncedAt }),
     );
 
@@ -134,7 +134,7 @@ describe('Home screen', () => {
 
   it('shows a friendly message (not a crash) when the saved snapshot is broken', async () => {
     await AsyncStorage.setItem(
-      SNAPSHOT_STORAGE_KEY,
+      LEGACY_SNAPSHOT_KEY, // a plain copy from before encryption, sealed on first read
       JSON.stringify({ snapshot: { contract: 1, budget: 'oops' }, last_synced_at: new Date().toISOString() }),
     );
 
