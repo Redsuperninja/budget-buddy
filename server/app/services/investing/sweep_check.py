@@ -12,7 +12,7 @@ broker's other habits (a sweep two weeks later, a few cents off) are easy to spo
   sweep lines are free. When those don't add up, something wasn't matched.
 
 Linking by hand works like a found link: the sweep is left out of "needs a category" and of the
-budget (``transaction_roles``; a dividend's sweep you gave a category still counts there). Since
+budget (``transaction_roles``), even one you gave a category. Since
 the sweep's whole amount then stops counting, a link must be the same money (``fits``): the same
 account (one in another account is real money moving between accounts), the opposite direction, at
 most ``SUGGEST_DAYS`` apart, and amounts at most ``ALLOWED_GAP_CENTS`` or ``ALLOWED_GAP_PERCENT``

@@ -72,7 +72,7 @@ INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money o
   frees the sweep from the whole group.
 - **Budget:** a trade and its sweep are cash turning into shares (or back) inside the account, so the monthly
   summary, "needs a category", transfer matching and "hide dividends" leave both out. A dividend's linked sweep is
-  also left out of "needs a category".
+  also left out of "needs a category" and the monthly summary ([dividends.md](dividends.md)).
 - **Company name:** the description without a leading bought/sold, up to "unsolicited", "we are acting", "common
   stock", "commission", "@", "(" or a digit.
 - Not handled: share counts or prices in the description (they are typed once per trade), partial fills split

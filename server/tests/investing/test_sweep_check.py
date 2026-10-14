@@ -157,14 +157,15 @@ def test_a_hand_link_with_a_gap_leaves_the_sweep_out_of_the_budget(client, broke
     assert (totals["unassigned_count"], totals["income_cents"]) == (0, 0)
 
 
-def test_a_dividend_sweep_you_gave_a_category_still_counts(client, brokerage, add_txn):
+def test_a_dividend_sweep_linked_by_hand_stays_out_even_with_a_category(client, brokerage, add_txn):
     add_txn(brokerage, 1_000, date="2026-10-02", description="FAKECO CASH DIV ON 10 SHS")
     sweep = add_txn(brokerage, -1_000, date="2026-10-10", description="FAKE DEPOSIT SWEEP")
     saving = next(c for c in client.get("/api/local/categories").json() if c["group"] == "savings")
     client.patch(f"/api/local/transactions/{sweep['id']}", json={"category_id": saving["id"]})
     [match] = check(client)["unlinked"][0]["matches"]
     link(client, sweep["id"], match)
-    assert month(client, "2026-10")["saved_cents"] >= 1_000
+    totals = month(client, "2026-10")
+    assert (totals["income_cents"], totals["saved_cents"]) == (1_000, 0)
 
 
 def test_a_retirement_dividend_linked_by_hand_stays_out(client, make_account, add_txn):

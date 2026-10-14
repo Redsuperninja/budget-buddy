@@ -8,7 +8,8 @@ When you import a bank or brokerage file (or add a transaction by hand), Budget 
 - puts them in the **Dividends** income category (unless you, or one of your auto-sort rules, already gave that
   payment a category);
 - finds the **deposit sweep** that moved the same cash on, like `IRA DEPOSIT SWEEP ... INTRA-DAY DEPOSIT`: money
-  out of the same account, for the same amount, within a few days. The sweep keeps its own category;
+  out of the same account, for the same amount, within a few days. The sweep is left out of your budget, even if you give it a
+  category (see Your budget below);
 - keeps a dividend record, listed by year on the **Stocks** page (under **Taxes**).
 
 ## See your dividends
@@ -23,9 +24,8 @@ and paid in January counts in the year before on your Form 1099-DIV.
 
 ## Your budget
 
-A dividend in a regular brokerage account counts as income in your monthly summary. Its deposit sweep is left out
-unless you give it a category, since it only moves the cash inside the account; file it under a category, like
-savings, and it counts there. A dividend inside a
+A dividend in a regular brokerage account counts as income in your monthly summary. Its deposit sweep is always
+left out, even if you give it a category, since it only moves the cash inside the account. A dividend inside a
 retirement account or HSA, and its deposit sweep, are left out of your budget completely: that cash stays in the
 account, so it isn't take-home income or new saving.
 

@@ -16,15 +16,15 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
 - A percentage budget is a share of the month's budget income (``budget_plan.budget_income``).
 - A dividend paid inside a retirement account or HSA, and its deposit sweep, are left out: the
   cash stays in the account (``transaction_roles.dividends_kept_inside``).
-- Any other dividend's deposit sweep with no category is left out too: it only parks the cash, and
-  "needs a category" doesn't list it. Given a category (say, savings), it counts there.
+- Any other dividend's deposit sweep is left out too, even with a category: it only moves the cash
+  inside the account. The dividend itself is income.
 - A transaction classified as a stock purchase or sale is left out too: cash turned into shares
   (or back) inside an investment account (``transaction_roles.stock_trades``).
 """
 
 import datetime as dt
 
-from sqlalchemy import and_, case, func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
@@ -69,9 +69,7 @@ def monthly_summary(
             Transaction.date >= start,
             Transaction.date < end,
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
-            *none_of(*dividends_kept_inside(), *cash_inside_account()),
-            # Only while it has no category, on purpose: a sweep you filed (say, as savings) counts.
-            Transaction.category_id.is_not(None) | and_(*none_of(dividend_sweeps())),
+            *none_of(*dividends_kept_inside(), *cash_inside_account(), dividend_sweeps()),
         )
         .group_by(Transaction.category_id, Transaction.kind)
     ).all()
