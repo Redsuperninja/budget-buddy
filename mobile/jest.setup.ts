@@ -42,6 +42,12 @@ jest.mock('expo-file-system', () => {
       this.uri = join(parts);
     }
     create() {}
+    get exists() {
+      return [...files.keys()].some((uri) => uri.startsWith(`${this.uri}/`));
+    }
+    delete() {
+      for (const uri of [...files.keys()]) if (uri.startsWith(`${this.uri}/`)) files.delete(uri);
+    }
     list() {
       return [...files.keys()]
         .filter((uri) => uri.startsWith(`${this.uri}/`) && !uri.slice(this.uri.length + 1).includes('/'))
@@ -71,10 +77,11 @@ jest.mock('expo-file-system', () => {
       files.delete(this.uri);
     }
   }
-  return { __files: files, Directory, File, Paths: { document: new Directory('doc') } };
+  return { __files: files, Directory, File, Paths: { document: new Directory('doc'), cache: new Directory('cache') } };
 });
 
 // Deterministic-enough random bytes for tests (real app uses the phone's secure random).
 jest.mock('expo-crypto', () => ({
   getRandomBytes: (n: number) => require('crypto').randomBytes(n),
+  randomUUID: () => require('crypto').randomUUID(),
 }));

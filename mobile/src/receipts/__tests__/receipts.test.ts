@@ -5,6 +5,8 @@ import * as FileSystem from 'expo-file-system';
 import {
   addReceipt,
   cleanUpPhotos,
+  clearQueue,
+  queueReadable,
   listReceipts,
   MAX_PHOTO_BYTES,
   PHOTO_PROBLEM,
@@ -171,5 +173,19 @@ describe('uploadReceipts', () => {
     await addReceipt(receipt(), JPEG);
     await expect(uploadReceipts(async () => { throw new Error('offline'); })).rejects.toThrow('offline');
     expect((await listReceipts())[0]).toMatchObject({ state: 'waiting' });
+  });
+});
+
+describe('a list this phone can no longer open', () => {
+  it('can be cleared, so new photos can be added again', async () => {
+    await addReceipt(receipt(), JPEG);
+    const sealed = (await AsyncStorage.getItem(QUEUE_KEY)) as string;
+    await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify({ ...JSON.parse(sealed), c: 'AAAA' }));
+    expect(await queueReadable()).toBe(false);
+    await clearQueue();
+    expect(await queueReadable()).toBe(true);
+    expect(files.size).toBe(0);
+    await addReceipt(receipt(), JPEG);
+    expect(await listReceipts()).toHaveLength(1);
   });
 });

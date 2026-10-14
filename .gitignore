@@ -10,9 +10,15 @@ data/
 *.sqlite-shm
 *.db.bak-*
 *.db.lock
-# Receipt photos a Home Base stores (its data folder); not the phone app's receipts code.
+# Receipt photos a Home Base stores (its data folder), wherever a copy lands; not the phone app's receipts code.
 receipts/
-!mobile/src/receipts/
+# In the phone app's code folders named receipts, only code files are allowed (never a photo, whatever its
+# format or letter case).
+!mobile/src/**/receipts/
+mobile/src/**/receipts/**
+!mobile/src/**/receipts/**/
+!mobile/src/**/receipts/**/*.ts
+!mobile/src/**/receipts/**/*.tsx
 backups/
 *.bbbackup
 .env

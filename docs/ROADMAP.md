@@ -17,7 +17,7 @@ computer has no friendly screen and the phone only shows sample data.
    CSRF/DNS-rebinding protection (#4), showing the pairing QR, CSV upload, and polling the device list.
 2. **15. Encrypted sync** (snapshot download, receipt upload), with the phone-side checks: ~~#19 (encrypt the
    cached snapshot)~~, ~~#20~~ (size limits), ~~#23~~ and ~~#24~~ (stale or inconsistent snapshots).
-3. ~~**21. Sync button + reminders**~~, then **20. Receipt capture** with the offline queue.
+3. ~~**21. Sync button + reminders**~~, then ~~**20. Receipt capture**~~ with the offline queue.
 4. ~~Quick fixes from testing so far~~ (done 2026-10-14): validation messages that showed internal names, "1 rows"
    wording, #31 (accept `.50` and `12.`), #29 (future-dated transactions in balances), #25 and #32 (negative
    balances as money owed, an overpaid card as a credit).
@@ -119,7 +119,7 @@ items (20, 21).
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
 - [x] 18. Pair screen (QR scan, secure key storage) — *mobile-engineer*
 - [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
-- [ ] 20. Receipt capture with offline queue — *mobile-engineer* (queue and upload done; the camera screen is next)
+- [x] 20. Receipt capture with offline queue — *mobile-engineer*
 - [x] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
   - Sync now button done (feat/phone-sync); reminders still to do
 

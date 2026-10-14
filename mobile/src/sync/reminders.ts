@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { loadCredentials } from './credentials';
+import { getNeedsAttention, loadCredentials } from './credentials';
 
 export type ReminderChoice = 0 | 1 | 2 | 3; // 0 = off
 export const REMINDER_CHOICES: readonly ReminderChoice[] = [1, 2, 3, 0];
@@ -99,7 +99,8 @@ async function cancelAll(): Promise<void> {
 export async function rescheduleReminders(ctx: ReminderContext): Promise<void> {
   try {
     await cancelAll();
-    if (!(await loadCredentials())) return; // not paired: no reminders
+    // Not paired, or the computer turned this phone away (it must pair again first): no reminders.
+    if (!(await loadCredentials()) || (await getNeedsAttention())) return;
     const days = effectiveDays(await loadReminderChoice(), ctx.suggestedDays);
     if (days === 0 || !(await Notifications.getPermissionsAsync()).granted) return;
     const now = ctx.now ?? new Date();

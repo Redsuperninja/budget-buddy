@@ -190,6 +190,8 @@ export async function syncNow(creds: Credentials, deps: SyncDeps): Promise<SyncR
           encryptedPost(f, creds, key, RECEIPTS_PATH, batch, now, MAX_RECEIPT_ANSWER_BYTES, RECEIPT_TIMEOUT_MS),
         );
       } catch (e) {
+        // Errors about this phone itself (not paired, revoked, can't decrypt) come back from the snapshot
+        // step just below, which reports them and sets "needs attention", so they needn't stop here.
         if (e instanceof PairError && e.code === 'server_unreachable') throw e;
       }
     }
