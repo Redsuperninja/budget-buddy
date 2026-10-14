@@ -10,10 +10,10 @@ from fastapi.responses import JSONResponse
 from app.bodylimit import RECEIPTS_LIMIT_BYTES, SMALL_SYNC_LIMIT_BYTES, read_limited
 from app.deps import SessionDep
 from app.errors import ApiError
-from app.services import devices as device_service
-from app.services import envelope, sync_receipts
-from app.services import sync as service
-from app.services.sync_context import Endpoint, SyncContext
+from app.services.devices import envelope, sync_receipts
+from app.services.devices import phones as device_service
+from app.services.devices import sync as service
+from app.services.devices.sync_context import Endpoint, SyncContext
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])
 

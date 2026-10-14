@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from app.bodylimit import PAIR_LIMIT_BYTES, read_limited
 from app.deps import SessionDep
 from app.errors import ApiError
-from app.services import pairing as service
+from app.services.devices import pairing as service
 
 router = APIRouter(prefix="/api", tags=["pairing"])
 

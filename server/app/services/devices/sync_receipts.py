@@ -14,13 +14,13 @@ from sqlalchemy.exc import IntegrityError
 from app.crypto.b64url import b64u_decode
 from app.models import Category, Receipt
 from app.money import MAX_ABS_CENTS
-from app.schemas.receipts import ReceiptCreate
-from app.services import devices as device_service
-from app.services import envelope
-from app.services.envelope import bad_data
-from app.services.receipt_images import MAX_IMAGE_BYTES, ImageRejected, jpeg_size
-from app.services.receipts import create_receipt
-from app.services.sync_context import SyncContext
+from app.schemas.devices.receipts import ReceiptCreate
+from app.services.devices import envelope
+from app.services.devices import phones as device_service
+from app.services.devices.envelope import bad_data
+from app.services.devices.receipt_images import MAX_IMAGE_BYTES, ImageRejected, jpeg_size
+from app.services.devices.receipts import create_receipt
+from app.services.devices.sync_context import SyncContext
 
 MAX_RECEIPTS_PER_BATCH = 5
 MAX_PIXELS = 16_000_000

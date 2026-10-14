@@ -21,8 +21,8 @@ from sqlalchemy.orm import Session
 from app.crypto.b64url import b64u_encode
 from app.db import database_path
 from app.models import Device, PairingNonce, PairingSession
-from app.services import devices as device_service
-from app.services import pairing as pairing_service
+from app.services.devices import pairing as pairing_service
+from app.services.devices import phones as device_service
 
 
 def test_deeply_nested_json_is_a_plain_400(app_client, start):

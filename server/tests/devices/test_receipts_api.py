@@ -10,8 +10,8 @@ from sqlalchemy import select
 
 from app.db import SessionLocal
 from app.models import Category
-from app.services import receipts as service
-from app.services.receipt_images import MAX_IMAGE_BYTES
+from app.services.devices import receipts as service
+from app.services.devices.receipt_images import MAX_IMAGE_BYTES
 
 URL = "/api/local/receipts"
 MERCHANT = "Fake Corner Pharmacy"

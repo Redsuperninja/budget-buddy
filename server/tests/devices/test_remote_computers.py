@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.services import remote_computers as service
+from app.services.devices import remote_computers as service
 
 LAN_BASE = "http://192.168.1.20:8765"
 CODE_URL = "/api/local/remote-computers/join-code"

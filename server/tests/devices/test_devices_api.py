@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.crypto.b64url import b64u_encode
 from app.models import Device
-from app.services import devices as device_service
+from app.services.devices import phones as device_service
 
 
 def test_revoked_token_stops_working_at_once(app_client, start):

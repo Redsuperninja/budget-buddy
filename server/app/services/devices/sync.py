@@ -19,10 +19,10 @@ from sqlalchemy.orm import Session
 from app.crypto.b64url import b64u_decode, b64u_encode
 from app.errors import ApiError
 from app.models import Device, SeenNonce
-from app.services import devices as device_service
-from app.services import envelope, snapshot
-from app.services.envelope import EncryptedError, bad_data
-from app.services.sync_context import Endpoint, SyncContext
+from app.services.devices import envelope, snapshot
+from app.services.devices import phones as device_service
+from app.services.devices.envelope import EncryptedError, bad_data
+from app.services.devices.sync_context import Endpoint, SyncContext
 
 WATERMARK_LAG_SECONDS = 600  # twice the clock window (§4.4)
 

@@ -15,7 +15,7 @@ from app.crypto._fs import write_private_bytes
 from app.crypto.b64url import b64u_decode, b64u_encode
 from app.crypto.hashing import hash_secret
 from app.models import Device, PairingNonce, PairingSession
-from app.services.envelope import CONTRACT
+from app.services.devices.envelope import CONTRACT
 
 APP_ID = "budget-buddy"
 CODE_TTL_SECONDS = 600

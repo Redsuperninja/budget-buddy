@@ -49,7 +49,7 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 `services/`, `routers/`, `schemas/` and `tests/` each have one package per area, so one area's code is in the same
 place in all four. What isn't in an area stays at the top: the infrastructure routes (`health`, `instance`,
 `dashboard`), `schemas/common.py` (shared helpers such as `resolve_amount`), and the tests of the app's plumbing.
-Modules not yet moved into an area are still at the top too.
+A new module goes in the area of the dashboard section it serves; tests of it go in the same area under `tests/`.
 
 | Area | What's in it |
 | --- | --- |
@@ -58,6 +58,7 @@ Modules not yet moved into an area are still at the top too.
 | `budget/` | Categories, auto-sort rules and what they learn, the monthly summary, trends, spending pace, the suggested budget and the budget plan |
 | `investing/` | Stock lots, sales, gains and holdings, prices and the live price feed, positions, trades and dividends found in bank files and their deposit sweeps, retirement and HSA limits |
 | `tax/` | Donations and what proves them, repeat gifts, other deductions, paychecks and pay deposits, the yearly tax summary and its CSV export |
+| `devices/` | Phones and other computers: pairing, paired phones (`phones.py`), sync and its envelope, the phone snapshot, joined computers, receipts and their photos |
 
 ## Local API: common rules
 

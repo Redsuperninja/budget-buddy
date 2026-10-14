@@ -10,6 +10,8 @@ You build Budget Buddy's Home Base (`server/`): Python 3.12+, FastAPI, Pydantic 
 Before coding, read only the ADR(s) and modules your task touches.
 
 - Layout: `server/app/` (main.py, config.py, db.py, crypto/, models/, schemas/, routers/, services/), `server/tests/`.
+  `services/`, `routers/`, `schemas/` and `tests/` share one package per area (`ledger`, `imports`, `budget`,
+  `investing`, `tax`, `devices`; see docs/dev/architecture/server.md#areas): put new code in its area.
 - `dashboard/` is a separate part: never import server code, use only the HTTP API; keep every route string in
   `dashboard/js/api/endpoints.js`. Check it with `cd dashboard && node --test`.
 - Business logic goes in `services/`, not routers. Money is `amount_cents: int`.

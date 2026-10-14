@@ -22,7 +22,7 @@ here changes what the app does.
 2. **Dividends and bank trades are the same shape** (a payment, its sweep, a name, `dismissed`). Now that sweeps are
    shared (`services/investing/sweeps.py`), also share "find, file, dismiss" so a third kind (interest, fees) is a small
    addition.
-3. **Group the 59 flat files in `server/app/services/`** into packages that match the dashboard sections, and
+3. **Done: grouped the 59 flat files in `server/app/services/`** into packages that match the dashboard sections, and
    mirror them in `routers/`, `schemas/` and `tests/`:
    `ledger/` (accounts, transactions, transfers, balances), `imports/` (csv_*, activity_*, positions_csv, imports),
    `budget/` (categories, rules, learning, summary, trend, budget_engine, budget_plan), `investing/` (stock_*,

@@ -10,8 +10,8 @@ from fastapi import APIRouter, Request, Response, status
 from app.deps import PathId, SessionDep
 from app.errors import ApiError
 from app.lan import host_header
-from app.schemas.remote_computers import ComputerOut, JoinCode, Joined, JoinRequest
-from app.services import remote_computers as service
+from app.schemas.devices.remote_computers import ComputerOut, JoinCode, Joined, JoinRequest
+from app.services.devices import remote_computers as service
 
 router = APIRouter(tags=["remote computers"])
 
