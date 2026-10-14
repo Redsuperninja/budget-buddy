@@ -190,3 +190,12 @@ def test_a_bill_dated_ahead_doesnt_lower_todays_balance(client, make_account, ad
     assert (got["current_balance_cents"], got["balance_cents"]) == (97_500, 57_500)
     [listed] = client.get("/api/local/accounts").json()
     assert listed["current_balance_cents"] == 97_500
+
+
+def test_a_choice_error_names_the_choices_plainly(client, make_account):
+    account = make_account()["id"]
+    body = {"account_id": account, "date": "2026-10-01", "amount_cents": 5, "description": "Fake"}
+    response = client.post("/api/local/transactions", json=body | {"kind": "bogus"})
+    message = response.json()["error"]["message"]
+    assert "'normal', 'refund' or 'adjustment'" in message
+    assert "TransactionKind" not in message and "<" not in message

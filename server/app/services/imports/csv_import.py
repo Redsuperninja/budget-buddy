@@ -184,11 +184,16 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
     invalid = [r.row_number for r, _ in p.rows if r.status == "invalid"]
     if invalid and not choices.skip_invalid_rows:
         listed = ", ".join(str(n) for n in invalid[:10]) + (", ..." if len(invalid) > 10 else "")
+        which = (
+            f"1 row couldn't be read (row {listed})"
+            if len(invalid) == 1
+            else (f"{len(invalid)} rows couldn't be read (rows {listed})")
+        )
         raise ApiError(
             422,
             "invalid_rows",
-            f"{len(invalid)} rows couldn't be read (row {listed}). Check the column choices, "
-            "or choose to skip those rows.",
+            f"{which}. Check the column choices, or choose to skip "
+            + ("that row." if len(invalid) == 1 else "those rows."),
         )
     new = [(r, fp) for r, fp in p.rows if r.status == "new"]
     import_id = record(session, "bank", account_id, choices.file_name, len(new)) if new else None

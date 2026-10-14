@@ -233,7 +233,7 @@ def test_bad_rows_block_the_import_unless_skipped(client, checking, caplog):
     error = response.json()["error"]
     assert error["code"] == "invalid_rows"
     assert "4 rows" in error["message"]
-    assert "row 3, 4, 5, 6" in error["message"]
+    assert "rows 3, 4, 5, 6" in error["message"]
     assert "SECRET" not in response.text and "777" not in response.text
     assert txns(client, checking) == []
 
@@ -274,3 +274,24 @@ def test_unknown_account(client):
     response = send(client, 999, CHECKING_CSV)
     assert response.status_code == 404
     assert client.delete(url(999, "mapping")).status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("bad_rows", "words"),
+    [
+        (
+            1,
+            "1 row couldn't be read (row 2). Check the column choices, or choose to skip that row.",
+        ),
+        (
+            2,
+            "2 rows couldn't be read (rows 2, 3). Check the column choices, or choose to skip",
+        ),
+    ],
+)
+def test_unreadable_rows_are_counted_in_plain_words(client, make_account, bad_rows, words):
+    account = make_account()["id"]
+    body = "Date,Description,Amount\r\n" + "not a date,Fake,1.00\r\n" * bad_rows
+    body += "10/02/2026,Fake shop,-5.00\r\n" * 4  # enough good rows to tell the columns apart
+    response = send(client, account, body, "commit")
+    assert response.json()["error"]["message"].startswith(words)
