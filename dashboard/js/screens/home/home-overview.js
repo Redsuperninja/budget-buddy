@@ -34,8 +34,9 @@ export function incomeSplitCard(summary) {
 
 export function balancesCard(accounts, investments) {
   if (!accounts.length) return chartCard("What you have and owe", { chart: empty("No accounts yet. Add one on the Accounts page."), table: null });
-  const net = accounts.reduce((sum, a) => sum + a.balance_cents, 0);
-  const rows = accounts.map((a) => ({ label: a.name, cents: a.balance_cents }));
+  // Today's balances: a bill dated ahead of today hasn't left the account yet.
+  const net = accounts.reduce((sum, a) => sum + a.current_balance_cents, 0);
+  const rows = accounts.map((a) => ({ label: a.name, cents: a.current_balance_cents }));
   return chartCard("What you have and owe", {
     chart: h("div", {},
       h("p", {}, h("span", { class: "muted" }, "Net worth (what you have minus what you owe): "),
@@ -44,7 +45,7 @@ export function balancesCard(accounts, investments) {
         width))),
     legendNames: ["Have", "Owe"],
     table: table(["Account", "Type", "Balance"],
-      accounts.map((a) => [a.name, kindLabel(a.kind), formatBalance(a.balance_cents, a.kind)]), [2]),
+      accounts.map((a) => [a.name, kindLabel(a.kind), formatBalance(a.current_balance_cents, a.kind)]), [2]),
     note: empty(investments === null
       ? "Balances come from your transactions."
       : `Balances come from your transactions. Your stocks and funds are worth ${formatCents(investments)} at your ` +

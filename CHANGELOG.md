@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- A transaction dated ahead of today (like next week's rent, entered early) no longer lowers today's balance on the Accounts page or your net worth on Home. Accounts shows the balance after it, too: "$975.00 ($575.00 after what's scheduled)".
 - Amounts typed or imported as `.50` or `12.` are accepted (as $0.50 and $12.00) by the Home Base too, typed in or in a bank file, not only on the dashboard. A lone `.` still isn't an amount.
 - Credit card payments go in the **Payments** category on both sides (the payment from checking and the payment into the card), even before both sides are linked, so they're clearly marked and never count as spending. **Match everything again** moves older card payments there too. Only a payment to a card you've added is filed this way; clear its category and it stays out.
 - Fixed: after an import, "sorted by your rules" counted lines Budget Buddy filed itself (dividends, card payments); it now counts only what your auto-sort rules sorted.

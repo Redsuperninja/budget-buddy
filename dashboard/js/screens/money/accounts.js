@@ -6,7 +6,7 @@ import { fill } from "../../dom.js";
 import { optionalText } from "../../fields.js";
 import { form } from "../../form.js";
 import { ACCOUNT_KINDS, RETIREMENT_TYPES } from "../../labels.js";
-import { formatBalance } from "../../money.js";
+import { balanceText } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, foldCard, table } from "../../widgets.js";
 import { balanceCard } from "./account-balance.js";
@@ -18,7 +18,7 @@ export async function render(root, options) {
     card("Accounts", accounts.length
       ? table(["Name", "Type", "Bank", "Balance", "Transactions"],
           accounts.map((a) => [a.name, accountTypeCell(a), a.institution || "",
-            formatBalance(a.balance_cents, a.kind), a.transaction_count]), [3, 4])
+            balanceText(a), a.transaction_count]), [3, 4])
       : empty("No accounts yet.")),
     accounts.length ? balanceCard(accounts, options.balanceDone) : null,
     foldCard("Add an account", { open: !accounts.length },

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  balanceText,
   bankBalanceToCents, centsOrThrow, centsToInput, formatBalance, formatCents, inAndOut, parseDollars,
 } from "../js/money.js";
 
@@ -75,4 +76,12 @@ test("bankBalanceToCents: cards and loans are typed as what you owe", () => {
 test("inAndOut adds money in and money out separately, both positive", () => {
   assert.deepEqual(inAndOut([]), { in: 0, out: 0 });
   assert.deepEqual(inAndOut([260000, -150000, -11865, 0, 6000]), { in: 266000, out: 161865 });
+});
+
+test("an account's balance today, and after what's scheduled", () => {
+  const checking = { kind: "checking", balance_cents: 57500, current_balance_cents: 97500 };
+  assert.equal(balanceText(checking), "$975.00 ($575.00 after what's scheduled)");
+  assert.equal(balanceText({ ...checking, balance_cents: 97500 }), "$975.00");
+  const card = { kind: "credit_card", balance_cents: -9000, current_balance_cents: -5000 };
+  assert.equal(balanceText(card), "$50.00 owed ($90.00 owed after what's scheduled)");
 });
