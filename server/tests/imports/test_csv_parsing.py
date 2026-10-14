@@ -19,6 +19,10 @@ from app.services.imports.csv_parsing import clean_description, parse_amount, pa
         ("($1,000.00)", -100000),
         ("12.00-", -1200),
         ("+7.1", 710),
+        ("$.50", 50),
+        ("(.99)", -99),
+        ("12.", 1200),
+        ("1,000.", 100000),
         (" 1 000.00 ", 100000),
         ("1\xa0000.00", 100000),  # non-breaking space
         ("", None),
@@ -31,7 +35,7 @@ def test_parse_amount(text, cents):
 
 
 @pytest.mark.parametrize(
-    "text", ["12,34", "1,23,456.00", "1.005", "abc", "(-4.50)", "1e3", "--5", "12.3.4"]
+    "text", ["12,34", "1,23,456.00", "1.005", "abc", "(-4.50)", "1e3", "--5", "12.3.4", ".", "$-."]
 )
 def test_parse_amount_refuses_to_guess(text):
     with pytest.raises(ValueError):

@@ -27,7 +27,7 @@ MAX_ROWS = 10_000
 MAX_DESCRIPTION = 500
 DELIMITERS = (",", ";", "\t", "|")
 
-THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]+)?")
+THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?")
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 SPACES = re.compile(r"\s+")
 

@@ -3,15 +3,17 @@
 import re
 from decimal import Decimal
 
-# Plain ASCII digits with an optional sign and decimal part. No exponents, underscores,
-# thousands separators, currency symbols, or non-ASCII digits.
-_AMOUNT_RE = re.compile(r"[+-]?[0-9]+(\.[0-9]+)?")
+# Plain ASCII digits with an optional sign and decimal part, as people type them: "12.34", "12.",
+# ".50". No exponents, underscores, thousands separators, currency symbols, or non-ASCII digits,
+# and never a bare "." or "-.".
+_AMOUNT_RE = re.compile(r"[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)")
 _CENT = Decimal("0.01")
 MAX_ABS_CENTS = 10**13  # $100 billion: far beyond any personal amount, well inside int64
 
 
 def dollars_to_cents(value: str | Decimal) -> int:
-    """Turn a dollar amount like ``"12.34"`` or ``Decimal("-5.5")`` into cents (1234, -550).
+    """Turn a dollar amount like ``"12.34"``, ``".50"`` or ``Decimal("-5.5")`` into cents (1234, 50,
+    -550).
 
     Exact: uses ``Decimal``, so there is no rounding. Extra trailing zeros are fine (``"1.500"``),
     but fractions of a cent (``"1.005"``) are rejected. Floats are rejected because they can't

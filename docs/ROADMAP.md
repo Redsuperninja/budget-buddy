@@ -19,7 +19,7 @@ computer has no friendly screen and the phone only shows sample data.
    cached snapshot), #20 (size limits), #23 and #24 (stale or inconsistent snapshots).
 3. **21. Sync button + reminders**, then **20. Receipt capture** with the offline queue.
 4. Quick fixes from testing so far: validation messages that show internal names (for example
-   `<TransactionKind.NORMAL: 'normal'>`), "1 rows" wording in CSV import errors, #31 (accept `.50` and `12.`),
+   `<TransactionKind.NORMAL: 'normal'>`), "1 rows" wording in CSV import errors, ~~#31 (accept `.50` and `12.`)~~,
    #29 (future-dated transactions in balances), #25 and #32 (show negative balances as money owed).
 
 **C. Tax-season beta: the numbers people file with.** Items 1 to 3 done (PRs #59 to #63).
