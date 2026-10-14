@@ -26,7 +26,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Donation, DonationKind, Transaction, TransactionKind
-from app.services.category_learning import shop_key
+from app.services.budget.category_learning import shop_key
 from app.services.gift_categories import CHARITY, file_under
 from app.services.ledger.transaction_roles import donations, none_of, stock_trades
 

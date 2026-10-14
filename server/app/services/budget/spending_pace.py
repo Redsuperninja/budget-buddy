@@ -6,8 +6,8 @@ import datetime as dt
 
 from sqlalchemy.orm import Session
 
-from app.schemas.summary import PaceDay, SpendingPace
-from app.services.summary import month_range, monthly_summary
+from app.schemas.budget.summary import PaceDay, SpendingPace
+from app.services.budget.summary import month_range, monthly_summary
 
 
 def _today() -> dt.date:

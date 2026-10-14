@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.categories import CategoryCreate, CategoryOut, CategoryUpdate
-from app.services import categories as service
+from app.schemas.budget.categories import CategoryCreate, CategoryOut, CategoryUpdate
+from app.services.budget import categories as service
 
 router = APIRouter(prefix="/api/local/categories", tags=["categories"])
 

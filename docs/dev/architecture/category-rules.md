@@ -1,6 +1,6 @@
 # Auto-categorization rules
 
-Code: `services/category_rules.py`, `services/category_learning.py`, `routers/category_rules.py`, table
+Code: `services/budget/category_rules.py`, `services/budget/category_learning.py`, `routers/budget/category_rules.py`, table
 `category_rules` (migrations 0009, 0014). Roadmap items 9 and 9b.
 
 ## Routes (this computer only)
@@ -43,7 +43,7 @@ its rules leaves the old ID behind (shown as "a removed rule").
 - `GET /api/local/category-rules` adds `learned` and `sorted_count` (transactions still carrying that rule's
   sorting).
 
-## Learning (`services/category_learning.py`)
+## Learning (`services/budget/category_learning.py`)
 
 After a category is picked by hand, `shop_key` takes the start of the description (up to three words, skipping
 generic bank words like POS or DEBIT, stopping at a word with a digit; at least 3 letters). When 3 hand-picked

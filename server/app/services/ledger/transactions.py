@@ -19,8 +19,8 @@ from app.models import (
     TransactionSource,
 )
 from app.schemas.ledger.transactions import TransactionCreate, TransactionPage, TransactionUpdate
-from app.services.category_learning import picked_by_hand
-from app.services.category_rules import load_matcher, rule_fields
+from app.services.budget.category_learning import picked_by_hand
+from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.combined_sweeps import free_sweeps_of
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transaction_roles import (

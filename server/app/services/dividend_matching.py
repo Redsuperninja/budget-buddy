@@ -37,9 +37,9 @@ from app.models import (
     Dividend,
     Transaction,
 )
+from app.services.budget.named_categories import find_or_make
 from app.services.ledger.accounts import INVESTMENT_KINDS
 from app.services.ledger.transaction_roles import dividends, none_of
-from app.services.named_categories import find_or_make
 from app.services.sweeps import link_sweeps, regular
 
 CATEGORY = "Dividends"

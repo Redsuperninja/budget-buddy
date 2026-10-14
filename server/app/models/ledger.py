@@ -39,7 +39,7 @@ class Category(TimestampMixin, Base):
     group: Mapped[CategoryGroup] = mapped_column(str_enum(CategoryGroup, "category_group"))
     budget_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     # A budget as a share of monthly income, in basis points (1500 = 15%). When set, it replaces
-    # ``budget_cents``; see app/services/budget_plan.py for which income it's a share of.
+    # ``budget_cents``; see app/services/budget/budget_plan.py for which income it's a share of.
     budget_percent_bp: Mapped[int | None]
 
 
@@ -56,7 +56,8 @@ class BudgetPlan(TimestampMixin, Base):
 
 class CategoryRule(TimestampMixin, Base):
     """Auto-categorization: a transaction whose description contains ``pattern`` (ignoring upper
-    and lower case) gets ``category_id``. See app/services/category_rules.py for which rule wins."""
+    and lower case) gets ``category_id``. See app/services/budget/category_rules.py for which
+    rule wins."""
 
     __tablename__ = "category_rules"
     __table_args__ = (UniqueConstraint("pattern"),)
@@ -66,7 +67,8 @@ class CategoryRule(TimestampMixin, Base):
     category_id: Mapped[int] = mapped_column(
         ForeignKey("categories.id", ondelete="CASCADE"), index=True
     )
-    # Made by Budget Buddy from the categories you kept picking (services/category_learning.py).
+    # Made by Budget Buddy from the categories you kept picking
+    # (services/budget/category_learning.py).
     learned: Mapped[bool] = mapped_column(default=False, server_default="0")
 
 
@@ -103,7 +105,7 @@ class Transaction(TimestampMixin, Base):
     # and categories set by Budget Buddy itself (transfers). See enums.CategorySource.
     category_source: Mapped[str | None] = mapped_column(String(8))
     # The rule that sorted it. No foreign key (adding one would mean rebuilding this table, which
-    # other tables point at); deleting a rule clears it in services/category_rules.py.
+    # other tables point at); deleting a rule clears it in services/budget/category_rules.py.
     sorted_by_rule_id: Mapped[int | None] = mapped_column(Integer, index=True)
     # The file import that added it (``imports``), so the import can be undone. No foreign key,
     # like sorted_by_rule_id (migration 0022 only adds columns).

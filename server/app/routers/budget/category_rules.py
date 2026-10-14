@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.category_rules import ApplyResult, RuleCreate, RuleOut, RuleUpdate
-from app.services import category_rules as service
+from app.schemas.budget.category_rules import ApplyResult, RuleCreate, RuleOut, RuleUpdate
+from app.services.budget import category_rules as service
 
 router = APIRouter(prefix="/api/local/category-rules", tags=["category rules"])
 

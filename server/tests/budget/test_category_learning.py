@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.services.category_learning import LEARN_AFTER, shop_key
+from app.services.budget.category_learning import LEARN_AFTER, shop_key
 
 TXN = "/api/local/transactions"
 RULES = "/api/local/category-rules"

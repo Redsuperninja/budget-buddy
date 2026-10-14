@@ -29,8 +29,8 @@ from sqlalchemy.orm import Session
 
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.percent import percent_bp
-from app.schemas.summary import CategoryTotal, GroupTotal, MonthlySummary
-from app.services.budget_plan import budget_for, budget_income
+from app.schemas.budget.summary import CategoryTotal, GroupTotal, MonthlySummary
+from app.services.budget.budget_plan import budget_for, budget_income
 from app.services.ledger.savings_transfers import saved_by_transfer
 from app.services.ledger.transaction_roles import (
     cash_inside_account,

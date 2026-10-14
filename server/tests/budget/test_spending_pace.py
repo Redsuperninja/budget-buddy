@@ -5,7 +5,7 @@ import datetime as dt
 
 from test_categories_summary_api import cid
 
-from app.services import spending_pace
+from app.services.budget import spending_pace
 
 PACE = "/api/local/summary/pace"
 

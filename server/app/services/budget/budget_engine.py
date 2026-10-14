@@ -29,17 +29,17 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError
 from app.models import Category, CategoryGroup
 from app.percent import percent_bp, share_of
-from app.schemas.budget_engine import (
+from app.schemas.budget.budget_engine import (
     ApplyResult,
     BudgetSuggestion,
     SuggestedCategory,
     SuggestedGroup,
 )
-from app.schemas.budget_plan import BudgetPlanIn
-from app.schemas.summary import MonthlySummary
-from app.services.budget_plan import get_plan, save_plan
-from app.services.summary import monthly_summary
-from app.services.trend import months_ending
+from app.schemas.budget.budget_plan import BudgetPlanIn
+from app.schemas.budget.summary import MonthlySummary
+from app.services.budget.budget_plan import get_plan, save_plan
+from app.services.budget.summary import monthly_summary
+from app.services.budget.trend import months_ending
 
 LOOKBACK_MONTHS = 3
 GUIDE_BP = {CategoryGroup.NEEDS: 5_000, CategoryGroup.WANTS: 3_000, CategoryGroup.SAVINGS: 2_000}

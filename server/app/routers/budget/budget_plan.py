@@ -3,10 +3,10 @@ import datetime as dt
 from fastapi import APIRouter
 
 from app.deps import SessionDep, parse_month
-from app.schemas.budget_engine import ApplyChoice, ApplyResult, BudgetSuggestion
-from app.schemas.budget_plan import BudgetPlanIn, BudgetPlanOut
-from app.services import budget_engine
-from app.services import budget_plan as service
+from app.schemas.budget.budget_engine import ApplyChoice, ApplyResult, BudgetSuggestion
+from app.schemas.budget.budget_plan import BudgetPlanIn, BudgetPlanOut
+from app.services.budget import budget_engine
+from app.services.budget import budget_plan as service
 
 router = APIRouter(prefix="/api/local/budget", tags=["budget"])
 

@@ -5,10 +5,10 @@ from fastapi import APIRouter, Query
 
 from app.deps import SessionDep, parse_month
 from app.errors import ApiError
-from app.schemas.summary import MonthlySummary, MonthlyTrend, SpendingPace
-from app.services import summary as service
-from app.services.spending_pace import spending_pace
-from app.services.trend import monthly_trend
+from app.schemas.budget.summary import MonthlySummary, MonthlyTrend, SpendingPace
+from app.services.budget import summary as service
+from app.services.budget.spending_pace import spending_pace
+from app.services.budget.trend import monthly_trend
 
 router = APIRouter(prefix="/api/local/summary", tags=["summary"])
 

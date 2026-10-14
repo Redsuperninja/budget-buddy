@@ -130,8 +130,8 @@ def test_no_income_means_no_shares(client, checking, add_txn):
 
 def test_phone_snapshot_gets_the_worked_out_budget(client):
     from app.db import SessionLocal
+    from app.services.budget.summary import monthly_summary
     from app.services.snapshot import _budget
-    from app.services.summary import monthly_summary
 
     client.put(PLAN, json={"planned_income_cents": 200_000})
     client.patch(f"{CATS}/{cid(client, 'Groceries')}", json={"budget_percent_bp": 1_000})

@@ -63,7 +63,7 @@ def test_name_unique_by_casefold(client):
 
 
 def test_database_duplicate_becomes_name_taken(client, monkeypatch):
-    from app.services import categories
+    from app.services.budget import categories
 
     monkeypatch.setattr(categories, "_check_name_free", lambda *a, **k: None)
     dup = client.post(CATS, json={"name": "Groceries", "group": "needs"})

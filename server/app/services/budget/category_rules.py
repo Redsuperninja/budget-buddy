@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryRule, CategorySource, Transaction, TransactionKind
-from app.schemas.category_rules import ApplyResult, RuleCreate, RuleUpdate
+from app.schemas.budget.category_rules import ApplyResult, RuleCreate, RuleUpdate
 
 
 class RuleMatch(NamedTuple):

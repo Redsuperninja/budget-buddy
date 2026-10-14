@@ -3,7 +3,7 @@
 import pytest
 from test_categories_summary_api import cid
 
-from app.services.trend import months_ending
+from app.services.budget.trend import months_ending
 
 TREND = "/api/local/summary/trend"
 
