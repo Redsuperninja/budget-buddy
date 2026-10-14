@@ -69,6 +69,16 @@ class _Prepared:
     flipped: bool = False  # a card file read the other way round (card_signs)
 
 
+def import_conflict() -> ApiError:
+    """The same rows were imported at the same moment by another window (fingerprints clash)."""
+    return ApiError(
+        409,
+        "import_conflict",
+        "Some of these rows were imported at the same time by another window. "
+        "Please preview the file again.",
+    )
+
+
 def _saved_mapping(session: Session, account_id: int) -> CsvMapping | None:
     saved = session.get(CsvImportMapping, account_id)
     if saved is None:
@@ -221,12 +231,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
         session.commit()
     except IntegrityError:
         session.rollback()
-        raise ApiError(
-            409,
-            "import_conflict",
-            "Some of these rows were imported at the same time by another window. "
-            "Please preview the file again.",
-        ) from None
+        raise import_conflict() from None
     # Dividends and their deposit sweeps first, then card payments and moves between your
     # accounts in this file, matched with the other side.
     dividends = find_dividends(session, {t.id for t in added})

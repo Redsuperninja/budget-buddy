@@ -22,7 +22,7 @@ reviewers check them.
     (`api/endpoints.js` holds every route string), building the page, money, dates, labels, and charts
     (`charts/`).
   - Phone (`mobile/src/`): screens in `app/`, reusable UI in `components/`, pure logic in `lib/`,
-    sync in `sync/`.
+    sync in `sync/`, receipts in `receipts/`.
   - Desktop (`desktop/budget_buddy_desktop/`): one module per job (tray, window, starting the Home Base,
     start with Windows); the tray's modules never load the window library.
   - Scripts: one folder per audience (`scripts/testing/`, `scripts/release/`, `scripts/dev/`; everyday ones at the

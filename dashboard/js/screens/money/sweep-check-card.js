@@ -18,6 +18,7 @@ function undoLine(sweepId) {
       await reload();
     } catch (err) {
       note.textContent = ` ${err.message}`;
+      undo.disabled = false;
     }
   } }, "Undo");
   return h("span", {}, note, " ", undo);

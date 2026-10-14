@@ -1,7 +1,7 @@
 # Developer testing
 
 How to check your work in each part, and what CI runs. (Testers trying Budget Buddy with demo data: see
-[docs/guide/](../guide/).)
+[docs/testing/](../testing/README.md).)
 
 ## Commands
 
@@ -59,7 +59,7 @@ a reason in the PR.
 | Part | Floor | Where it's set | Check locally |
 | --- | --- | --- | --- |
 | Server | 94% of lines in `app/` (96% when set) | `[tool.coverage.report] fail_under` in `server/pyproject.toml` | `.venv\Scripts\pytest --cov` |
-| Dashboard | 100% of lines, branches and functions in the logic modules `money.js`, `dates.js`, `percent.js`, `prefs.js`, `theme.js`, `view.js`, `charts/scale.js`, `charts/shares.js` (screens need a browser, so they're checked by the static rules instead) | `coverage` script in `dashboard/package.json` | `npm run coverage` |
+| Dashboard | 100% of lines, branches and functions in the logic modules, the `--test-coverage-include` list in `dashboard/package.json` (screens need a browser, so they're checked by the static rules instead) | `coverage` script in `dashboard/package.json` | `npm run coverage` |
 | Desktop | 95% of lines in `budget_buddy_desktop/` (98% when set; the on-screen tray loop is checked by hand) | `[tool.coverage.report] fail_under` in `desktop/pyproject.toml` | `.venv\Scripts\pytest --cov` |
 | Phone | statements 90%, branches 80%, functions 90%, lines 92% | `jest.coverageThreshold` in `mobile/package.json` | `npm test -- --coverage` |
 
@@ -83,8 +83,9 @@ A new logic module in the dashboard joins the `--test-coverage-include` list in 
 
 Node's built-in runner reads the files with `fs` (no browser, no packages). `tests/static-rules.test.js`
 enforces the safety rules (no `innerHTML`, no inline script or style, no internet addresses, route strings only
-in `js/api/`); `money.test.js`, `dates.test.js` and `percent.test.js` cover the logic. The screens themselves run in a
-real browser in `scripts\dev\check-pages.ps1` (above). Details: [dashboard/README.md](../../dashboard/README.md).
+in `js/api/`); the other test files cover the logic modules (the list is in
+[dashboard/README.md](../../dashboard/README.md)). The screens themselves run in a real browser in
+`scripts\dev\check-pages.ps1` (above).
 
 ## Phone tests
 

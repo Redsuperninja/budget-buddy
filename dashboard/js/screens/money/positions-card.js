@@ -24,9 +24,16 @@ function recordsCell(p) {
 }
 
 function accountTable(group, year) {
+  const problem = h("span", { class: "error", role: "alert" });
   const forget = h("button", { class: "plain", type: "button", onclick: async () => {
-    await clearPositions(group.account_id);
-    await reload({ year });
+    forget.disabled = true;
+    try {
+      await clearPositions(group.account_id);
+      await reload({ year });
+    } catch (err) {
+      problem.textContent = ` ${err.message}`;
+      forget.disabled = false;
+    }
   } }, "Forget this file");
   return h("div", {},
     h("h3", {}, `${group.account_name}, as of ${group.as_of}`),
@@ -39,7 +46,7 @@ function accountTable(group, year) {
       recordsCell(p),
     ]), [2, 3]),
     h("p", {}, h("strong", {}, `Value: ${group.value_cents === null ? "not known for every line" : formatCents(group.value_cents)}`),
-      " ", forget));
+      " ", forget, problem));
 }
 
 function importCard(accounts, year) {

@@ -59,8 +59,21 @@ export async function settingsCard(year) {
       await savePriceFeed(body);
       await reload({ year });
     }),
-    feed.has_key ? h("p", {}, h("button", { class: "plain", type: "button", onclick: async () => {
+    feed.has_key ? removeKeyLine(year) : null);
+}
+
+// "Remove my key and turn off", with the reason shown if it doesn't work.
+function removeKeyLine(year) {
+  const problem = h("span", { class: "error", role: "alert" });
+  const button = h("button", { class: "plain", type: "button", onclick: async () => {
+    button.disabled = true;
+    try {
       await savePriceFeed({ enabled: false, api_key: "" });
       await reload({ year });
-    } }, "Remove my key and turn off")) : null);
+    } catch (err) {
+      problem.textContent = ` ${err.message}`;
+      button.disabled = false;
+    }
+  } }, "Remove my key and turn off");
+  return h("p", {}, button, problem);
 }

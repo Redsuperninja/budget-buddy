@@ -9,7 +9,8 @@ Start page for developers and AI agents. Read only what your task needs.
 3. [../adr/](../adr/): decisions and why they were made.
 4. [workflow.md](workflow.md) and [conventions.md](conventions.md): how changes are made, and the file rules.
 5. The README of the part you're changing: [server](../../server/README.md), [dashboard](../../dashboard/README.md),
-   [mobile](../../mobile/README.md), [scripts](../../scripts/README.md).
+   [mobile](../../mobile/README.md), [desktop](../../desktop/README.md), [scripts](../../scripts/README.md),
+   [launch](../../launch/README.md), [packaging](../../packaging/README.md).
 
 ## Where each fact lives
 

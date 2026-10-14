@@ -4,8 +4,8 @@ Folder: `mobile/` ([mobile/README.md](../../../mobile/README.md) for running it,
 
 - **Expo (React Native + TypeScript)** with expo-router. Runs on iPhone and Android inside Expo Go, so there is
   no app store and no custom native code.
-- **Works offline.** It keeps the latest snapshot from the Home Base (and, once roadmap #20 lands, a queue of
-  receipt photos taken since). Until the first sync it shows a made-up sample snapshot with a banner saying so.
+- **Works offline.** It keeps the latest snapshot from the Home Base and a queue of receipt photos taken
+  since. Until the first sync it shows a made-up sample snapshot with a banner saying so.
 - **Screens:** Home (budget breakdown), Taxes summary, Settings (connect to the computer, **Sync now**), the
   pair screen (scan the QR or paste its text), and Add Receipt (camera, details form and the list of receipts waiting to sync; roadmap #20).
 - **Talks to the Home Base only through the [sync contract](../../api/sync-contract.md)**, on home Wi-Fi.

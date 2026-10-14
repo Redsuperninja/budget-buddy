@@ -4,8 +4,8 @@
 
 | Part | What works | Not built yet |
 | --- | --- | --- |
-| Computer dashboard | Accounts, transactions, categories, budgets, monthly summary, bank CSV import, paychecks, donations, receipts, stocks, connecting your phone | Editing or deleting most items (you can add and view; ask if you need to fix something) |
-| Phone app | Connecting to your computer, Home and Taxes screens | Showing your real data (it shows sample data until sync), receipt photos, the Sync button and reminders |
+| Computer dashboard | Accounts, transactions, categories, budgets, monthly summary, bank CSV import, paychecks, donations, receipts, stocks, connecting your phone | Deleting a transaction, account, category or paycheck, and changing a transaction's date, amount or description (you can change its category; ask if you need to fix something) |
+| Phone app | Connecting to your computer, the **Sync now** button, Home and Taxes with your real data (sample data until the first sync), taking receipt photos, sync reminders | Editing anything on the phone |
 
 ## Checklist
 
@@ -22,6 +22,9 @@ Open http://127.0.0.1:8766/ on your computer and use the buttons along the top (
 - [ ] **Stocks:** look at the gains for this year. Add a sale of more shares than you own.
 - [ ] **Tax summary:** add a medical deduction, download the CSV and open it in a spreadsheet, then try "Print or save as PDF".
 - [ ] **Phone:** connect, then disconnect and connect again. Try scanning an old or used code.
+- [ ] **Phone sync:** tap **Sync now**. Do Home and Taxes show the demo data instead of the sample?
+- [ ] **Receipt photo:** on the phone's **Add Receipt**, take a photo and fill in the details, then sync. Does it show on the computer under **Money**, **Receipts**?
+- [ ] **Reminders:** on the phone, open **Settings** and turn on **Remind me to sync**.
 - [ ] **Messages:** were any error messages confusing or too technical? Note the exact words.
 
 ## How to report what you find

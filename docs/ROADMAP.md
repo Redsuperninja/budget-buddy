@@ -5,17 +5,17 @@ Each line is planned as **one small pull request**. Owner = the specialized agen
 
 ## What's next (milestones)
 
-Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom. D (easy start) is done; the first
-Windows release (G) is being prepared alongside what's left of B (2026-10-09).
+Numbers are roadmap items below; `#N` are GitHub issues. Work top to bottom. A, B and D are done (B on
+2026-10-14); the first Windows release (G) is next.
 
-**A. Tester preview** (now): people can try the Home Base with demo data and connect a phone.
+**A. Tester preview** (done): people can try the Home Base with demo data and connect a phone.
 - [x] User-testing kit: setup and start scripts, demo data, pairing QR, CSV import helper, [testing guide](testing/set-up-for-testing.md).
 
-**B. Alpha: the whole loop works for a non-technical tester.** The biggest gap today is that the
-computer has no friendly screen and the phone only shows sample data.
+**B. Alpha: the whole loop works for a non-technical tester (done 2026-10-14).** The computer now has a friendly
+screen and the phone shows real data.
 1. ~~**16. Local web dashboard.**~~ Comes first, because it's how testers will use the computer. Must include the
    CSRF/DNS-rebinding protection (#4), showing the pairing QR, CSV upload, and polling the device list.
-2. **15. Encrypted sync** (snapshot download, receipt upload), with the phone-side checks: ~~#19 (encrypt the
+2. ~~**15. Encrypted sync**~~ (snapshot download, receipt upload), with the phone-side checks: ~~#19 (encrypt the
    cached snapshot)~~, ~~#20~~ (size limits), ~~#23~~ and ~~#24~~ (stale or inconsistent snapshots).
 3. ~~**21. Sync button + reminders**~~, then ~~**20. Receipt capture**~~ with the offline queue.
 4. ~~Quick fixes from testing so far~~ (done 2026-10-14): validation messages that showed internal names, "1 rows"
@@ -44,8 +44,8 @@ investment data from banks like Chase and Wells Fargo without hand-mapping CSV f
 3. **28. Optional live connection, bring your own free developer key** (Teller first, Plaid if needed); test
    with the owner's own banks before building.
 
-**F. Fuller phone app ([ADR-0007](adr/0007-standalone-phone-app.md), accepted).** After milestone B's phone
-items (20, 21).
+**F. Fuller phone app ([ADR-0007](adr/0007-standalone-phone-app.md), accepted).** Next, now that B is
+done.
 1. **29. Phone database** (encrypted on-device SQLite) and shared budget-math test vectors.
 2. **30. Sync contract v2:** two-way changes with conflict rules.
 3. **31. Edit on the phone:** transactions, categories, budgets, suggested budget.
@@ -74,7 +74,7 @@ items (20, 21).
 - [x] 6b. Import history: see every imported file and remove an outdated one (undo) — *backend-engineer* + *security-reviewer*
 - [x] 7. Paychecks API — *backend-engineer* + *finance-tax-expert*
 - [x] 7b. Pay deposits from bank files start a paycheck on the Paychecks page, linked to the deposit — *backend-engineer*
-- [x] 8. Receipts API: encrypted photo upload, details, optional OCR — *backend-engineer*
+- [x] 8. Receipts API: encrypted photo upload, details — *backend-engineer*
 - [x] 8b. Receipts page on the dashboard: photos, details, delete outdated ones — *backend-engineer*
   - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
 - [x] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
@@ -83,13 +83,13 @@ items (20, 21).
 - [x] 9c. Show only transactions with no category yet, to sort them quickly — *backend-engineer*
 
 ## Phase 3: Budget & taxes
-- [x] 9b. Tax-year reference data (2025, 2026) — *finance-tax-expert*
+- [x] 9e. Tax-year reference data (2025, 2026) — *finance-tax-expert*
 - [x] 10. Budget engine: suggested budget (50/30/20 baseline from real data), targets vs actual — *finance-tax-expert*
 - [x] 10d. Income has no budget: it's what the rest of the budget is measured against — *finance-tax-expert*
 - [x] 10a. Budgets as a percentage of income (planned or actual), and each group's share of income — *finance-tax-expert*
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 10c. Match transfers between accounts automatically and say what kind they are — *backend-engineer* + *finance-tax-expert*
-- [x] 10d. Credit card payments in a "Payments" category on both sides, linked or not — *backend-engineer* + *finance-tax-expert*
+- [x] 10e. Credit card payments in a "Payments" category on both sides, linked or not — *backend-engineer* + *finance-tax-expert*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
 - [x] 11b. Sort a payment into charity: a donation linked to its transaction — *finance-tax-expert* + *backend-engineer*
 - [x] 11c. Gift categories: charity gifts filed under "Charitable giving", personal gifts under "Gifts" — *finance-tax-expert*
@@ -121,7 +121,6 @@ items (20, 21).
 - [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
 - [x] 20. Receipt capture with offline queue — *mobile-engineer*
 - [x] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
-  - Sync now button done (feat/phone-sync); reminders still to do
 
 ## Phase 6: Make it easy
 - [x] 22a. One start script: first-run setup, start, open the dashboard, stop cleanly — *backend-engineer*

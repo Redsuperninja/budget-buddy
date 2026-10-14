@@ -82,7 +82,7 @@ with a button to download it as a spreadsheet or print it for your tax preparer.
 </p>
 
 At home, open Budget Buddy in your phone's web browser: no app store and nothing to install. The pages rearrange
-to fit a small screen. (A phone app for snapping receipt photos is also being built.)
+to fit a small screen. (A phone app that takes receipt photos and shows your budget offline is in testing.)
 
 ## Getting it
 

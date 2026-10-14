@@ -6,8 +6,8 @@ here changes what the app does.
 
 ## 1. Before anything else
 
-1. **Merge the open stack** bottom-first ([workflow.md](workflow.md#merging-a-stack-safely)). Twelve stacked
-   branches are the biggest risk right now: every new change has to be rebased through them.
+1. ~~**Merge the open stack**~~ Done: the stacked branches were merged bottom-first (#125 to #160,
+   [workflow.md](workflow.md#merging-a-stack-safely)).
 2. **Cut 0.1.0.** Move the long `## Unreleased` list in `CHANGELOG.md` under `## 0.1.0 - <date>`, tag it, and let the
    release workflow build the download ([release.md](release.md)). From then on, one changelog section per release.
 3. ~~**One version number.**~~ Done: `server/app/__init__.py` holds the only `__version__`; the desktop package has a
@@ -31,14 +31,27 @@ here changes what the app does.
    Do it one package per PR with `git mv` and import-only changes, and compare the test count before and after.
 4. **Files near the 300-line limit:** `activity_import.py` (293), `stock_gains.py` (286), `db.py` (270),
    `tax_data/__init__.py` (269), `paychecks.py` (258), `network.py` (255). Split before the next feature touches them.
-5. **Exact-dict tests.** `test_csv_import.py` compares the whole import result, so every new counter breaks it.
+5. **Exact-dict tests.** `tests/imports/test_csv_import.py` compares the whole import result, so every new counter breaks it.
    Assert the fields the test is about.
 6. **Tables list in `tests/test_db.py`.** It must be edited with every new table; derive it from the migrations
    instead and keep only the "models match migrations" check.
+7. **Repeated code found in the 2026-10-14 review** (each a small shared helper):
+   - the "rows couldn't be read" refusal and `PREVIEW_ROWS`/`MAX_PROBLEM_ROWS` in `imports/csv_import.py`,
+     `activity_import.py` and `stock_import.py` (the wording has drifted): one `refuse_invalid_rows(...)`;
+   - the finders run in sequence (`find_dividends`, `find_trades`, `match_transfers`, `repeat_gifts`) in both
+     importers, `routers/ledger/transactions.py` and `match_again.py`: one `run_finders(session, ids)` (the activity
+     import skips `repeat_gifts`; decide whether on purpose);
+   - the whole-word regex wrapper (`(?<![a-z])...(?![a-z])`) rebuilt in `bank_trades.py`, `dividend_matching.py`,
+     `sweeps.py`, `pay_deposits.py`, `retirement.py`, and "name before the keyword" in three finders: an `app/words.py`;
+   - `dt.date(year, 1, 1), dt.date(year, 12, 31)` in about nine tax/investing files: a public `year_range(year)`;
+   - "not dismissed and no sweep yet" in `bank_trades.py`, `combined_sweeps.py`, `dividend_matching.py` and
+     `sweep_check.py`: one `unlinked(model)` in `investing/sweeps.py`;
+   - the test-server setup repeated in `scripts/testing/demo_data.py`, `pair_phone.py` and `import_csv.py`: a
+     `connect_test_server(port)` in `_local_api.py`.
 
 ## 3. Code debt (dashboard)
 
-1. **Done: grouped `dashboard/js/screens/` (36 files) by section:** `screens/home/`, `money/`, `budget/`, `taxes/`,
+1. **Done: grouped `dashboard/js/screens/` (36 files) by section:** `screens/home/`, `money/`, `budget/`, `tax/`,
    `devices/`, with each section's parts next to its page (for example `money/transactions.js` with
    `give-to-charity.js`, `stock-trade-cell.js` and `category-picker.js`). `main.js` already lists pages by section,
    so the folders follow it one to one.
@@ -46,10 +59,26 @@ here changes what the app does.
    smoke test that starts a test Home Base with demo data, opens every page in headless Edge or Chrome through the
    DevTools protocol (no packages; Node 22 has `WebSocket`) and fails on a script error or an empty page. A working
    prototype of the screenshot side was used for this hand-off.
-3. **Charts on phones.** Charts are drawn 640 wide and scaled down; on a phone the text is still small. Let each
-   chart take its width from its card and lay out labels for it.
+3. ~~**Charts on phones.**~~ Done (#130): each chart is drawn at its card's width and redrawn when it changes
+   (`charts/fit.js`), so its text is its real size on a phone.
 4. **Small helpers to move out of screens** into tested modules: `sharesText` (bank-trades-card.js), the plural
-   wording on Home, and the account-kind sets repeated in `stock-trade-cell.js` and elsewhere.
+   wording on Home, and the account-kind sets repeated in `stock-trade-cell.js`, `activity-import.js` and the "card or
+   loan" check twice in `money.js` (move to `labels.js`).
+5. **Buttons that run an action** (disable, await, show the result or error, enable again) are written out in about
+   twelve handlers; `remove-button.js` already does it for Delete. Generalise it into `action-button.js`, so no
+   button can forget its error handling again (four did, fixed 2026-10-14).
+6. **The three CSV import cards** (`money/import.js`, `money/activity-import.js`, `tax/stock-import.js`, plus
+   `money/positions-card.js`) share a file picker, a preview button, the "skip rows with a problem" choice and the
+   problems table: a `csv-upload.js`.
+
+## 3b. Code debt (phone)
+
+1. **Shared form and list pieces:** `app/pair.tsx` copies `TextField`'s input style (`components/Field.tsx`); a list
+   row (title, muted subtitle, value, hairline) is written out in `app/index.tsx`, `AccountsList.tsx`, `app/taxes.tsx`
+   and `receipts/WaitingReceipts.tsx`. Add `ListRow` and a muted `SmallText` next to `BodyText`, and a `lineHeight`
+   in `theme.ts`.
+2. **Exported only for tests:** `categoriesById` (`lib/budget.ts`; use it in `transactionCategoryLabel` or drop it),
+   `isSnapshot` (`sync/snapshot.ts`).
 
 ## 4. Repository layout (make it easier to find things)
 
@@ -59,8 +88,8 @@ here changes what the app does.
 | Partly done (tester guides moved; user guides stay one folder, grouped by section in its index): `docs/guide/` (32 files, testers and users mixed) | `docs/guide/` for users only, grouped by the dashboard's sections; tester guides move to `docs/testing/` | Users never land on "start three PowerShell windows" |
 | `docs/ROADMAP.md` (done and future mixed, long) | Keep only what's next; move finished milestones to `docs/history.md` | The roadmap fits on one screen |
 | `docs/showcase/` | Keep; refresh screenshots each release from the smoke test above | The showcase never goes stale |
-| Done: `desktop/packaging/` (spec, installer, read-me) and `server/packaging/` | `packaging/windows/` at the root with both specs and the installer | Releasing lives in one place |
-| `mobile/` (Expo app in testing, not shipped) | Keep, but say "in testing" at the top of `mobile/README.md` and in the root README until it ships | Sets expectations; phones use the browser for now |
+| Done: moved to `packaging/windows/` (#142) | `packaging/windows/` at the root with both specs and the installer | Releasing lives in one place |
+| `mobile/` (Expo app in testing, not shipped) | ~~Say "in testing" at the top of `mobile/README.md` and in the root README until it ships~~ | Done (2026-10-14) |
 
 Move files with `git mv` in small PRs, update links in the same PR, and run the markdown link check (any
 `](...)` that doesn't resolve) before merging.
@@ -72,7 +101,7 @@ Move files with `git mv` in small PRs, update links in the same PR, and run the 
 - Code signing for the Windows download, and HTTPS on the home network (ADR-0009's noted follow-up).
 - Bank-file trades: read share counts when a broker puts them in the description; partial fills on several lines.
 - Recurring gifts: a "check these" note on Home when a repeat payment to a charity had a different amount.
-- An owner on paychecks and deductions (limits are per person), the 457(b) plan type, phone reminders (#21).
+- An owner on paychecks and deductions (limits are per person), the 457(b) plan type.
 - From the reviews (should-fix, not done): Roth IRA deposits made January to April 15 for the year before, when
   the description names that year, should count toward that year (`services/investing/retirement.py`); a refund of an excess
   contribution should be taken off; the Receipts page's "Download photo" link should use `?download=true` when a

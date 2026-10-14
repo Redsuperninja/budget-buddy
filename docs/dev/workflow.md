@@ -30,7 +30,7 @@ those commits and decides which ones become pull requests and get merged on GitH
 1. **Plan:** `architect` picks the next roadmap item and writes a short task (goal, files, acceptance criteria).
 2. **Build:** the owning engineer agent implements it on a branch `feat/<short-name>`, with tests and docs:
    the matching `docs/dev/architecture/<topic>.md` and the part's README (`server/`, `dashboard/`, `mobile/`,
-   `scripts/`) for API or data changes, plus a plain-English guide in `docs/guide/` (listed in its README) for
+   `desktop/`, `scripts/`) for API or data changes, plus a plain-English guide in `docs/guide/` (listed in its README) for
    anything a user will see.
 3. **Check:** `test-engineer` runs the tests ([testing.md](testing.md)); `security-reviewer` reviews if
    data/sync/auth/storage is touched; `finance-tax-expert` reviews if money math or tax logic is touched.

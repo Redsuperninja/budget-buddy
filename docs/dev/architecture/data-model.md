@@ -1,12 +1,12 @@
 # Data model
 
-Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc)` marks an encrypted column
+Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`, `imports.py`, `trades.py`). `(enc)` marks an encrypted column
 ([security.md](security.md)); `?` marks an optional one.
 
 | Table | Key fields |
 | --- | --- |
 | `accounts` | id, name, kind (checking/savings/brokerage/credit_card/cash/loan/retirement/hsa/other), retirement_type? (roth_ira/traditional_ira/401k/roth_401k/403b/other; retirement accounts only), institution, last4 (enc), notes (enc) |
-| `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique), category_source? (rule/you), sorted_by_rule_id? |
+| `transactions` | id, account_id, date, amount_cents (signed: negative = money out), description, category_id, source (csv/manual/receipt), kind (normal/transfer/refund/adjustment), transfer_pair_id? (the other side of a transfer), notes (enc), import_fingerprint? (CSV import, unique), category_source? (rule/you), sorted_by_rule_id?, import_id? (the file import that added it), auto_transfer_off (a transfer link you undid; never matched again), pre_transfer_category_id? / pre_transfer_category_source? / pre_transfer_rule_id? (put back when a transfer link is undone) |
 | `csv_import_mappings` | account_id (PK, deleted with the account), mapping (JSON: which column is what, date format, sign flip) |
 | `categories` | id, name, group (needs/wants/savings/income/transfer), budget_cents, budget_percent_bp? (share of income, 1 to 10,000) |
 | `budget_plan` | id (always 1), planned_income_cents? (what percentage budgets are shares of) |
@@ -18,7 +18,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `bank_trades` | id, transaction_id (unique; the trade), sweep_transaction_id? (shared when one sweep covers several), sweep_by_hand, security (company name), dismissed |
 | `security_symbols` | id, security (unique), symbol: the ticker you gave a company once |
 | `dividends` | id, transaction_id (unique; the dividend payment), sweep_transaction_id? (its deposit sweep; may be shared), sweep_by_hand, payer, dismissed |
-| `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc) |
+| `donations` | id, date, organization, amount_cents (> 0; for goods, fair market value), kind (cash/goods), receipt_id?, transaction_id? (unique; the payment it came from), notes (enc), auto_added (a repeat gift added automatically; migration 0024) |
 | `stock_lots` | one purchase: account_id?, symbol, shares_micro (millionths of a share, > 0), acquired_on, cost_basis_cents (≥ 0, fees included), transaction_id? (unique; the payment it was classified from) |
 | `stock_sale_orders` | one sale as entered: account_id?, symbol, sold_on, shares_micro (> 0), proceeds_cents (≥ 0, after fees), transaction_id? (unique; the deposit it was classified from) |
 | `stock_prices` | symbol (primary key), price_cents per share (≥ 0), as_of, source (you/feed), fetched_at?: the latest price |
@@ -26,6 +26,7 @@ Models live in `server/app/models/` (`ledger.py`, `tax.py`, `devices.py`). `(enc
 | `stock_sales` | one lot's part of an order: order_id (cascade delete), lot_id, sold_on, shares_micro (> 0), proceeds_cents (≥ 0); rebuilt with FIFO ([stocks.md](stocks.md)) |
 | `deductions` | id, tax_year (2000–2100), kind (medical/education/student_loan_interest/home_office/mortgage_interest/property_tax/state_local_tax/hsa/ira/childcare/other), description? (enc), date?, amount_cents (≥ 0), receipt_id? |
 | `devices` | id, name, token_hash, sync_key (enc, deleted on revoke), platform, app_version, nonce_watermark, revoked, revoked_at, paired_at, last_sync_at |
+| `remote_computers` | another computer allowed to use the dashboard (ADR-0009; migration 0013): id, name, token_hash? (cleared on remove), joined_from (its home-network address), paired_at, last_seen_at?, revoked_at? |
 | `pairing_sessions` | id, code_hash, pair_pub, pair_sk (enc, erased when the session ends), created_at, exp, used_at, cancelled_at, wrong_attempts |
 | `pairing_nonces` | session_id, nonce (bytes); UNIQUE(session_id, nonce); replay cache for `/api/pair`, removed with the session |
 | `seen_nonces` | device_id, nonce (bytes), ts; UNIQUE(device_id, nonce); replay cache pruned below the device's watermark |

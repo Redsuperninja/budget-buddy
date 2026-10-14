@@ -53,14 +53,16 @@ Tables and columns for sync came in migration 0008 ([database.md](database.md)).
 
 ## Phone side
 
-Contract sections followed: 3.5, 3.8, 3.9, 4, 7.2 and 8. Code: `mobile/src/sync/syncClient.ts` (`syncNow()`),
+Contract sections followed: 3.5, 3.8, 3.9, 4, 6, 7.2, 8 and 9. Code: `mobile/src/sync/syncClient.ts` (`syncNow()`),
 `runSync.ts` (one sync at a time, every outcome in plain English), `transport.ts`, `snapshot.ts` and
 `snapshotChecks.ts` / `snapshotSections.ts` (`parseSnapshot()`), `store.tsx` (`useSnapshot()`), and
 `mobile/src/components/SyncPanel.tsx` (the **Sync now** button on Home and Settings).
 
 1. `GET /api/health` first, so "computer not reachable" is told apart from other problems. It must report
    `contract: 1`, otherwise the phone asks for an update.
-2. Receipt upload: a hook only (`SyncDeps.uploadReceipts`) until roadmap #20.
+2. Receipt upload: waiting receipts go up in batches of 1 to 5 under 11 MiB, each with a 2-minute timeout. An
+   unreachable computer stops the sync; any other receipt problem leaves them queued and the sync goes on to the
+   snapshot. The queue itself: [phone-app.md](phone-app.md).
 3. `POST /api/sync/snapshot` with a fresh random nonce. The answer must open, be `type: "res"`, and have `re`
    equal to our nonce, or it is thrown away (`bad_response`). The snapshot must pass `parseSnapshot()` and carry
    this computer's `server_id`; only then is it saved. That moment counts as a successful sync.
@@ -72,10 +74,10 @@ Safety rules:
   and `decrypt_failed`, a **Pair again** button). They never delete the token, sync key or saved snapshot.
 - An encrypted `replay` answer is retried once with a new nonce. `clock_skew` is never retried with the
   server's clock.
-- Every request times out after 10 s (`AbortController`); redirects are never followed; the saved address must
-  still be a private or loopback IP with a valid port (checked in `transport.ts`, so health and pairing too).
+- Every request times out after 10 s (receipt batches 2 minutes, `RECEIPT_TIMEOUT_MS`; `AbortController`);
+  redirects are never followed; the saved address must still be a private or loopback IP with a valid port
+  (checked in `transport.ts`, so health and pairing too).
 - Answer size is capped (16 KiB, snapshot 2 MiB). A `Content-Length` over the cap is refused up front; with a
   streaming body the phone counts bytes and aborts at the cap. **Limitation:** React Native's `fetch` may not
   stream, in which case the whole answer is read and then measured (the 10 s timeout still applies).
-- The saved snapshot is in AsyncStorage (no keys in it), protected by the phone's lock. Encrypting it at rest is
-  issue #19: secure-store has a small size limit, so it needs a key in secure-store plus an encrypted file.
+- The saved snapshot is encrypted at rest; see [phone-app.md](phone-app.md) (Storage).

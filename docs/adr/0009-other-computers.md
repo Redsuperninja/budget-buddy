@@ -15,9 +15,9 @@ computer *is* the permission. The owner wants to open the dashboard from another
 
 ## Decision
 **Pair each computer with a one-time code, like a phone** (the owner's choice).
-- **Off until used.** On the Budget Buddy computer, Devices, Other computers, **Allow another computer** makes an
-  8-character code (32-letter alphabet without look-alikes, about 40 bits) that works once for 10 minutes. Only its
-  SHA-256 is kept, in memory, never in the database or a log. Five wrong tries end it; joining is rate-limited per
+- **Off until used.** On the Budget Buddy computer, Devices, Other computers, **Allow another computer** (now Other devices /
+  Allow another device) makes an 8-character code (32-letter alphabet without look-alikes, about 40 bits) that
+  works once for 10 minutes. Only its SHA-256 is kept, in memory, never in the database or a log. Five wrong tries end it; joining is rate-limited per
   address. A new code cancels the old one.
 - **Joining.** The other computer opens the address shown (`http://<home-network address>:<port>/`) and types the
   code and a name. The Home Base answers with a random 32-byte token in a cookie (`HttpOnly`, `SameSite=Strict`,
