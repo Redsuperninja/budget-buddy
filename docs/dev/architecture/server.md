@@ -57,6 +57,7 @@ Modules not yet moved into an area are still at the top too.
 | `imports/` | Reading files: bank, brokerage activity, stock and positions CSVs; card sign flipping; the import history |
 | `budget/` | Categories, auto-sort rules and what they learn, the monthly summary, trends, spending pace, the suggested budget and the budget plan |
 | `investing/` | Stock lots, sales, gains and holdings, prices and the live price feed, positions, trades and dividends found in bank files and their deposit sweeps, retirement and HSA limits |
+| `tax/` | Donations and what proves them, repeat gifts, other deductions, paychecks and pay deposits, the yearly tax summary and its CSV export |
 
 ## Local API: common rules
 

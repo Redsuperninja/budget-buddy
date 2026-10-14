@@ -4,14 +4,14 @@ from fastapi import APIRouter, Path, Query, status
 
 from app.deps import Offset, PathId, SessionDep
 from app.models import DonationKind
-from app.schemas.donations import (
+from app.schemas.tax.donations import (
     DonationCreate,
     DonationOut,
     DonationPage,
     DonationSummary,
     DonationUpdate,
 )
-from app.services import donations as service
+from app.services.tax import donations as service
 
 router = APIRouter(prefix="/api/local/donations", tags=["donations"])
 

@@ -27,8 +27,8 @@ from sqlalchemy.orm import Session
 
 from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.services.budget.category_learning import shop_key
-from app.services.gift_categories import CHARITY, file_under
 from app.services.ledger.transaction_roles import donations, none_of, stock_trades
+from app.services.tax.gift_categories import CHARITY, file_under
 
 # First words of a description that say how you paid, not who you paid.
 NOT_A_PAYEE = frozenset(

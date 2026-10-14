@@ -9,7 +9,7 @@ from sqlalchemy import text
 
 from app.crypto import FieldCipher
 from app.db import alembic_config, create_db_engine
-from app.services.paychecks import max_social_security_tax
+from app.services.tax.paychecks import max_social_security_tax
 
 URL = "/api/local/paychecks"
 TXN_URL = "/api/local/transactions"

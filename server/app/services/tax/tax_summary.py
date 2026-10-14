@@ -2,8 +2,8 @@
 tax year, built from the existing services so it shows the same numbers as their own pages.
 
 Nothing here adds different kinds of deductions together: they follow different rules (see
-``services/deductions.py``). The standard deduction is shown from the year's tax data file only for
-comparison. An estimate to get records together, not tax advice.
+``services/tax/deductions.py``). The standard deduction is shown from the year's tax data file only
+for comparison. An estimate to get records together, not tax advice.
 """
 
 import datetime as dt
@@ -13,9 +13,9 @@ from sqlalchemy.orm import Session
 
 from app import tax_data
 from app.models import Deduction, Donation, DonationKind
-from app.schemas.tax_summary import DeductionTotal, Line, TaxSummary
-from app.services import deductions, paychecks
+from app.schemas.tax.tax_summary import DeductionTotal, Line, TaxSummary
 from app.services.investing import stock_sales
+from app.services.tax import deductions, paychecks
 
 DISCLAIMER = (
     "These totals help you gather your records for tax time. They are estimates, not tax advice, "

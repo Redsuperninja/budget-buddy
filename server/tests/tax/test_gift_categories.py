@@ -4,7 +4,7 @@ import datetime as dt
 
 import pytest
 
-from app.schemas import donations as donation_schemas
+from app.schemas.tax import donations as donation_schemas
 
 DONATIONS = "/api/local/donations"
 TXN = "/api/local/transactions"

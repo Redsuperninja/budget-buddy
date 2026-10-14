@@ -21,24 +21,12 @@ from app.listeners import LanListener
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
-from app.routers import (
-    dashboard,
-    deductions,
-    donations,
-    health,
-    instance,
-    pair,
-    pairing,
-    paychecks,
-    receipts,
-    remote_computers,
-    sync,
-    tax_summary,
-)
+from app.routers import dashboard, health, instance, pair, pairing, receipts, remote_computers, sync
 from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.imports import activity_import, csv_import, history, stock_import
 from app.routers.investing import bank_trades, dividends, positions, price_feed, retirement, stocks
 from app.routers.ledger import accounts, transactions
+from app.routers.tax import deductions, donations, paychecks, tax_summary
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
 from app.services.remote_computers import JoinCodes, authenticate

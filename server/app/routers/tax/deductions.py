@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.deductions import DeductionCreate, DeductionOut, DeductionUpdate
-from app.services import deductions as service
+from app.schemas.tax.deductions import DeductionCreate, DeductionOut, DeductionUpdate
+from app.services.tax import deductions as service
 
 router = APIRouter(prefix="/api/local/deductions", tags=["deductions"])
 

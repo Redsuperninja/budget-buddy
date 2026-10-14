@@ -1,6 +1,6 @@
 # Other deductions and the yearly tax summary
 
-Code: `services/deductions.py`, `services/tax_summary.py`, `services/tax_export.py` and their routers.
+Code: `services/tax/deductions.py`, `services/tax/tax_summary.py`, `services/tax/tax_export.py` and their routers.
 Roadmap item 13. An estimate to gather records, not tax advice.
 
 ## Routes (this computer only)
@@ -24,7 +24,7 @@ Roadmap item 13. An estimate to gather records, not tax advice.
   (education, childcare), or `other` (home office, other). HSA, IRA and Other have their own text (HSA: only
   money put in yourself, not through payroll; IRA: traditional only, may be limited with a workplace plan).
   The mapping and plain-English text (`hint()`) live in
-  `services/deductions.py`; the phone snapshot's deduction labels come from the same place.
+  `services/tax/deductions.py`; the phone snapshot's deduction labels come from the same place.
 - Pay totals reuse the paychecks year summary; stock gains reuse `stock_sales.gains_summary`; donations are
   totaled by date in the calendar year (the same rule as the donations page).
 

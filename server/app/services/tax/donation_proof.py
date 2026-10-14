@@ -20,7 +20,7 @@ These are estimates, not tax advice.
 
 from app.models import DonationKind
 from app.money import cents_to_display
-from app.schemas.donations import ProofItem
+from app.schemas.tax.donations import ProofItem
 from app.tax_data import Charitable
 
 

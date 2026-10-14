@@ -46,7 +46,7 @@ from app.services.investing.bank_trades import find_trades
 from app.services.investing.dividend_matching import find_dividends
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transfer_matching import match_transfers
-from app.services.repeat_gifts import repeat_gifts
+from app.services.tax.repeat_gifts import repeat_gifts
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 PREVIEW_ROWS = 50

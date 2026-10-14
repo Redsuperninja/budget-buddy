@@ -6,7 +6,7 @@ import datetime as dt
 import pytest
 from csv_helpers import ok, send
 
-from app.schemas import donations as donation_schemas
+from app.schemas.tax import donations as donation_schemas
 
 URL = "/api/local/donations"
 

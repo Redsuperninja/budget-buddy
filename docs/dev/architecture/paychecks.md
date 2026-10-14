@@ -1,6 +1,6 @@
 # Paychecks and income (no double counting)
 
-Code: `services/paychecks.py`, `schemas/paychecks.py`, `routers/paychecks.py`. Estimates, not tax advice.
+Code: `services/tax/paychecks.py`, `schemas/tax/paychecks.py`, `routers/tax/paychecks.py`. Estimates, not tax advice.
 User guide: [docs/guide/](../../guide/).
 
 ## Fields
@@ -52,7 +52,7 @@ entered or imported. Paychecks feed the tax side (wages and withholding by tax y
   whole cents only (no dollar text).
 - `POST/DELETE /api/local/paychecks/{id}/deposit` links or unlinks the bank deposit. `POST /api/local/paychecks`
   can also take `deposit_transaction_id` to add and link in one go (same checks; nothing is saved if they fail).
-- `GET /api/local/paychecks/deposits?year=` (`services/pay_deposits.py`): pay deposits no paycheck explains yet,
+- `GET /api/local/paychecks/deposits?year=` (`services/tax/pay_deposits.py`): pay deposits no paycheck explains yet,
   newest first, at most 100: `normal` money in, not a transfer, in a checking or savings account, that's either
   in an income category with the word pay, paycheck, payroll or salary in its name, or has no category and a
   payroll word in its description (payroll, direct dep, dir dep, salary, paycheck, wages). Tax refunds, Social
