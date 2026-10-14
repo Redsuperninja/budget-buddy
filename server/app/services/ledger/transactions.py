@@ -207,6 +207,14 @@ def update_transaction(
         changes.get("category_id", transaction.category_id),
     )
     _check_references(session, changes)
+    if (
+        "category_id" in changes
+        and changes["category_id"] is None
+        and transaction.category_source is None
+        and _is_transfer_category(session, transaction.category_id)
+    ):
+        # You took it out of Budget Buddy's "Payments" (or "Transfer"): it isn't filed again.
+        transaction.auto_transfer_off = True
     for field, value in changes.items():
         setattr(transaction, field, value)
     if "category_id" in changes:

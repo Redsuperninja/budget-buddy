@@ -3,16 +3,16 @@ and what kind of transfer it is (a card payment, money into savings...). Matchin
 automatically is in ``transfer_matching``.
 
 A transfer is two regular transactions on different accounts, one out and one in, for the same
-amount. Linked, both become kind "transfer" in the transfer group's category, so they're never
+amount. Linked, both become kind "transfer" in the transfer group's category ("Payments" for a card
+payment, else "Transfer": ``transfer_categories``), so they're never
 counted as income or spending; money into savings-type accounts counts as saved
 (``savings_transfers``).
 """
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError
-from app.models import Category, CategoryGroup, Transaction, TransactionKind
+from app.models import Transaction, TransactionKind
 from app.services.ledger.transactions import (
     _DEPOSIT_LOCKED_MESSAGE,
     _DONATION_LOCKED_MESSAGE,
@@ -21,16 +21,7 @@ from app.services.ledger.transactions import (
     is_paycheck_deposit,
     is_stock_trade,
 )
-
-
-def _transfer_category_id(session: Session) -> int | None:
-    """The starter "Transfer" category (or another in the transfer group), if there is one."""
-    return session.scalar(
-        select(Category.id)
-        .where(Category.group == CategoryGroup.TRANSFER)
-        .order_by((Category.name == "Transfer").desc(), Category.id)
-        .limit(1)
-    )
+from app.services.ledger.transfer_categories import pair_category
 
 
 def unlink_sides(*sides: Transaction | None, remember: bool = True) -> None:
@@ -54,7 +45,8 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
 
     They must be regular (kind "normal") transactions on different accounts, with opposite signs
     and the same size, e.g. -$500.00 out of checking and +$500.00 into savings. Both become kind
-    "transfer", move to the Transfer category, and point at each other.
+    "transfer", move to the Transfer (or, for a card payment, Payments) category, and point at
+    each other.
     """
     first = get_transaction(session, transaction_id)
     second = get_transaction(session, other_id)
@@ -96,9 +88,13 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
     return first
 
 
-def pair_up(session: Session, first: Transaction, second: Transaction) -> None:
-    """Link two checked transactions as one transfer (the caller commits)."""
+def pair_up(
+    session: Session, first: Transaction, second: Transaction, known: dict | None = None
+) -> None:
+    """Link two checked transactions as one transfer (the caller commits). ``known``: see
+    ``transfer_categories.pair_category``."""
     first.transfer_pair_id, second.transfer_pair_id = second.id, first.id
+    category_id = pair_category(session, first, second, known)
     for side in (first, second):
         # Kept so undoing the link puts the category back (and it counts as spending again).
         side.pre_transfer_category_id = side.category_id
@@ -107,7 +103,7 @@ def pair_up(session: Session, first: Transaction, second: Transaction) -> None:
         side.kind = TransactionKind.TRANSFER
         # So a category filter (e.g. Groceries) doesn't list money you only moved. Budget Buddy's
         # choice, not yours or a rule's.
-        side.category_id = _transfer_category_id(session)
+        side.category_id = category_id
         side.category_source = side.sorted_by_rule_id = None
         side.auto_transfer_off = False
     session.flush()

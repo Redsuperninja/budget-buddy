@@ -40,6 +40,10 @@ _OUT_OF = {
 }
 
 
+# Money doesn't leave these for your other accounts (a card or loan payment is money into them).
+CANT_SEND = frozenset({AccountKind.CREDIT_CARD, AccountKind.LOAN})
+
+
 def classify(from_kind: AccountKind, to_kind: AccountKind) -> TransferType:
     """Money moved out of a ``from_kind`` account into a ``to_kind`` account. Where it went decides
     first (paying a card from savings is still a card payment)."""

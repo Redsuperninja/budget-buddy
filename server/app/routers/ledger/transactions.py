@@ -70,13 +70,13 @@ def list_transactions(
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_transaction(data: TransactionCreate, session: SessionDep) -> TransactionOut:
     transaction = service.create_transaction(session, data)
-    found = find_dividends(session, {transaction.id})  # a dividend, or the sweep of one
-    trades = find_trades(session, {transaction.id})  # a stock trade, or its sweep
+    find_dividends(session, {transaction.id})  # a dividend, or the sweep of one
+    find_trades(session, {transaction.id})  # a stock trade, or its sweep
     # The other side of a transfer you entered.
-    matched = match_transfers(session, {transaction.id})
-    gifts = repeat_gifts(session, {transaction.id})  # a repeat gift to a charity
-    if matched or found.dividends or found.sweeps or trades.trades or trades.sweeps or gifts.filed:
-        session.commit()
+    match_transfers(session, {transaction.id})
+    repeat_gifts(session, {transaction.id})  # a repeat gift to a charity
+    # The finders' changes, including a card payment filed under Payments (in match_transfers).
+    session.commit()
     return transaction
 
 
