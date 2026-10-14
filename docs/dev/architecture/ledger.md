@@ -40,7 +40,7 @@ snapshot, use today's.
 and refunds are positive.** A card payment from checking is a linked transfer: -X on checking, +X on the card.
 This makes net worth the plain sum of every account's balance. CSV import must flip card issuers that export
 charges as positive numbers (the `flip_sign` choice, saved with the account's mapping, and noticed by itself for
-card accounts; [csv-import.md](csv-import.md)). The dashboard and phone show a negative card or loan balance as "$50.00 owed".
+card accounts; [csv-import.md](csv-import.md)). The dashboard and phone show a negative card or loan balance as "$50.00 owed", and a positive one (overpaid) as "$12.00 credit".
 
 Worked example (fake data, also a test in `server/tests/ledger/test_accounts_api.py`):
 

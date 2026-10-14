@@ -21,7 +21,8 @@ test("formatBalance says owed for negative cards and loans only", () => {
   assert.equal(formatBalance(-5000, "credit_card"), "$50.00 owed");
   assert.equal(formatBalance(-5000, "loan"), "$50.00 owed");
   assert.equal(formatBalance(-5000, "checking"), "-$50.00");
-  assert.equal(formatBalance(5000, "credit_card"), "$50.00");
+  assert.equal(formatBalance(5000, "credit_card"), "$50.00 credit");
+  assert.equal(formatBalance(0, "loan"), "$0.00");
 });
 
 test("centsToInput gives a plain number for a text box", () => {

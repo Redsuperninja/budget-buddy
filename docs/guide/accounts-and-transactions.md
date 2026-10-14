@@ -4,8 +4,9 @@ Both pages are in the **Money** section: click **Money** at the top, then the **
 
 ## Your accounts
 
-Lists all your bank and savings accounts, and their current balances. A transaction you enter for a later date
-(like next week's rent) doesn't change today's balance yet: the list shows what the balance will be after it, too.
+Lists all your bank and savings accounts, and their current balances. A credit card or loan shows what you owe
+("$50.00 owed"), or "$12.00 credit" if you've paid more than you owed. A transaction you enter for a later date (like
+next week's rent) doesn't change today's balance yet: the list shows what the balance will be after it, too.
 
 ### Add an account
 
