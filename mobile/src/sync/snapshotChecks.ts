@@ -52,12 +52,18 @@ export function str(v: unknown, path: string): string {
   return v;
 }
 
+/** Server text made safe to show: hidden characters as spaces, then at most `max` characters. Never throws. */
+export function cleanText(s: string, max: number): string {
+  const shown = s.replace(HIDDEN_CHARS, ' ').replace(/ {2,}/g, ' ').trim();
+  return [...shown].slice(0, max).join(''); // by character, so an emoji is never cut in half
+}
+
 /** Text shown on screen: at most `max` characters, with control and direction-changing characters dropped. */
 export function text(v: unknown, path: string, max: number = SNAPSHOT_LIMITS.text): string {
   const s = str(v, path);
   // Counted like the Home Base does (one per character, so an emoji is one, not two).
   if ([...s].length > max) throw new SnapshotError(path, `expected at most ${max} characters`);
-  return s.replace(HIDDEN_CHARS, ' ').replace(/ {2,}/g, ' ').trim();
+  return cleanText(s, max);
 }
 
 /** A list of at most `max` items. */

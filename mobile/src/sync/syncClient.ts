@@ -26,6 +26,11 @@ export { getNeedsAttention };
 export const HEALTH_PATH = '/api/health';
 export const SNAPSHOT_PATH = '/api/sync/snapshot';
 export const ACK_PATH = '/api/sync/ack';
+export const RECEIPTS_PATH = '/api/sync/receipts';
+/** The answer to a receipt batch is a short list of results. */
+export const MAX_RECEIPT_ANSWER_BYTES = 64 * 1024;
+/** A batch can be several MB over home Wi-Fi: more time than a small request. */
+export const RECEIPT_TIMEOUT_MS = 120_000;
 /** A snapshot is bigger than a pairing answer; still capped so a bad server can't fill the phone's memory. */
 export const MAX_SNAPSHOT_BYTES = 2 * 1024 * 1024;
 
@@ -35,10 +40,11 @@ export type SyncDeps = {
   now?: () => number;
   appVersion?: string;
   /**
-   * Hook for roadmap #20 (receipt upload, contract section 8 step 2). Called after the health check and
-   * before the snapshot. Return how many receipts were uploaded. Not built yet.
+   * Receipt upload (roadmap #20, contract section 8 step 2), called after the health check and before
+   * the snapshot with `send`, which posts one batch through the encrypted envelope. Returns how many
+   * receipts the Home Base now has (`receipts/receiptUpload.ts`).
    */
-  uploadReceipts?: () => Promise<number>;
+  uploadReceipts?: (send: (data: { receipts: object[] }) => Promise<Record<string, unknown>>) => Promise<number>;
   /** Saves the validated snapshot on the phone. Return an error message, or null when saved. */
   save: (snapshot: Snapshot) => Promise<string | null>;
 };
@@ -95,6 +101,7 @@ export async function encryptedPost(
   data: object,
   now: () => number,
   maxBytes: number,
+  timeoutMs?: number,
 ): Promise<Record<string, unknown>> {
   for (let attempt = 0; ; attempt++) {
     const ts = now();
@@ -109,6 +116,7 @@ export async function encryptedPost(
         body: sealed.body,
       },
       maxBytes,
+      timeoutMs,
     );
 
     const outer = parseObject(res.text);
@@ -173,8 +181,18 @@ export async function syncNow(creds: Credentials, deps: SyncDeps): Promise<SyncR
     const key = checkCredentials(creds);
     await checkHealth(f, creds);
 
-    // Contract section 8 step 2 belongs to roadmap #20 (receipt queue). Hook only.
-    const receiptsUploaded = deps.uploadReceipts ? await deps.uploadReceipts() : 0;
+    // Contract section 8 step 2: queued receipts first, so the snapshot can include them. Only an
+    // unreachable computer stops the sync; any other receipt problem leaves them queued for next time.
+    let receiptsUploaded = 0;
+    if (deps.uploadReceipts) {
+      try {
+        receiptsUploaded = await deps.uploadReceipts((batch) =>
+          encryptedPost(f, creds, key, RECEIPTS_PATH, batch, now, MAX_RECEIPT_ANSWER_BYTES, RECEIPT_TIMEOUT_MS),
+        );
+      } catch (e) {
+        if (e instanceof PairError && e.code === 'server_unreachable') throw e;
+      }
+    }
 
     const data = await encryptedPost(f, creds, key, SNAPSHOT_PATH, {}, now, MAX_SNAPSHOT_BYTES);
     const parsed = parseSnapshot(data);

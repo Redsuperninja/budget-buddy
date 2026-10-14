@@ -4,6 +4,9 @@
  */
 import Constants from 'expo-constants';
 
+import { waitingCount } from '@/receipts/receiptQueue';
+import { uploadReceipts } from '@/receipts/receiptUpload';
+
 import { loadCredentials } from './credentials';
 import { rescheduleReminders } from './reminders';
 import { PAIR_MESSAGES, PairError, NEEDS_ATTENTION_CODES } from './pairErrors';
@@ -26,11 +29,12 @@ export function runSync(save: (snapshot: Snapshot) => Promise<string | null>): P
     try {
       const creds = await loadCredentials();
       if (!creds) return { ok: false, message: NOT_CONNECTED_MESSAGE, code: 'not_connected', needsAttention: false };
-      const { snapshot } = await syncNow(creds, { save, appVersion: Constants.expoConfig?.version ?? '1.0.0' });
+      const { snapshot } = await syncNow(creds, { save, uploadReceipts, appVersion: Constants.expoConfig?.version ?? '1.0.0' });
       // Contract §9: fresh reminders, counted from this sync.
       await rescheduleReminders({
         lastSyncedAt: new Date().toISOString(),
         suggestedDays: snapshot.settings.reminder_days_default,
+        waitingReceipts: await waitingCount(),
       });
       return { ok: true };
     } catch (e) {

@@ -32,6 +32,48 @@ jest.mock('expo-notifications', () => {
   };
 });
 
+// In-memory files for tests (receipt photos): paths joined like the real File/Directory classes.
+jest.mock('expo-file-system', () => {
+  const files = new Map<string, Uint8Array>();
+  const join = (parts: unknown[]) => parts.map((p) => (typeof p === 'string' ? p : (p as { uri: string }).uri)).join('/');
+  class Directory {
+    uri: string;
+    constructor(...parts: unknown[]) {
+      this.uri = join(parts);
+    }
+    create() {}
+    list() {
+      return [...files.keys()]
+        .filter((uri) => uri.startsWith(`${this.uri}/`) && !uri.slice(this.uri.length + 1).includes('/'))
+        .map((uri) => new File(uri));
+    }
+  }
+  class File {
+    uri: string;
+    constructor(...parts: unknown[]) {
+      this.uri = join(parts);
+    }
+    get exists() {
+      return files.has(this.uri);
+    }
+    get name() {
+      return this.uri.split('/').pop() as string;
+    }
+    write(content: Uint8Array) {
+      files.set(this.uri, new Uint8Array(content));
+    }
+    async bytes() {
+      const data = files.get(this.uri);
+      if (!data) throw new Error('missing file');
+      return new Uint8Array(data);
+    }
+    delete() {
+      files.delete(this.uri);
+    }
+  }
+  return { __files: files, Directory, File, Paths: { document: new Directory('doc') } };
+});
+
 // Deterministic-enough random bytes for tests (real app uses the phone's secure random).
 jest.mock('expo-crypto', () => ({
   getRandomBytes: (n: number) => require('crypto').randomBytes(n),

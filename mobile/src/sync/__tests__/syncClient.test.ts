@@ -4,7 +4,8 @@ import { b64uDecode, b64uEncode } from '../base64url';
 import { CREDENTIALS_KEY, getNeedsAttention, loadCredentials, saveCredentials } from '../credentials';
 import { PAIR_MESSAGES } from '../pairErrors';
 import { SAMPLE_SNAPSHOT } from '../sampleSnapshot';
-import { ACK_PATH, HEALTH_PATH, SNAPSHOT_PATH, syncNow } from '../syncClient';
+import { PairError } from '../pairErrors';
+import { ACK_PATH, HEALTH_PATH, RECEIPTS_PATH, SNAPSHOT_PATH, syncNow } from '../syncClient';
 import type { SyncDeps } from '../syncClient';
 import { openResponse, sealRequest } from '../transport';
 
@@ -79,7 +80,12 @@ const SNAPSHOT = { ...JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT)), server_id: SE
 const key = b64uDecode(SYNC_KEY, 32);
 
 type Reply = { status?: number; inner?: object; plain?: unknown; httpStatus?: number; reNonce?: string };
-type Handlers = { health?: () => Promise<unknown> | unknown; snapshot?: (n: number) => Reply; ack?: () => Reply };
+type Handlers = {
+  health?: () => Promise<unknown> | unknown;
+  snapshot?: (n: number) => Reply;
+  ack?: () => Reply;
+  receipts?: (data: any) => Reply;
+};
 
 /** A fake computer. Opens each request with the sync key and answers with a box bound to its nonce. */
 function fakeServer(h: Handlers = {}) {
@@ -99,7 +105,9 @@ function fakeServer(h: Handlers = {}) {
     const isSnapshot = url.endsWith(SNAPSHOT_PATH);
     const reply: Reply = isSnapshot
       ? (h.snapshot ?? (() => ({ inner: SNAPSHOT })))(snapshotCalls++)
-      : (h.ack ?? (() => ({ inner: { last_sync_at: '2026-10-02T18:30:01Z' } })))();
+      : url.endsWith(RECEIPTS_PATH)
+        ? (h.receipts ?? (() => ({ inner: { results: [] } })))(call.inner.data)
+        : (h.ack ?? (() => ({ inner: { last_sync_at: '2026-10-02T18:30:01Z' } })))();
     if (reply.plain !== undefined) return json(reply.plain, reply.httpStatus ?? 400);
     const status = reply.status ?? 200;
     const innerRes: Record<string, unknown> = { type: 'res', ts: NOW + 1, re: reply.reNonce ?? outer.nonce, status };
@@ -153,6 +161,40 @@ describe('syncNow', () => {
     expect(save).toHaveBeenCalledTimes(1);
     expect(result.snapshot.server_id).toBe(SERVER_ID);
     expect(new Set(server.calls.slice(1).map((c) => c.nonce)).size).toBe(2); // fresh nonce per request
+  });
+
+  it('sends queued receipts through the envelope before the snapshot, and counts them in the ack', async () => {
+    const server = fakeServer({
+      receipts: (data) => ({ inner: { results: data.receipts.map((r: any) => ({ client_id: r.client_id, status: 'accepted' })) } }),
+    });
+    const uploadReceipts = async (send: (d: { receipts: object[] }) => Promise<Record<string, unknown>>) => {
+      const answer = await send({ receipts: [{ client_id: 'x' }] });
+      return (answer.results as unknown[]).length;
+    };
+    const result = await run(server, { uploadReceipts }).p;
+    await result.ackDone;
+    expect(server.calls.map((c) => c.url.replace('http://192.168.1.20:8765', ''))).toEqual([
+      HEALTH_PATH,
+      RECEIPTS_PATH,
+      SNAPSHOT_PATH,
+      ACK_PATH,
+    ]);
+    expect(server.calls[1].inner).toMatchObject({ path: RECEIPTS_PATH, data: { receipts: [{ client_id: 'x' }] } });
+    expect(server.calls[3].inner.data.receipts_uploaded).toBe(1);
+  });
+
+  it('still gets the budget when sending receipts fails, but not when the computer is unreachable', async () => {
+    const server = fakeServer();
+    const failing = async () => {
+      throw new PairError('bad_response');
+    };
+    const result = await run(server, { uploadReceipts: failing }).p;
+    expect(result.snapshot.server_id).toBe(SERVER_ID);
+
+    const unreachable = async () => {
+      throw new PairError('server_unreachable');
+    };
+    await expect(run(fakeServer(), { uploadReceipts: unreachable }).p).rejects.toMatchObject({ code: 'server_unreachable' });
   });
 
   it('does not fetch anything encrypted if the computer cannot be reached', async () => {

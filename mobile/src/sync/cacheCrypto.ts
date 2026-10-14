@@ -56,17 +56,43 @@ function keyForSaving(): Promise<Uint8Array> {
   return keyInFlight;
 }
 
-/** Seal `text` for AsyncStorage. Throws (and nothing should be saved) without a secure random source. */
-export async function sealForDisk(text: string): Promise<string> {
-  const key = await keyForSaving();
-  let nonce: Uint8Array;
+function freshNonce(): Uint8Array {
   try {
-    nonce = randomBytes(nacl.secretbox.nonceLength);
+    return randomBytes(nacl.secretbox.nonceLength);
   } catch {
     throw new Error('No secure random source: nothing is saved.');
   }
+}
+
+/** Seal `text` for AsyncStorage. Throws (and nothing should be saved) without a secure random source. */
+export async function sealForDisk(text: string): Promise<string> {
+  const key = await keyForSaving();
+  const nonce = freshNonce();
   const box = nacl.secretbox(decodeUTF8(text), nonce, key);
   return JSON.stringify({ v: 1, n: b64uEncode(nonce), c: b64uEncode(box) });
+}
+
+/** Seal bytes for a file (a receipt photo): the 24-byte nonce, then the box. Throws like `sealForDisk`. */
+export async function sealBytesForDisk(plain: Uint8Array): Promise<Uint8Array> {
+  const key = await keyForSaving();
+  const nonce = freshNonce();
+  const box = nacl.secretbox(plain, nonce, key);
+  const out = new Uint8Array(nonce.length + box.length);
+  out.set(nonce);
+  out.set(box, nonce.length);
+  return out;
+}
+
+/** The bytes sealed by `sealBytesForDisk`, or null if they can't be opened on this phone. Never throws. */
+export async function openBytesFromDisk(sealed: Uint8Array): Promise<Uint8Array | null> {
+  try {
+    const n = nacl.secretbox.nonceLength;
+    if (sealed.length < n + nacl.secretbox.overheadLength) return null;
+    const key = await readKey();
+    return key ? nacl.secretbox.open(sealed.subarray(n), sealed.subarray(0, n), key) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** The text sealed by `sealForDisk`, or null if it can't be opened on this phone. Never throws. */
