@@ -34,6 +34,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Account, BankTrade, SecuritySymbol, Transaction
 from app.services.accounts import INVESTMENT_KINDS
+from app.services.combined_sweeps import free_sweep, link_combined
 from app.services.dividend_matching import looks_like_dividend
 from app.services.sweeps import SWEEP_WORDS, candidates, in_window, link_sweeps, regular
 from app.services.transaction_roles import bank_trades, dividends, none_of, stock_trades
@@ -137,6 +138,7 @@ def forget_recorded(session: Session, transaction_id: int | None) -> None:
     if trade is not None and not looks_like_trade(
         session.get(Transaction, transaction_id).description
     ):
+        free_sweep(session, trade.sweep_transaction_id)
         session.delete(trade)
 
 
@@ -170,6 +172,7 @@ def find_trades(session: Session, transaction_ids: set[int] | None = None) -> Fo
             session.add_all(adopted)
             session.flush()
             found.sweeps = _link_sweeps(session)
+            found.sweeps += link_combined(session)  # dividends' too: they were looked for first
             for trade in adopted:  # kept only with a sweep, so it isn't listed for nothing
                 if trade.sweep_transaction_id is None:
                     session.delete(trade)

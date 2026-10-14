@@ -31,6 +31,7 @@ from app.models import (
 )
 from app.schemas.imports import ImportOut
 from app.services import stock_gains as gains
+from app.services.combined_sweeps import free_sweeps_of
 from app.services.stock_records import in_account, rematch
 from app.services.transfers import unlink_sides
 
@@ -129,6 +130,7 @@ def remove(session: Session, import_id: int) -> None:
         )
     _remove_trades(session, import_id)
     session.execute(delete(Position).where(Position.import_id == import_id))
+    free_sweeps_of(session, mine)  # a sweep shared with dividends or trades from other files
     # The database clears paycheck, donation, transfer and sweep links and deletes dividends.
     session.execute(delete(Transaction).where(Transaction.import_id == import_id))
     session.delete(batch)

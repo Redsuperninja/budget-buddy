@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Match everything again** on the Transactions page: looks through all your transactions again for dividends, stock trades, deposit sweeps and transfers with today's rules, so data you imported earlier is matched like new data. What you decided yourself stays.
+- One deposit sweep for several trades or dividends: when your broker sweeps a day's cash in one line (two purchases paid by one sweep for their total, say), the sweep is linked to all of them and no longer needs a category. A sweep you had already given a category stops counting once it's linked, also in past months. Restart Budget Buddy after updating (database change 0026).
 - Fixed: a credit card file that lists charges as positive numbers is now flipped for you, so the card shows what you owe (also on the charts and in net worth) and its payment links up with the payment from checking instead of needing a category. Imported one before? Undo it in Import history and import it again.
 - Fixed: a stock trade you mark yourself on the Transactions page now gets its deposit sweep linked too, so the sweep no longer shows up under "needs a category". For trades marked before this fix, click **Find trades in my transactions** on the Investments page.
 - Fixed: a dividend's deposit sweep in a regular brokerage account no longer counts as unsorted money out (it only parks the cash, and "needs a category" never listed it, so it couldn't be sorted). Give it a category yourself and it counts there.

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Path, status
 from app.deps import PathId, SessionDep
 from app.schemas.dividends import DividendsFound, DividendsOut
 from app.services import dividends as service
+from app.services.combined_sweeps import link_combined
 from app.services.dividend_matching import find_dividends
 
 router = APIRouter(prefix="/api/local/dividends", tags=["dividends"])
@@ -16,8 +17,9 @@ TaxYear = Annotated[int, Path(ge=2000, le=2100)]
 def find(session: SessionDep) -> DividendsFound:
     """Look through every transaction for dividends and their deposit sweeps."""
     found = find_dividends(session)
+    combined = link_combined(session)  # one sweep for several dividends (or trades)
     session.commit()
-    return DividendsFound(found=found.dividends, sweeps_linked=found.sweeps)
+    return DividendsFound(found=found.dividends, sweeps_linked=found.sweeps + combined)
 
 
 @router.get("/{tax_year}")

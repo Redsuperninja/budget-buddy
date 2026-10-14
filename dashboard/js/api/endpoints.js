@@ -35,6 +35,7 @@ export const listTransactions = (params) => api("GET", `${LOCAL}/transactions?${
 export const createTransaction = (json) => api("POST", `${LOCAL}/transactions`, { json });
 export const updateTransaction = (id, json) => api("PATCH", `${LOCAL}/transactions/${id}`, { json });
 export const matchTransfers = () => api("POST", `${LOCAL}/transactions/match-transfers`);
+export const matchAgain = () => api("POST", `${LOCAL}/transactions/match-again`);
 export const markPersonalGift = (id) => api("POST", `${LOCAL}/transactions/${id}/personal-gift`);
 
 // Bank file import (query: already-encoded text; bytes: the CSV file)

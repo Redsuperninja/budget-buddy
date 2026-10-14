@@ -10,6 +10,7 @@ from app.errors import not_found
 from app.models import Account, Category, Dividend, Transaction, TransactionKind
 from app.schemas.dividends import DividendOut, DividendsOut
 from app.services.accounts import TAX_FREE_KINDS
+from app.services.combined_sweeps import free_sweep
 from app.services.dividend_matching import CATEGORY
 
 
@@ -60,5 +61,6 @@ def dismiss(session: Session, dividend_id: int) -> None:
     if category and category.name == CATEGORY and payment.category_source is None:
         payment.category_id = None
     dividend.dismissed = True
+    free_sweep(session, dividend.sweep_transaction_id)  # from every dividend or trade sharing it
     dividend.sweep_transaction_id = None
     session.commit()

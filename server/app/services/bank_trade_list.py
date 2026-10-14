@@ -10,6 +10,7 @@ from app.models import Account, BankTrade, SecuritySymbol, StockLot, StockSaleOr
 from app.models.tax import SHARES_SCALE
 from app.schemas.bank_trades import BankTradeOut, BankTradesOut
 from app.services.bank_trades import ticker_in
+from app.services.combined_sweeps import free_sweep
 
 RECORDED = (
     "This trade is recorded on the Stocks page. To undo it, delete the purchase or sale there."
@@ -78,5 +79,6 @@ def dismiss(session: Session, trade_id: int) -> None:
     if _recorded(session, [trade.transaction_id]):
         raise ApiError(409, "trade_recorded", RECORDED)
     trade.dismissed = True
+    free_sweep(session, trade.sweep_transaction_id)  # from every trade or dividend sharing it
     trade.sweep_transaction_id = None
     session.commit()

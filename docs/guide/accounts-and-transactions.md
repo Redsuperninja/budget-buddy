@@ -107,6 +107,14 @@ If a payment was a gift, click **Mark as gift** in its row (in the [All tools](o
 
 Either way the payment still counts once as spending in your budget. [Sort a payment into charity](donations.md#sort-a-payment-into-charity) has the details.
 
+### Match everything again
+
+Budget Buddy sorts out dividends, stock trades, deposit sweeps and transfers as each file comes in. When it gets
+better at this, your older transactions don't change by themselves. Click **Match everything again** on the
+**Transactions** page to look through all of them with today's rules. It says what it found. Anything you decided
+yourself stays: a "not a dividend" or "not a trade", transfers you linked or unlinked, your categories and the shares
+you recorded. It's safe to click more than once.
+
 ## Something went wrong?
 
 **Numbers don't look right**

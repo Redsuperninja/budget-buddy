@@ -103,3 +103,12 @@ class TransactionPage(Schema):
 
 class TransfersMatched(Schema):
     matched: int  # pairs linked as transfers
+
+
+class MatchedAgain(Schema):
+    """What "match everything again" found (services/match_again.py)."""
+
+    dividends_found: int  # new dividends
+    trades_found: int  # new stock trades from a bank file
+    sweeps_linked: int  # deposit sweeps linked (all are picked again)
+    transfers_linked: int  # new transfer pairs
