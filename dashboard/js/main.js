@@ -4,23 +4,23 @@
 
 import { start } from "./router.js";
 import { addSettingsMenu } from "./settings-menu.js";
-import * as accounts from "./screens/accounts.js";
-import * as categories from "./screens/categories.js";
-import * as connectPhone from "./screens/connect-phone.js";
-import * as donations from "./screens/donations.js";
-import * as home from "./screens/home.js";
-import * as importCsv from "./screens/import.js";
-import * as importHistory from "./screens/import-history.js";
-import * as investments from "./screens/investments.js";
-import * as join from "./screens/join.js";
-import * as otherComputers from "./screens/other-computers.js";
-import * as paychecks from "./screens/paychecks.js";
-import * as plan from "./screens/plan.js";
-import * as receipts from "./screens/receipts.js";
-import * as rules from "./screens/rules.js";
-import * as stocks from "./screens/stocks.js";
-import * as taxes from "./screens/taxes.js";
-import * as transactions from "./screens/transactions.js";
+import * as accounts from "./screens/money/accounts.js";
+import * as categories from "./screens/budget/categories.js";
+import * as connectPhone from "./screens/devices/connect-phone.js";
+import * as donations from "./screens/tax/donations.js";
+import * as home from "./screens/home/home.js";
+import * as importCsv from "./screens/money/import.js";
+import * as importHistory from "./screens/money/import-history.js";
+import * as investments from "./screens/money/investments.js";
+import * as join from "./screens/devices/join.js";
+import * as otherComputers from "./screens/devices/other-computers.js";
+import * as paychecks from "./screens/tax/paychecks.js";
+import * as plan from "./screens/budget/plan.js";
+import * as receipts from "./screens/money/receipts.js";
+import * as rules from "./screens/money/rules.js";
+import * as stocks from "./screens/tax/stocks.js";
+import * as taxes from "./screens/tax/taxes.js";
+import * as transactions from "./screens/money/transactions.js";
 
 // Connecting phones and computers only works on the Budget Buddy computer itself.
 const onThisComputer = ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname);

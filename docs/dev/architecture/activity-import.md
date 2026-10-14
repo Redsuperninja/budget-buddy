@@ -3,7 +3,7 @@
 Code: `services/imports/activity_csv.py` (columns by name, one row), `services/imports/activity_import.py` (preview, duplicates,
 add and sort), `schemas/imports/activity_import.py`, `routers/imports/activity_import.py`. Shared: decoding, amounts, dates and
 fingerprints (`csv_parsing`), header matching (`csv_headers`), Buy/Sell wording and share signs (`stock_csv`),
-upload checks (`CsvBody`). Dashboard: **Money**, **Import files** (`screens/activity-import.js`). User guide:
+upload checks (`CsvBody`). Dashboard: **Money**, **Import files** (`screens/money/activity-import.js`). User guide:
 [docs/guide/import-brokerage-activity.md](../../guide/import-brokerage-activity.md).
 
 ## Routes (this computer, or a joined one: the `accounts` area)

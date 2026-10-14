@@ -18,7 +18,7 @@ Code: `services/devices/receipts.py`, `services/devices/receipt_images.py`, `rou
 
 ## Dashboard
 
-**Money**, **Receipts** (`dashboard/js/screens/receipts.js`) lists the newest 200 with an `<img>` thumbnail from
+**Money**, **Receipts** (`dashboard/js/screens/money/receipts.js`) lists the newest 200 with an `<img>` thumbnail from
 `GET .../{id}/image` (same origin, allowed by the dashboard's `img-src 'self'`; the image response keeps its own
 sandbox CSP), a link to open it, a download link when the browser can't decode it (HEIC), and Delete
 (`DELETE /api/local/receipts/{id}`, which removes the encrypted photo too).

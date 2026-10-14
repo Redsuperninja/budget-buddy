@@ -2,7 +2,7 @@
 
 Code: `services/investing/stock_holdings.py`, `services/investing/retirement.py`, `routers/investing/stocks.py` (holdings, prices),
 `routers/investing/retirement.py`, `services/investing/price_feed.py`, tables `stock_prices` (migration 0015) and `price_feed`
-(migration 0017). Dashboard: `screens/investments.js` (Money,
+(migration 0017). Dashboard: `screens/money/investments.js` (Money,
 Investments). User guide: [docs/guide/investments.md](../../guide/investments.md). Estimates, not tax advice.
 
 ## Holdings

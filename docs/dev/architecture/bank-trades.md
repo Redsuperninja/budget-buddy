@@ -2,7 +2,7 @@
 
 Code: `services/investing/bank_trades.py` (find trades, link sweeps, remember tickers),
 `services/investing/bank_trade_list.py` (the list with price per share, "not a trade"), `models/trades.py`,
-`schemas/investing/bank_trades.py`, `routers/investing/bank_trades.py`. Dashboard: `screens/bank-trades-card.js` on Investments.
+`schemas/investing/bank_trades.py`, `routers/investing/bank_trades.py`. Dashboard: `screens/money/bank-trades-card.js` on Investments.
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).
 
 Some brokers' bank-style files (J.P. Morgan / Chase) show a trade only as a line naming the company, with no ticker,

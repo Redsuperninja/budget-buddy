@@ -18,7 +18,7 @@ reviewers check them.
   - Server: business logic in `services/` (one package per area, one module per job; routers, schemas and
     tests use the same areas, see [server.md](architecture/server.md#areas)), request/response shapes in `schemas/`,
     small cross-cutting helpers next to what uses them (e.g. `app/crypto/`, `app/bodylimit.py`).
-  - Web dashboard (`dashboard/js/`): one module per screen, plus shared modules for API calls
+  - Web dashboard (`dashboard/js/`): one module per screen in `screens/<section>/` (as in `main.js`), plus shared modules for API calls
     (`api/endpoints.js` holds every route string), building the page, money, dates, labels, and charts
     (`charts/`).
   - Phone (`mobile/src/`): screens in `app/`, reusable UI in `components/`, pure logic in `lib/`,

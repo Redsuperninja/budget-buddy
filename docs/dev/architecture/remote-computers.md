@@ -5,7 +5,7 @@ Design: [ADR-0009](../../adr/0009-other-computers.md). User guide:
 
 Code: `services/devices/remote_computers.py` (codes, tokens), `routers/devices/remote_computers.py`, `app/remote_access.py` (which
 requests a home-network computer may make, asked by `LocalAccessMiddleware`), table `remote_computers`
-(migration 0013). Dashboard: `screens/other-computers.js` (on this computer) and `screens/join.js`.
+(migration 0013). Dashboard: `screens/devices/other-computers.js` (on this computer) and `screens/devices/join.js`.
 
 ## Routes
 

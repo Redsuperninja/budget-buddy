@@ -62,7 +62,7 @@ pieces (Import history, Auto-sort, Find transfers, the gift and stock-trade colu
 import, live price settings) carry the `advanced` class; `app.css` hides them unless `<html data-view="all">`,
 which the header **Settings** menu sets (`js/view.js`, remembered in `localStorage` per browser). It is a display
 choice only: the API, the data and every route are the same in both views, and a link to a hidden page still
-opens it. Home also shows a **Get started** checklist (`screens/home-start.js`) until there are accounts,
+opens it. Home also shows a **Get started** checklist (`screens/home/home-start.js`) until there are accounts,
 transactions and budgets, and hides its charts until the first transaction.
 
 ## Folding cards
@@ -80,7 +80,7 @@ covered 100%, adds up amount and percentage budgets apart, never counting a perc
 
 ## Charts
 
-Home shows money tiles with SVG meters (`screens/home-tiles.js`; inline styles are blocked by the CSP), a "needs
+Home shows money tiles with SVG meters (`screens/home/home-tiles.js`; inline styles are blocked by the CSP), a "needs
 your attention" list, where the income went (`charts/income-split.js`: one bar split into needs, wants, savings and
 a neutral gray left over), spending against budget (by group and by category), spending against last month
 (`charts/change-bars.js`: more = series 2 to the right, less = series 1 to the left, always with "more" or "less"
