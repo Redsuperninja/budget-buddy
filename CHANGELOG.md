@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Phone app: a budget summary that's far too big (more than 500 transactions, very long names, impossible dates like February 30) is refused instead of slowing the phone down, and hidden characters that could make text read backwards are dropped. The Home Base drops those characters from bank-file descriptions too.
 - Phone app: a budget summary whose month doesn't add up (say, February with 30 days, or a start that isn't the 1st) is refused like any other unreadable copy, instead of being shown under the wrong month.
 - Phone app: an account below zero (not a card or loan) shows as "$30.00 overdrawn", and if your computer has a kind of account this version of the app can't show yet, the list says "1 account needs an app update to show" instead of leaving it out without a word.
 - A credit card or loan you've overpaid shows as a credit ("$12.00 credit") on the dashboard, as on the phone, instead of a bare amount.

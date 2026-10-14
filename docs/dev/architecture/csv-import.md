@@ -36,6 +36,8 @@ has `mapping.flip_sign` turned over and says so in `message`; saving the mapping
 - **Problem rows** stop the import and are listed by row number, so nothing half-imports, unless
   `skip_invalid_rows=true`. Blank lines are ignored.
 - **Limits:** 5 MB and 10,000 rows per file. UTF-8, UTF-16 and Windows-1252 are accepted.
+- **Hidden characters:** control characters (C0 and C1) and the ones that flip text direction (U+202A-202E,
+  U+2066-2069) become spaces in a description (`csv_parsing.clean_description`), so it can't read as something else.
 - **Formula guard** (`app/spreadsheet.py`): a description starting with `=`, `+`, `-`, `@`, tab or carriage return gets a `'` in front, so a spreadsheet never
   runs it as a formula after export.
 - Imported rows are `normal` transactions with `source = csv`, sorted into a category by the

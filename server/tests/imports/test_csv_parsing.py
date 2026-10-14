@@ -75,3 +75,15 @@ def test_parse_date(text, fmt, expected):
 )
 def test_clean_description_neutralizes_formulas(text, expected):
     assert clean_description(text) == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("FAKE\u202eSHOP\u0085 1\u2066", "FAKE SHOP 1"),
+        ("FAKE\u009bSHOP", "FAKE SHOP"),  # C1
+        ("FAKE\u200f\u061cSHOP\u2028", "FAKE SHOP"),  # direction marks, line separator
+    ],
+)
+def test_clean_description_drops_direction_and_control_characters(text, expected):
+    assert clean_description(text) == expected

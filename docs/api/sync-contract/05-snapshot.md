@@ -92,7 +92,9 @@ export interface SyncSettings {
 Rules:
 - `transactions`: last **60 days** up to and including today, newest first, at most **500**. No account
   numbers, notes, or raw bank memo fields.
-- `accounts`: every account, whatever its kind. Never includes account numbers or `last4`.
+- `accounts`: every account, whatever its kind. Never includes account numbers or `last4`. The phone may refuse a
+  snapshot with more than 1,000 accounts or 1,000 categories in a group, or text over 100 characters (500 for the
+  tax disclaimer).
   `credit_card` and `loan` balances are negative when money is owed.
 - `budget.unassigned`: money from this month that couldn't be placed in a budget category (no category, or a
   refund), so the phone can say "N transactions need a category". `in_cents` and `out_cents` are both

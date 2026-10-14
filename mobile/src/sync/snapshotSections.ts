@@ -1,7 +1,7 @@
 /** Parsers for each part of a snapshot (groups, transactions, accounts, tax, settings). */
 
 import {
-  arr, bool, date, int, matching, MONTH, nonNegInt, obj, oneOf, SnapshotError, str,
+  arr, bool, date, int, list, matching, MONTH, nonNegInt, obj, oneOf, SNAPSHOT_LIMITS, SnapshotError, str, text,
 } from './snapshotChecks';
 import { ACCOUNT_KINDS, GROUP_ORDER } from './snapshotTypes';
 import type {
@@ -12,7 +12,7 @@ export function parseCategory(v: unknown, p: string): BudgetCategory {
   const o = obj(v, p);
   return {
     id: int(o.id, `${p}.id`),
-    name: str(o.name, `${p}.name`),
+    name: text(o.name, `${p}.name`),
     target_cents: int(o.target_cents, `${p}.target_cents`),
     actual_cents: int(o.actual_cents, `${p}.actual_cents`),
   };
@@ -22,10 +22,10 @@ export function parseGroup(v: unknown, p: string): BudgetGroup {
   const o = obj(v, p);
   return {
     group: oneOf(o.group, GROUP_ORDER, `${p}.group`),
-    name: str(o.name, `${p}.name`),
+    name: text(o.name, `${p}.name`),
     target_cents: int(o.target_cents, `${p}.target_cents`),
     actual_cents: int(o.actual_cents, `${p}.actual_cents`),
-    categories: arr(o.categories, `${p}.categories`).map((c, i) =>
+    categories: list(o.categories, `${p}.categories`, SNAPSHOT_LIMITS.categoriesPerGroup).map((c, i) =>
       parseCategory(c, `${p}.categories[${i}]`),
     ),
   };
@@ -36,7 +36,7 @@ export function parseTransaction(v: unknown, p: string): SnapshotTransaction {
   return {
     id: int(o.id, `${p}.id`),
     date: date(o.date, `${p}.date`),
-    description: str(o.description, `${p}.description`),
+    description: text(o.description, `${p}.description`),
     amount_cents: int(o.amount_cents, `${p}.amount_cents`),
     category_id: o.category_id === null ? null : int(o.category_id, `${p}.category_id`),
     account_id: int(o.account_id, `${p}.account_id`),
@@ -80,7 +80,7 @@ export function parseAccount(v: unknown, p: string): SnapshotAccount | null {
   if (!(ACCOUNT_KINDS as readonly string[]).includes(kind)) return null;
   return {
     id: int(o.id, `${p}.id`),
-    name: str(o.name, `${p}.name`),
+    name: text(o.name, `${p}.name`),
     kind: kind as SnapshotAccount['kind'],
     balance_cents: int(o.balance_cents, `${p}.balance_cents`),
     balance_as_of: date(o.balance_as_of, `${p}.balance_as_of`),
@@ -98,17 +98,17 @@ export function parseTax(v: unknown, p: string): TaxSummary {
       long_term_cents: int(g.long_term_cents, `${p}.realized_gains.long_term_cents`),
       is_estimate: bool(g.is_estimate, `${p}.realized_gains.is_estimate`),
     },
-    deductions: arr(o.deductions, `${p}.deductions`).map((d, i) => {
+    deductions: list(o.deductions, `${p}.deductions`, SNAPSHOT_LIMITS.deductions).map((d, i) => {
       const dp = `${p}.deductions[${i}]`;
       const dobj = obj(d, dp);
       return {
-        kind: str(dobj.kind, `${dp}.kind`),
-        label: str(dobj.label, `${dp}.label`),
+        kind: text(dobj.kind, `${dp}.kind`),
+        label: text(dobj.label, `${dp}.label`),
         amount_cents: int(dobj.amount_cents, `${dp}.amount_cents`),
         is_estimate: bool(dobj.is_estimate, `${dp}.is_estimate`),
       };
     }),
-    disclaimer: str(o.disclaimer, `${p}.disclaimer`),
+    disclaimer: text(o.disclaimer, `${p}.disclaimer`, SNAPSHOT_LIMITS.disclaimer),
   };
 }
 

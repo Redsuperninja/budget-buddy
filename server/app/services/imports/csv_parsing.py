@@ -28,7 +28,12 @@ MAX_DESCRIPTION = 500
 DELIMITERS = (",", ";", "\t", "|")
 
 THOUSANDS = re.compile(r"[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?")
-_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+# Control characters (C0, C1), direction marks and overrides (U+061C, U+200E-200F, U+202A-202E,
+# U+2066-2069) and line/paragraph separators (U+2028-2029), which could make a description read as
+# something else. The phone drops the same list (mobile/src/sync/snapshotChecks.ts HIDDEN_CHARS).
+_CONTROL = re.compile(
+    r"[\x00-\x1f\x7f-\x9f\u061c\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]"
+)
 SPACES = re.compile(r"\s+")
 
 

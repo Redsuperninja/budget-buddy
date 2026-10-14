@@ -8,7 +8,8 @@
  */
 
 import {
-  arr, CURRENCY, date, int, ISO_DATE_TIME, matching, nonNegInt, obj, Obj, SnapshotError, str,
+  arr, CURRENCY, date, int, ISO_DATE_TIME, list, matching, nonNegInt, obj, Obj, SERVER_ID, SNAPSHOT_LIMITS,
+  SnapshotError,
 } from './snapshotChecks';
 import {
   parseAccount, parseGroup, parsePeriod, parseSettings, parseTax, parseTransaction, parseUnassigned,
@@ -17,6 +18,7 @@ import { GROUP_ORDER } from './snapshotTypes';
 import type { Snapshot, SnapshotAccount } from './snapshotTypes';
 
 export * from './snapshotTypes';
+export { SNAPSHOT_LIMITS } from './snapshotChecks';
 
 export type ParseResult =
   | { ok: true; snapshot: Snapshot }
@@ -60,7 +62,7 @@ function parseOrThrow(input: unknown): Snapshot {
 
   return {
     contract: 1,
-    server_id: str(root.server_id, 'server_id'),
+    server_id: matching(root.server_id, SERVER_ID, 'server_id', 'a Home Base ID'),
     generated_at: matching(root.generated_at, ISO_DATE_TIME, 'generated_at', 'a date-time'),
     currency: matching(root.currency, CURRENCY, 'currency', 'a currency code like USD'),
     period: parsePeriod(root.period, 'period'),
@@ -75,7 +77,7 @@ function parseOrThrow(input: unknown): Snapshot {
       groups,
       ...(unassigned ? { unassigned } : {}),
     },
-    transactions: arr(root.transactions, 'transactions').map((t, i) =>
+    transactions: list(root.transactions, 'transactions', SNAPSHOT_LIMITS.transactions).map((t, i) =>
       parseTransaction(t, `transactions[${i}]`),
     ),
     ...accountsOf(root),
@@ -86,7 +88,7 @@ function parseOrThrow(input: unknown): Snapshot {
 
 /** The accounts this app can show, and how many it can't (also counting ones a saved copy skipped). */
 function accountsOf(root: Record<string, unknown>): { accounts: SnapshotAccount[]; skipped_accounts?: number } {
-  const raw = arr(root.accounts, 'accounts');
+  const raw = list(root.accounts, 'accounts', SNAPSHOT_LIMITS.accounts);
   const accounts = raw
     .map((a, i) => parseAccount(a, `accounts[${i}]`))
     .filter((a): a is SnapshotAccount => a !== null);
