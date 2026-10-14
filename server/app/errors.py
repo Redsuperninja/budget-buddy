@@ -6,6 +6,8 @@ include amounts, with one exception: a paycheck that doesn't add up says by how 
 person needs that to fix their own entry. Error responses are never logged.
 """
 
+import re
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -37,9 +39,14 @@ def _field_name(loc: tuple) -> str | None:
     return ".".join(parts) or None
 
 
+# How Pydantic names an enum member in a message: <TransactionKind.NORMAL: 'normal'>.
+_ENUM_MEMBER = re.compile(r"<\w+\.\w+: ('[^']*')>")
+
+
 def _plain(msg: str) -> str:
     # Our own validators raise ValueError("..."), which Pydantic prefixes with "Value error, ".
-    return msg.removeprefix("Value error, ")
+    # An enum member is shown as its value ('normal'), never as the code's name for it.
+    return _ENUM_MEMBER.sub(r"\1", msg.removeprefix("Value error, "))
 
 
 async def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Clearer messages: a wrong choice (like a transaction's kind) lists the choices plainly ('normal', 'refund' or 'adjustment') instead of code names, and a bank file with one unreadable row says "1 row couldn't be read".
 - A transaction dated ahead of today (like next week's rent, entered early) no longer lowers today's balance on the Accounts page or your net worth on Home. Accounts shows the balance after it, too: "$975.00 ($575.00 after what's scheduled)".
 - Amounts typed or imported as `.50` or `12.` are accepted (as $0.50 and $12.00) by the Home Base too, typed in or in a bank file, not only on the dashboard. A lone `.` still isn't an amount.
 - Credit card payments go in the **Payments** category on both sides (the payment from checking and the payment into the card), even before both sides are linked, so they're clearly marked and never count as spending. **Match everything again** moves older card payments there too. Only a payment to a card you've added is filed this way; clear its category and it stays out.
