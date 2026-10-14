@@ -22,7 +22,6 @@ from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
 from app.routers import (
-    accounts,
     activity_import,
     bank_trades,
     budget_plan,
@@ -49,8 +48,8 @@ from app.routers import (
     summary,
     sync,
     tax_summary,
-    transactions,
 )
+from app.routers.ledger import accounts, transactions
 from app.services.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.receipts import remove_orphan_files
 from app.services.remote_computers import JoinCodes, authenticate

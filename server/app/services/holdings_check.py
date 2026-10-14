@@ -20,7 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import BankTrade, Position, StockLot, StockSaleOrder, Transaction
-from app.services.transaction_roles import none_of, stock_trades
+from app.services.ledger.transaction_roles import none_of, stock_trades
 
 CheckedBy = Literal["transaction", "positions_file"] | None
 

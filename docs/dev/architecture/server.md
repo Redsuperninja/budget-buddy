@@ -35,9 +35,7 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | `config.py` | Settings from environment variables ([settings](../settings.md)) |
 | `db.py`, `migrations/` | Engine and Alembic migrations |
 | `models/` | Tables: `ledger.py` (accounts, categories, category rules, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, stocks, deductions), `devices.py` (devices, pairing, nonces) |
-| `schemas/` | Request and response shapes; `common.py` holds shared helpers such as `resolve_amount` |
-| `routers/` | One per area; thin, no business logic |
-| `services/` | Business logic, one module per area |
+| `services/`, `routers/`, `schemas/` | Business logic; thin routes with no business logic; request and response shapes. All three, and `tests/`, are grouped the same way by area ([below](#areas)) |
 | `crypto/` | Keys, key stores, encrypted columns and files, recovery phrase, base64url |
 | `network.py`, `remote_access.py`, `lan.py`, `listeners.py` | Access rules middleware, what joined computers may do, home-network address, the second listener |
 | `bodylimit.py`, `ratelimit.py`, `errors.py` | Streaming body limits, per-address rate limit, error shape |
@@ -45,6 +43,17 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | `dashboard_files.py` | Finds the dashboard folder and lists the files it may serve |
 | `tax_data/` | Per-year tax data files and their loader ([../tax-data.md](../tax-data.md)) |
 | `data_folder.py`, `logs.py`, `deps.py` | Data-folder warnings, logging, FastAPI dependencies |
+
+## Areas
+
+`services/`, `routers/`, `schemas/` and `tests/` each have one package per area, so one area's code is in the same
+place in all four. What isn't in an area stays at the top: the infrastructure routes (`health`, `instance`,
+`dashboard`), `schemas/common.py` (shared helpers such as `resolve_amount`), and the tests of the app's plumbing.
+Modules not yet moved into an area are still at the top too.
+
+| Area | What's in it |
+| --- | --- |
+| `ledger/` | Accounts, transactions, balances, transaction roles, transfers between your own accounts |
 
 ## Local API: common rules
 

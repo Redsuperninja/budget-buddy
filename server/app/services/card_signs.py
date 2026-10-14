@@ -10,7 +10,7 @@ credit card account, unless you chose yourself, the import checks the file and f
   are mostly charges).
 """
 
-from app.services.transfer_matching import CARD_PAYMENT_WORDS
+from app.services.ledger.transfer_matching import CARD_PAYMENT_WORDS
 
 MIN_ROWS = 3
 MOSTLY = 0.8

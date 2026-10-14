@@ -52,9 +52,7 @@ Changing tables: [docs/dev/architecture/database.md](../docs/dev/architecture/da
 | `main.py`, `__main__.py`, `cli.py`, `serving.py` | Build the app, run it, recovery-phrase command line |
 | `parent_watch.py` | Stop when the program that started us ends (`BUDGET_BUDDY_STOP_WITH_PID`, used by the desktop app) |
 | `config.py` | Settings from environment variables |
-| `routers/` | One per area, thin |
-| `services/` | Business logic, one module per area |
-| `schemas/` | Request and response shapes |
+| `services/`, `routers/`, `schemas/` | Business logic, thin routes, request and response shapes, grouped by area ([areas](../docs/dev/architecture/server.md#areas)) |
 | `models/`, `migrations/`, `db.py` | Tables, Alembic migrations, engine |
 | `crypto/` | Keys, encrypted columns and files, recovery phrase |
 | `network.py`, `lan.py`, `listeners.py` | Access rules, home-network address and listener |

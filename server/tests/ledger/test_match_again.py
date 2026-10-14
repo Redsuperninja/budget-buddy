@@ -4,7 +4,8 @@ in for an older data set, the file is imported with the finders switched off. Fa
 import pytest
 from csv_helpers import ok, send
 
-from app.services import bank_trades, csv_import, dividend_matching, match_again
+from app.services import bank_trades, csv_import, dividend_matching
+from app.services.ledger import match_again
 
 AGAIN = "/api/local/transactions/match-again"
 TRADE = "FAKECO INC UNSOLICITED WE ARE ACTING AS PRINCIPAL COMMISSION FIELD IS A COMMISSION"

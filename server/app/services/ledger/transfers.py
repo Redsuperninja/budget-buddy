@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import Category, CategoryGroup, Transaction, TransactionKind
-from app.services.transactions import (
+from app.services.ledger.transactions import (
     _DEPOSIT_LOCKED_MESSAGE,
     _DONATION_LOCKED_MESSAGE,
     _TRADE_LOCKED_MESSAGE,

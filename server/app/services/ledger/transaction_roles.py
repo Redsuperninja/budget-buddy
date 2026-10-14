@@ -22,7 +22,7 @@ from app.models import (
     StockSaleOrder,
     Transaction,
 )
-from app.services.accounts import TAX_FREE_KINDS
+from app.services.ledger.accounts import TAX_FREE_KINDS
 
 
 def none_of(*roles) -> list:

@@ -20,7 +20,7 @@ from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.money import cents_to_display
 from app.schemas.donations import ProofItem
 from app.services.gift_categories import CHARITY, file_under
-from app.services.transactions import get_transaction
+from app.services.ledger.transactions import get_transaction
 
 _ALREADY_LINKED = "That payment is already recorded as a donation."
 

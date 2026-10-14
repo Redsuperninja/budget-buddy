@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
 from app.models import Account, AccountKind, StockLot, StockSaleOrder, Transaction
-from app.schemas.accounts import RETIREMENT_ONLY, AccountCreate, AccountOut, AccountUpdate
+from app.schemas.ledger.accounts import RETIREMENT_ONLY, AccountCreate, AccountOut, AccountUpdate
 
 # Selling inside these accounts isn't taxed: their stock sales are left out of the gains summary.
 TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}

@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Home has new charts: **Spending pace** (how fast you're spending against your budget this month, with a plain sentence on where it's heading), **Left over each month**, and **Net worth over time**. Over-budget bars on **Needs, wants and savings** turn red, and charts are drawn to fit their card, so they read well on a phone too.
+- Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`). Nothing changes in what you see.
 - Behind the scenes: checks between the parts. The Home Base's tests now fail if a route the dashboard, phone app, desktop app or scripts call is missing, if the phone's snapshot drifts from the published example, if the desktop app's copy of the data folder or start-up check drifts from the Home Base's, or if the dashboard outgrows what the Home Base will serve. `scripts\dev\check-all.ps1` runs every part's checks at once. Nothing changes in what you see.
 - Fixed: live prices stopped with "Finnhub didn't accept your key" when you held one symbol Finnhub's free plan doesn't cover (like a mutual fund). That symbol now just says "No price found", and the rest get their prices.
 - **Match everything again** on the Transactions page: looks through all your transactions again for dividends, stock trades, deposit sweeps and transfers with today's rules, so data you imported earlier is matched like new data. What you decided yourself stays.

@@ -1,7 +1,7 @@
 # Accounts and transactions (the ledger)
 
-Code: `services/accounts.py`, `services/transactions.py`, `services/transaction_roles.py`, `routers/accounts.py`,
-`routers/transactions.py`.
+Code: `services/ledger/accounts.py`, `services/ledger/transactions.py`, `services/ledger/transaction_roles.py`, `routers/ledger/accounts.py`,
+`routers/ledger/transactions.py`.
 Common API rules: [server.md](server.md).
 
 ## Transaction kinds and what counts as income or spending
@@ -19,7 +19,7 @@ Common API rules: [server.md](server.md).
 
 Besides its kind and category, a transaction can be **used as** something, recorded by a link from another
 table: a paycheck's deposit, a donation, a stock purchase or sale, a trade or dividend found in a bank file, or
-the deposit sweep next to one. `services/transaction_roles.py` is the one place that knows those links. Each
+the deposit sweep next to one. `services/ledger/transaction_roles.py` is the one place that knows those links. Each
 role is a select of transaction ids, and `none_of(...)` turns roles into conditions (one `NOT IN` each, since
 SQLite can't nest one `UNION` inside another). The monthly summary, "needs a category", transfer matching,
 sweep and trade finding, repeat gifts and pay deposits all leave roles out through it, so a new role is added
@@ -39,7 +39,7 @@ This makes net worth the plain sum of every account's balance. CSV import must f
 charges as positive numbers (the `flip_sign` choice, saved with the account's mapping, and noticed by itself for
 card accounts; [csv-import.md](csv-import.md)). The dashboard and phone show a negative card or loan balance as "$50.00 owed".
 
-Worked example (fake data, also a test in `server/tests/test_accounts_api.py`):
+Worked example (fake data, also a test in `server/tests/ledger/test_accounts_api.py`):
 
 | Account | Transaction | `amount_cents` |
 | --- | --- | ---: |
@@ -54,7 +54,7 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
 
 ## Routes (this computer only)
 
-- **Match everything again:** `POST /api/local/transactions/match-again` (`services/match_again.py`), in one savepoint,
+- **Match everything again:** `POST /api/local/transactions/match-again` (`services/ledger/match_again.py`), in one savepoint,
   picks every sweep link again (they're all automatic; a link the new pick leaves free is put back, so it only adds)
   and runs the finders over all transactions: dividends, stock trades (and
   recorded trades with a sweep nearby), sweeps one each then several at once, transfers. Dismissed dividends and
@@ -69,7 +69,7 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   - `POST /api/local/accounts/{id}/balance` `{date, balance_cents | balance}`: the bank's balance at the end of
     `date` (today or earlier). Adds one `adjustment` dated `date` for the difference from the sum of the account's
     transactions up to that day; nothing when it already matches. Returns `adjustment_cents`, `transaction_id`
-    and `balance_now_cents` (end of today; an older day's change moves it too) (`services/account_balance.py`).
+    and `balance_now_cents` (end of today; an older day's change moves it too) (`services/ledger/account_balance.py`).
     The accounts list's `balance_cents` includes future-dated transactions; this end-of-day sum doesn't.
 - **Transactions:** `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`, `date_from`,
   `date_to`, `kind`, `q`, `sorted_by` (`rule` or `you`, [category-rules.md](category-rules.md)), `uncategorized` (`true`: normal and
