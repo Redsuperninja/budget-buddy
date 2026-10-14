@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
 
+import { ReminderKeeper } from '@/components/ReminderKeeper';
 import { SnapshotProvider } from '@/sync/store';
 import { useTheme } from '@/theme';
 
@@ -19,6 +20,7 @@ export default function RootLayout() {
   const t = useTheme();
   return (
     <SnapshotProvider>
+      <ReminderKeeper />
       <StatusBar style={t.dark ? 'light' : 'dark'} />
       <Tabs
         screenOptions={{

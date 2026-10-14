@@ -10,8 +10,16 @@ Folder: `mobile/` ([mobile/README.md](../../../mobile/README.md) for running it,
   pair screen (scan the QR or paste its text), and Add Receipt (a "coming soon" placeholder until roadmap #20).
 - **Talks to the Home Base only through the [sync contract](../../api/sync-contract.md)**, on home Wi-Fi.
   Pairing: [pairing.md](pairing.md). Syncing: [sync.md](sync.md).
-- **Reminders:** a local notification when the last sync is older than the chosen interval (default 2 days,
-  adjustable 1–3); rules in sync contract §9.
+- **Reminders** (`src/sync/reminders.ts`, roadmap #21): local notifications only, following sync contract §9:
+  every 1, 2 or 3 days (the snapshot's `reminder_days_default` until you pick; Off is a phone-only extra), due
+  N days after the last sync and moved out of quiet hours (21:00-09:00) to 09:00, or the next non-quiet minute if
+  overdue; two follow-ups 1 and 2 days later. All three are cancelled and made fresh after each sync, when the
+  setting changes and when the app starts (`ReminderKeeper`); none when not paired. Permission is offered once
+  right after the first successful sync (`ReminderOffer`) or asked when you pick a choice. The text is the
+  contract's, with the waiting receipt count, never money. expo-notifications also ships push plumbing (Firebase
+  Messaging on Android, the `aps-environment` entitlement on iOS); it stays off because the app never asks for a
+  push token and has no Firebase config, and `src/__tests__/noPush.test.ts` fails if either appears. It adds two
+  Android permissions: `POST_NOTIFICATIONS` and `RECEIVE_BOOT_COMPLETED` (so reminders survive a restart).
 - **Storage:** keys and tokens in `expo-secure-store` only. The snapshot is in AsyncStorage, always encrypted
   (`src/sync/cacheCrypto.ts`, `snapshotDisk.ts`): `nacl.secretbox` with a fresh nonce each save and its own 32-byte
   key in secure store (`budgetbuddy.cache_key.v1`, `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, so never in a backup), stored
