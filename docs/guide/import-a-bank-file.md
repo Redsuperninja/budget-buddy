@@ -21,7 +21,13 @@ Most banks let you download your transactions as a CSV file. Budget Buddy can re
 
 **Importing the same file twice is safe.** Rows already there are skipped automatically.
 
-**Credit card statements** often show charges as positive numbers. If that's wrong, set "Charges show as positive numbers?" to "Yes, flip them".
+**Credit card statements** often show charges as positive numbers. For a credit card account Budget Buddy notices
+this and flips them for you (the preview says so), so charges are money out, payments money in, the card shows what
+you owe, and your card payment links up with the payment from checking. If it guessed wrong, set "Charges show as
+positive numbers?" in the column choices.
+
+Imported a card file before this, and the card shows money you have instead of what you owe? Open **Import
+history**, undo that file, and import it again.
 
 **Date formats.** Your bank writes dates in different ways. Budget Buddy usually figures it out, but if it gets it wrong:
 - US-style month/day is tried first

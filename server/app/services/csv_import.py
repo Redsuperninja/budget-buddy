@@ -15,7 +15,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError
-from app.models import CsvImportMapping, Transaction, TransactionKind, TransactionSource
+from app.models import (
+    AccountKind,
+    CsvImportMapping,
+    Transaction,
+    TransactionKind,
+    TransactionSource,
+)
 from app.schemas.csv_import import (
     CommitChoices,
     CsvMapping,
@@ -26,6 +32,7 @@ from app.schemas.csv_import import (
 )
 from app.services.accounts import get_account
 from app.services.bank_trades import find_trades
+from app.services.card_signs import FLIPPED, looks_flipped
 from app.services.category_rules import load_matcher, rule_fields
 from app.services.csv_columns import build_mapping, columns_used, detect_columns
 from app.services.csv_parsing import (
@@ -58,6 +65,7 @@ class _Prepared:
     columns: list[str]
     sample: list[list[str]]
     rows: list[tuple[PreviewRow, str | None]]  # each row with its fingerprint
+    flipped: bool = False  # a card file read the other way round (card_signs)
 
 
 def _saved_mapping(session: Session, account_id: int) -> CsvMapping | None:
@@ -71,7 +79,7 @@ def _saved_mapping(session: Session, account_id: int) -> CsvMapping | None:
 
 
 def _prepare(session: Session, account_id: int, data: bytes, choices: MappingChoices) -> _Prepared:
-    get_account(session, account_id)
+    account = get_account(session, account_id)
     text = decode_csv(data)
     delimiter = choices.delimiter or detect_delimiter(text)
     rows = read_rows(text, delimiter)
@@ -98,7 +106,17 @@ def _prepare(session: Session, account_id: int, data: bytes, choices: MappingCho
     ]
     sample = [r for r in rows[header_rows:] if any(c.strip() for c in r)][:SAMPLE_ROWS]
     parsed = _parse_rows(session, account_id, rows, mapping) if mapping else []
-    return _Prepared(mapping, used_saved and mapping is not None, columns, sample, parsed)
+    flipped = (
+        mapping is not None
+        and account.kind == AccountKind.CREDIT_CARD
+        and choices.flip_sign is None
+        and looks_flipped([(r.description, r.amount_cents) for r, _ in parsed if r.date])
+    )
+    if flipped:
+        mapping = mapping.model_copy(update={"flip_sign": not mapping.flip_sign})
+        parsed = _parse_rows(session, account_id, rows, mapping)
+    used = used_saved and mapping is not None
+    return _Prepared(mapping, used, columns, sample, parsed, flipped)
 
 
 def _parse_rows(
@@ -146,7 +164,7 @@ def preview(session: Session, account_id: int, data: bytes, choices: MappingChoi
     return ImportPreview(
         mapping=p.mapping,
         used_saved_mapping=p.used_saved,
-        message=None if p.mapping else NEED_COLUMNS,
+        message=FLIPPED if p.flipped else None if p.mapping else NEED_COLUMNS,
         columns=p.columns,
         sample=p.sample,
         total_rows=len(rows),
