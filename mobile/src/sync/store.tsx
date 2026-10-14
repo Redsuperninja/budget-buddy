@@ -15,7 +15,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 
 import { SAMPLE_SNAPSHOT } from './sampleSnapshot';
-import { parseSnapshot, SNAPSHOT_INVALID_MESSAGE } from './snapshot';
+import { parseSnapshot, SNAPSHOT_INVALID_MESSAGE, SNAPSHOT_LIMITS } from './snapshot';
 import type { Snapshot } from './snapshot';
 
 export const SNAPSHOT_STORAGE_KEY = 'budgetbuddy.snapshot.v1';
@@ -59,6 +59,10 @@ export async function loadStoredSnapshot(): Promise<InternalState> {
     return { ...SAMPLE_STATE, loading: false, loadError: SNAPSHOT_INVALID_MESSAGE };
   }
   if (raw === null) return { ...SAMPLE_STATE, loading: false };
+  // Far bigger than any real snapshot: damaged, so not even read (it could freeze the screen).
+  if (raw.length > SNAPSHOT_LIMITS.storedChars) {
+    return { ...SAMPLE_STATE, loading: false, loadError: SNAPSHOT_INVALID_MESSAGE };
+  }
 
   try {
     const stored = JSON.parse(raw) as Partial<StoredSnapshot> | null;
@@ -98,8 +102,11 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
     if (!result.ok) return result.message;
     const lastSyncedAt = syncedAt.toISOString();
     const stored: StoredSnapshot = { snapshot: result.snapshot, last_synced_at: lastSyncedAt };
+    const text = JSON.stringify(stored);
+    // Never save a copy the next start would refuse to read.
+    if (text.length > SNAPSHOT_LIMITS.storedChars) return SNAPSHOT_INVALID_MESSAGE;
     try {
-      await AsyncStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(stored));
+      await AsyncStorage.setItem(SNAPSHOT_STORAGE_KEY, text);
     } catch {
       return "Couldn't save your budget on this phone. Check that your phone has free space, then try again.";
     }
