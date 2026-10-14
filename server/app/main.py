@@ -25,7 +25,15 @@ from app.routers import dashboard, health, instance
 from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.devices import pair, pairing, receipts, remote_computers, sync
 from app.routers.imports import activity_import, csv_import, history, stock_import
-from app.routers.investing import bank_trades, dividends, positions, price_feed, retirement, stocks
+from app.routers.investing import (
+    bank_trades,
+    dividends,
+    positions,
+    price_feed,
+    retirement,
+    stocks,
+    sweep_check,
+)
 from app.routers.ledger import accounts, transactions
 from app.routers.tax import deductions, donations, paychecks, tax_summary
 from app.services.devices.pairing_sessions import load_server_id, purge_ended_sessions
@@ -120,6 +128,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(donations.router)
     app.include_router(dividends.router)
     app.include_router(bank_trades.router)
+    app.include_router(sweep_check.router)
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
     app.include_router(stock_import.router)

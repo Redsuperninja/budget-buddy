@@ -19,7 +19,7 @@ list, "not a dividend"), `services/budget/named_categories.py` (the "Dividends" 
 ## Table
 
 `dividends` (migration 0019): `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (indexed,
-shared by several when one sweep covers them, migration 0026; `ON DELETE SET NULL`), `payer` (from the description), `dismissed`. The date, amount and account are the
+shared by several when one sweep covers them, migration 0026; `ON DELETE SET NULL`), `sweep_by_hand` (0027: you linked it, see [bank-trades.md](bank-trades.md#routes-under-stocks-so-joined-computers-and-phones-see-them-too)), `payer` (from the description), `dismissed`. The date, amount and account are the
 transaction's, never copied.
 
 ## Rules

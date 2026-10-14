@@ -50,7 +50,7 @@ Track income, donations, and stock gains to help prepare for tax time.
 3. [Stocks](stocks.md) — Record purchases and sales in any account; calculate gains and losses; spot wash sales.
    - [Dividends](dividends.md) — Dividends found in your bank files, their deposit sweeps, and hiding them from your transactions.
    - [Import stocks from a CSV file](import-stocks.md) — Add many purchases and sales at once from a spreadsheet or your broker's file.
-4. [Your investments and retirement savings](investments.md) — What you hold in each account and what it's worth; 401(k), IRA and HSA contributions against the limits.
+4. [Your investments and retirement savings](investments.md) — What you hold in each account and what it's worth; 401(k), IRA and HSA contributions against the limits; deposit sweeps to check by hand.
 5. [Tax summary and other deductions](tax-summary.md) — Medical bills, mortgage interest and more; one page per year; download or print it.
 
 ## Keeping your data safe

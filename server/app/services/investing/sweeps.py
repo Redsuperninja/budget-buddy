@@ -83,6 +83,7 @@ def link_sweeps(session: Session, waiting: list) -> int:
         if fits:
             best = min(fits, key=lambda s: (abs((s.date - paid.date).days), s.id))
             record.sweep_transaction_id = best.id
+            record.sweep_by_hand = False  # a hand link whose sweep was deleted isn't one any more
             taken.add(best.id)
             linked += 1
     return linked

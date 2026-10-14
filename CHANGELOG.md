@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Deposit sweeps to check** on the Investments page: each deposit sweep line Budget Buddy couldn't link by itself (say, a week late or a few cents off), with the dividends and trades nearby in the same account to pick from and a **Link** button, plus counts per account of dividends and trades, how many have their sweep, and sweep lines left over. Only a dividend or trade that could be the same money is offered (same account, the other direction, up to two weeks away, within $1 or 1%), and you're asked first when the amounts differ. **Match everything again** keeps links you made yourself. Restart Budget Buddy after updating (database change 0027).
 - Home has new charts: **Spending pace** (how fast you're spending against your budget this month, with a plain sentence on where it's heading), **Left over each month**, and **Net worth over time**. Over-budget bars on **Needs, wants and savings** turn red, and charts are drawn to fit their card, so they read well on a phone too.
 - Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`). Nothing changes in what you see.
 - Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`); reading files (`imports`). Nothing changes in what you see.

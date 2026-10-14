@@ -3,6 +3,8 @@
 Code: `services/investing/bank_trades.py` (find trades, link sweeps, remember tickers),
 `services/investing/bank_trade_list.py` (the list with price per share, "not a trade"), `models/trades.py`,
 `schemas/investing/bank_trades.py`, `routers/investing/bank_trades.py`. Dashboard: `screens/money/bank-trades-card.js` on Investments.
+Checking sweeps by hand: `services/investing/sweep_check.py`, `routers/investing/sweep_check.py`,
+`screens/money/sweep-check-card.js` (words in `sweep-words.js`).
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).
 
 Some brokers' bank-style files (J.P. Morgan / Chase) show a trade only as a line naming the company, with no ticker,
@@ -20,13 +22,28 @@ INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money o
   to them).
 - `POST /api/local/stocks/bank-trades/{id}/dismiss`: not a trade; its sweep is freed; never found again. Refused
   (409 `trade_recorded`) once a purchase or sale is recorded from it: delete that instead.
+- `GET /api/local/stocks/sweeps`: every free sweep line (any account; `sweeps.candidates`), newest first, each
+  with `matches`: dividends and trades still without a sweep that it `fits`, smallest `gap_cents` first, then
+  the closest dates (`exact`, `days_apart`); and `accounts`: per account, how
+  many dividends and trades (`payments`), how many have a sweep (`with_sweep`), and `free_sweeps`.
+- `POST /api/local/stocks/sweeps/{sweep_id}/link` with `{kind: "dividend"|"trade", record_id, confirm}`: link
+  by hand, marked `sweep_by_hand`. The sweep's whole amount then leaves the budget, so it must be the same money
+  (`fits`), or 409: `other_account` (a sweep in another account is real money moving between accounts),
+  `same_direction`, `too_far` (more than 14 days apart), `too_different` (amounts more than $1 or 1% apart,
+  whichever is more). Any gap needs `confirm: true` (409 `confirm_gap`); the page asks first, naming the gap
+  that won't be counted anywhere. Also 409 `not_free` (already linked, not a free sweep line, or a dividend's own
+  payment), `dismissed`, and `has_sweep` (the dividend or trade, or the line, was linked meanwhile: the update
+  is guarded on both).
+- `POST /api/local/stocks/sweeps/{sweep_id}/unlink`: frees it from every dividend and trade (`free_sweep`); 404
+  if nothing has it. The page offers it as Undo right after a Link. A link the finders made comes back the next
+  time they run, so a wrong one of those is fixed with "not a trade" / "not a dividend".
 - Recording uses the Stocks API (`POST /stocks/lots` or `/stocks/sales` with `transaction_id`); that also saves the
   company's ticker (`security_symbols`). Bank CSV import results gain `trades_found` and `trade_sweeps_linked`.
 
-## Tables (migrations 0025, 0026)
+## Tables (migrations 0025, 0026, 0027)
 
 `bank_trades`: `transaction_id` (unique, `ON DELETE CASCADE`), `sweep_transaction_id` (indexed, not unique since
-0026: several trades and dividends can share one sweep; `ON DELETE SET NULL`), `security` (from the description), `dismissed`. Date, amount and account are the transaction's.
+0026: several trades and dividends can share one sweep; `ON DELETE SET NULL`), `sweep_by_hand` (0027: linked by you; Match everything again leaves it, and Unlink clears it), `security` (from the description), `dismissed`. Date, amount and account are the transaction's.
 `security_symbols`: `security` (unique) to `symbol`.
 
 ## Rules

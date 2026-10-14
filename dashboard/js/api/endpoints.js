@@ -105,6 +105,10 @@ export const refreshPrices = () => api("POST", `${LOCAL}/stocks/prices/refresh`)
 export const listBankTrades = () => api("GET", `${LOCAL}/stocks/bank-trades`);
 export const findBankTrades = () => api("POST", `${LOCAL}/stocks/bank-trades/find`);
 export const dismissBankTrade = (id) => api("POST", `${LOCAL}/stocks/bank-trades/${id}/dismiss`);
+// Deposit sweeps not linked yet, with possible matches; link one by hand, or unlink
+export const checkSweeps = () => api("GET", `${LOCAL}/stocks/sweeps`);
+export const linkSweep = (sweepId, json) => api("POST", `${LOCAL}/stocks/sweeps/${sweepId}/link`, { json });
+export const unlinkSweep = (sweepId) => api("POST", `${LOCAL}/stocks/sweeps/${sweepId}/unlink`);
 // Positions from a broker's file (query: already-encoded text; bytes: the CSV file)
 export const listPositions = () => api("GET", `${LOCAL}/stocks/positions`);
 export const clearPositions = (accountId) => api("DELETE", `${LOCAL}/stocks/positions/${accountId}`);

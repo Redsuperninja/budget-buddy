@@ -39,6 +39,7 @@
 | 0024 | `donations.auto_added`: a donation recorded for you for a repeat gift to a charity |
 | 0025 | `bank_trades` (stock trades named in a bank file, with their sweeps) and `security_symbols` (a company's ticker) |
 | 0026 | A deposit sweep can be shared by several dividends and trades (`sweep_transaction_id` no longer unique) |
+| 0027 | `sweep_by_hand` on dividends and bank trades: a sweep you linked yourself, kept by Match everything again |
 
 ## Adding a migration
 

@@ -3,10 +3,11 @@ matching rule improved gets the same treatment as new data. Dividends, then stoc
 from a bank file or recorded by you), then deposit sweeps (one each, then one for several), then
 transfers.
 
-Sweep links are always made by Budget Buddy, so they're picked again with today's rules. It only
-ever adds: a link the new pick left free is put back as it was, so nothing that was sorted before
-comes back unsorted. Anything you decided stays: "not a dividend" and "not a trade", transfers you
-linked or unlinked, categories, and recorded shares. Nothing here logs descriptions or amounts.
+Sweep links Budget Buddy made are picked again with today's rules. It only ever adds: a link the
+new pick left free is put back as it was, so nothing that was sorted before comes back unsorted.
+Anything you decided stays: sweeps you linked by hand (``sweep_by_hand``, left as they are, so the
+finders can't take their sweep), "not a dividend" and "not a trade", transfers you linked or
+unlinked, categories, and recorded shares. Nothing here logs descriptions or amounts.
 """
 
 import threading
@@ -69,8 +70,18 @@ def match_again(session: Session) -> MatchedAgain:
 def _run(session: Session) -> MatchedAgain:
     with session.begin_nested():  # all of it, or none
         before = _links(session)
+        for model in MODELS:  # a hand link whose sweep was deleted is no longer one
+            session.execute(
+                update(model)
+                .where(model.sweep_transaction_id.is_(None))
+                .values(sweep_by_hand=False)
+            )
         for model in MODELS:
-            session.execute(update(model).values(sweep_transaction_id=None))
+            session.execute(
+                update(model)
+                .where(model.sweep_by_hand.is_(False))
+                .values(sweep_transaction_id=None)
+            )
         dividends = find_dividends(session)
         trades = find_trades(session)  # sweeps for several at once, too
         _put_back(session, before, _links(session))

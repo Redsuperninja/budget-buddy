@@ -64,7 +64,7 @@ def _claim(session: Session, sweep: Transaction, group: tuple) -> bool:
             claimed += session.execute(
                 update(model)
                 .where(model.id.in_(ids), model.sweep_transaction_id.is_(None))
-                .values(sweep_transaction_id=sweep.id)
+                .values(sweep_transaction_id=sweep.id, sweep_by_hand=False)
             ).rowcount
     sharing = sum(
         session.scalar(select(func.count()).where(model.sweep_transaction_id == sweep.id)) or 0
@@ -114,7 +114,7 @@ def free_sweep(session: Session, sweep_id: int | None) -> None:
         session.execute(
             update(model)
             .where(model.sweep_transaction_id == sweep_id)
-            .values(sweep_transaction_id=None)
+            .values(sweep_transaction_id=None, sweep_by_hand=False)
         )
 
 
