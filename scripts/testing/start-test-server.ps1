@@ -40,7 +40,7 @@ Write-Host "  Check it's running: http://127.0.0.1:$TestPort/api/health"
 Write-Host "  API explorer:       http://127.0.0.1:$TestPort/docs"
 Write-Host ""
 Write-Host "If Windows asks whether to allow Python on networks, tick 'Private networks' only, never Public." -ForegroundColor Yellow
-Write-Host "See 'Step 3: Add a firewall rule' in docs\guide\set-up-for-testing.md. Press Ctrl+C to stop."
+Write-Host "See 'Step 3: Add a firewall rule' in docs\testing\set-up-for-testing.md. Press Ctrl+C to stop."
 Write-Host ""
 
 Push-Location $ServerDir

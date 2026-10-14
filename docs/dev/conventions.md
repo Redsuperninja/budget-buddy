@@ -41,7 +41,9 @@ reviewers check them.
 - **Say each fact once** and link to it instead of repeating it. The sync wire format lives only in
   `docs/api/sync-contract.md` (and its section files); tax numbers live only in the per-year data files;
   environment variables only in [settings.md](settings.md).
-- **Where docs go:** people using Budget Buddy read `docs/guide/`; developers and agents read `docs/dev/`
-  (map: [docs/README.md](../README.md)). Each part's README covers how to run and check it, and its layout.
+- **Where docs go:** people using Budget Buddy read `docs/guide/`; testers trying it with made-up data read
+  `docs/testing/`; developers and agents read `docs/dev/` (map: [docs/README.md](../README.md)). Each part's README
+  covers how to run and check it, and its layout.
 - User guides in `docs/guide/` stay one task per page and are for people only: no environment variables, API
-  paths, file or module names, error codes, or code. Copy-paste PowerShell lines for testers are allowed.
+  paths, file or module names, error codes, or code. Tester guides in `docs/testing/` follow the same rules, but may
+  have copy-paste PowerShell lines.

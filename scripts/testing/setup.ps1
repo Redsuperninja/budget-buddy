@@ -28,4 +28,4 @@ Write-Host ""
 Write-Host "All set. Next:" -ForegroundColor Green
 Write-Host "  1. scripts\testing\start-test-server.ps1   (leave that window open)"
 Write-Host "  2. scripts\testing\load-demo-data.ps1      (fills it with made-up data)"
-Write-Host "See docs\guide\set-up-for-testing.md for the full walkthrough."
+Write-Host "See docs\testing\set-up-for-testing.md for the full walkthrough."
