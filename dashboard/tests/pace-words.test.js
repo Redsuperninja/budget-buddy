@@ -32,6 +32,8 @@ test("already over, refunds, no budget, percentage budgets with no income", () =
 
 test("past tense only once the month is over", () => {
   assert.equal(paceSentence(pace(90000, 30, 100000, true)), "You spent $900.00 of your $1,000.00 budget.");
+  assert.equal(paceSentence(pace(120000, 30, 100000, true)),
+    "You spent $1,200.00, $200.00 over your $1,000.00 budget.");
   assert.match(paceSentence(pace(90000, 30, 100000, false)), /^Under budget so far/);
   assert.equal(paceSentence({ month: "2026-12", days_in_month: 31, budget_cents: 1, days: [], complete: false }),
     "This month hasn't started yet.");

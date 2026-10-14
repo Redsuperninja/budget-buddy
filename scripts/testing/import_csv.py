@@ -19,7 +19,7 @@ def call(api: LocalApi, method: str, path: str, body: bytes | None = None):
         return api.call(method, path, body=body, content_type="text/csv", timeout=30)
     except NotRunning:
         raise SystemExit(
-            "The test Home Base isn't running. Start scripts\\start-test-server.ps1 first."
+            "The test Home Base isn't running. Start scripts\\testing\\start-test-server.ps1 first."
         ) from None
     except ApiError as exc:
         raise SystemExit(f"Budget Buddy said: {exc}") from None

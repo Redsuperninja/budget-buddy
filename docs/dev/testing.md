@@ -29,7 +29,7 @@ tests catch it; each reads the other side's files or a published example, never 
 | A route the dashboard, phone app, desktop app or scripts call is renamed or removed | `server/tests/test_callers_match_routes.py` (reads `dashboard/js/api/endpoints.js` and the others' source) |
 | The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/devices/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
 | Pairing and sync encryption | The §4.7 vectors, in `server/tests/contract_vectors.py` and the phone's `pairing.test.ts` |
-| The desktop app's copies of the data folder rule and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
+| The desktop app's copies of the data folder rule, the default port and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
 | A dashboard screen breaks when it runs (a moved file, a renamed field the screen reads) | `scripts\dev\check-pages.ps1`: every page in a headless browser against a Home Base with demo data (needs Edge or Chrome; not in CI yet) |
 | The dashboard outgrows what the Home Base serves (past its file limit the page disappears) | `test_the_real_dashboard_is_served_whole_with_room_to_grow` in `server/tests/test_dashboard_serving.py` |
 
@@ -42,10 +42,9 @@ workflow**), so PRs can merge while CI is being fixed up. Run each part's checks
 CI back, delete `workflow_dispatch:` in each file and uncomment the lines under it.
 
 Once back, each part has its own workflow, run on pull requests **into `main`** and on pushes to `main` (never on
-stacked branches), and only when that part's folder (or the workflow file) changed:
-Each workflow also runs when what its checks between parts read changes: the server's on `dashboard/`,
-`mobile/src/`, `desktop/budget_buddy_desktop/`, `scripts/` and `docs/api/`; the phone's and the desktop's on
-`docs/api/`.
+stacked branches), and only when that part's folder, the workflow file, or what its checks between parts read
+changed (the server's also on `dashboard/`, `mobile/src/`, `desktop/budget_buddy_desktop/`, `scripts/` and
+`docs/api/`; the phone's and the desktop's also on `docs/api/`):
 
 - `server-ci.yml`: Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
 - `dashboard-ci.yml`: Node 22; `npm run coverage` (`node --test` with coverage; no dependencies to install).

@@ -25,7 +25,7 @@ def refuse_unless_test_server(port: int) -> str | None:
         return f"Refusing: the test Home Base runs on port {TEST_PORT}, not {port}."
     if not (test_data_dir() / MARKER_NAME).is_file():
         return (
-            "Refusing: the test Home Base hasn't been started from scripts\\start-test-server.ps1 yet. "
+            "Refusing: the test Home Base hasn't been started from scripts\\testing\\start-test-server.ps1 yet. "
             "Start it there first (in its own window)."
         )
     return None
