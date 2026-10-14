@@ -19,6 +19,7 @@ export const updateCategory = (id, json) => api("PATCH", `${LOCAL}/categories/${
 export const monthlySummary = (month, through) =>
   api("GET", `${LOCAL}/summary/monthly?month=${month}${through ? `&through=${through}` : ""}`);
 export const monthlyTrend = (end) => api("GET", `${LOCAL}/summary/trend?end=${end}&months=12`);
+export const spendingPace = (month) => api("GET", `${LOCAL}/summary/pace?month=${month}`);
 export const getBudgetPlan = () => api("GET", `${LOCAL}/budget/plan`);
 export const saveBudgetPlan = (json) => api("PUT", `${LOCAL}/budget/plan`, { json });
 export const budgetSuggestion = (month) => api("GET", `${LOCAL}/budget/suggestion?month=${month}`);

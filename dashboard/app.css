@@ -10,6 +10,7 @@
      lighter step of it for the unfilled part of a meter or ring. */
   --accent: #1f8050; --accent-text: #ffffff; --link: light-dark(#1a7347, #6fd3a0);
   --accent-soft: light-dark(#d6ebdd, #2f4337);
+  --raised: light-dark(#eef2ee, #2e2e29); /* a chart bar's empty track */
   --good: light-dark(#187a3b, #5fd08a); --bad: light-dark(#b3261e, #ff8a80); --warn-bg: light-dark(#fff4d6, #45381a);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px; line-height: 1.45;
@@ -61,7 +62,7 @@ details.fold.group > summary { flex-wrap: wrap; gap: 0.25rem 0.75rem; }
 details.fold.group > summary h3 { margin: 0; }
 details.fold.group table { table-layout: fixed; } /* the groups' columns line up */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
-.cards .card { margin: 0; }
+.cards .card { margin: 0; min-width: 0; }
 .big { font-size: 1.5rem; font-weight: 600; }
 .muted { color: var(--muted); font-size: 0.9rem; }
 .good { color: var(--good); } .bad { color: var(--bad); }
@@ -82,7 +83,7 @@ details.settings summary { cursor: pointer; padding: 0.4rem 0.75rem; border: 1px
   list-style: none; }
 details.settings summary::-webkit-details-marker { display: none; }
 .settings-panel { position: absolute; right: 0; top: calc(100% + 0.4rem); z-index: 10; width: 18rem; max-width: 90vw;
-  display: grid; gap: 0.6rem; padding: 0.9rem; background: var(--card); border: 1px solid var(--line);
+  display: grid; gap: 0.6rem; padding: 0.9rem; background: var(--card); color: var(--text); border: 1px solid var(--line);
   border-radius: 10px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); }
 .settings-panel p { margin: 0; }
 /* Simple view (the default) hides power-user tools; Settings, View, All tools shows them (js/view.js). The page
@@ -110,11 +111,17 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 .series-2 { --series: light-dark(#eb6834, #d95926); }
 .series-3 { --series: light-dark(#2a78d6, #3987e5); }
 .chart { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-fit { width: 100%; min-width: 0; overflow: hidden; }
 .chart text { fill: var(--muted); font-size: 12px; }
 .chart text.label { fill: var(--text); }
 .chart .grid { stroke: var(--line); stroke-width: 1; }
 .chart .grid.zero { stroke: var(--muted); }
 .chart .bar { fill: var(--series); }
+.chart .track { fill: var(--raised); }
+.chart .row.over .bar { fill: var(--bad); }
+.chart text.value.over { fill: var(--bad); font-weight: 600; }
+.chart .area { fill: var(--series); opacity: 0.14; stroke: none; }
+.chart .guide { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
 .chart .budget-mark { stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
 .chart .line { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; }
 .chart .dot { fill: var(--series); stroke: var(--card); stroke-width: 2; }
@@ -161,14 +168,19 @@ ol.steps .step-mark { flex: none; min-width: 3.5rem; text-align: center; font-si
   padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--warn-bg); }
 ol.steps li.done { color: var(--muted); }
 ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px solid var(--good); }
+/* Home: charts two to a row on wide screens (js/screens/home.js), and a plain sentence leading a chart card. */
+.duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem;
+  margin-bottom: 1rem; }
+.duo > .card { margin: 0; min-width: 0; }
+p.lead { margin: 0 0 0.5rem; font-size: 1.02rem; }
 .leftover { --series: light-dark(#c6cec8, #4f4e47); }
 .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
 .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem;
   background: var(--series); }
 
 /* Phones and narrow windows: one scrolling row of section buttons and of tabs, less padding, each table row as a
-   small card of "column: value" lines (js/widgets.js puts the column name on each cell), and bigger chart text
-   (charts are drawn 640 wide and shrink to fit). */
+   small card of "column: value" lines (js/widgets.js puts the column name on each cell), and bigger text in
+   charts drawn 640 wide that shrink to fit (charts drawn at their card's width, js/charts/fit.js, need none). */
 @media (max-width: 40rem) {
   header { padding: 0.5rem 0.75rem; gap: 0.5rem; }
   h1 { font-size: 1.1rem; }
@@ -185,7 +197,7 @@ ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px 
   .stack td::before { content: attr(data-label); color: var(--muted); font-size: 0.85rem; text-align: left; }
   .stack td:not([data-label])::before { content: none; }
   .stack td:not([data-label]) { justify-content: flex-end; }
-  .chart text { font-size: 20px; }
+  :not(.chart-fit) > .chart text { font-size: 20px; }
 }
 
 /* Printing (or saving as PDF) shows only the page content, without navigation or forms. */

@@ -27,6 +27,7 @@ def test_trend_matches_each_monthly_summary(client, make_account, add_txn):
         "income_cents": 300_000,
         "spending_cents": 50_000,
         "saved_cents": 0,
+        "net_worth_cents": 250_000,
     }
     assert trend[1]["spending_cents"] == 0
     assert (trend[2]["spending_cents"], trend[2]["saved_cents"]) == (-1_000, 20_000)
@@ -50,3 +51,13 @@ def test_twelve_months_by_default(client):
 )
 def test_bad_requests(client, params):
     assert client.get(TREND, params=params).status_code == 422
+
+
+def test_net_worth_at_each_months_end(client, make_account, add_txn):
+    checking = make_account()["id"]
+    card = make_account(name="Fake Card", kind="credit_card")["id"]
+    add_txn(checking, 100_000, date="2026-01-31", kind="adjustment")  # opening balance counts
+    add_txn(card, -30_000, date="2026-02-10")
+    add_txn(checking, -5_000, date="2026-04-01")  # after the last month
+    trend = client.get(TREND, params={"end": "2026-03", "months": 3}).json()["months"]
+    assert [m["net_worth_cents"] for m in trend] == [100_000, 70_000, 70_000]

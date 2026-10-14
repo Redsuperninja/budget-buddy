@@ -42,8 +42,11 @@ The **Home** page shows your month at a glance:
 
 It also has these charts:
 
+- **Spending pace:** how much you've spent by each day of the month so far, against a dashed line for spending
+  your budget evenly. The sentence above it says whether you're on track, ahead or under, and where the month is
+  heading at this pace.
 - **Needs, wants and savings:** a bar for what you've spent this month, and a short upright line where your budget
-  is. If the bar goes past the line, you're over budget (the amount on the right also says "over").
+  is. If the bar goes past the line, you're over budget: the bar turns red and the amount on the right says "over".
 - **Budget and actual by category:** each category with a thin bar filling up as you spend, what's left (or how
   much you're over, in red) and what you've spent of its budget. Savings categories read as goals: "$200.00 to go",
   and saving more than planned says "extra". Click a category's name to see its transactions for the month.
@@ -54,8 +57,12 @@ It also has these charts:
   (the chart says so when there is some), and in your first month there's nothing to compare with yet.
 - **Month by month:** lines for money in, spending and saving, from your first month with any money in it (up to
   12 months). Point at a month to see its exact numbers.
+- **Left over each month:** a column for what was left after spending and saving, below the line when more went
+  out than came in.
+- **Net worth over time:** what you have minus what you owe at the end of each month.
 
-Click **Show as table** on any chart to see the same numbers as a list.
+On a wide screen some charts sit two to a row; on a phone, one under the other, drawn to fit. Click **Show as
+table** on any chart to see the same numbers as a list.
 
 ## Simple view or All tools
 
