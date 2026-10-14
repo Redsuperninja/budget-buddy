@@ -4,6 +4,7 @@ import { AccountsList } from '@/components/AccountsList';
 import { GroupCard } from '@/components/BudgetBreakdown';
 import { Card, Screen } from '@/components/Screen';
 import { LastSynced, SnapshotNotices } from '@/components/SnapshotNotices';
+import { withMonthBreaks } from '@/lib/months';
 import { SyncPanel } from '@/components/SyncPanel';
 import {
   moneyDirection,
@@ -135,14 +136,23 @@ function RecentActivity({ snapshot }: { snapshot: Snapshot }) {
         <Text style={{ fontSize: t.fontSizes.body, color: t.colors.textMuted }}>No recent activity yet.</Text>
       ) : (
         <View>
-          {recent.map((tx) => (
-            <TransactionRow
-              key={tx.id}
-              tx={tx}
-              currency={snapshot.currency}
-              categoryName={transactionCategoryLabel(tx, snapshot)}
-            />
-          ))}
+          {withMonthBreaks(recent, snapshot.period.month).map((entry) =>
+            entry.kind === 'month' ? (
+              <Text
+                key={`month-${entry.label}`}
+                accessibilityRole="header"
+                style={{ fontSize: t.fontSizes.small, fontWeight: '700', color: t.colors.textMuted, paddingTop: t.spacing.sm }}>
+                {entry.label}
+              </Text>
+            ) : (
+              <TransactionRow
+                key={entry.item.id}
+                tx={entry.item}
+                currency={snapshot.currency}
+                categoryName={transactionCategoryLabel(entry.item, snapshot)}
+              />
+            ),
+          )}
         </View>
       )}
     </View>

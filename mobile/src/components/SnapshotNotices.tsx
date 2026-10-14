@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
 import { formatLastSynced } from '@/lib/dates';
+import { oldMonthNotice } from '@/lib/months';
 import { useSnapshot } from '@/sync/store';
 import { useTheme } from '@/theme';
 
@@ -32,13 +33,18 @@ function Notice({ icon, text, tone }: { icon: 'information-circle' | 'alert-circ
   );
 }
 
-/** Banners for sample data and an unreadable saved snapshot. Renders nothing when all is well. */
+/**
+ * Banners for sample data, an unreadable saved snapshot, and a summary from an earlier month (so last
+ * month's "Left to spend" isn't taken for this month's). Renders nothing when all is well.
+ */
 export function SnapshotNotices() {
-  const { isSample, loadError } = useSnapshot();
+  const { isSample, loadError, snapshot } = useSnapshot();
+  const oldMonth = isSample ? null : oldMonthNotice(snapshot.period.month);
   return (
     <>
       {loadError ? <Notice icon="alert-circle" tone="problem" text={loadError} /> : null}
       {isSample ? <Notice icon="information-circle" tone="info" text={SAMPLE_BANNER_TEXT} /> : null}
+      {oldMonth ? <Notice icon="alert-circle" tone="info" text={oldMonth} /> : null}
     </>
   );
 }

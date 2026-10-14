@@ -32,7 +32,9 @@ know yet, the list says how many need an app update to show.
 
 ## Recent activity
 
-The last 10 transactions appear here, showing what you bought, when, and the amount. If you haven't synced any data yet, you'll see "No recent activity yet."
+The last 10 transactions appear here, showing what you bought, when, and the amount. Transactions from an earlier
+month sit under that month's name, so last month's purchases don't read as this month's. If you haven't synced any
+data yet, you'll see "No recent activity yet."
 
 ## Seeing sample data?
 
@@ -43,6 +45,9 @@ Once you've synced, this banner disappears.
 ## "Last synced"
 
 Next to the **Sync now** button you'll see when your phone last synced with your computer (for example, "Last synced: 2 days ago"). If you've never synced, it says "Never synced."
+
+If your phone hasn't synced since last month, a notice says so, for example "This is your September summary. Sync
+on your home Wi-Fi to see October." The numbers, like **Left to spend**, are still September's until you sync.
 
 See [Sync your phone](sync-your-phone.md) to understand how syncing works and how to sync now.
 

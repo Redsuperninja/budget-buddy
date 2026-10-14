@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Phone app: if it hasn't synced since last month, it says so ("This is your September summary. Sync on your home Wi-Fi to see October."), and Recent activity puts earlier months' transactions under that month's name.
 - Phone app: a budget summary that's far too big (more than 500 transactions, very long names, impossible dates like February 30) is refused instead of slowing the phone down, and hidden characters that could make text read backwards are dropped. The Home Base drops those characters from bank-file descriptions too.
 - Phone app: a budget summary whose month doesn't add up (say, February with 30 days, or a start that isn't the 1st) is refused like any other unreadable copy, instead of being shown under the wrong month.
 - Phone app: an account below zero (not a card or loan) shows as "$30.00 overdrawn", and if your computer has a kind of account this version of the app can't show yet, the list says "1 account needs an app update to show" instead of leaving it out without a word.

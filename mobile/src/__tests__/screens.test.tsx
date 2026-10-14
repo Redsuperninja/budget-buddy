@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from '@/app/index';
 import TaxesScreen, { DEDUCTIONS_NOTE, DEDUCTIONS_TITLE, GAINS_MAY_CHANGE_TAG, MISSING_INFO_TAG } from '@/app/taxes';
 import { SAMPLE_BANNER_TEXT } from '@/components/SnapshotNotices';
+import { oldMonthNotice, phoneMonth } from '@/lib/months';
 import { SAMPLE_SNAPSHOT } from '@/sync/sampleSnapshot';
 import { SNAPSHOT_INVALID_MESSAGE } from '@/sync/snapshot';
 import { SNAPSHOT_STORAGE_KEY, SnapshotProvider } from '@/sync/store';
@@ -81,6 +82,37 @@ describe('Home screen', () => {
     expect(
       screen.getByRole('button', { name: /^Wants\./ }).props.accessibilityState,
     ).toEqual(expect.objectContaining({ expanded: true }));
+  });
+
+  // A saved summary for `month`, with its period made consistent (parsePeriod checks it).
+  async function saveSummaryFor(month: string) {
+    const copy = JSON.parse(JSON.stringify(SAMPLE_SNAPSHOT));
+    const [y, m] = month.split('-').map(Number);
+    const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    copy.period = { month, start: `${month}-01`, end: `${month}-${days}`, days_elapsed: days, days_in_month: days };
+    await AsyncStorage.setItem(
+      SNAPSHOT_STORAGE_KEY,
+      JSON.stringify({ snapshot: copy, last_synced_at: new Date().toISOString() }),
+    );
+  }
+
+  it('says when the saved summary is from an earlier month', async () => {
+    const now = new Date();
+    const earlier = phoneMonth(new Date(now.getFullYear(), now.getMonth() - 1, 15));
+    await saveSummaryFor(earlier);
+
+    await render(<HomeScreen />, { wrapper: Wrapper });
+
+    expect(await screen.findByText(oldMonthNotice(earlier, now) as string)).toBeTruthy();
+  });
+
+  it("doesn't flag a summary from this month", async () => {
+    await saveSummaryFor(phoneMonth());
+
+    await render(<HomeScreen />, { wrapper: Wrapper });
+
+    expect(await screen.findByText('Left to spend')).toBeTruthy();
+    expect(screen.queryByText(/summary\. Sync on your home Wi-Fi to see/)).toBeNull();
   });
 
   it('shows a saved snapshot and when it was synced', async () => {
