@@ -59,7 +59,7 @@ Changing tables: [docs/dev/architecture/database.md](../docs/dev/architecture/da
 | `dashboard_files.py` | Finds the dashboard folder and its allowlist |
 | `tax_data/` | Per-year tax numbers ([docs/dev/tax-data.md](../docs/dev/tax-data.md)) |
 
-`packaging/home-base.spec` builds the packaged Home Base for the desktop app ([desktop.md](../docs/dev/architecture/desktop.md)).
+`packaging/windows/home-base.spec` (at the repo root) builds the packaged Home Base for the desktop app ([desktop.md](../docs/dev/architecture/desktop.md)).
 
 The full module map is in [server.md](../docs/dev/architecture/server.md).
 

@@ -1,5 +1,5 @@
 # Install (or remove) the Budget Buddy desktop app for this Windows user. No admin rights needed; safe to run
-# again to update. Used by the release download ("Install Budget Buddy.bat") and by scripts\install-desktop.ps1.
+# again to update. Used by the release download ("Install Budget Buddy.bat") and by scripts\release\install-desktop.ps1.
 #
 #   install.ps1 [-From <folder with Budget Buddy.exe>] [-NoDesktopShortcut]
 #   install.ps1 -Uninstall      removes the app and its shortcuts; your data folder is kept

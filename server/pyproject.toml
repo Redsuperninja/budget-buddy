@@ -29,7 +29,7 @@ dev = [
     "httpx2>=2.13",
     "ruff>=0.8",
 ]
-# Makes the packaged Home Base that the desktop app starts (packaging/home-base.spec).
+# Makes the packaged Home Base that the desktop app starts (packaging/windows/home-base.spec at the repo root).
 # PyInstaller: GPL with an exception that allows building apps like this one.
 package = ["pyinstaller>=6.10"]
 

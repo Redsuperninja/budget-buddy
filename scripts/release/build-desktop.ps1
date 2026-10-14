@@ -35,9 +35,9 @@ function Invoke-PyInstaller($VenvPython, $Spec, $DistPath) {
 }
 
 Write-Host "Building Budget Buddy.exe and the Home Base (a few minutes)..."
-Invoke-PyInstaller $DesktopPython (Join-Path $DesktopDir "packaging\desktop.spec") $Dist
-Invoke-PyInstaller $Python (Join-Path $ServerDir "packaging\home-base.spec") $Out
-Copy-Item (Join-Path $DesktopDir "packaging\THIRD-PARTY-NOTICES.txt") $Out
+Invoke-PyInstaller $DesktopPython (Join-Path $PackagingDir "desktop.spec") $Dist
+Invoke-PyInstaller $Python (Join-Path $PackagingDir "home-base.spec") $Out
+Copy-Item (Join-Path $PackagingDir "THIRD-PARTY-NOTICES.txt") $Out
 
 Write-Host ""
 Write-Host "Built: $(Join-Path $Out 'Budget Buddy.exe')" -ForegroundColor Green

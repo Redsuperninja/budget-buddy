@@ -8,6 +8,7 @@ $ServerDir = Join-Path $RepoRoot "server"
 $MobileDir = Join-Path $RepoRoot "mobile"
 $DesktopDir = Join-Path $RepoRoot "desktop"
 $LaunchDir = Join-Path $RepoRoot "launch"
+$PackagingDir = Join-Path $RepoRoot "packaging\windows"
 $Python = Join-Path $ServerDir ".venv\Scripts\python.exe"
 $DesktopPython = Join-Path $DesktopDir ".venv\Scripts\python.exe"
 

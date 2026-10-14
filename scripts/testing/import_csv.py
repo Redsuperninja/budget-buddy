@@ -1,6 +1,6 @@
 """Preview a bank CSV file, then import it into an account on the TEST Home Base.
 
-Run it via scripts/import-csv.ps1. Shows what Budget Buddy understood (columns, dates, amounts, and
+Run it via scripts/testing/import-csv.ps1. Shows what Budget Buddy understood (columns, dates, amounts, and
 any problem rows) and asks before saving anything.
 """
 

@@ -1,6 +1,6 @@
 """Start pairing on the TEST Home Base and show the QR code for the phone to scan.
 
-Run it via scripts/pair-phone.ps1. The code works once, for 10 minutes. It is a secret while it's
+Run it via scripts/testing/pair-phone.ps1. The code works once, for 10 minutes. It is a secret while it's
 valid, so it is only shown on screen and in a temporary picture that is deleted when you press
 Enter or the code expires, whichever comes first.
 """

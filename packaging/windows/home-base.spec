@@ -1,13 +1,14 @@
 # PyInstaller recipe for the packaged Home Base, "Budget Buddy Home Base.exe": the server with the
 # dashboard files bundled in (ADR-0005 asks the installer to ship them beside it). The desktop app starts
-# it (ADR-0008). Built by scripts\build-desktop.ps1. No console window: output goes nowhere unless the
-# program that starts it collects it.
+# it (ADR-0008). Built by scripts\release\build-desktop.ps1. No console window: output goes nowhere unless
+# the program that starts it collects it.
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_submodules
 
-SERVER = Path(SPECPATH).parent
-DASHBOARD = SERVER.parent / "dashboard"
+REPO = Path(SPECPATH).parents[1]  # this file is in packaging\windows\
+SERVER = REPO / "server"
+DASHBOARD = REPO / "dashboard"
 # PyInstaller adds the recipe name to workpath; the build script draws the icon one level up.
 ICON = Path(workpath).parent / "budget-buddy.ico"
 

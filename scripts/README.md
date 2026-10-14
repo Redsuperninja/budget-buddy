@@ -39,7 +39,7 @@ in the test data folder, so made-up data can't end up in real data.
 | Script | What it does |
 | --- | --- |
 | `build-desktop.ps1` | Builds the desktop app into `launch\Budget Buddy\` ([desktop architecture](../docs/dev/architecture/desktop.md)); `launch\Build desktop app.bat` runs it. |
-| `install-desktop.ps1` | Installs the built app with `desktop\packaging\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps. `launch\Install desktop app.bat` runs it. |
+| `install-desktop.ps1` | Installs the built app with `packaging\windows\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps. `launch\Install desktop app.bat` runs it. |
 | `make-release.ps1` | Builds the release download, `dist\Budget-Buddy-<version>-Windows.zip` and its `.sha256` ([release.md](../docs/dev/release.md)). |
 
 ## Developers (`scripts\dev\`)
