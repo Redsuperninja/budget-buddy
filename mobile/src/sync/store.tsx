@@ -6,19 +6,22 @@
  * still has something to show.
  *
  * Storage note: the cached snapshot is FINANCIAL DATA (budget, recent transactions, balances).
- * It contains no keys or tokens, so it lives in AsyncStorage rather than expo-secure-store
- * (which is for small secrets and has size limits). It is protected by the phone's own OS lock
- * and app sandbox. Encrypting this cache at rest is a possible follow-up.
+ * It's too big for expo-secure-store, so it lives in AsyncStorage, which phones copy into cloud and
+ * computer backups: it's always encrypted there with a key that stays on this phone
+ * (`snapshotDisk.ts`, `cacheCrypto.ts`). Android app backup is off as well (app.json).
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SAMPLE_SNAPSHOT } from './sampleSnapshot';
 import { parseSnapshot, SNAPSHOT_INVALID_MESSAGE, SNAPSHOT_LIMITS } from './snapshot';
 import type { Snapshot } from './snapshot';
+import { readSaved, writeSaved } from './snapshotDisk';
 
-export const SNAPSHOT_STORAGE_KEY = 'budgetbuddy.snapshot.v1';
+export { LEGACY_SNAPSHOT_KEY, SNAPSHOT_STORAGE_KEY } from './snapshotDisk';
+
+const SAVE_FAILED =
+  "Couldn't save your budget on this phone. Unlock your phone and check it has free space, then try again.";
 
 /** What we keep on disk: the snapshot plus when the phone last synced (phone clock, ISO UTC). */
 type StoredSnapshot = { snapshot: unknown; last_synced_at: string };
@@ -52,23 +55,19 @@ const SnapshotContext = createContext<SnapshotState | null>(null);
 
 /** Read and validate the cached snapshot. Never throws. */
 export async function loadStoredSnapshot(): Promise<InternalState> {
-  let raw: string | null;
-  try {
-    raw = await AsyncStorage.getItem(SNAPSHOT_STORAGE_KEY);
-  } catch {
-    return { ...SAMPLE_STATE, loading: false, loadError: SNAPSHOT_INVALID_MESSAGE };
-  }
-  if (raw === null) return { ...SAMPLE_STATE, loading: false };
-  // Far bigger than any real snapshot: damaged, so not even read (it could freeze the screen).
-  if (raw.length > SNAPSHOT_LIMITS.storedChars) {
-    return { ...SAMPLE_STATE, loading: false, loadError: SNAPSHOT_INVALID_MESSAGE };
-  }
+  const saved = await readSaved();
+  if (saved.kind === 'none') return { ...SAMPLE_STATE, loading: false };
+  if (saved.kind === 'unreadable') return { ...SAMPLE_STATE, loading: false, loadError: SNAPSHOT_INVALID_MESSAGE };
 
   try {
-    const stored = JSON.parse(raw) as Partial<StoredSnapshot> | null;
+    const stored = JSON.parse(saved.text) as Partial<StoredSnapshot> | null;
     const result = parseSnapshot(stored?.snapshot);
     const syncedAt = typeof stored?.last_synced_at === 'string' ? stored.last_synced_at : null;
     if (result.ok && syncedAt !== null && !Number.isNaN(Date.parse(syncedAt))) {
+      if (saved.legacy) {
+        // Saved before encryption: seal it now and drop the plain copy (best effort).
+        await writeSaved(saved.text).catch(() => undefined);
+      }
       return {
         snapshot: result.snapshot,
         lastSyncedAt: syncedAt,
@@ -106,9 +105,9 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
     // Never save a copy the next start would refuse to read.
     if (text.length > SNAPSHOT_LIMITS.storedChars) return SNAPSHOT_INVALID_MESSAGE;
     try {
-      await AsyncStorage.setItem(SNAPSHOT_STORAGE_KEY, text);
+      await writeSaved(text); // sealed; nothing is saved without the phone's secure random source
     } catch {
-      return "Couldn't save your budget on this phone. Check that your phone has free space, then try again.";
+      return SAVE_FAILED;
     }
     setState({
       snapshot: result.snapshot,
