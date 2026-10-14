@@ -5,7 +5,7 @@
 . "$PSScriptRoot\test-settings.ps1"
 
 if (-not (Test-Path (Join-Path $MobileDir "node_modules"))) {
-    Write-Host "The phone app tools aren't installed yet. Run scripts\setup.ps1 first." -ForegroundColor Yellow
+    Write-Host "The phone app tools aren't installed yet. Run scripts\testing\setup.ps1 first." -ForegroundColor Yellow
     exit 1
 }
 

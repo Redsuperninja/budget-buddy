@@ -5,14 +5,14 @@
 #   - its own port (8766; the real Home Base uses 8765),
 # so demo data can never end up in your real data.
 
-. "$PSScriptRoot\paths.ps1"
+. "$PSScriptRoot\..\paths.ps1"
 
 $TestDataDir = Join-Path $env:LOCALAPPDATA "BudgetBuddy-Test"
 $TestPort = 8766
 
 function Assert-SetUp {
     if (-not (Test-Path $Python)) {
-        Write-Host "Budget Buddy isn't set up on this computer yet. Run scripts\setup.ps1 first." -ForegroundColor Yellow
+        Write-Host "Budget Buddy isn't set up on this computer yet. Run scripts\testing\setup.ps1 first." -ForegroundColor Yellow
         exit 1
     }
 }

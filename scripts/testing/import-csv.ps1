@@ -1,7 +1,7 @@
 # Preview and import a bank CSV file into an account on the TEST Home Base.
 #
-#   scripts\import-csv.ps1                                       the sample file into the demo checking account
-#   scripts\import-csv.ps1 -File my.csv -Account "Demo Credit Card" -FlipSign
+#   scripts\testing\import-csv.ps1                                       the sample file into the demo checking account
+#   scripts\testing\import-csv.ps1 -File my.csv -Account "Demo Credit Card" -FlipSign
 #   add -SkipInvalid to import the good rows when a few rows can't be read
 
 param(

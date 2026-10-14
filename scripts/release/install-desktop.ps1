@@ -2,11 +2,11 @@
 # and desktop shortcuts. The work is done by desktop\packaging\install.ps1, the same installer the release download
 # uses. Safe to run again to update.
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\install-desktop.ps1 [-NoDesktopShortcut]
+#   powershell -ExecutionPolicy Bypass -File scripts\release\install-desktop.ps1 [-NoDesktopShortcut]
 
 param([switch]$NoDesktopShortcut)
 
-. "$PSScriptRoot\paths.ps1"
+. "$PSScriptRoot\..\paths.ps1"
 
 $Built = Join-Path $LaunchDir "Budget Buddy"
 if (-not (Test-Path (Join-Path $Built "Budget Buddy.exe"))) {

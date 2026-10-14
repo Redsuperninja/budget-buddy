@@ -128,7 +128,7 @@ items (20, 21).
 - [ ] 23. Plain-English user guide with screenshots — *docs-writer*
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
-  - Done so far: Windows download with installer and uninstall (`scripts/make-release.ps1`, release workflow, [release.md](dev/release.md)); simple view with All tools; Get started checklist on Home; phone-friendly dashboard for a phone's browser
+  - Done so far: Windows download with installer and uninstall (`scripts/release/make-release.ps1`, release workflow, [release.md](dev/release.md)); simple view with All tools; Get started checklist on Home; phone-friendly dashboard for a phone's browser
 
 ## Phase 7: Bank data (ADR-0006: free and open source first)
 - [x] 26b. Brokerage activity CSV: every row a transaction, buys and sells linked as stock trades, dividends filed — *backend-engineer* + *finance-tax-expert*

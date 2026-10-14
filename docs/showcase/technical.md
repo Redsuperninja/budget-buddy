@@ -92,7 +92,7 @@ release on CI and attaches it to a draft GitHub Release ([release.md](../dev/rel
 
 ## Shipping
 
-- **Windows:** `scripts\make-release.ps1` makes `Budget-Buddy-<version>-Windows.zip`: the PyInstaller-built desktop
+- **Windows:** `scripts\release\make-release.ps1` makes `Budget-Buddy-<version>-Windows.zip`: the PyInstaller-built desktop
   app and Home Base (no Python needed), a per-user installer (no admin; Start menu, desktop shortcut, an entry in
   Settings, Apps), an uninstaller that keeps the data folder, and a plain-English read-me.
 - **Phones:** the dashboard in the phone's browser for now; the Expo app runs in Expo Go during testing.

@@ -62,7 +62,7 @@ function New-Shortcut($Path) {
 New-Shortcut $StartMenuLink
 if (-not $NoDesktopShortcut) { New-Shortcut $DesktopLink }
 
-$versionFile = Join-Path $Target "version.txt"  # written by scripts\make-release.ps1
+$versionFile = Join-Path $Target "version.txt"  # written by scripts\release\make-release.ps1
 New-Item -Path $AppsEntry -Force | Out-Null
 $entry = @{
     DisplayName = "Budget Buddy"; Publisher = "Budget Buddy"; DisplayIcon = $Exe; InstallLocation = $Target

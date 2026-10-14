@@ -30,7 +30,7 @@ venv/
 htmlcov/
 dist/
 build/
-# The built desktop app (scripts/build-desktop.ps1)
+# The built desktop app (scripts/release/build-desktop.ps1)
 launch/Budget Buddy/
 
 # --- Node / Expo ---

@@ -1,8 +1,8 @@
 # Start a TEST Home Base with its own data folder and port, kept apart from any real data.
 # Leave this window open while testing; press Ctrl+C to stop.
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\start-test-server.ps1          keep last time's test data
-#   powershell -ExecutionPolicy Bypass -File scripts\start-test-server.ps1 -Reset   start over, empty
+#   powershell -ExecutionPolicy Bypass -File scripts\testing\start-test-server.ps1          keep last time's test data
+#   powershell -ExecutionPolicy Bypass -File scripts\testing\start-test-server.ps1 -Reset   start over, empty
 
 param([switch]$Reset)
 

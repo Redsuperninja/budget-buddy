@@ -7,7 +7,7 @@ Each time you test, open three PowerShell windows and run one script in each. Ke
 Run this command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\start-test-server.ps1
+powershell -ExecutionPolicy Bypass -File scripts\testing\start-test-server.ps1
 ```
 
 Leave this window open. The test version uses its own folder (`%LOCALAPPDATA%\BudgetBuddy-Test`) on its own port (8766), completely separate from any real Budget Buddy data.
@@ -17,7 +17,7 @@ Leave this window open. The test version uses its own folder (`%LOCALAPPDATA%\Bu
 Run this command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\load-demo-data.ps1
+powershell -ExecutionPolicy Bypass -File scripts\testing\load-demo-data.ps1
 ```
 
 This adds three months of made-up accounts, spending, paychecks, donations and stocks. Skip this if you already loaded demo data.
@@ -27,7 +27,7 @@ This adds three months of made-up accounts, spending, paychecks, donations and s
 Run this command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\start-phone-app.ps1
+powershell -ExecutionPolicy Bypass -File scripts\testing\start-phone-app.ps1
 ```
 
 You'll see a QR code in the window.
@@ -44,7 +44,7 @@ Budget Buddy opens inside Expo Go.
 
 1. On your phone: **Settings → Connect**
 2. On your computer, open http://127.0.0.1:8766/ in your browser
-3. Click **Show pairing code** (or in window 2, run `powershell -ExecutionPolicy Bypass -File scripts\pair-phone.ps1` to get a code in the window)
+3. Click **Show pairing code** (or in window 2, run `powershell -ExecutionPolicy Bypass -File scripts\testing\pair-phone.ps1` to get a code in the window)
 4. Scan the code on your phone. It works once, for 10 minutes
 5. The page says **New phone paired** when it worked
 6. The phone should say **Connected to …**
@@ -58,7 +58,7 @@ Press Ctrl+C in each window to stop. This also stops the phone app's test server
 Run this command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\start-test-server.ps1 -Reset
+powershell -ExecutionPolicy Bypass -File scripts\testing\start-test-server.ps1 -Reset
 ```
 
 This clears only the test data folder. Your phone will need to connect again.
@@ -78,7 +78,7 @@ Start window 1 and leave it open.
 
 **Budget Buddy isn't set up on this computer yet**
 
-Run `scripts\setup.ps1` from the setup page first.
+Run `scripts\testing\setup.ps1` from the setup page first.
 
 **The QR code won't scan**
 

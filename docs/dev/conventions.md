@@ -25,7 +25,8 @@ reviewers check them.
     sync in `sync/`.
   - Desktop (`desktop/budget_buddy_desktop/`): one module per job (tray, window, starting the Home Base,
     start with Windows); the tray's modules never load the window library.
-  - Scripts: the shared local-API client is `scripts/_local_api.py`; shared PowerShell is `scripts/paths.ps1`.
+  - Scripts: one folder per audience (`scripts/testing/`, `scripts/release/`, `scripts/dev/`; everyday ones at the
+    top). The shared local-API client is `scripts/testing/_local_api.py`; shared PowerShell is `scripts/paths.ps1`.
     What people double-click lives in `launch/` as thin `.bat` files that call `scripts/`.
 - **Short functions with clear names** over comments explaining long ones. A file starts with a one-line
   comment saying what it's for.

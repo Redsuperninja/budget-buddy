@@ -18,14 +18,14 @@ It starts the server from `server\.venv`, so set that up first ([server/README.m
 
 ## Build the .exe
 
-Double-click **Build desktop app** in the [launch](../launch/) folder (or run `scripts\build-desktop.ps1`). It makes
+Double-click **Build desktop app** in the [launch](../launch/) folder (or run `scripts\release\build-desktop.ps1`). It makes
 `launch\Budget Buddy\Budget Buddy.exe` plus `home-base\` (the packaged Home Base from
 `server/packaging/home-base.spec`). **Install desktop app** copies it to `%LOCALAPPDATA%\Programs\Budget Buddy` and
 adds Start menu and desktop shortcuts.
 
 ## Make the release download
 
-`scripts\make-release.ps1` builds the app and packs it with `packaging\install.ps1`, the two `.bat` files and
+`scripts\release\make-release.ps1` builds the app and packs it with `packaging\install.ps1`, the two `.bat` files and
 `packaging\READ ME FIRST.txt` into `dist\Budget-Buddy-<version>-Windows.zip` ([release.md](../docs/dev/release.md)).
 
 ## Check it
