@@ -33,7 +33,8 @@ transaction's, never copied.
   set its category, or "Dividends" names one of your non-income categories.
 - **Budget**: in a retirement account or HSA (`TAX_FREE_KINDS`), a dividend and its linked sweep are left out of
   the monthly summary (`transaction_roles.dividends_kept_inside`), so they're neither income nor saved; the budget engine and
-  trend use the same summary. Elsewhere a dividend is income and its sweep keeps its own category.
+  trend use the same summary. Elsewhere a dividend is income; its sweep is left out while it has no category (it only
+  parks the cash, and "needs a category" doesn't list it) and counts in a category you give it.
 - **Totals** only count dividends whose payment is still money in and `normal`. Two `find` runs at once: the
   second adds nothing (a savepoint catches the unique-constraint clash).
 - A linked sweep doesn't show under "needs a category" (it only parks the cash). Stock trades and their sweeps

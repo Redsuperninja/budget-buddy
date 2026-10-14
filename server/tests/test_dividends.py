@@ -150,6 +150,20 @@ def test_ira_dividends_and_sweeps_stay_out_of_the_budget(client, ira, make_accou
     assert summary["unassigned_out_cents"] == 0
 
 
+def test_a_brokerage_dividend_sweep_counts_only_once_you_file_it(client, make_account, add_txn):
+    brokerage = make_account(name="Fake Brokerage", kind="brokerage")["id"]
+    add_txn(brokerage, 1_000, date="2026-09-09", description="FAKE FUND DIVIDEND")
+    sweep = add_txn(brokerage, -1_000, date="2026-09-09", description="FAKE DEPOSIT SWEEP")
+
+    def month():
+        return client.get("/api/local/summary/monthly", params={"month": "2026-09"}).json()
+
+    assert (month()["income_cents"], month()["unassigned_out_cents"]) == (1_000, 0)
+    saving = next(c for c in client.get("/api/local/categories").json() if c["group"] == "savings")
+    client.patch(f"{TXN}/{sweep['id']}", json={"category_id": saving["id"]})
+    assert month()["saved_cents"] >= 1_000
+
+
 def test_a_payment_changed_to_money_out_leaves_the_totals(client, ira, add_txn):
     paid = add_txn(ira, 130, date="2026-09-08", description="FAKECO CASH DIV")
     changed = client.patch(f"{TXN}/{paid['id']}", json={"amount_cents": -130})

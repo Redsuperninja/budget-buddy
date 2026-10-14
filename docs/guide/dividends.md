@@ -23,7 +23,9 @@ and paid in January counts in the year before on your Form 1099-DIV.
 
 ## Your budget
 
-A dividend in a regular brokerage account counts as income in your monthly summary. A dividend inside a
+A dividend in a regular brokerage account counts as income in your monthly summary. Its deposit sweep is left out
+unless you give it a category, since it only moves the cash inside the account; file it under a category, like
+savings, and it counts there. A dividend inside a
 retirement account or HSA, and its deposit sweep, are left out of your budget completely: that cash stays in the
 account, so it isn't take-home income or new saving.
 
