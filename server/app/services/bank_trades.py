@@ -8,7 +8,9 @@ pays for a buy, "... INTRA-DAY DEPOSIT" (money out) parks a sale's proceeds. (A 
 handled by ``dividend_matching``, which runs first.)
 
 - **A trade** is a regular transaction in a brokerage, retirement or HSA account whose description
-  has trade-confirmation wording (``TRADE_WORDS``), and isn't a sweep or a dividend.
+  has trade-confirmation wording (``TRADE_WORDS``), and isn't a sweep or a dividend. A trade you
+  recorded yourself from a transaction (a stock purchase or sale linked to it) becomes one too,
+  but only once its sweep is found, so its sweep is left out the same way.
 - **Its sweep**: the opposite amount in the same account, from the day before to three days after,
   with "sweep" in it, not already a dividend's or another trade's. Closest date wins, then the one
   added first.
@@ -33,8 +35,8 @@ from sqlalchemy.orm import Session
 from app.models import Account, BankTrade, SecuritySymbol, Transaction
 from app.services.accounts import INVESTMENT_KINDS
 from app.services.dividend_matching import looks_like_dividend
-from app.services.sweeps import SWEEP_WORDS, link_sweeps, regular
-from app.services.transaction_roles import bank_trades, dividends, none_of
+from app.services.sweeps import SWEEP_WORDS, candidates, in_window, link_sweeps, regular
+from app.services.transaction_roles import bank_trades, dividends, none_of, stock_trades
 
 # Trade-confirmation wording, which only trades carry.
 CONFIRMATION_WORDS = re.compile(
@@ -101,6 +103,43 @@ def _new_trades(session: Session, ids: set[int] | None) -> list[Transaction]:
     ]
 
 
+def _recorded_without_one(session: Session) -> list[Transaction]:
+    """Trades you recorded yourself (a stock purchase or sale linked to the transaction) in an
+    investment account that aren't a bank-file trade yet, with a free sweep near them: their
+    sweep is looked for too."""
+    recorded = list(
+        session.scalars(
+            regular(select(Transaction))
+            .join(Account, Account.id == Transaction.account_id)
+            .where(
+                Account.kind.in_(INVESTMENT_KINDS),
+                Transaction.amount_cents != 0,
+                Transaction.id.in_(stock_trades()),
+                *none_of(bank_trades(include_dismissed=True)),
+            )
+        )
+    )
+    if not recorded:
+        return []
+    sweeps = candidates(session, {t.account_id for t in recorded})
+    return [
+        t for t in recorded if any(s.account_id == t.account_id and in_window(s, t) for s in sweeps)
+    ]
+
+
+def forget_recorded(session: Session, transaction_id: int | None) -> None:
+    """The purchase or sale recorded from this transaction was deleted: if it was a bank-file
+    trade only because you recorded it (no trade wording), drop that too, freeing its sweep, so
+    the payment counts like any other again. Not saved until the caller commits."""
+    if transaction_id is None:
+        return
+    trade = session.scalar(select(BankTrade).where(BankTrade.transaction_id == transaction_id))
+    if trade is not None and not looks_like_trade(
+        session.get(Transaction, transaction_id).description
+    ):
+        session.delete(trade)
+
+
 def _link_sweeps(session: Session) -> int:
     waiting = session.execute(
         select(BankTrade, Transaction)
@@ -123,8 +162,17 @@ def find_trades(session: Session, transaction_ids: set[int] | None = None) -> Fo
                     BankTrade(transaction_id=paid.id, security=security_name(paid.description))
                 )
                 found.trades += 1
+            # Every recorded trade, not only ``transaction_ids``: its sweep may come in later.
+            adopted = [
+                BankTrade(transaction_id=paid.id, security=security_name(paid.description))
+                for paid in _recorded_without_one(session)
+            ]
+            session.add_all(adopted)
             session.flush()
             found.sweeps = _link_sweeps(session)
+            for trade in adopted:  # kept only with a sweep, so it isn't listed for nothing
+                if trade.sweep_transaction_id is None:
+                    session.delete(trade)
             session.flush()
     except IntegrityError:
         return Found()

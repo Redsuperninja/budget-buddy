@@ -18,7 +18,7 @@ from app.schemas.stocks import (
     TermTotalsOut,
 )
 from app.services import stock_gains as gains
-from app.services.bank_trades import remember_symbol
+from app.services.bank_trades import find_trades, forget_recorded, remember_symbol
 from app.services.holdings_check import Snapshot, checked_by, snapshots
 from app.services.stock_records import (
     check_account,
@@ -154,18 +154,21 @@ def create_sale(session: Session, data: SaleCreate) -> SaleOut:
     remember_symbol(
         session, values["transaction_id"], values["symbol"]
     )  # a trade from the bank file
+    if values["transaction_id"] is not None:
+        find_trades(session, {values["transaction_id"]})  # links its deposit sweep, if any
     session.commit()
     return sale_out(session, new_id)
 
 
 def delete_sale(session: Session, sale_id: int) -> None:
     order = get_order(session, sale_id)
-    symbol, account_id = order.symbol, order.account_id
+    symbol, account_id, transaction_id = order.symbol, order.account_id, order.transaction_id
     session.delete(order)  # its per-lot pieces go with it (ON DELETE CASCADE)
     session.flush()
     # Later sales may now be matched to older shares. Removing a sale frees up shares, so this
     # can't fail.
     rematch(session, symbol, account_id)
+    forget_recorded(session, transaction_id)
     session.commit()
 
 

@@ -5,11 +5,15 @@ trade". See ``bank_trades`` for how they're found."""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.errors import not_found
+from app.errors import ApiError, not_found
 from app.models import Account, BankTrade, SecuritySymbol, StockLot, StockSaleOrder, Transaction
 from app.models.tax import SHARES_SCALE
 from app.schemas.bank_trades import BankTradeOut, BankTradesOut
 from app.services.bank_trades import ticker_in
+
+RECORDED = (
+    "This trade is recorded on the Stocks page. To undo it, delete the purchase or sale there."
+)
 
 
 def price_per_share(amount_cents: int, shares_micro: int | None) -> int | None:
@@ -71,6 +75,8 @@ def dismiss(session: Session, trade_id: int) -> None:
     trade = session.get(BankTrade, trade_id)
     if trade is None:
         raise not_found("trade")
+    if _recorded(session, [trade.transaction_id]):
+        raise ApiError(409, "trade_recorded", RECORDED)
     trade.dismissed = True
     trade.sweep_transaction_id = None
     session.commit()

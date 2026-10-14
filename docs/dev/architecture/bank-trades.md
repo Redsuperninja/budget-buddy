@@ -18,7 +18,8 @@ INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money o
   company before, or one in brackets in the description).
 - `POST /api/local/stocks/bank-trades/find`: look through every transaction (dividends first, so their sweeps go
   to them).
-- `POST /api/local/stocks/bank-trades/{id}/dismiss`: not a trade; its sweep is freed; never found again.
+- `POST /api/local/stocks/bank-trades/{id}/dismiss`: not a trade; its sweep is freed; never found again. Refused
+  (409 `trade_recorded`) once a purchase or sale is recorded from it: delete that instead.
 - Recording uses the Stocks API (`POST /stocks/lots` or `/stocks/sales` with `transaction_id`); that also saves the
   company's ticker (`security_symbols`). Bank CSV import results gain `trades_found` and `trade_sweeps_linked`.
 
@@ -37,6 +38,12 @@ NULL`), `security` (from the description), `dismissed`. Date, amount and account
   commission field/equivalent), or a plain bought/sold without money market, MMKT, redemption, maturity or "to
   cover" words; and isn't a sweep, a dividend, or a cancel/correction/reversal/rebill/adjustment (a reversal
   would otherwise look like the opposite trade).
+- **A trade you recorded yourself** (a stock purchase or sale linked to a regular transaction in an investment
+  account, from the Transactions page or an activity file) becomes a `bank_trades` row too, but only once its
+  sweep is found; without one it isn't listed. Every `find` run looks at all of them, so a sweep imported later
+  is still linked, and recording a purchase or sale from a transaction runs `find` for it. Deleting that purchase
+  or sale drops the row again if the description has no trade wording (`forget_recorded`), so the payment and
+  its sweep count like any others.
 - **Sweeps** are picked by `services/sweeps.py`, shared with dividends: a trade is never a sweep.
 - **Price per share** is the amount (commission included) / shares: cost basis on a buy, net proceeds on a
   sale. Shown as "with fees", since it can differ from the trade price.
