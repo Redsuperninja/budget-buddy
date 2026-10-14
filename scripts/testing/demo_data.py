@@ -43,7 +43,7 @@ def main() -> int:
         api.call("GET", "/api/health")
     except ApiError:
         print(f"The test Home Base isn't running on port {port}.")
-        print("Start it first with scripts\\start-test-server.ps1 (in its own window).")
+        print("Start it first with scripts\\testing\\start-test-server.ps1 (in its own window).")
         return 1
 
     try:
@@ -53,12 +53,12 @@ def main() -> int:
                 "Refusing: this Home Base has accounts that aren't demo data. Demo data only"
             )
             print(
-                "goes into an empty test Home Base (scripts\\start-test-server.ps1 -Reset)."
+                "goes into an empty test Home Base (scripts\\testing\\start-test-server.ps1 -Reset)."
             )
             return 2
         if any(a["name"] == DEMO_CHECKING for a in accounts):
             print(
-                "Demo data is already loaded. To start over: scripts\\start-test-server.ps1 -Reset"
+                "Demo data is already loaded. To start over: scripts\\testing\\start-test-server.ps1 -Reset"
             )
             return 0
         load(api, dt.date.today())  # noqa: DTZ011 -- the tester's local calendar date is what we want

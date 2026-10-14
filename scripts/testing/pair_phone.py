@@ -30,7 +30,7 @@ def main() -> int:
         started = api.call("POST", "/api/local/pairing")
     except NotRunning:
         print(f"The test Home Base isn't running on port {port}.")
-        print("Start it first with scripts\\start-test-server.ps1 (in its own window).")
+        print("Start it first with scripts\\testing\\start-test-server.ps1 (in its own window).")
         return 1
     except ApiError as exc:
         print(exc)
@@ -45,7 +45,7 @@ def main() -> int:
     try:
         import segno
     except ImportError:
-        print("The QR code tool isn't installed. Run scripts\\setup.ps1 again.")
+        print("The QR code tool isn't installed. Run scripts\\testing\\setup.ps1 again.")
         return 1
 
     qr = segno.make(started["payload_text"], error="m")

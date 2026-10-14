@@ -22,4 +22,5 @@ test("an account's gap, or nothing when it adds up", () => {
   assert.equal(gapText({ payments: 3, with_sweep: 2, free_sweeps: 1 }),
     "1 dividend or trade without a sweep, 1 sweep line not linked");
   assert.equal(gapText({ payments: 4, with_sweep: 2, free_sweeps: 0 }), "2 dividends or trades without a sweep");
+  assert.equal(gapText({ payments: 1, with_sweep: 1, free_sweeps: 3 }), "3 sweep lines not linked");
 });
