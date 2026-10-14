@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Behind the scenes (phone app): a queue that keeps receipt photos encrypted on the phone and sends them to your computer in small batches the next time you sync. Taking the photos comes next.
 - Phone app: reminders to sync. After your first sync the phone offers them once; in Settings, **Remind me to sync** picks every 1, 2 or 3 days (your computer's suggestion until you pick) or Off. Never between 9 PM and 9 AM, with two gentle follow-ups, and no amounts on your lock screen.
 - Phone app: the budget kept on your phone is now encrypted, with a key that never leaves the phone, so it isn't readable in a phone backup (Android app backup is also off). An older saved copy is encrypted the first time the app opens. After restoring a backup or moving to a new phone, sync once to see your budget again.
 - Phone app: if it hasn't synced since last month, it says so ("This is your September summary. Sync on your home Wi-Fi to see October."), and Recent activity puts earlier months' transactions under that month's name.

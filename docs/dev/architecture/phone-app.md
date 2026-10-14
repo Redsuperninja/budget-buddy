@@ -10,6 +10,16 @@ Folder: `mobile/` ([mobile/README.md](../../../mobile/README.md) for running it,
   pair screen (scan the QR or paste its text), and Add Receipt (a "coming soon" placeholder until roadmap #20).
 - **Talks to the Home Base only through the [sync contract](../../api/sync-contract.md)**, on home Wi-Fi.
   Pairing: [pairing.md](pairing.md). Syncing: [sync.md](sync.md).
+- **Receipt queue** (`src/receipts/`, roadmap #20): receipts wait on the phone until a sync sends them (contract §6,
+  §8 step 2, before the snapshot). The list is sealed in AsyncStorage (`budgetbuddy.receipts.v1`) and each photo is
+  its own sealed file (`receipts/<client_id>.bin`, nonce then box), both with the phone-only cache key; only a UUID
+  names a file. A photo must be a JPEG of at most 3 MiB (§6.1) and its ID new. Changes run one at a time and never
+  save over a list that couldn't be read. Batches are 1-5 receipts under 11 MiB, sent with a 2-minute timeout; a
+  photo is opened only for its own batch. Only answers about receipts actually sent count: `accepted`/`duplicate`
+  delete the receipt and photo, `rejected` keeps it with the Home Base's message (cleaned like other server text,
+  at most 200 characters) until you retake or delete it. A photo that won't open is marked to retake without
+  being sent. An unreachable computer stops the sync; any other receipt problem leaves them queued and the sync
+  goes on to the snapshot (§8). At app start, photo files no receipt lists are deleted (`ReminderKeeper`).
 - **Reminders** (`src/sync/reminders.ts`, roadmap #21): local notifications only, following sync contract §9:
   every 1, 2 or 3 days (the snapshot's `reminder_days_default` until you pick; Off is a phone-only extra), due
   N days after the last sync and moved out of quiet hours (21:00-09:00) to 09:00, or the next non-quiet minute if

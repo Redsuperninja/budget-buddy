@@ -119,7 +119,7 @@ items (20, 21).
 - [x] 17. Expo scaffold, navigation, theme — *mobile-engineer*
 - [x] 18. Pair screen (QR scan, secure key storage) — *mobile-engineer*
 - [x] 19. Dashboard: budget breakdown from snapshot — *mobile-engineer*
-- [ ] 20. Receipt capture with offline queue — *mobile-engineer*
+- [ ] 20. Receipt capture with offline queue — *mobile-engineer* (queue and upload done; the camera screen is next)
 - [x] 21. Sync button + 1–3 day reminder notifications — *mobile-engineer*
   - Sync now button done (feat/phone-sync); reminders still to do
 
