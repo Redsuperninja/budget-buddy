@@ -16,12 +16,12 @@ Two transactions are matched when all of these hold:
   credit card or loan: those don't send money to your other accounts);
 - each is the other's only best match: the closest date wins, and a tie is left for you to link.
 
-It runs after a bank file is imported, after a transaction is added by hand, and when asked to
+Card payments not linked (yet) are then filed under "Payments" (``card_payments``). It runs after
+a bank file is imported, after a transaction is added by hand, and when asked to
 look through everything. Nothing here logs descriptions or amounts.
 """
 
 import datetime as dt
-import re
 from collections import defaultdict
 
 from sqlalchemy import select
@@ -33,39 +33,18 @@ from app.models import (
     Category,
     CategoryGroup,
     Transaction,
-    TransactionKind,
 )
-from app.services.ledger.transaction_roles import (
-    cash_inside_account,
-    dividend_sweeps,
-    donations,
-    none_of,
-    paycheck_deposits,
+from app.services.ledger.card_payments import file_card_payments
+from app.services.ledger.transaction_roles import free_to_move
+from app.services.ledger.transfer_words import (
+    CARD_PAYMENT_WORDS,
+    NOT_TRANSFER_WORDS,
+    TRANSFER_WORDS,
 )
 from app.services.ledger.transfers import pair_up
+from app.transfer_types import CANT_SEND
 
 WINDOW_DAYS = 5
-_WORDS = r"(?<![a-z])(?:{})(?![a-z])"
-TRANSFER_WORDS = re.compile(
-    _WORDS.format(
-        "transfer|xfer|trnsfr|tfr|payment|pymt|pmt|autopay|auto pay|thank you|online banking|ach|"
-        "contribution|contrib|to savings|from savings|to checking|from checking|to sav|from chk|"
-        "internal|move money|zelle to self"
-    ),
-    re.I,
-)
-CARD_PAYMENT_WORDS = re.compile(
-    _WORDS.format("payment|pymt|pmt|autopay|auto pay|thank you|online banking|ach"), re.I
-)
-NOT_TRANSFER_WORDS = re.compile(
-    _WORDS.format(
-        "div|dividend|dividends|interest|int pd|reinvest|reinvestment|employer|match|payroll|"
-        "direct dep|dir dep|salary|refund|return|credit adj|cashback|cash back|reward|rewards"
-    ),
-    re.I,
-)
-# Money doesn't leave these for your other accounts (a card payment is money into the card).
-CANT_SEND = {AccountKind.CREDIT_CARD, AccountKind.LOAN}
 
 
 def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
@@ -74,11 +53,8 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
         select(Transaction, Account.kind)
         .join(Account, Account.id == Transaction.account_id)
         .where(
-            Transaction.kind == TransactionKind.NORMAL,
-            Transaction.transfer_pair_id.is_(None),
-            Transaction.auto_transfer_off.is_(False),
+            *free_to_move(),
             Transaction.amount_cents != 0,
-            *none_of(paycheck_deposits(), donations(), dividend_sweeps(), *cash_inside_account()),
             Transaction.category_id.is_(None) | Transaction.category_id.in_(transfer_categories),
         )
     )  # fmt: skip
@@ -135,13 +111,14 @@ def match_transfers(session: Session, only_ids: set[int] | None = None) -> int:
             and _looks_like_transfer(o, into, kinds[into.id])
         ]
 
-    linked = 0
+    linked, known = 0, {}
     for out in sorted(outs, key=lambda t: (t.date, t.id)):
         into = _best(partners_of_out(out))
         if into is None or _best(partners_of_in(into)) is not out:
             continue
         if only_ids is not None and out.id not in only_ids and into.id not in only_ids:
             continue
-        pair_up(session, out, into)
+        pair_up(session, out, into, known)
         linked += 1
+    file_card_payments(session, only_ids)  # card payments without their other side, too
     return linked

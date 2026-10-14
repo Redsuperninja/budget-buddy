@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import (
+    CategorySource,
     StockLot,
     StockSaleOrder,
     Transaction,
@@ -286,7 +287,7 @@ def commit(
         trades=trades,
         trades_linked=linked,
         dividends_found=dividends.dividends,
-        categorized=sum(t.category_id is not None for t, _ in added),
+        categorized=sum(t.category_source == CategorySource.RULE for t, _ in added),
         transfers_matched=matched,
         skipped_duplicates=sum(out.status == "duplicate" for out, _, _ in p.rows),
         skipped_invalid=len(invalid),

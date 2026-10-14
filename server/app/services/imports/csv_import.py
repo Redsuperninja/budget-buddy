@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError
 from app.models import (
     AccountKind,
+    CategorySource,
     CsvImportMapping,
     Transaction,
     TransactionKind,
@@ -236,7 +237,7 @@ def commit(session: Session, account_id: int, data: bytes, choices: CommitChoice
         donations_added=gifts.recorded,
         trades_found=trades.trades,
         trade_sweeps_linked=trades.sweeps,
-        categorized=sum(t.category_id is not None for t in added),
+        categorized=sum(t.category_source == CategorySource.RULE for t in added),
         skipped_duplicates=sum(r.status == "duplicate" for r, _ in p.rows),
         skipped_invalid=len(invalid),
         mapping_saved=choices.save_mapping,

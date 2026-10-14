@@ -21,6 +21,7 @@ from app.models import (
     StockLot,
     StockSaleOrder,
     Transaction,
+    TransactionKind,
 )
 from app.services.ledger.accounts import TAX_FREE_KINDS
 
@@ -90,4 +91,16 @@ def dividends_kept_inside() -> list:
         inside.with_only_columns(Dividend.sweep_transaction_id).where(
             Dividend.sweep_transaction_id.is_not(None)
         ),
+    ]
+
+
+def free_to_move() -> list:
+    """Conditions: a regular transaction that could be one side of a transfer or card payment: not
+    linked yet, not unlinked by you before (``auto_transfer_off``), and not a paycheck's deposit, a
+    donation, a dividend's sweep or cash moving inside an account."""
+    return [
+        Transaction.kind == TransactionKind.NORMAL,
+        Transaction.transfer_pair_id.is_(None),
+        Transaction.auto_transfer_off.is_(False),
+        *none_of(paycheck_deposits(), donations(), dividend_sweeps(), *cash_inside_account()),
     ]

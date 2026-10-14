@@ -27,6 +27,18 @@ Money moved **into** savings, investments, retirement or an HSA counts as **save
 back out lowers what you saved. A credit card payment doesn't count as spending, because the purchases on the card
 already did.
 
+**Credit card payments** go in the **Payments** category, on both sides: the payment out of your checking account
+and the payment into the card. Budget Buddy files them there even before both sides are linked, when the line says
+it's a payment (like "AUTOPAY" or "THANK YOU") and, on the checking side, names a credit card (like "CREDIT CARD
+PAYMENT", "AMEX" or "DISCOVER") and the card you added (a word of its name or bank, like "Chase" for a card you
+called "Chase Freedom"). Debit-card purchases, loan payments and moves to a savings account at a card
+company's bank (like Discover Bank or Capital One 360) are never filed there. A payment that was returned goes in **Payments** too, since it cancels the payment.
+
+A payment to a card you haven't added to Budget Buddy isn't filed this way, since it's the only record of what you
+spent on that card: add the card too, or give that payment a category yourself so it counts. A category you picked
+yourself is never changed, and a line you take out of **Payments** (by clearing its category) stays out. If you already
+have a category called Payments for something else, card payments stay in **Transfer** instead.
+
 Both sides need to be in Budget Buddy, so add both accounts and import (or enter) both sides.
 
 - **Loan payments:** if your lender's file shows the whole payment, the interest part is linked too, so it isn't
@@ -58,5 +70,6 @@ those two automatically again.
 | What you see | What to do |
 | --- | --- |
 | Two unrelated transactions were linked | Undo the link. Each side gets its old category back, and the link won't be made again. |
-| A card payment shows as spending | Add the credit card as an account and import its statement, so both sides are there. Then click **Find transfers**. |
+| A card payment shows as spending | Add the credit card as an account and import its statement, so both sides are there. Then click **Find transfers**. Older card payments move to **Payments** when you click **Match everything again** on the Transactions page. |
+| A purchase or loan payment landed in **Payments** | Pick its category yourself on the **Transactions** page, or clear it; either way it stays. (Auto-sort rules only sort lines with no category, so they won't move it.) |
 | "No new transfers found." | Nothing new matched. Check that both sides are in Budget Buddy with the same amount, a few days apart at most. |
