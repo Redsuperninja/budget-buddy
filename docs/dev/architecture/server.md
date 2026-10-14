@@ -54,6 +54,7 @@ Modules not yet moved into an area are still at the top too.
 | Area | What's in it |
 | --- | --- |
 | `ledger/` | Accounts, transactions, balances, transaction roles, transfers between your own accounts |
+| `imports/` | Reading files: bank, brokerage activity, stock and positions CSVs; card sign flipping; the import history |
 
 ## Local API: common rules
 

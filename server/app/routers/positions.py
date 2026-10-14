@@ -9,7 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status
 
 from app.deps import PathId, SessionDep
-from app.routers.csv_import import CsvBody
+from app.routers.imports.csv_import import CsvBody
 from app.schemas.positions import PositionsChoices, PositionsOut, PositionsPreview, PositionsResult
 from app.services import positions as service
 

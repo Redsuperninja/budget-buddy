@@ -1,5 +1,5 @@
 """Brokerage activity import: a broker's history file into one account
-(services/activity_import.py)."""
+(services/imports/activity_import.py)."""
 
 import datetime as dt
 from typing import Literal

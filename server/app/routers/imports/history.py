@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.imports import ImportOut
-from app.services import imports as service
+from app.schemas.imports.history import ImportOut
+from app.services.imports import history as service
 
 router = APIRouter(prefix="/api/local/imports", tags=["imports"])
 

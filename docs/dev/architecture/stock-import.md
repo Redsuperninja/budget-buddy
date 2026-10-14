@@ -1,9 +1,9 @@
 # Stock CSV import (roadmap #12d)
 
-Code: `services/stock_csv.py` (find the columns, read one row), `services/stock_import.py` (preview,
-duplicates, add), `schemas/stock_import.py`, `routers/stock_import.py`. Decoding, row splitting, amounts and dates
-are shared with the bank import (`services/csv_parsing.py`, [csv-import.md](csv-import.md)); the upload checks
-(CSV content type, 5 MB, 10,000 rows) are the same dependency (`routers/csv_import.CsvBody`). User guide:
+Code: `services/imports/stock_csv.py` (find the columns, read one row), `services/imports/stock_import.py` (preview,
+duplicates, add), `schemas/imports/stock_import.py`, `routers/imports/stock_import.py`. Decoding, row splitting, amounts and dates
+are shared with the bank import (`services/imports/csv_parsing.py`, [csv-import.md](csv-import.md)); the upload checks
+(CSV content type, 5 MB, 10,000 rows) are the same dependency (`routers/imports/csv_import.CsvBody`). User guide:
 [docs/guide/import-stocks.md](../../guide/import-stocks.md).
 
 ## Routes (this computer only)

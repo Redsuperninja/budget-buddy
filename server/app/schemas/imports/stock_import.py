@@ -1,6 +1,6 @@
 """Stock CSV import: purchases and sales from a spreadsheet or a broker's export.
 
-The columns are found from the header row's names (see ``services/stock_csv``); there's no
+The columns are found from the header row's names (see ``services/imports/stock_csv``); there's no
 column picker. Each row becomes a purchase (lot) or a sale, in one account or none.
 """
 

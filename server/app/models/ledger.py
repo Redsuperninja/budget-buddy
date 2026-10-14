@@ -96,7 +96,8 @@ class Transaction(TimestampMixin, Base):
     )
     notes: Mapped[str | None] = mapped_column(EncryptedString("transactions.notes"))
     # CSV import only: a hash of (account, date, amount, description, occurrence) so importing
-    # an overlapping statement again doesn't add the same rows twice. See services/csv_import.py.
+    # an overlapping statement again doesn't add the same rows twice.
+    # See services/imports/csv_import.py.
     import_fingerprint: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
     # How the category was set: "rule" (auto-sort) or "you" (picked by hand); None for older rows
     # and categories set by Budget Buddy itself (transfers). See enums.CategorySource.
@@ -153,7 +154,8 @@ class CsvImportMapping(TimestampMixin, Base):
     account_id: Mapped[int] = mapped_column(
         ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True
     )
-    mapping: Mapped[str] = mapped_column(Text)  # JSON, see app.schemas.csv_import.CsvMapping
+    # JSON, see app.schemas.imports.csv_import.CsvMapping
+    mapping: Mapped[str] = mapped_column(Text)
 
 
 class Paycheck(TimestampMixin, Base):

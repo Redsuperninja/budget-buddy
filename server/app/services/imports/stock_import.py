@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import StockLot, StockSaleOrder
-from app.schemas.stock_import import (
+from app.schemas.imports.stock_import import (
     StockColumns,
     StockCommitChoices,
     StockImportChoices,
@@ -25,9 +25,9 @@ from app.schemas.stock_import import (
 )
 from app.schemas.stocks import LotCreate
 from app.services import stock_gains as gains
-from app.services.csv_parsing import RowProblem, decode_csv, detect_delimiter, read_rows
-from app.services.imports import record
-from app.services.stock_csv import ParsedRow, find_columns, parse_row
+from app.services.imports.csv_parsing import RowProblem, decode_csv, detect_delimiter, read_rows
+from app.services.imports.history import record
+from app.services.imports.stock_csv import ParsedRow, find_columns, parse_row
 from app.services.stock_records import check_account, in_account, rematch
 from app.shares import micro_to_text
 

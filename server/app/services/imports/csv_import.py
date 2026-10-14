@@ -22,7 +22,7 @@ from app.models import (
     TransactionKind,
     TransactionSource,
 )
-from app.schemas.csv_import import (
+from app.schemas.imports.csv_import import (
     CommitChoices,
     CsvMapping,
     ImportPreview,
@@ -31,10 +31,11 @@ from app.schemas.csv_import import (
     PreviewRow,
 )
 from app.services.bank_trades import find_trades
-from app.services.card_signs import FLIPPED, looks_flipped
 from app.services.category_rules import load_matcher, rule_fields
-from app.services.csv_columns import build_mapping, columns_used, detect_columns
-from app.services.csv_parsing import (
+from app.services.dividend_matching import find_dividends
+from app.services.imports.card_signs import FLIPPED, looks_flipped
+from app.services.imports.csv_columns import build_mapping, columns_used, detect_columns
+from app.services.imports.csv_parsing import (
     RowProblem,
     decode_csv,
     detect_delimiter,
@@ -42,8 +43,7 @@ from app.services.csv_parsing import (
     parse_row,
     read_rows,
 )
-from app.services.dividend_matching import find_dividends
-from app.services.imports import record
+from app.services.imports.history import record
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transfer_matching import match_transfers
 from app.services.repeat_gifts import repeat_gifts

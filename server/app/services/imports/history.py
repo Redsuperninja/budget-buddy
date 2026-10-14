@@ -29,7 +29,7 @@ from app.models import (
     StockSaleOrder,
     Transaction,
 )
-from app.schemas.imports import ImportOut
+from app.schemas.imports.history import ImportOut
 from app.services import stock_gains as gains
 from app.services.combined_sweeps import free_sweeps_of
 from app.services.ledger.transfers import unlink_sides

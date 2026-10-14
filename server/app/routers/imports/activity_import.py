@@ -9,9 +9,9 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from app.deps import PathId, SessionDep
-from app.routers.csv_import import CsvBody
-from app.schemas.activity_import import ActivityChoices, ActivityPreview, ActivityResult
-from app.services import activity_import as service
+from app.routers.imports.csv_import import CsvBody
+from app.schemas.imports.activity_import import ActivityChoices, ActivityPreview, ActivityResult
+from app.services.imports import activity_import as service
 
 router = APIRouter(prefix="/api/local/accounts/{account_id}/activity-import", tags=["csv import"])
 
