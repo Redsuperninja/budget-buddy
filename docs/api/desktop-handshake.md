@@ -8,6 +8,8 @@ The rules the desktop app (`desktop/budget_buddy_desktop/genuine.py`) and the Ho
 
 ## Rules
 
+0. **Port.** `BUDGET_BUDDY_PORT` if set; otherwise 8765. The Home Base listens on it (this computer's address) and
+   the desktop app looks for it there.
 1. **Data folder.** `BUDGET_BUDDY_DATA_DIR` if set; otherwise `%LOCALAPPDATA%\BudgetBuddy` on Windows (or
    `~\AppData\Local\BudgetBuddy` without `LOCALAPPDATA`) and `~/.local/share/budget-buddy` elsewhere.
 2. **Running file.** While it runs, the Home Base keeps `home-base-running.json` in the data folder:
@@ -22,6 +24,7 @@ Both test suites check these values.
 
 ```json
 {
+  "port": { "override_variable": "BUDGET_BUDDY_PORT", "default": 8765 },
   "running_file": "home-base-running.json",
   "proof_path": "/api/local/instance/proof",
   "data_folder": {

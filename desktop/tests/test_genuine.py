@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from budget_buddy_desktop import genuine
+from budget_buddy_desktop import genuine, probe
 
 KEY = "11" * 32
 
@@ -113,6 +113,14 @@ def test_process_alive():
 # The handshake's published example (docs/api/desktop-handshake.md); the server's tests read it too.
 DOC = Path(__file__).resolve().parents[2] / "docs" / "api" / "desktop-handshake.md"
 EXAMPLE = json.loads(re.search(r"```json\n(.*?)```", DOC.read_text(encoding="utf-8"), re.S)[1])
+
+
+def test_same_port_rule_as_the_home_base(monkeypatch):
+    rule = EXAMPLE["port"]
+    monkeypatch.delenv(rule["override_variable"], raising=False)
+    assert probe.port() == rule["default"]
+    monkeypatch.setenv(rule["override_variable"], "9123")
+    assert probe.port() == 9123
 
 
 def test_same_data_folder_rule_as_the_home_base(monkeypatch, tmp_path):

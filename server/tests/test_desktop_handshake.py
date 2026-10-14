@@ -12,6 +12,14 @@ DOC = Path(__file__).resolve().parents[2] / "docs" / "api" / "desktop-handshake.
 EXAMPLE = json.loads(re.search(r"```json\n(.*?)```", DOC.read_text(encoding="utf-8"), re.S)[1])
 
 
+def test_port_rule(monkeypatch):
+    rule = EXAMPLE["port"]
+    monkeypatch.delenv(rule["override_variable"], raising=False)
+    assert Settings().port == rule["default"]
+    monkeypatch.setenv(rule["override_variable"], "9123")
+    assert Settings().port == 9123
+
+
 def test_running_file_name():
     assert instance_proof.FILE_NAME == EXAMPLE["running_file"]
 
