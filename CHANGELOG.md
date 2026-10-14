@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- A credit card or loan you've overpaid shows as a credit ("$12.00 credit") on the dashboard, as on the phone, instead of a bare amount.
 - Clearer messages: a wrong choice (like a transaction's kind) lists the choices plainly ('normal', 'refund' or 'adjustment') instead of code names, and a bank file with one unreadable row says "1 row couldn't be read".
 - A transaction dated ahead of today (like next week's rent, entered early) no longer lowers today's balance on the Accounts page or your net worth on Home. Accounts shows the balance after it, too: "$975.00 ($575.00 after what's scheduled)".
 - Amounts typed or imported as `.50` or `12.` are accepted (as $0.50 and $12.00) by the Home Base too, typed in or in a bank file, not only on the dashboard. A lone `.` still isn't an amount.

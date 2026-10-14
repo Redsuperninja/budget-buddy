@@ -7,10 +7,12 @@ export function formatCents(cents) {
   return `${cents < 0 ? "-" : ""}$${dollars}.${String(abs % 100).padStart(2, "0")}`;
 }
 
-// Cards and loans: a negative balance is money you owe.
+// Cards and loans: a negative balance is money you owe, a positive one a credit (you paid more than you owed),
+// the same words as the phone app.
 export function formatBalance(cents, kind) {
-  if ((kind === "credit_card" || kind === "loan") && cents < 0) return `${formatCents(-cents)} owed`;
-  return formatCents(cents);
+  if (kind !== "credit_card" && kind !== "loan") return formatCents(cents);
+  if (cents < 0) return `${formatCents(-cents)} owed`;
+  return cents > 0 ? `${formatCents(cents)} credit` : formatCents(0);
 }
 
 // An account's balance today, and what it will be once transactions dated ahead of today (a bill entered early)
