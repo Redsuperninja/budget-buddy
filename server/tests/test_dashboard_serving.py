@@ -1,6 +1,7 @@
 """Serving the dashboard (roadmap #16, ADR-0005): this computer only, locked down, offline.
 
-Runs against the fake dashboard folder from ``conftest.py``, never the real ``dashboard/``.
+Runs against the fake dashboard folder from ``conftest.py``; only the size check reads the real
+one, ``dashboard/``.
 """
 
 import logging
@@ -10,7 +11,7 @@ import sys
 
 import pytest
 
-from app.dashboard_files import MAX_FILE_BYTES, default_dashboard_dir, load_dashboard
+from app.dashboard_files import MAX_FILE_BYTES, MAX_FILES, default_dashboard_dir, load_dashboard
 
 
 def _code(response) -> str:
@@ -190,6 +191,23 @@ def test_the_default_folder_is_dashboard_at_the_repo_root():
     folder = default_dashboard_dir()
     assert folder.name == "dashboard"
     assert (folder.parent / "server" / "app").is_dir()
+
+
+def test_the_real_dashboard_is_served_whole_with_room_to_grow():
+    """Past MAX_FILES the Home Base drops the whole page and runs API-only, and a file it won't
+    list (in a new folder, or too big) is a broken import. Fail here first, with room to spare.
+    The one test that reads the real dashboard folder."""
+    folder = default_dashboard_dir()
+    on_disk = {
+        p.relative_to(folder).as_posix()
+        for p in [*folder.glob("*.css"), *folder.glob("js/**/*.js")]
+    }
+    dashboard = load_dashboard(folder)
+    assert dashboard is not None
+    assert set(dashboard.assets) == on_disk
+    assert len(on_disk) <= MAX_FILES * 3 // 4, (
+        f"{len(on_disk)} dashboard files; the limit is {MAX_FILES}"
+    )
 
 
 # --- API-only mode: no dashboard folder ---

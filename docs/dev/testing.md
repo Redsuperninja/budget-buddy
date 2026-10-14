@@ -15,6 +15,25 @@ How to check your work in each part, and what CI runs. (Testers trying Budget Bu
 On macOS/Linux use `.venv/bin/...`. Run the tests you touched first (`pytest -q path::test`,
 `npm test -- <pattern>`), then the full suite.
 
+**Everything at once:** `powershell -ExecutionPolicy Bypass -File scripts\dev\check-all.ps1` runs every part's
+checks (the same as CI) and lists which passed. Run it before pushing or merging, and always for a change one part
+makes that another relies on (below).
+
+## Checks between parts
+
+Parts only talk over HTTP, so a change in one can break another without failing that part's own tests. These
+tests catch it; each reads the other side's files or a published example, never its code:
+
+| What could break | Checked by |
+| --- | --- |
+| A route the dashboard, phone app, desktop app or scripts call is renamed or removed | `server/tests/test_callers_match_routes.py` (reads `dashboard/js/api/endpoints.js` and the others' source) |
+| The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
+| Pairing and sync encryption | The §4.7 vectors, in `server/tests/contract_vectors.py` and the phone's `pairing.test.ts` |
+| The desktop app's copies of the data folder rule and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
+| The dashboard outgrows what the Home Base serves (past its file limit the page disappears) | `test_the_real_dashboard_is_served_whole_with_room_to_grow` in `server/tests/test_dashboard_serving.py` |
+
+Changing one of these on purpose: change the published example (or route) and both sides in the same branch.
+
 ## CI (`.github/workflows/`)
 
 **Paused until 2026-11-22:** the four workflows below only run by hand (GitHub, Actions, pick one, **Run
@@ -23,6 +42,9 @@ CI back, delete `workflow_dispatch:` in each file and uncomment the lines under 
 
 Once back, each part has its own workflow, run on pull requests **into `main`** and on pushes to `main` (never on
 stacked branches), and only when that part's folder (or the workflow file) changed:
+Each workflow also runs when what its checks between parts read changes: the server's on `dashboard/`,
+`mobile/src/`, `desktop/budget_buddy_desktop/`, `scripts/` and `docs/api/`; the phone's and the desktop's on
+`docs/api/`.
 
 - `server-ci.yml`: Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
 - `dashboard-ci.yml`: Node 22; `npm run coverage` (`node --test` with coverage; no dependencies to install).
@@ -51,7 +73,8 @@ A new logic module in the dashboard joins the `--test-coverage-include` list in 
   process stops, so this works only on a new, empty data folder and is refused on any folder that already has
   data or a `key-fingerprint` file. `tests/conftest.py` and `server-ci.yml` set both. Never use it for real data.
 - **Fake dashboard.** An autouse fixture, `fake_dashboard` in `tests/conftest.py`, writes a tiny dashboard into
-  the temp folder and points `BUDGET_BUDDY_DASHBOARD_DIR` at it, so no server test reads the real `dashboard/`.
+  the temp folder and points `BUDGET_BUDDY_DASHBOARD_DIR` at it, so server tests don't read the real `dashboard/`
+  (except the size check above).
 - Shared helpers: `tests/fake_phone.py` (the phone side of pairing and sync) and `tests/contract_vectors.py`
   (sync contract §4.7 vectors, tested once in `test_envelope_vectors.py`).
 - When splitting test files, the test count must not change: compare `pytest --collect-only -q` before and after.

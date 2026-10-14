@@ -10,11 +10,13 @@ on:
 #    paths:
 #      - "desktop/**"
 #      - ".github/workflows/desktop-ci.yml"
+#      - "docs/api/**"
 #  push:
 #    branches: [main]
 #    paths:
 #      - "desktop/**"
 #      - ".github/workflows/desktop-ci.yml"
+#      - "docs/api/**"
 
 permissions:
   contents: read

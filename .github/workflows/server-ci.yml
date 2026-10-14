@@ -10,11 +10,21 @@ on:
 #    paths:
 #      - "server/**"
 #      - ".github/workflows/server-ci.yml"
+#      - "dashboard/**"
+#      - "mobile/src/**"
+#      - "desktop/budget_buddy_desktop/**"
+#      - "scripts/**"
+#      - "docs/api/**"
 #  push:
 #    branches: [main]
 #    paths:
 #      - "server/**"
 #      - ".github/workflows/server-ci.yml"
+#      - "dashboard/**"
+#      - "mobile/src/**"
+#      - "desktop/budget_buddy_desktop/**"
+#      - "scripts/**"
+#      - "docs/api/**"
 
 permissions:
   contents: read
