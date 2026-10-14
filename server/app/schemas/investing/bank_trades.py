@@ -1,5 +1,5 @@
-"""Stock trades found in a bank-style file (``services/bank_trades``). Amounts are cents; shares are
-millionths of a share."""
+"""Stock trades found in a bank-style file (``services/investing/bank_trades``). Amounts are cents;
+shares are millionths of a share."""
 
 import datetime as dt
 from typing import Literal

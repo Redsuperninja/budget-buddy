@@ -1,8 +1,8 @@
 # Stock trades in a bank file, and their deposit sweeps
 
-Code: `services/bank_trades.py` (find trades, link sweeps, remember tickers),
-`services/bank_trade_list.py` (the list with price per share, "not a trade"), `models/trades.py`,
-`schemas/bank_trades.py`, `routers/bank_trades.py`. Dashboard: `screens/bank-trades-card.js` on Investments.
+Code: `services/investing/bank_trades.py` (find trades, link sweeps, remember tickers),
+`services/investing/bank_trade_list.py` (the list with price per share, "not a trade"), `models/trades.py`,
+`schemas/investing/bank_trades.py`, `routers/investing/bank_trades.py`. Dashboard: `screens/bank-trades-card.js` on Investments.
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).
 
 Some brokers' bank-style files (J.P. Morgan / Chase) show a trade only as a line naming the company, with no ticker,
@@ -44,14 +44,14 @@ INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money o
   is still linked, and recording a purchase or sale from a transaction runs `find` for it. Deleting that purchase
   or sale drops the row again if the description has no trade wording (`forget_recorded`), so the payment and
   its sweep count like any others.
-- **Sweeps** are picked by `services/sweeps.py`, shared with dividends: a trade is never a sweep.
+- **Sweeps** are picked by `services/investing/sweeps.py`, shared with dividends: a trade is never a sweep.
 - **Price per share** is the amount (commission included) / shares: cost basis on a buy, net proceeds on a
   sale. Shown as "with fees", since it can differ from the trade price.
 - **Its sweep:** the opposite amount, same account, from 1 day before to 3 days after, "sweep" in the description,
   not already a dividend's or another trade's (dividends also skip trades' sweeps). Closest date, then first added.
 - **One sweep for several:** after that, a free sweep is linked to a group of two or more trades and dividends still
   without one, same account and window, whose amounts add up to exactly its opposite: smallest group, then oldest
-  payments; skipped with more than 10 waiting nearby (`services/combined_sweeps.py`). "Not a trade" on one member
+  payments; skipped with more than 10 waiting nearby (`services/investing/combined_sweeps.py`). "Not a trade" on one member
   frees the sweep from the whole group.
 - **Budget:** a trade and its sweep are cash turning into shares (or back) inside the account, so the monthly
   summary, "needs a category", transfer matching and "hide dividends" leave both out. A dividend's linked sweep is

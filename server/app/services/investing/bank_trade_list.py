@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError, not_found
 from app.models import Account, BankTrade, SecuritySymbol, StockLot, StockSaleOrder, Transaction
 from app.models.tax import SHARES_SCALE
-from app.schemas.bank_trades import BankTradeOut, BankTradesOut
-from app.services.bank_trades import ticker_in
-from app.services.combined_sweeps import free_sweep
+from app.schemas.investing.bank_trades import BankTradeOut, BankTradesOut
+from app.services.investing.bank_trades import ticker_in
+from app.services.investing.combined_sweeps import free_sweep
 
 RECORDED = (
     "This trade is recorded on the Stocks page. To undo it, delete the purchase or sale there."

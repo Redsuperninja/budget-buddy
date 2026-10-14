@@ -16,9 +16,14 @@ from sqlalchemy.orm import Session
 
 from app.models import Account, StockLot, StockPrice, StockSale
 from app.models.tax import SHARES_SCALE
-from app.schemas.stock_holdings import AccountHoldingsOut, HoldingOut, HoldingsOut, PriceIn
-from app.services import stock_gains as gains
-from app.services.stock_records import TAX_FREE_KINDS
+from app.schemas.investing.stock_holdings import (
+    AccountHoldingsOut,
+    HoldingOut,
+    HoldingsOut,
+    PriceIn,
+)
+from app.services.investing import stock_gains as gains
+from app.services.investing.stock_records import TAX_FREE_KINDS
 from app.shares import micro_to_text
 
 NO_ACCOUNT = "Not in an account"

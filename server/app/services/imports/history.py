@@ -30,10 +30,10 @@ from app.models import (
     Transaction,
 )
 from app.schemas.imports.history import ImportOut
-from app.services import stock_gains as gains
-from app.services.combined_sweeps import free_sweeps_of
+from app.services.investing import stock_gains as gains
+from app.services.investing.combined_sweeps import free_sweeps_of
+from app.services.investing.stock_records import in_account, rematch
 from app.services.ledger.transfers import unlink_sides
-from app.services.stock_records import in_account, rematch
 
 MAX_FILE_NAME = 200
 

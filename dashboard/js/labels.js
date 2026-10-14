@@ -49,7 +49,7 @@ export const everydayFirst = (accounts) =>
   accounts.map((a, i) => [a, i]).sort(([a, i], [b, j]) => everydayRank(a.kind) - everydayRank(b.kind) || i - j)
     .map(([a]) => a);
 
-// What backs up a stock purchase or sale (server services/holdings_check.py).
+// What backs up a stock purchase or sale (server services/investing/holdings_check.py).
 export const checkedLabel = (checkedBy) => ({
   transaction: "A transaction",
   positions_file: "Broker's positions file",

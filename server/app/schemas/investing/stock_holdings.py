@@ -1,4 +1,5 @@
-"""What you hold now, by account, and the prices you type in (services/stock_holdings.py)."""
+"""What you hold now, by account, and the prices you type in
+(services/investing/stock_holdings.py)."""
 
 import datetime as dt
 
@@ -6,7 +7,7 @@ from pydantic import model_validator
 
 from app.models import AccountKind
 from app.schemas.common import DollarText, Schema, pick_cents
-from app.schemas.stocks import NonNegativeCents, Symbol
+from app.schemas.investing.stocks import NonNegativeCents, Symbol
 
 
 class PriceIn(Schema):

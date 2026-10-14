@@ -20,7 +20,7 @@ here changes what the app does.
    deposit, donation, stock trade, bank-file trade, dividend, sweep) and `none_of(...)`, and every query uses it
    ([ledger.md](architecture/ledger.md#transaction-roles)). A stored `role` column wasn't needed.
 2. **Dividends and bank trades are the same shape** (a payment, its sweep, a name, `dismissed`). Now that sweeps are
-   shared (`services/sweeps.py`), also share "find, file, dismiss" so a third kind (interest, fees) is a small
+   shared (`services/investing/sweeps.py`), also share "find, file, dismiss" so a third kind (interest, fees) is a small
    addition.
 3. **Group the 59 flat files in `server/app/services/`** into packages that match the dashboard sections, and
    mirror them in `routers/`, `schemas/` and `tests/`:
@@ -74,6 +74,6 @@ Move files with `git mv` in small PRs, update links in the same PR, and run the 
 - Recurring gifts: a "check these" note on Home when a repeat payment to a charity had a different amount.
 - An owner on paychecks and deductions (limits are per person), the 457(b) plan type, phone reminders (#21).
 - From the reviews (should-fix, not done): Roth IRA deposits made January to April 15 for the year before, when
-  the description names that year, should count toward that year (`services/retirement.py`); a refund of an excess
+  the description names that year, should count toward that year (`services/investing/retirement.py`); a refund of an excess
   contribution should be taken off; the Receipts page's "Download photo" link should use `?download=true` when a
   photo can't be shown.

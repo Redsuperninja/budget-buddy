@@ -38,9 +38,9 @@ from app.models import (
     Transaction,
 )
 from app.services.budget.named_categories import find_or_make
+from app.services.investing.sweeps import link_sweeps, regular
 from app.services.ledger.accounts import INVESTMENT_KINDS
 from app.services.ledger.transaction_roles import dividends, none_of
-from app.services.sweeps import link_sweeps, regular
 
 CATEGORY = "Dividends"
 DIVIDEND_WORDS = re.compile(r"(?<![a-z])dividends?(?![a-z])", re.I)

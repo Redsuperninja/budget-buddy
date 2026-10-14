@@ -4,8 +4,8 @@ in for an older data set, the file is imported with the finders switched off. Fa
 import pytest
 from csv_helpers import ok, send
 
-from app.services import bank_trades, dividend_matching
 from app.services.imports import csv_import
+from app.services.investing import bank_trades, dividend_matching
 from app.services.ledger import match_again
 
 AGAIN = "/api/local/transactions/match-again"

@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Query, status
 
 from app.deps import PathId, QueryId, SessionDep
-from app.schemas.price_feed import RefreshResult
-from app.schemas.stock_holdings import HoldingsOut, PriceIn
-from app.schemas.stocks import GainsSummaryOut, LotCreate, LotOut, SaleCreate, SaleOut
-from app.services import price_feed, stock_holdings, stock_lots, stock_sales
+from app.schemas.investing.price_feed import RefreshResult
+from app.schemas.investing.stock_holdings import HoldingsOut, PriceIn
+from app.schemas.investing.stocks import GainsSummaryOut, LotCreate, LotOut, SaleCreate, SaleOut
+from app.services.investing import price_feed, stock_holdings, stock_lots, stock_sales
 
 router = APIRouter(prefix="/api/local/stocks", tags=["stocks"])
 

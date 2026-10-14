@@ -20,7 +20,7 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
-from app.services import stock_gains as gains
+from app.services.investing import stock_gains as gains
 from app.services.ledger.accounts import INVESTMENT_KINDS, TAX_FREE_KINDS, get_account
 
 

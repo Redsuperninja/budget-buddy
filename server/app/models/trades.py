@@ -1,5 +1,5 @@
 """Stock trades seen in a bank-style file, and the ticker you gave each company once. See
-app/services/bank_trades.py."""
+app/services/investing/bank_trades.py."""
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -20,7 +20,7 @@ class BankTrade(TimestampMixin, Base):
     transaction_id: Mapped[int] = mapped_column(
         ForeignKey("transactions.id", ondelete="CASCADE"), unique=True
     )
-    # Several can share one sweep (services/combined_sweeps.py).
+    # Several can share one sweep (services/investing/combined_sweeps.py).
     sweep_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True
     )

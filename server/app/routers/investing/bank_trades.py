@@ -1,13 +1,13 @@
-"""Stock trades found in a bank-style file (services/bank_trades.py), under /stocks so a joined
-computer or phone may see them like the rest of the Stocks pages."""
+"""Stock trades found in a bank-style file (services/investing/bank_trades.py), under /stocks so a
+joined computer or phone may see them like the rest of the Stocks pages."""
 
 from fastapi import APIRouter, status
 
 from app.deps import PathId, SessionDep
-from app.schemas.bank_trades import BankTradesFound, BankTradesOut
-from app.services import bank_trade_list as service
-from app.services.bank_trades import find_trades
-from app.services.dividend_matching import find_dividends
+from app.schemas.investing.bank_trades import BankTradesFound, BankTradesOut
+from app.services.investing import bank_trade_list as service
+from app.services.investing.bank_trades import find_trades
+from app.services.investing.dividend_matching import find_dividends
 
 router = APIRouter(prefix="/api/local/stocks/bank-trades", tags=["stocks"])
 

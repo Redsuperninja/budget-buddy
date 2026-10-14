@@ -14,7 +14,8 @@ from sqlalchemy.orm import Session
 from app import tax_data
 from app.models import Deduction, Donation, DonationKind
 from app.schemas.tax_summary import DeductionTotal, Line, TaxSummary
-from app.services import deductions, paychecks, stock_sales
+from app.services import deductions, paychecks
+from app.services.investing import stock_sales
 
 DISCLAIMER = (
     "These totals help you gather your records for tax time. They are estimates, not tax advice, "

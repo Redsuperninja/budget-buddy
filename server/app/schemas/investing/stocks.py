@@ -11,7 +11,7 @@ from pydantic import AfterValidator, Field, model_validator
 
 from app.money import MAX_ABS_CENTS
 from app.schemas.common import DollarText, Id, Schema, pick_cents
-from app.services.stock_gains import Term
+from app.services.investing.stock_gains import Term
 from app.shares import MAX_SHARES_MICRO, shares_to_micro
 
 # Shown with the wash-sale flag and when a retirement account or HSA is refused.

@@ -40,7 +40,7 @@ from app.models import (
     Transaction,
     TransactionKind,
 )
-from app.schemas.retirement import LimitOut, RetirementOut
+from app.schemas.investing.retirement import LimitOut, RetirementOut
 
 NOTE = (
     "An estimate to help you stay under the limits, not tax advice. Catch-up amounts depend on "

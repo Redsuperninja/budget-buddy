@@ -10,8 +10,13 @@ from fastapi import APIRouter, Query, status
 
 from app.deps import PathId, SessionDep
 from app.routers.imports.csv_import import CsvBody
-from app.schemas.positions import PositionsChoices, PositionsOut, PositionsPreview, PositionsResult
-from app.services import positions as service
+from app.schemas.investing.positions import (
+    PositionsChoices,
+    PositionsOut,
+    PositionsPreview,
+    PositionsResult,
+)
+from app.services.investing import positions as service
 
 router = APIRouter(prefix="/api/local/stocks/positions", tags=["stocks"])
 

@@ -23,12 +23,12 @@ from app.schemas.imports.stock_import import (
     StockImportResult,
     StockPreviewRow,
 )
-from app.schemas.stocks import LotCreate
-from app.services import stock_gains as gains
+from app.schemas.investing.stocks import LotCreate
 from app.services.imports.csv_parsing import RowProblem, decode_csv, detect_delimiter, read_rows
 from app.services.imports.history import record
 from app.services.imports.stock_csv import ParsedRow, find_columns, parse_row
-from app.services.stock_records import check_account, in_account, rematch
+from app.services.investing import stock_gains as gains
+from app.services.investing.stock_records import check_account, in_account, rematch
 from app.shares import micro_to_text
 
 PREVIEW_ROWS = 50
