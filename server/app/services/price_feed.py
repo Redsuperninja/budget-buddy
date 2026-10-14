@@ -8,6 +8,8 @@ so it can't end up in a log). Nothing else: no amounts, accounts or other data.
   timer. A symbol fetched in the last ``FRESH_SECONDS`` isn't asked for again.
 - Finnhub's free plan allows 60 requests a minute; a refresh stops early on a limit, a key problem
   or no connection, and says so in plain English. Prices fetched so far are kept.
+- A symbol your plan doesn't cover (Finnhub answers 403, common for mutual funds and stocks outside
+  the US) is listed as "no price found" and the refresh goes on. Only 401 means a bad key.
 - A price is Finnhub's latest trade price (``c``), rounded half up to a cent, dated by its time.
 """
 
@@ -45,6 +47,10 @@ BUSY = "Prices are already being refreshed. Try again in a moment."
 
 class FeedStop(Exception):
     """Stop this refresh; the message is for people."""
+
+
+class NoAccess(Exception):
+    """Finnhub has this symbol behind a paid plan: no price for it, but go on with the rest."""
 
 
 def _feed(session: Session) -> PriceFeed:
@@ -108,8 +114,10 @@ def _get_json(url: str, key: str) -> dict:
         with _OPENER.open(request, timeout=TIMEOUT_SECONDS) as reply:
             return json.loads(reply.read(MAX_REPLY_BYTES), parse_constant=_reject_constant)
     except urllib.error.HTTPError as exc:
-        if exc.code in (401, 403):
+        if exc.code == 401:
             raise FeedStop(BAD_KEY) from None
+        if exc.code == 403:
+            raise NoAccess from None
         if exc.code == 429:
             raise FeedStop(LIMIT) from None
         raise FeedStop(OFFLINE) from None
@@ -119,7 +127,10 @@ def _get_json(url: str, key: str) -> dict:
 
 def quote(symbol: str, key: str) -> tuple[int, dt.date] | None:
     """The latest price in cents and its date, or None if Finnhub doesn't know the symbol."""
-    data = _get_json(f"{QUOTE_URL}?{urllib.parse.urlencode({'symbol': symbol})}", key)
+    try:
+        data = _get_json(f"{QUOTE_URL}?{urllib.parse.urlencode({'symbol': symbol})}", key)
+    except NoAccess:
+        return None
     latest = dt.datetime.now(dt.UTC) + dt.timedelta(days=1)
     try:
         price = Decimal(str(data.get("c") or 0))

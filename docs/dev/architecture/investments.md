@@ -30,8 +30,9 @@ symbol, replaced each time; `source` "you"). 204.
   certificates; 5 s timeout, reply read up to 4 KB, NaN/Infinity refused. A price must be finite, above zero and at
   most $1 billion, and its time no later than tomorrow, or the symbol counts as not found. All quotes are fetched
   first and saved in one short transaction afterwards (no database lock while waiting on the internet); one
-  refresh runs at a time. Returns `{enabled, updated, not_found, message}`; 401/403, 429 or no connection stop
-  early with a plain message, keeping prices fetched so far.
+  refresh runs at a time. Returns `{enabled, updated, not_found, message}`; 401 (bad key), 429 or no connection
+  stop early with a plain message, keeping prices fetched so far. 403 is Finnhub's "your plan doesn't cover this
+  symbol" (mutual funds, stocks outside the US): that symbol goes in `not_found` and the refresh goes on.
 - The dashboard calls refresh when the Investments page opens and on Refresh prices; never on a timer. A failed
   refresh becomes a note; the page still shows. The key box uses `autocomplete="new-password"`.
 - Holdings include `price_source` and `price_fetched_at`.

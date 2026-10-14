@@ -17,7 +17,8 @@ export async function refreshIfOn() {
   try {
     const r = await refreshPrices();
     if (!r.enabled) return { enabled: false, note: null };
-    const missing = r.not_found.length ? ` No price found for ${r.not_found.join(", ")}.` : "";
+    const missing = r.not_found.length ? ` No price found for ${r.not_found.join(", ")}: Finnhub's free plan ` +
+      "leaves out some funds and stocks outside the US, so type their price yourself." : "";
     const updated = r.updated.length ? `Updated ${r.updated.length} price(s).` : "";
     return { enabled: true, note: r.message || `${updated}${missing}`.trim() || null };
   } catch (err) {
