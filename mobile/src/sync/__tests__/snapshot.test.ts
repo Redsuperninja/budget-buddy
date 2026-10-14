@@ -68,6 +68,27 @@ describe('parseSnapshot', () => {
     expect(parseSnapshot(empty).ok).toBe(true);
   });
 
+  it('counts accounts of a kind this app version does not know, and keeps the count when re-read', () => {
+    const future = (count: number) =>
+      broken((s) => {
+        for (let i = 0; i < count; i++) {
+          s.accounts.push({ ...s.accounts[0], id: 900 + i, kind: 'crypto_wallet' });
+        }
+      });
+    const none = parseSnapshot(broken(() => {}));
+    expect(none.ok && none.snapshot.skipped_accounts).toBeUndefined();
+    for (const count of [1, 3]) {
+      const result = parseSnapshot(future(count));
+      expect(result.ok).toBe(true);
+      if (!result.ok) continue;
+      expect(result.snapshot.accounts).toHaveLength(SAMPLE_SNAPSHOT.accounts.length);
+      expect(result.snapshot.skipped_accounts).toBe(count);
+      // The phone saves the checked copy and checks it again on start.
+      const again = parseSnapshot(JSON.parse(JSON.stringify(result.snapshot)));
+      expect(again.ok && again.snapshot.skipped_accounts).toBe(count);
+    }
+  });
+
   it('ignores unknown extra fields and drops them from the result', () => {
     const extra = broken((s) => {
       s.new_feature = { anything: true };

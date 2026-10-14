@@ -167,7 +167,7 @@ export default function HomeScreen() {
           <GroupCard key={g.group} group={g} currency={snapshot.currency} />
         ))}
       </View>
-      <AccountsList accounts={snapshot.accounts} currency={snapshot.currency} />
+      <AccountsList accounts={snapshot.accounts} currency={snapshot.currency} skipped={snapshot.skipped_accounts} />
       <RecentActivity snapshot={snapshot} />
     </Screen>
   );

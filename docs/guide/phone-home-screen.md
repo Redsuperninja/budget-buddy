@@ -26,7 +26,9 @@ on your computer." Those aren't counted in **Spent** or **Left to spend** until 
 ## Your accounts
 
 Each account and its balance, as of your last sync. For a credit card or loan, a balance you owe shows as, for
-example, **$50.00 owed**.
+example, **$50.00 owed** (or **$12.00 credit** if you paid more than you owed). Any other account below zero shows
+as **overdrawn**, like **$30.00 overdrawn**. If your computer has a kind of account this version of the app doesn't
+know yet, the list says how many need an app update to show.
 
 ## Recent activity
 
@@ -51,3 +53,4 @@ See [Sync your phone](sync-your-phone.md) to understand how syncing works and ho
 | Sample data still showing | [Sync your phone](sync-your-phone.md) with your computer. The sample data will be replaced with your real budget. |
 | Numbers look too low; "Spent" seems wrong | Some transactions have no category yet (look for the "need a category" note). On your computer, open Budget Buddy and assign a category to each transaction. Then sync your phone. |
 | A credit card or loan shows "owed" | That's how much you owe on the account right now. This isn't a problem—it's just information. |
+| "1 account needs an app update to show" | Update Budget Buddy on your phone. Until then, that account's balance isn't shown here (it's still on your computer). |

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { accountKindLabel, formatAccountBalance, isDebtKind } from '@/lib/accounts';
+import { accountKindLabel, formatAccountBalance, isOwing, skippedAccountsNote } from '@/lib/accounts';
 import { formatDay } from '@/lib/dates';
 import type { SnapshotAccount } from '@/sync/snapshot';
 import { useTheme } from '@/theme';
@@ -8,7 +8,7 @@ import { useTheme } from '@/theme';
 function AccountRow({ account, currency }: { account: SnapshotAccount; currency: string }) {
   const t = useTheme();
   const balance = formatAccountBalance(account, currency);
-  const owed = isDebtKind(account.kind) && account.balance_cents < 0;
+  const owed = isOwing(account);
   const kind = accountKindLabel(account.kind);
   return (
     <View
@@ -36,10 +36,15 @@ function AccountRow({ account, currency }: { account: SnapshotAccount; currency:
   );
 }
 
-/** Account balances, with card and loan debt shown as "owed". Renders nothing when there are no accounts. */
-export function AccountsList({ accounts, currency }: { accounts: SnapshotAccount[]; currency: string }) {
+/**
+ * Account balances, with card and loan debt shown as "owed" and other accounts below zero as "overdrawn".
+ * `skipped`: accounts this app version can't show, mentioned so money owed there isn't hidden without a word.
+ * Renders nothing when there's nothing to show or say.
+ */
+export function AccountsList({ accounts, currency, skipped }: { accounts: SnapshotAccount[]; currency: string; skipped?: number }) {
   const t = useTheme();
-  if (accounts.length === 0) return null;
+  const note = skippedAccountsNote(skipped);
+  if (accounts.length === 0 && !note) return null;
   return (
     <View style={{ gap: t.spacing.sm }}>
       <Text accessibilityRole="header" style={{ fontSize: t.fontSizes.large, fontWeight: '700', color: t.colors.text }}>
@@ -50,6 +55,7 @@ export function AccountsList({ accounts, currency }: { accounts: SnapshotAccount
           <AccountRow key={a.id} account={a} currency={currency} />
         ))}
       </View>
+      {note ? <Text style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted }}>{note}</Text> : null}
     </View>
   );
 }

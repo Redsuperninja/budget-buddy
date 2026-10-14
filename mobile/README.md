@@ -48,8 +48,8 @@ More in [docs/dev/testing.md](../docs/dev/testing.md).
 | `src/lib/money.ts` | `formatCents()`: turns integer cents into text like `$1,234.56`. |
 | `src/lib/budget.ts` | Budget math for Home: percent used, left to spend, savings rate, on track / close / over. |
 | `src/lib/dates.ts` | Plain-English dates ("October 2026", "2 days ago"). |
-| `src/lib/accounts.ts` | Account kind labels, "$50.00 owed" balances for cards and loans, the "need a category" note. |
-| `src/sync/snapshot.ts` | `parseSnapshot()`, which checks a snapshot before use (re-exports the types). Accepts all account kinds (unknown kinds are skipped) and the optional `budget.unassigned`. |
+| `src/lib/accounts.ts` | Account kind labels, "$50.00 owed" / "$12.00 credit" balances for cards and loans and "$30.00 overdrawn" for any other account below zero, the "need a category" and "need an app update" notes. |
+| `src/sync/snapshot.ts` | `parseSnapshot()`, which checks a snapshot before use (re-exports the types). Accepts all account kinds (unknown kinds are skipped, but counted in the phone-only `skipped_accounts`, kept when the saved copy is checked again, so the accounts list can say "1 account needs an app update to show") and the optional `budget.unassigned`. |
 | `src/sync/snapshotTypes.ts` | Snapshot types (sync contract §5). |
 | `src/sync/snapshotChecks.ts` / `snapshotSections.ts` | Field checks, and the parser for each snapshot section. |
 | `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
