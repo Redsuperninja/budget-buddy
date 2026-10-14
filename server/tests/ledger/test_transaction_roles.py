@@ -1,4 +1,4 @@
-"""The shared "what is this transaction used as" conditions (services/transaction_roles.py).
+"""The shared "what is this transaction used as" conditions (services/ledger/transaction_roles.py).
 Fake data only."""
 
 from sqlalchemy import select

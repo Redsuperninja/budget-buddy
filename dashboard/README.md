@@ -21,7 +21,8 @@ Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
 `money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `folds.test.js`, `category-groups.test.js`,
-`labels.test.js`, `charts.test.js` and `months.test.js` cover the logic.
+`labels.test.js`, `charts.test.js`, `months.test.js`, `shares.test.js`, `pace-words.test.js` and `sweep-words.test.js`
+cover the logic.
 
 ## What the server expects
 
@@ -51,7 +52,9 @@ All under `js/` (each file starts with a one-line purpose):
 | `dates.js` | Today, current month, month ranges |
 | `labels.js` | Plain-English names for account types, groups and so on; `everydayFirst()` orders accounts for pickers |
 | `percent.js` | Basis points to "15%" and back, "percent used" (string logic, no float maths) |
-| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `fit.js` (draws a chart at its card's width and again on resize), `budget-bars.js` (spent against budget), `progress-rows.js` (each category's left/over with a meter), `meter.js` (meter and ring), `change-bars.js` (spending against last month), `months.js` (trend trimming, sparklines, which days to compare; pure and tested), `line-chart.js` + `hover.js` (months, with a hover guide; optional shaded area), `columns.js` (a column per month, up or down), `pace-chart.js` + `pace.js` (spending pace and its maths), `chart-card.js` ("Show as table" switch, legend, lead sentence) |
+| `charts/` | Charts drawn as SVG in code, no library: `scale.js` (axis maths, pure and tested), `svg.js` (safe SVG builder), `fit.js` (draws a chart at its card's width and again on resize), `budget-bars.js` (spent against budget), `progress-rows.js` (each category's left/over with a meter), `meter.js` (meter and ring), `change-bars.js` (spending against last month), `months.js` (trend trimming, sparklines, which days to compare; pure and tested), `shares.js` (parts of a whole and bar lengths with negatives; pure and tested), `income-split.js` (where the income went), `balance-bars.js` (what you have and owe, per account), `line-chart.js` + `hover.js` (months, with a hover guide; optional shaded area), `columns.js` (a column per month, up or down), `pace-chart.js` + `pace.js` (spending pace and its maths), `chart-card.js` ("Show as table" switch, legend, lead sentence) |
+| `pace-words.js` | The plain sentence above Home's Spending pace chart (pure, tested) |
+| `sweep-words.js` | Plain words for the Investments page's "Deposit sweeps to check" card (pure, tested) |
 | `prefs.js` | A remembered choice from a short list, shown as an attribute on `<html>` (pure, tested); used by `theme.js` and `view.js` |
 | `theme.js` | Light, dark or match the computer (`data-theme`). Colors live in `app.css` as `light-dark()` pairs, the same green theme in both (`--accent` fills, `--link` is text, `--accent-soft` for meter tracks, `--raised` for a bar chart's empty track) |
 | `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |

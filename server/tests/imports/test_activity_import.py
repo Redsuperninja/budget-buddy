@@ -128,3 +128,23 @@ def test_money_market_sweeps_and_trades_already_recorded(client, brokerage):
     assert (r["imported"], r["trades"], r["trades_linked"]) == (3, 1, 1)
     lots = client.get("/api/local/stocks/lots").json()
     assert [(lot["symbol"], lot["transaction_id"] is not None) for lot in lots] == [("FAKE", True)]
+
+
+def test_the_same_file_from_two_windows_at_once_gets_a_plain_message(
+    client, brokerage, monkeypatch
+):
+    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.orm import Session
+
+    real_flush = Session.flush
+
+    def clashing(self, *args, **kwargs):
+        # As if another window had just saved the same rows: their fingerprints clash.
+        if any(getattr(obj, "import_fingerprint", None) for obj in self.new):
+            raise IntegrityError("INSERT", {}, Exception("UNIQUE constraint failed"))
+        return real_flush(self, *args, **kwargs)
+
+    monkeypatch.setattr(Session, "flush", clashing)
+    response = send(client, brokerage, "commit", skip_invalid_rows=True)
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "import_conflict"

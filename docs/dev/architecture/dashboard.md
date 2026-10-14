@@ -97,6 +97,14 @@ toolbar says when a file was last imported (`imports` list; its UTC `created_at`
 as goals, "to go"/"extra", never red), and the Spent tile has a ring (`charts/meter.js` `ring`, the meter's circular
 form: theme green on its lighter step, red once over). Group bars (`budget-bars.js`) still link per row when given
 an `href` (an SVG `<a>` left out of the Tab order).
+
+Spending pace (`screens/home/home-pace.js`, from `GET /api/local/summary/pace`) is a line of spending so far by day
+against a dashed even-pace line (`charts/pace-chart.js`, maths in `charts/pace.js`), with a plain sentence on where
+the month is heading (`pace-words.js`). Left over each month (`charts/columns.js`: up or down from a zero line) and
+Net worth over time (`charts/line-chart.js` with the `hover.js` guide) are in `screens/home/home-trends.js`. Charts
+are drawn at their card's width and redrawn when it changes (window resized, phone turned) by `charts/fit.js`, so
+their text is its real size on a phone.
+
 Their maths is in `charts/shares.js` and `charts/months.js`, covered 100% like `scale.js`. They are SVG built in code (`js/charts/`), with no chart library and nothing loaded from the internet, so
 the CSP and the safety tests are unchanged; the only web address in them is the SVG namespace in `js/charts/svg.js`,
 which the static test allows by exact match. Every chart has a "Show as table" switch and an `aria-label`. The

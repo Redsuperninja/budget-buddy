@@ -34,12 +34,14 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | `main.py`, `__main__.py`, `cli.py` | Build the app; run it; command line |
 | `config.py` | Settings from environment variables ([settings](../settings.md)) |
 | `db.py`, `migrations/` | Engine and Alembic migrations |
-| `models/` | Tables: `ledger.py` (accounts, categories, category rules, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, stocks, deductions), `devices.py` (devices, pairing, nonces) |
+| `models/` | Tables: `ledger.py` (accounts, categories, budget plan, category rules, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, dividends, stocks, positions, prices, deductions), `devices.py` (devices, other computers, pairing, nonces), `imports.py` (import history), `trades.py` (bank-file stock trades, tickers), `enums.py` (shared choices) |
 | `services/`, `routers/`, `schemas/` | Business logic; thin routes with no business logic; request and response shapes. All three, and `tests/`, are grouped the same way by area ([below](#areas)) |
 | `crypto/` | Keys, key stores, encrypted columns and files, recovery phrase, base64url |
 | `network.py`, `remote_access.py`, `lan.py`, `listeners.py` | Access rules middleware, what joined computers may do, home-network address, the second listener |
 | `bodylimit.py`, `ratelimit.py`, `errors.py` | Streaming body limits, per-address rate limit, error shape |
-| `money.py`, `shares.py` | Cents and share-quantity parsing |
+| `money.py`, `shares.py`, `percent.py` | Cents, share-quantity and basis-point parsing and maths |
+| `transfer_types.py`, `spreadsheet.py` | What kind of transfer a linked pair is; keeping CSV text safe for spreadsheets |
+| `serving.py`, `parent_watch.py`, `instance_proof.py` | Building the running server (console and desktop app); stopping with the desktop app; proving to the desktop app this is Budget Buddy |
 | `dashboard_files.py` | Finds the dashboard folder and lists the files it may serve |
 | `tax_data/` | Per-year tax data files and their loader ([../tax-data.md](../tax-data.md)) |
 | `data_folder.py`, `logs.py`, `deps.py` | Data-folder warnings, logging, FastAPI dependencies |

@@ -15,7 +15,7 @@ phone syncs on your home Wi-Fi, the receipt goes to your computer, where you can
    the photo is optional.
 5. Tap **Save receipt**.
 
-The receipt now shows under **Receipts waiting**, marked "Waiting to sync". Sync on your home Wi-Fi (see
+The receipt now shows in the list of receipts waiting, marked "Waiting to sync". Sync on your home Wi-Fi (see
 [Sync your phone](sync-your-phone.md)) and it goes to your computer, then disappears from the list.
 
 ## Private on your phone

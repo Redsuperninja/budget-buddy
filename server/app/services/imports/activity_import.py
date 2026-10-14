@@ -17,6 +17,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError
@@ -38,6 +39,7 @@ from app.schemas.imports.activity_import import (
 from app.schemas.investing.stocks import LotCreate
 from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.imports.activity_csv import ActivityRow, SharesOnly, find_columns, parse_row
+from app.services.imports.csv_import import import_conflict
 from app.services.imports.csv_parsing import (
     RowProblem,
     decode_csv,
@@ -275,7 +277,11 @@ def commit(
         )
         session.add(transaction)
         added.append((transaction, r))
-    session.flush()
+    try:
+        session.flush()
+    except IntegrityError:  # the same rows, imported by another window at the same moment
+        session.rollback()
+        raise import_conflict() from None
     trades, linked = _add_trades(session, added, import_id)
     ids = {t.id for t, _ in added}
     dividends = find_dividends(session, ids)

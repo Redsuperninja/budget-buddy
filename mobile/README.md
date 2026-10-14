@@ -1,5 +1,7 @@
 # Budget Buddy phone app
 
+> **In testing:** the phone app isn't released yet; for now, phones can also use the dashboard in their browser.
+
 The phone side of Budget Buddy, built with [Expo](https://expo.dev) (React Native + TypeScript) and
 [expo-router](https://docs.expo.dev/router/introduction/). It runs inside the free **Expo Go** app on
 iPhone and Android, so there's nothing to publish to an app store. It talks to the Home Base only through the
@@ -9,7 +11,7 @@ How it works: [phone-app.md](../docs/dev/architecture/phone-app.md), [pairing.md
 (phone side) and [sync.md](../docs/dev/architecture/sync.md) (phone side).
 
 > Home and Taxes show a made-up **sample** budget (with a banner saying so) until you connect to your computer
-> and tap **Sync now**. After that they show your real budget. Receipt photos come in a later update.
+> and tap **Sync now**. After that they show your real budget. Take receipt photos on **Add Receipt**; they're sent at your next sync.
 
 ## Run it on your phone
 
@@ -42,8 +44,8 @@ More in [docs/dev/testing.md](../docs/dev/testing.md).
 
 | Path | What's there |
 | --- | --- |
-| `src/app/` | Screens. Each file is a route; `_layout.tsx` sets up the bottom tabs; `pair.tsx` is the pair screen. |
-| `src/components/` | Shared building blocks (screen wrapper, big button, card, `SyncPanel.tsx` with **Sync now**). |
+| `src/app/` | Screens. Each file is a route; `_layout.tsx` sets up the bottom tabs: `index.tsx` (Home), `add-receipt.tsx`, `taxes.tsx`, `settings.tsx`; `pair.tsx` is the pair screen. |
+| `src/components/` | Shared building blocks: `Screen.tsx` (screen wrapper, big button, card), `SyncPanel.tsx` with **Sync now**, `AccountsList.tsx` (Your accounts), `BudgetBreakdown.tsx` (Needs / Wants / Savings cards and bars), `SnapshotNotices.tsx` (sample banner, earlier-month notice, last synced). |
 | `src/theme.ts` | Colors (light + dark), spacing, font sizes. |
 | `src/lib/money.ts` | `formatCents()`: turns integer cents into text like `$1,234.56`. |
 | `src/lib/budget.ts` | Budget math for Home: percent used, left to spend, savings rate, on track / close / over. |
@@ -59,7 +61,7 @@ More in [docs/dev/testing.md](../docs/dev/testing.md).
 | `src/sync/sampleSnapshot.ts` | Fictional sample snapshot shown until the phone has synced. |
 | `src/sync/transport.ts` | Shared by pairing and syncing: secure random numbers, one HTTP request with a 10 s timeout, and the encrypted envelope (`sealRequest` / `openResponse`, contract §4). |
 | `src/sync/pairingQr.ts`, `pairClient.ts`, `pairErrors.ts`, `credentials.ts`, `base64url.ts` | Pairing: QR checks, the `/api/pair` call, plain-English messages, secure storage. |
-| `src/sync/syncClient.ts` | `syncNow()`: health check, receipt-upload hook (#20), snapshot, save, best-effort ack. |
+| `src/sync/syncClient.ts` | `syncNow()`: health check, uploads waiting receipts (`receipts/receiptUpload.ts`, 2-minute timeout), snapshot, save, best-effort ack. |
 | `src/sync/runSync.ts` | Runs one sync for the screens (one at a time) and turns every outcome into plain English. |
 | `src/sync/store.tsx` | `SnapshotProvider` / `useSnapshot()`: loads the saved snapshot, falls back to the sample. |
 
@@ -67,10 +69,14 @@ More in [docs/dev/testing.md](../docs/dev/testing.md).
 
 | Package | Why |
 | --- | --- |
-| `expo-camera` | Scans the pairing QR code. |
+| `expo-camera` | Scans the pairing QR code and takes receipt photos. |
 | `expo-secure-store` | Keeps the token and sync key in the phone's secure storage. |
 | `expo-crypto` | Secure random numbers for the pairing keys (no weaker fallback is ever used). |
 | `expo-device` | The phone model name, used as the default name shown on the computer. |
+| `expo-notifications` | Sync reminders (local notifications only). |
+| `expo-image-manipulator` | Shrinks receipt photos and strips their EXIF details. |
+| `expo-file-system` | Each receipt photo kept as a sealed file in the app's folder. |
+| `@react-native-async-storage/async-storage` | The sealed saved snapshot and receipt list. |
 | `tweetnacl`, `tweetnacl-util` | The encryption the contract specifies (pinned to exact versions). |
 
 ## Rules of the road
