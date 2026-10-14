@@ -8,10 +8,10 @@
  */
 
 import {
-  arr, CURRENCY, date, int, ISO_DATE_TIME, matching, MONTH, nonNegInt, obj, Obj, SnapshotError, str,
+  arr, CURRENCY, date, int, ISO_DATE_TIME, matching, nonNegInt, obj, Obj, SnapshotError, str,
 } from './snapshotChecks';
 import {
-  parseAccount, parseGroup, parseSettings, parseTax, parseTransaction, parseUnassigned,
+  parseAccount, parseGroup, parsePeriod, parseSettings, parseTax, parseTransaction, parseUnassigned,
 } from './snapshotSections';
 import { GROUP_ORDER } from './snapshotTypes';
 import type { Snapshot, SnapshotAccount } from './snapshotTypes';
@@ -35,16 +35,6 @@ export const SNAPSHOT_UPDATE_MESSAGE =
 
 function parseOrThrow(input: unknown): Snapshot {
   const root = obj(input, 'snapshot');
-
-  const period = obj(root.period, 'period');
-  const daysInMonth = int(period.days_in_month, 'period.days_in_month');
-  if (daysInMonth < 28 || daysInMonth > 31) {
-    throw new SnapshotError('period.days_in_month', 'expected 28 to 31');
-  }
-  const daysElapsed = int(period.days_elapsed, 'period.days_elapsed');
-  if (daysElapsed < 0 || daysElapsed > daysInMonth) {
-    throw new SnapshotError('period.days_elapsed', 'expected 0 to days_in_month');
-  }
 
   const income = obj(root.income, 'income');
   let lastPaycheck: Snapshot['income']['last_paycheck'] = null;
@@ -73,13 +63,7 @@ function parseOrThrow(input: unknown): Snapshot {
     server_id: str(root.server_id, 'server_id'),
     generated_at: matching(root.generated_at, ISO_DATE_TIME, 'generated_at', 'a date-time'),
     currency: matching(root.currency, CURRENCY, 'currency', 'a currency code like USD'),
-    period: {
-      month: matching(period.month, MONTH, 'period.month', 'a month like 2026-10'),
-      start: date(period.start, 'period.start'),
-      end: date(period.end, 'period.end'),
-      days_elapsed: daysElapsed,
-      days_in_month: daysInMonth,
-    },
+    period: parsePeriod(root.period, 'period'),
     income: {
       expected_cents: nonNegInt(income.expected_cents, 'income.expected_cents'),
       received_cents: nonNegInt(income.received_cents, 'income.received_cents'),
