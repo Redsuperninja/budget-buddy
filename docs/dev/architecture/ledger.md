@@ -31,7 +31,10 @@ that's shown.
 ## Signs and balances
 
 `amount_cents` is signed from the account's point of view: **negative = money out, positive = money in**. An
-account's balance is the plain sum of its transactions.
+account's balance is the plain sum of its transactions. The accounts API gives both `balance_cents` (every
+transaction) and `current_balance_cents` (only those dated today or earlier, this computer's calendar), so a bill
+entered ahead of time doesn't lower today's balance; the dashboard's balances and net worth, and the phone
+snapshot, use today's.
 
 **For `credit_card` and `loan` accounts a negative balance means money owed. Charges are negative, and payments
 and refunds are positive.** A card payment from checking is a linked transfer: -X on checking, +X on the card.
@@ -65,12 +68,13 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   - `retirement_type` (`roth_ira`, `traditional_ira`, `401k`, `roth_401k`, `403b`, `other`) only on a `retirement`
     account (422 otherwise); changing the kind away from retirement clears it.
   - `balance_cents` is the sum of the account's transactions; record a starting balance as an `adjustment`.
+    `current_balance_cents` counts only those dated today or earlier (what Home and the Accounts list show).
   - An account with transactions can't be deleted.
   - `POST /api/local/accounts/{id}/balance` `{date, balance_cents | balance}`: the bank's balance at the end of
     `date` (today or earlier). Adds one `adjustment` dated `date` for the difference from the sum of the account's
     transactions up to that day; nothing when it already matches. Returns `adjustment_cents`, `transaction_id`
     and `balance_now_cents` (end of today; an older day's change moves it too) (`services/ledger/account_balance.py`).
-    The accounts list's `balance_cents` includes future-dated transactions; this end-of-day sum doesn't.
+    It equals the account's `current_balance_cents`; `balance_cents` also includes future-dated transactions.
 - **Transactions:** `GET/POST /api/local/transactions` (filters: `account_id`, `category_id`, `date_from`,
   `date_to`, `kind`, `q`, `sorted_by` (`rule` or `you`, [category-rules.md](category-rules.md)), `uncategorized` (`true`: normal and
   refund transactions with no category yet; transfers and adjustments never need one), `hide_dividends`

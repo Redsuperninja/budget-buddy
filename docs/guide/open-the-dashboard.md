@@ -37,8 +37,8 @@ The **Home** page shows your month at a glance:
   how up to date the numbers are.
 - **Where your income went:** one bar the length of your income, split into needs, wants and savings, with what's
   left over in gray. If you spent and saved more than came in, a line marks where your income ran out.
-- **What you have and owe:** your net worth, and a bar for each account: money you have to the right, money you
-  owe (credit cards, loans) to the left.
+- **What you have and owe:** your net worth today (a bill you entered for a later date doesn't count yet), and a
+  bar for each account: money you have to the right, money you owe (credit cards, loans) to the left.
 
 It also has these charts:
 

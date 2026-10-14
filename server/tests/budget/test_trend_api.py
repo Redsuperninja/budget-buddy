@@ -1,5 +1,7 @@
 """Month-by-month totals for the charts. Fake data only."""
 
+import datetime as dt
+
 import pytest
 from test_categories_summary_api import cid
 
@@ -61,3 +63,14 @@ def test_net_worth_at_each_months_end(client, make_account, add_txn):
     add_txn(checking, -5_000, date="2026-04-01")  # after the last month
     trend = client.get(TREND, params={"end": "2026-03", "months": 3}).json()["months"]
     assert [m["net_worth_cents"] for m in trend] == [100_000, 70_000, 70_000]
+
+
+def test_this_months_net_worth_stops_at_today(client, make_account, add_txn):
+    checking = make_account()["id"]
+    today = dt.date.today()
+    add_txn(checking, 100_000, date=today.isoformat(), kind="adjustment")
+    later = today + dt.timedelta(days=1)
+    add_txn(checking, -40_000, date=later.isoformat(), description="Fake rent")
+    month = f"{today.year}-{today.month:02d}"
+    [this] = client.get(TREND, params={"end": month, "months": 1}).json()["months"]
+    assert this["net_worth_cents"] == 100_000  # like Home's balances: the rent isn't paid yet

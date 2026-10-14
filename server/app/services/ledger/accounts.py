@@ -2,10 +2,14 @@
 
 Balance = the sum of every transaction on the account (transfers included, since they really
 move money). The ``accounts`` table has no opening-balance column, so a starting balance is
-recorded as an ``adjustment`` transaction.
+recorded as an ``adjustment`` transaction. ``current_balance_cents`` counts only transactions
+dated today or earlier (this computer's calendar), so a bill entered ahead of time for next week
+doesn't lower today's balance yet; ``balance_cents`` counts them all.
 """
 
-from sqlalchemy import func, select
+import datetime as dt
+
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
@@ -18,24 +22,33 @@ TAX_FREE_KINDS = {AccountKind.RETIREMENT, AccountKind.HSA}
 INVESTMENT_KINDS = {AccountKind.BROKERAGE, AccountKind.RETIREMENT, AccountKind.HSA}
 
 
-def _totals(session: Session, account_ids: list[int]) -> dict[int, tuple[int, int]]:
-    """``{account_id: (balance_cents, transaction_count)}`` in one query."""
+def _totals(session: Session, account_ids: list[int]) -> dict[int, tuple[int, int, int]]:
+    """``{account_id: (balance_cents, current_balance_cents, transaction_count)}`` in one query."""
+    today = dt.date.today()
     rows = session.execute(
         select(
             Transaction.account_id,
             func.coalesce(func.sum(Transaction.amount_cents), 0),
+            func.coalesce(
+                func.sum(case((Transaction.date <= today, Transaction.amount_cents), else_=0)), 0
+            ),
             func.count(Transaction.id),
         )
         .where(Transaction.account_id.in_(account_ids))
         .group_by(Transaction.account_id)
     )
-    return {account_id: (balance, count) for account_id, balance, count in rows}
+    return {account_id: (balance, now, count) for account_id, balance, now, count in rows}
 
 
-def _out(account: Account, totals: dict[int, tuple[int, int]]) -> AccountOut:
-    balance, count = totals.get(account.id, (0, 0))
+def _out(account: Account, totals: dict[int, tuple[int, int, int]]) -> AccountOut:
+    balance, current, count = totals.get(account.id, (0, 0, 0))
     return AccountOut.model_validate(
-        {**_columns(account), "balance_cents": balance, "transaction_count": count}
+        {
+            **_columns(account),
+            "balance_cents": balance,
+            "current_balance_cents": current,
+            "transaction_count": count,
+        }
     )
 
 

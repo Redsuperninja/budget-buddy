@@ -62,6 +62,8 @@ class AccountOut(Schema):
     # For credit_card and loan accounts a negative balance means money owed. Charges are
     # negative, and payments and refunds are positive.
     balance_cents: int
+    # The same, counting only transactions dated today or earlier: what the bank shows now.
+    current_balance_cents: int
     transaction_count: int
     created_at: dt.datetime
     updated_at: dt.datetime

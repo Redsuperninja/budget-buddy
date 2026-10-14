@@ -86,7 +86,7 @@ a neutral gray left over), spending against budget (by group and by category), s
 (`charts/change-bars.js`: more = series 2 to the right, less = series 1 to the left, always with "more" or "less"
 in words; the same days of last month while the month is going, via the summary's `through`), month by month (from
 the first month with activity, up to 12) of money in,
-spending and saving, and balances as bars either side of zero with net worth (`charts/balance-bars.js`; have =
+spending and saving, and today's balances (`current_balance_cents`) as bars either side of zero with net worth (`charts/balance-bars.js`; have =
 series 1, owe = series 2). Each money tile has a sparkline of its own number over the same months. "Needs your attention" adds needs and
 wants categories over budget (`category-groups.js` `overBudget`, with the percent over as the badge, "<1%" rather
 than "+0%"; percentage budgets are skipped while the month is going and budgets follow actual income, since a share of

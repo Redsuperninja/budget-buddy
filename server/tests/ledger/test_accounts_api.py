@@ -1,5 +1,7 @@
 """Accounts API, loopback-only access, and the shared error format. Fake data only."""
 
+import datetime as dt
+
 import pytest
 
 from app.network import is_loopback_address
@@ -173,3 +175,18 @@ def test_account_number_and_notes_are_encrypted_on_disk(client, make_account, da
         connection.close()
     assert isinstance(last4, bytes) and b"9876" not in last4
     assert isinstance(notes, bytes) and b"FAKE-NOTE" not in notes
+
+
+def test_a_bill_dated_ahead_doesnt_lower_todays_balance(client, make_account, add_txn):
+    account = make_account(name="Fake Checking", kind="checking")["id"]
+    today = dt.date.today()
+    add_txn(account, 100_000, date=today.isoformat(), description="Fake opening")
+    add_txn(account, -2_500, date=today.isoformat(), description="Fake coffee today")
+    add_txn(
+        account, -40_000, date=(today + dt.timedelta(days=1)).isoformat(), description="Fake rent"
+    )
+
+    got = client.get(f"/api/local/accounts/{account}").json()
+    assert (got["current_balance_cents"], got["balance_cents"]) == (97_500, 57_500)
+    [listed] = client.get("/api/local/accounts").json()
+    assert listed["current_balance_cents"] == 97_500

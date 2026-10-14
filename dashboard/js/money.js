@@ -13,6 +13,14 @@ export function formatBalance(cents, kind) {
   return formatCents(cents);
 }
 
+// An account's balance today, and what it will be once transactions dated ahead of today (a bill entered early)
+// happen: "$975.00 ($575.00 after what's scheduled)". account: from the accounts API.
+export function balanceText(account) {
+  const now = formatBalance(account.current_balance_cents, account.kind);
+  if (account.balance_cents === account.current_balance_cents) return now;
+  return `${now} (${formatBalance(account.balance_cents, account.kind)} after what's scheduled)`;
+}
+
 // For chart axes, in whole dollars: 95000 -> "$950", 123456 -> "$1.2k", 250000000 -> "$2.5M".
 export function shortDollars(cents) {
   const sign = cents < 0 ? "-" : "";
