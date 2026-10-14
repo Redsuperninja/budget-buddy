@@ -177,6 +177,29 @@ describe('parseSnapshot', () => {
     expectRejected(broken((s) => (s.period.days_elapsed = 32)), 'days_elapsed');
   });
 
+  const periodOf = (month: string, days: number, elapsed = 1) => ({
+    month, start: `${month}-01`, end: `${month}-${days}`, days_elapsed: elapsed, days_in_month: days,
+  });
+
+  it.each([
+    ['February 2027', periodOf('2027-02', 28)],
+    ['February 2028 (a leap year)', periodOf('2028-02', 29, 29)],
+    ['December', periodOf('2026-12', 31, 31)],
+  ])('accepts a consistent month: %s', (_name, period) => {
+    expect(parseSnapshot(broken((s) => (s.period = period))).ok).toBe(true);
+  });
+
+  it.each([
+    ['February 2027 said to have 29 days', { ...periodOf('2027-02', 28), days_in_month: 29, end: '2027-02-29' }, 'days_in_month'],
+    ['start not the 1st', { ...periodOf('2026-10', 31), start: '2026-10-02' }, 'period.start'],
+    ['end not the last day', { ...periodOf('2026-10', 31), end: '2026-10-30' }, 'period.end'],
+    ['end in another month', { ...periodOf('2026-10', 31), end: '2026-11-30' }, 'period.end'],
+    ['no days elapsed (today counts)', periodOf('2026-10', 31, 0), 'days_elapsed'],
+    ['month 13', { ...periodOf('2026-10', 31), month: '2026-13' }, 'period.month'],
+  ])('rejects a month that does not add up: %s', (_name, period, field) => {
+    expectRejected(broken((s) => (s.period = period)), field);
+  });
+
   it('never throws, even on odd input', () => {
     const cyclic: any = { contract: 1 };
     cyclic.period = cyclic;

@@ -1,11 +1,11 @@
 /** Parsers for each part of a snapshot (groups, transactions, accounts, tax, settings). */
 
 import {
-  arr, bool, date, int, nonNegInt, obj, oneOf, str,
+  arr, bool, date, int, matching, MONTH, nonNegInt, obj, oneOf, SnapshotError, str,
 } from './snapshotChecks';
 import { ACCOUNT_KINDS, GROUP_ORDER } from './snapshotTypes';
 import type {
-  BudgetCategory, BudgetGroup, SnapshotAccount, SnapshotTransaction, SyncSettings, TaxSummary, Unassigned,
+  BudgetCategory, BudgetGroup, Period, SnapshotAccount, SnapshotTransaction, SyncSettings, TaxSummary, Unassigned,
 } from './snapshotTypes';
 
 export function parseCategory(v: unknown, p: string): BudgetCategory {
@@ -48,6 +48,32 @@ export function parseTransaction(v: unknown, p: string): SnapshotTransaction {
  * Home Base add enum values without bumping the version, so we skip that account rather than
  * rejecting the whole snapshot.
  */
+/**
+ * The month the snapshot covers. Its parts must agree (contract §5.1): `start` is the 1st, `end` is the
+ * month's real last day (`days_in_month`, leap years included), and `days_elapsed` counts today, so 1 to
+ * `days_in_month`. A mismatch would quietly mislabel the month, so it's refused like any bad field.
+ */
+export function parsePeriod(v: unknown, p: string): Period {
+  const o = obj(v, p);
+  const month = matching(o.month, MONTH, `${p}.month`, 'a month like 2026-10');
+  const [year, monthNumber] = month.split('-').map(Number);
+  if (monthNumber < 1 || monthNumber > 12) throw new SnapshotError(`${p}.month`, 'expected a month 01 to 12');
+  const realDays = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  const daysInMonth = int(o.days_in_month, `${p}.days_in_month`);
+  if (daysInMonth !== realDays) throw new SnapshotError(`${p}.days_in_month`, `expected ${realDays} for ${month}`);
+  const start = date(o.start, `${p}.start`);
+  if (start !== `${month}-01`) throw new SnapshotError(`${p}.start`, `expected ${month}-01`);
+  const end = date(o.end, `${p}.end`);
+  if (end !== `${month}-${String(realDays).padStart(2, '0')}`) {
+    throw new SnapshotError(`${p}.end`, `expected the last day of ${month}`);
+  }
+  const daysElapsed = int(o.days_elapsed, `${p}.days_elapsed`);
+  if (daysElapsed < 1 || daysElapsed > daysInMonth) {
+    throw new SnapshotError(`${p}.days_elapsed`, 'expected 1 to days_in_month');
+  }
+  return { month, start, end, days_elapsed: daysElapsed, days_in_month: daysInMonth };
+}
+
 export function parseAccount(v: unknown, p: string): SnapshotAccount | null {
   const o = obj(v, p);
   const kind = str(o.kind, `${p}.kind`);

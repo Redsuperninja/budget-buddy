@@ -9,13 +9,7 @@ export interface Snapshot {
   server_id: string;
   generated_at: IsoDateTime;
   currency: string; // ISO 4217, e.g. "USD"
-  period: {
-    month: string; // "2026-10"
-    start: IsoDate; // first day of month
-    end: IsoDate; // last day of month
-    days_elapsed: number; // including today
-    days_in_month: number;
-  };
+  period: Period;
   income: {
     expected_cents: Cents; // this month's expected take-home (from paychecks)
     received_cents: Cents; // take-home received so far this month
@@ -37,6 +31,15 @@ export interface Snapshot {
   skipped_accounts?: number;
   tax: TaxSummary;
   settings: SyncSettings;
+}
+
+/** The month a snapshot covers; its parts always agree (checked by `parsePeriod`). */
+export interface Period {
+  month: string; // "2026-10"
+  start: IsoDate; // first day of month
+  end: IsoDate; // last day of month
+  days_elapsed: number; // including today: 1 to days_in_month
+  days_in_month: number; // the month's real length
 }
 
 export interface Unassigned {
