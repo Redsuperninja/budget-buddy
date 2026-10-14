@@ -18,9 +18,21 @@ $Browser = @(
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $Browser) { Write-Host "Needs Microsoft Edge or Google Chrome." -ForegroundColor Yellow; exit 1 }
 if (-not (Test-Path $Python)) { Write-Host "Set up the Home Base first (docs/dev/testing.md)." -ForegroundColor Yellow; exit 1 }
-if (Get-NetTCPConnection -LocalPort 8766 -State Listen -ErrorAction SilentlyContinue) {
-    Write-Host "Something is already using port 8766 (a test Home Base?). Stop it and try again." -ForegroundColor Yellow
-    exit 1
+foreach ($port in 8766, 9333) {  # the test Home Base, and the browser's DevTools port (check-pages.mjs)
+    if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
+        Write-Host "Something is already using port $port. Stop it and try again." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
+# True if process $Id was started by process $Ancestor, directly or a few steps down (the venv's python.exe
+# starts the real one).
+function Test-StartedBy($Id, $Ancestor) {
+    for ($step = 0; $step -lt 4 -and $Id; $step++) {
+        $Id = (Get-CimInstance Win32_Process -Filter "ProcessId=$Id" -ErrorAction SilentlyContinue).ParentProcessId
+        if ($Id -eq $Ancestor) { return $true }
+    }
+    return $false
 }
 
 $Run = Join-Path ([IO.Path]::GetTempPath()) "budget-buddy-check-pages-$PID"
@@ -48,12 +60,16 @@ try {
     & node "$PSScriptRoot\check-pages.mjs" $Browser "http://127.0.0.1:8766" "$Run\browser"
     $exitCode = $LASTEXITCODE
 } finally {
-    # Stop only what this run started: the Home Base listening on 8766 and browsers using this run's folder.
-    Get-NetTCPConnection -LocalPort 8766 -State Listen -ErrorAction SilentlyContinue |
-        ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
-    if ($server) { Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue }
+    # Stop only what this run started: the Home Base its start-test-server.ps1 started, and browsers using this
+    # run's own folder.
+    if ($server) {
+        Get-NetTCPConnection -LocalPort 8766 -State Listen -ErrorAction SilentlyContinue |
+            Where-Object { Test-StartedBy $_.OwningProcess $server.Id } |
+            ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+        Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+    }
     Get-CimInstance Win32_Process -Filter "Name='msedge.exe' or Name='chrome.exe'" |
-        Where-Object { $_.CommandLine -like "*$Run*" } |
+        Where-Object { $_.CommandLine -like "*$Run\*" } |
         ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
     foreach ($name in $Settings.Keys) { [Environment]::SetEnvironmentVariable($name, $Saved[$name], "Process") }
     Start-Sleep 1
