@@ -43,8 +43,8 @@ Code: `services/budget/categories.py`, `services/budget/summary.py` and their ro
   day of the month. **Transfers and adjustments (including opening balances) are never counted.**
   Neither are dividends paid inside a retirement account or HSA, or their deposit sweeps
   ([dividends.md](dividends.md)), stock trades, recorded or found in a bank file, and a bank-file trade's sweep
-  ([stocks.md](stocks.md), [bank-trades.md](bank-trades.md)), or any other dividend's sweep while it has no
-  category. All of these come from `services/ledger/transaction_roles.py` ([ledger.md](ledger.md#transaction-roles)).
+  ([stocks.md](stocks.md), [bank-trades.md](bank-trades.md)), or any other dividend's sweep (even with a
+  category). All of these come from `services/ledger/transaction_roles.py` ([ledger.md](ledger.md#transaction-roles)).
 - The category's group decides where a transaction goes: `income` is income; `needs` and `wants` add up to
   `spending_cents`; `savings` is `saved_cents`. Spending and savings are shown as money out, positive.
   **Refunds lower spending** (or savings) in their category and are never income. Spending can go

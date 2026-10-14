@@ -33,15 +33,15 @@ transaction's, never copied.
   set its category, or "Dividends" names one of your non-income categories.
 - **Budget**: in a retirement account or HSA (`TAX_FREE_KINDS`), a dividend and its linked sweep are left out of
   the monthly summary (`transaction_roles.dividends_kept_inside`), so they're neither income nor saved; the budget engine and
-  trend use the same summary. Elsewhere a dividend is income; its sweep is left out while it has no category (it only
-  parks the cash, and "needs a category" doesn't list it) and counts in a category you give it.
+  trend use the same summary. Elsewhere a dividend is income and its sweep is always left out, even with a category (it
+  only parks the cash; "needs a category" doesn't list it either), the same as a trade's sweep.
 - **Totals** only count dividends whose payment is still money in and `normal`. Two `find` runs at once: the
   second adds nothing (a savepoint catches the unique-constraint clash).
 - A linked sweep doesn't show under "needs a category" (it only parks the cash). Stock trades and their sweeps
   work the same way ([bank-trades.md](bank-trades.md)).
 - **Its sweep** is a regular money-out transaction in the same account, for exactly the same amount, from 1 day
   before to 3 days after, with the word "sweep" in it. Closest date wins, then the one added first. One sweep can
-  also cover several dividends and trades whose amounts add up to it ([bank-trades.md](bank-trades.md)). Sweeps keep their own category, and a linked sweep is never matched as a transfer.
+  also cover several dividends and trades whose amounts add up to it ([bank-trades.md](bank-trades.md)). Sweeps keep their own category (kept, but never counted), and a linked sweep is never matched as a transfer.
 - **Payer**: the description up to "common stock", "cash div", "qualified/ordinary dividend", "dividend" or "div".
 - Not handled yet: qualified vs ordinary (only the 1099-DIV knows), foreign tax paid, reversals (dismiss the
   dividend by hand), interest from sweep or money-market funds, January payments of dividends declared in the

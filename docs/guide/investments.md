@@ -100,8 +100,8 @@ check** box on the **Investments** page shows what's left over:
 
 Link only when you're sure it's the same money: once linked, the sweep's whole amount stops counting in your
 budget and it no longer needs a category. If the amounts are a little apart, Budget Buddy says by how much and asks
-first, because that difference won't be counted anywhere. A dividend's sweep you already gave a category (say,
-savings) still counts there. A sweep line in a different account (like your checking account) can't be linked:
+first, because that difference won't be counted anywhere. That's so even for a sweep you already gave a
+category. A sweep line in a different account (like your checking account) can't be linked:
 that's real money moving between your accounts. Only lines with the word "sweep" in them are listed. **Match
 everything again** on the Transactions page keeps the links you made here.
 
