@@ -7,6 +7,7 @@
 - Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`); reading files (`imports`); the budget (`budget`). Nothing changes in what you see.
 - Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`); reading files (`imports`); the budget (`budget`); investing (`investing`). Nothing changes in what you see.
 - Behind the scenes: the Home Base's code is being grouped by area. First, accounts and transactions (`ledger`); reading files (`imports`); the budget (`budget`); investing (`investing`); taxes (`tax`). Nothing changes in what you see.
+- For developers: `scripts\dev\check-pages.ps1` opens every dashboard page in a headless browser against a throwaway Home Base with demo data and reports any page that breaks; `check-all.ps1` runs it too.
 - For testers: the testing scripts moved to `scripts\testing\` (for example `scripts\testing\start-test-server.ps1`), and the build, install and release scripts to `scripts\release\`. The double-click files in `launch` work as before.
 elease\`. The double-click files in `launch` work as before.
 - Behind the scenes: the dashboard's screens are in one folder per section (Home, Money, Budget, Taxes, Devices). Nothing changes in what you see.
