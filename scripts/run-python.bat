@@ -1,9 +1,12 @@
 @echo off
+setlocal
 rem Run a Budget Buddy script with Python 3.12 or newer, on Windows. The double-click files in launch\ use it:
 rem   call scripts\run-python.bat scripts\start.py [arguments]
 rem Paths are relative to the Budget Buddy folder, wherever this is run from.
 
 cd /d "%~dp0.."
+rem Look for Python on PATH only, never a "py" or "python" file in this folder.
+set NoDefaultCurrentDirectoryInExePath=1
 where py >nul 2>nul
 if not errorlevel 1 (
     py -3 %*
