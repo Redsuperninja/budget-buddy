@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Start Budget Buddy** now works on a Mac and on Linux too: double-click **Start Budget Buddy.command** in the launch folder on a Mac, or run `launch/start-budget-buddy.sh` on Linux. On Windows, double-click **Start Budget Buddy** as before. Budget Buddy also stops cleanly if its window is closed.
 - Fixed: a few dashboard buttons now say what went wrong instead of doing nothing (**Forget this file** on Investments, **Remove my key and turn off** for live prices, **Undo** after linking a sweep), the bank import button can be tried again after an error (and can't be pressed with nothing new to import), and importing the same brokerage file from two windows at once says so plainly.
 - Phone app: take receipt photos. On **Add Receipt**, photograph a receipt, add the store, total, category, a note and whether it's tax deductible, and it waits on your phone, encrypted, until your next sync sends it to your computer (in small batches). A photo your computer can't use comes back with a reason and a **Retake photo** button. Photos are made smaller and the hidden details cameras add (like location) are removed.
 - Phone app: reminders to sync. After your first sync the phone offers them once; in Settings, **Remind me to sync** picks every 1, 2 or 3 days (your computer's suggestion until you pick) or Off. Never between 9 PM and 9 AM, with two gentle follow-ups, and no amounts on your lock screen.

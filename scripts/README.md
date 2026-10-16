@@ -1,15 +1,20 @@
 # scripts/
 
 What the double-click files in [`launch/`](../launch/) run, plus tools for testers, developers and releases, one folder
-each so you can tell at a glance who a script is for. The PowerShell scripts are for Windows; the Python files are
-small clients of the Home Base's this-computer-only API and never import the server.
+each so you can tell at a glance who a script is for. The scripts are Python (standard library only) and work the
+same on Windows, macOS and Linux ([ADR-0011](../docs/adr/0011-cross-platform-scripts.md)). Run them from the Budget
+Buddy folder: `python3 scripts/<script>.py` (on Windows, `py scripts\<script>.py`); `--help` lists each one's options.
+The Python files in `testing/` are small clients of the Home Base's this-computer-only API and never import the server.
 
-## Everyone (`scripts\`)
+## Everyone (`scripts/`)
 
 | Script | What it does |
 | --- | --- |
-| `start.ps1` | Everyday start (what `launch\Start Budget Buddy.bat` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `-NoBrowser` skips opening the browser. |
-| `paths.ps1` | Shared by the others: paths, `Assert-Python` (3.12+), `Install-Part <dir> <extras>` (installs a part into its `.venv` only when its `pyproject.toml` or the extras changed; stamp in `.venv`) and `Install-HomeBase [-Dev]`. Scripts in a subfolder dot-source it as `"$PSScriptRoot\..\paths.ps1"`. |
+| `start.py` | Everyday start (what **Start Budget Buddy** in `launch/` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `--no-browser` skips opening the browser. |
+| `run-python.sh`, `run-python.bat` | Find Python 3.12+ and run a script with it, from the Budget Buddy folder; the files in `launch/` call them (`.sh` on macOS and Linux, `.bat` on Windows). |
+| `_common.py` | Shared by the others: paths, `say` / `stop` (plain-English messages, in color when the window can), the Python 3.12 check (on import), `venv_python(dir)`, `install_part(dir, extras, label)` (installs a part into its `.venv` only when its `pyproject.toml` or the extras changed; stamp in `.venv`) and `install_home_base(dev=)`. A script in a subfolder puts `scripts/` on `sys.path` first. |
+| `_processes.py` | `start_home_base`, `wait_until_up`, `health_ok`, `port_in_use`, `stop_tree` and `stopped_afterwards`: run a Home Base and stop only what the script started, also after Ctrl+C. Each Home Base it starts stops by itself when the script ends (`BUDGET_BUDDY_STOP_WITH_PID`). |
+| `tests/` | Tests for the shared helpers: `server/.venv/Scripts/pytest scripts/tests` (`server/.venv/bin/pytest` on macOS and Linux). `ruff.toml` lints `scripts/` in the server's style. |
 
 ## Testers (`scripts\testing\`)
 
