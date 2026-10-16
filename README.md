@@ -35,13 +35,11 @@ with no cloud, no account and no bank passwords.
 **Windows (easiest):** download `Budget-Buddy-<version>-Windows.zip` from the Releases page, unzip it, and
 double-click **Install Budget Buddy** ([guide](docs/guide/install.md)). No Python needed.
 
-**From source on Windows:** install Python 3.12 or newer, open the **launch** folder and double-click **Start
-Budget Buddy**. It sets itself up the first time, starts the Home Base and opens the dashboard
-([guide](docs/guide/start-budget-buddy.md)). For the desktop app with a tray icon, double-click **Build desktop
-app**, then **Install desktop app** ([guide](docs/guide/desktop-app.md)).
-
-**macOS/Linux (from source):** from `server/`, run `python3 -m venv .venv`, `.venv/bin/pip install -e .`, then
-`.venv/bin/python -m app`, and open <http://127.0.0.1:8765/>.
+**From source (Windows, macOS, Linux):** install Python 3.12 or newer, then open the **launch** folder and start
+**Start Budget Buddy** (double-click it on Windows; **Start Budget Buddy.command** on a Mac; run
+`./launch/start-budget-buddy.sh` on Linux). It sets itself up the first time, starts the Home Base and opens the
+dashboard ([guide](docs/guide/start-budget-buddy.md)). On Windows, for the desktop app with a tray icon,
+double-click **Build desktop app**, then **Install desktop app** ([guide](docs/guide/desktop-app.md)).
 
 Then follow the **Get started** list on Home. Step-by-step help for everything: [the user guide](docs/guide/README.md).
 

@@ -1,0 +1,6 @@
+# The scripts follow the server's style (server/pyproject.toml). Checked by scripts/dev/check_all.py.
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B"]

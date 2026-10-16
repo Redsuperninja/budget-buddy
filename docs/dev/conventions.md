@@ -26,8 +26,10 @@ reviewers check them.
   - Desktop (`desktop/budget_buddy_desktop/`): one module per job (tray, window, starting the Home Base,
     start with Windows); the tray's modules never load the window library.
   - Scripts: one folder per audience (`scripts/testing/`, `scripts/release/`, `scripts/dev/`; everyday ones at the
-    top). The shared local-API client is `scripts/testing/_local_api.py`; shared PowerShell is `scripts/paths.ps1`.
-    What people double-click lives in `launch/` as thin `.bat` files that call `scripts/`.
+    top), all Python, standard library only ([ADR-0011](../adr/0011-cross-platform-scripts.md)). The shared local-API
+    client is `scripts/testing/_local_api.py`; shared helpers are `scripts/_common.py` and `scripts/_processes.py`.
+    What people double-click lives in `launch/` as one-line launchers (`.bat`, `.command`, `.sh`) that call
+    `scripts/run-python.*`.
 - **Short functions with clear names** over comments explaining long ones. A file starts with a one-line
   comment saying what it's for.
 - **Refactor as you go, in scope.** Tidy the code you touch. Large clean-ups of unrelated code go in their
@@ -46,4 +48,4 @@ reviewers check them.
   covers how to run and check it, and its layout.
 - User guides in `docs/guide/` stay one task per page and are for people only: no environment variables, API
   paths, file or module names, error codes, or code. Tester guides in `docs/testing/` follow the same rules, but may
-  have copy-paste PowerShell lines.
+  have copy-paste commands (both `python3` and `py` where they differ).
