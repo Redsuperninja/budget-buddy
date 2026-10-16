@@ -7,6 +7,7 @@ real Home Base even if someone runs theirs on an unusual port.
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 REAL_PORT = 8765
@@ -16,10 +17,16 @@ MARKER_NAME = ".budget-buddy-test-folder"
 
 def test_data_dir() -> Path:
     """The TEST Home Base's own data folder, next to where the real one is kept by default
-    (server/app/config.py). ``BUDGET_BUDDY_TEST_DATA_DIR`` moves it (check_pages.py uses a
-    temporary folder)."""
+    (server/app/config.py). ``BUDGET_BUDDY_TEST_DATA_DIR`` moves it, but only inside the system's
+    temporary folder (check_pages.py uses one), so it can never point at real data."""
     if override := os.environ.get("BUDGET_BUDDY_TEST_DATA_DIR"):
-        return Path(override)
+        path = Path(override).resolve()
+        if not path.is_relative_to(Path(tempfile.gettempdir()).resolve()):
+            raise SystemExit(
+                "Refusing: BUDGET_BUDDY_TEST_DATA_DIR must be inside the temporary folder "
+                f"({tempfile.gettempdir()}). It is only for the page checker; unset it."
+            )
+        return path
     if sys.platform == "win32":
         base = os.environ.get("LOCALAPPDATA")
         return (Path(base) if base else Path.home() / "AppData" / "Local") / "BudgetBuddy-Test"

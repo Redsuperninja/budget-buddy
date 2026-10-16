@@ -34,6 +34,9 @@ def main() -> int:
         say("Test data cleared.", "yellow")
     data.mkdir(parents=True, exist_ok=True)
     if not marker.is_file():
+        # Only a new, empty folder becomes a test folder; one with files may hold real data.
+        if any(data.iterdir()):
+            stop(f"Not using {data}: it already has files but isn't a test folder made here.")
         marker.write_text(
             "Budget Buddy TEST data folder. Made-up data only. Safe to delete.\n", encoding="ascii"
         )
