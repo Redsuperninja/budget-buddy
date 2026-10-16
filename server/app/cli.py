@@ -1,9 +1,10 @@
-"""Command-line tools: ``python -m app recovery-phrase show|restore``."""
+"""Command-line tools: ``python -m app recovery-phrase show|restore``, ``backup make|restore``."""
 
 import argparse
 import getpass
 import sys
 from collections.abc import Callable
+from pathlib import Path
 
 from app.config import Settings
 from app.crypto import (
@@ -168,6 +169,14 @@ def main(
         action="store_true",
         help="show: print the phrase even when the output isn't a terminal (e.g. into a file).",
     )
+    backup = commands.add_parser("backup", help="Make an encrypted backup, or restore one.")
+    backup_actions = backup.add_subparsers(dest="action", required=True)
+    make = backup_actions.add_parser("make", help="Save a backup file of all your data.")
+    make.add_argument("--to", type=Path, help="the folder to save it in (default: Documents)")
+    restore = backup_actions.add_parser(
+        "restore", help="Restore a backup file (Budget Buddy closed)."
+    )
+    restore.add_argument("file", type=Path, help="the .bbbackup file")
     args = parser.parse_args(argv)
 
     try:
@@ -177,6 +186,12 @@ def main(
             serve()
             return 0
         settings = Settings()
+        if args.command == "backup":
+            from app.cli_backup import make_backup, restore_backup
+
+            if args.action == "make":
+                return make_backup(settings, args.to, output)
+            return restore_backup(settings, args.file, output, ask, ask_secret or _read_hidden)
         if args.action == "show":
             return show_phrase(settings, output, ask, force=args.force)
         return restore_phrase(settings, output, ask, ask_secret)

@@ -32,6 +32,14 @@ reinstalling Windows or moving computers ([security](../docs/dev/architecture/se
 .venv\Scripts\python -m app recovery-phrase restore
 ```
 
+Back up everything into one encrypted file, and restore it with Budget Buddy closed
+([backup](../docs/dev/architecture/backup.md)):
+
+```powershell
+.venv\Scripts\python -m app backup make [--to <folder>]
+.venv\Scripts\python -m app backup restore <file>.bbbackup
+```
+
 To try it with made-up data on a separate test Home Base (port 8766), use the [`scripts/`](../scripts/README.md).
 
 ## Check your work

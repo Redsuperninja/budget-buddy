@@ -9,7 +9,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 
-from app import __version__, instance_proof
+from app import __version__, instance_proof, run_lock
+from app.backup.restore import sweep_leftovers
 from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, load_keys
 from app.dashboard_files import default_dashboard_dir, load_dashboard
@@ -63,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     ensure_data_dir(settings.data_dir)
     warn_if_risky_data_dir(settings.data_dir)
+    sweep_leftovers(settings.data_dir)  # from a backup or restore that was cut short
     keys = load_keys(settings)
     engine = create_db_engine(settings.data_dir, field_cipher=FieldCipher(keys.db_fields))
     run_migrations(engine)
@@ -72,11 +74,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        # Held while running, so a restore never swaps files under this Home Base (ADR-0012).
+        lock = run_lock.try_lock(settings.data_dir)
         with Session(engine) as session:
             purge_ended_sessions(session, app.state.clock())  # erase keys of old QR codes
         yield
         app.state.listener.close()
         engine.dispose()
+        if lock:
+            run_lock.release(lock)
 
     # The API explorer pages list every endpoint, so they're only on in dev mode.
     docs = {} if settings.dev_mode else {"docs_url": None, "redoc_url": None, "openapi_url": None}

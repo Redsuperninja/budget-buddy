@@ -41,24 +41,27 @@ MEMORY_STORE_IN_USE_MESSAGE = (
 )
 
 
-def _database_has_rows(data_dir: Path) -> bool:
-    """True if ``budget.db`` exists and any of its tables (other than Alembic's) holds a row."""
+def database_has_rows(data_dir: Path) -> bool:
+    """True if ``budget.db`` exists and any of its tables (other than Alembic's) holds a row.
+    A database that can't be read counts as having rows, so nothing treats it as empty."""
+    from app.db import open_read_only  # imported here: app.db imports this package
+
     path = data_dir / "budget.db"
     if not path.is_file() or path.stat().st_size == 0:
         return False
-    connection = sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True)
     try:
-        tables = [
-            name
-            for (name,) in connection.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'table' "
-                "AND name NOT LIKE 'sqlite_%' AND name != 'alembic_version'"
-            )
-        ]
-        quoted = ('"' + name.replace('"', '""') + '"' for name in tables)
-        return any(connection.execute(f"SELECT 1 FROM {q} LIMIT 1").fetchone() for q in quoted)
-    finally:
-        connection.close()
+        with open_read_only(path) as connection:
+            tables = [
+                name
+                for (name,) in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table' "
+                    "AND name NOT LIKE 'sqlite_%' AND name != 'alembic_version'"
+                )
+            ]
+            quoted = ('"' + name.replace('"', '""') + '"' for name in tables)
+            return any(connection.execute(f"SELECT 1 FROM {q} LIMIT 1").fetchone() for q in quoted)
+    except sqlite3.DatabaseError:
+        return True
 
 
 def _check_memory_store_folder(store: KeyStore, data_dir: Path) -> None:
@@ -70,7 +73,7 @@ def _check_memory_store_folder(store: KeyStore, data_dir: Path) -> None:
     """
     if load_master_key(store, data_dir) is not None:
         return
-    if read_fingerprint(data_dir) is not None or _database_has_rows(data_dir):
+    if read_fingerprint(data_dir) is not None or database_has_rows(data_dir):
         raise KeyStoreError(MEMORY_STORE_IN_USE_MESSAGE.format(data_dir=data_dir))
 
 

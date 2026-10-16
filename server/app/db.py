@@ -52,7 +52,7 @@ def database_path(data_dir: Path) -> Path:
     return data_dir / DB_FILENAME
 
 
-def _make_private(path: Path) -> None:
+def make_private_file(path: Path) -> None:
     """Create ``path`` if needed so only the current user can read it (macOS/Linux, issue #5)."""
     if not path.exists():
         os.close(os.open(path, os.O_CREAT | os.O_WRONLY, 0o600))
@@ -62,7 +62,7 @@ def _make_private(path: Path) -> None:
 
 
 def _create_private_file(path: Path) -> None:
-    _make_private(path)
+    make_private_file(path)
     if sys.platform != "win32":
         for suffix in ("-wal", "-shm"):  # SQLite's WAL sidecar files hold recent data too
             sidecar = path.with_name(path.name + suffix)
@@ -104,10 +104,35 @@ def alembic_config() -> Config:
     return config
 
 
+def known_revisions() -> set[str]:
+    """Every migration this version of Budget Buddy has."""
+    return {r.revision for r in ScriptDirectory.from_config(alembic_config()).walk_revisions()}
+
+
+@contextmanager
+def open_read_only(db_path: Path) -> Iterator[sqlite3.Connection]:
+    """A plain read-only connection to a database file (no engine, never creates it)."""
+    connection = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+    try:
+        yield connection
+    finally:
+        connection.close()
+
+
+def database_revision(db_path: Path) -> str | None:
+    """The migration a database file is at, or None if it has none."""
+    with open_read_only(db_path) as connection:
+        try:
+            row = connection.execute("SELECT version_num FROM alembic_version").fetchone()
+        except sqlite3.DatabaseError:
+            return None
+    return row[0] if row else None
+
+
 @contextmanager
 def _exclusive_lock(lock_path: Path) -> Iterator[None]:
     """Hold an OS-level lock on ``lock_path`` so only one process/thread migrates at a time."""
-    _make_private(lock_path)
+    make_private_file(lock_path)
     with open(lock_path, "r+b") as lock_file:
         if sys.platform == "win32":
             import msvcrt
@@ -134,9 +159,9 @@ def _exclusive_lock(lock_path: Path) -> Iterator[None]:
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
-def _backup(engine: Engine, destination: Path) -> None:
+def copy_database(engine: Engine, destination: Path) -> None:
     """Consistent copy of the database (including anything still in the WAL file)."""
-    _make_private(destination)
+    make_private_file(destination)
     target = sqlite3.connect(destination)
     try:
         with engine.connect() as connection:
@@ -169,14 +194,12 @@ def run_migrations(engine: Engine) -> None:
     db_path = Path(engine.url.database)
     marker = scrub_marker_path(db_path)
     config = alembic_config()
-    scripts = ScriptDirectory.from_config(config)
-    head = scripts.get_current_head()
-    known = {revision.revision for revision in scripts.walk_revisions()}
+    head = ScriptDirectory.from_config(config).get_current_head()
 
     with _exclusive_lock(db_path.with_name(db_path.name + ".lock")):
         with engine.connect() as connection:
             current = MigrationContext.configure(connection).get_current_revision()
-        if current is not None and current not in known:
+        if current is not None and current not in known_revisions():
             raise DatabaseUpgradeError(NEWER_DATABASE_MESSAGE)
         if current != head:
             _upgrade_with_backup(engine, db_path, config, current)
@@ -190,7 +213,7 @@ def _upgrade_with_backup(
     backup_path = None
     if current is not None:
         backup_path = db_path.with_name(f"{db_path.name}.bak-{current}")
-        _backup(engine, backup_path)
+        copy_database(engine, backup_path)
         if current.isdigit() and int(current) < int(FIRST_ENCRYPTED_REVISION):
             # Before the migration commits, so a crash right after it still leaves the marker.
             write_private_bytes(scrub_marker_path(db_path), b"")
