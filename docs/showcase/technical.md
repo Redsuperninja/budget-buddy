@@ -36,7 +36,7 @@ no account system.
 | `dashboard/` | Plain HTML, CSS, ES modules. No framework, no bundler, no dependencies | Served by the Home Base; strict CSP (no inline script or style), SVG charts built in code |
 | `desktop/` | Python, pywebview, pystray, PyInstaller | Starts the Home Base as a child process and proves it's genuine with an HMAC challenge before showing it |
 | `mobile/` | Expo (React Native, TypeScript), tweetnacl | Offline snapshot, receipt capture, sync on home Wi-Fi |
-| `scripts/`, `launch/` | PowerShell + small Python API clients | Double-click start, build, install and release; demo data for testers |
+| `scripts/`, `launch/` | Python (standard library) + one-line launchers per system | Double-click start on Windows, macOS and Linux; build, install and release; demo data for testers |
 
 Parts never import each other's code; they meet only at the HTTP API or the [sync contract](../api/sync-contract.md)
 ([ADR-0005](../adr/0005-dashboard-own-folder.md)).
@@ -92,7 +92,7 @@ release on CI and attaches it to a draft GitHub Release ([release.md](../dev/rel
 
 ## Shipping
 
-- **Windows:** `scripts\release\make-release.ps1` makes `Budget-Buddy-<version>-Windows.zip`: the PyInstaller-built desktop
+- **Windows:** `scripts/release/make_release.py` makes `Budget-Buddy-<version>-Windows.zip`: the PyInstaller-built desktop
   app and Home Base (no Python needed), a per-user installer (no admin; Start menu, desktop shortcut, an entry in
   Settings, Apps), an uninstaller that keeps the data folder, and a plain-English read-me.
 - **Phones:** the dashboard in the phone's browser for now; the Expo app runs in Expo Go during testing.

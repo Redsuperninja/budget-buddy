@@ -12,7 +12,7 @@ The Python files in `testing/` are small clients of the Home Base's this-compute
 | --- | --- |
 | `start.py` | Everyday start (what **Start Budget Buddy** in `launch/` runs): sets up or updates the Home Base when needed, starts it on your real data, opens the dashboard; says so if it's already running. `--no-browser` skips opening the browser. |
 | `run-python.sh`, `run-python.bat` | Find Python 3.12+ and run a script with it, from the Budget Buddy folder; the files in `launch/` call them (`.sh` on macOS and Linux, `.bat` on Windows). |
-| `_common.py` | Shared by the others: paths, `say` / `stop` (plain-English messages, in color when the window can), the Python 3.12 check (on import), `venv_python(dir)`, `install_part(dir, extras, label)` (installs a part into its `.venv` only when its `pyproject.toml` or the extras changed; stamp in `.venv`) and `install_home_base(dev=)`. A script in a subfolder puts `scripts/` on `sys.path` first. |
+| `_common.py` | Shared by the others: paths, `say` / `stop` (plain-English messages, in color when the window can), the Python 3.12 check (on import), `require_windows(what)`, `open_file`, `rerun_with`, `venv_python(dir)`, `install_part(dir, extras, label)` (installs a part into its `.venv` only when its `pyproject.toml` or the extras changed, keeping extras installed before; stamp in `.venv`) and `install_home_base(dev=)`. A script in a subfolder puts `scripts/` on `sys.path` first. |
 | `_processes.py` | `start_home_base`, `wait_until_up`, `health_ok`, `port_in_use`, `stop_tree` and `stopped_afterwards`: run a Home Base and stop only what the script started, also after Ctrl+C. Each Home Base it starts stops by itself when the script ends (`BUDGET_BUDDY_STOP_WITH_PID`). |
 | `tests/` | Tests for the shared helpers: `server/.venv/Scripts/pytest scripts/tests` (`server/.venv/bin/pytest` on macOS and Linux). `ruff.toml` lints `scripts/` in the server's style. |
 
@@ -39,13 +39,16 @@ The Python helpers talk only to `127.0.0.1` on the test port (8766) and refuse t
 (port 8765). They also refuse unless `start_test_server.py` has made its marker file (`.budget-buddy-test-folder`)
 in the test data folder, so made-up data can't end up in real data.
 
-## Building and releasing (`scripts\release\`)
+## Building and releasing (`scripts/release/`, Windows only)
+
+The desktop app and its download are Windows-only ([ADR-0008](../docs/adr/0008-desktop-app.md)); these refuse to run
+elsewhere.
 
 | Script | What it does |
 | --- | --- |
-| `build-desktop.ps1` | Builds the desktop app into `launch\Budget Buddy\` ([desktop architecture](../docs/dev/architecture/desktop.md)); `launch\Build desktop app.bat` runs it. |
-| `install-desktop.ps1` | Installs the built app with `packaging\windows\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps. `launch\Install desktop app.bat` runs it. |
-| `make-release.ps1` | Builds the release download, `dist\Budget-Buddy-<version>-Windows.zip` and its `.sha256` ([release.md](../docs/dev/release.md)). |
+| `build_desktop.py` | Builds the desktop app into `launch\Budget Buddy\` (`--into <folder>` builds elsewhere; [desktop architecture](../docs/dev/architecture/desktop.md)); `launch\Build desktop app.bat` runs it. |
+| `install_desktop.py` | Installs the built app with `packaging\windows\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps (`--no-desktop-shortcut`). `launch\Install desktop app.bat` runs it. |
+| `make_release.py` | Builds the release download, `dist\Budget-Buddy-<version>-Windows.zip` and its `.sha256` ([release.md](../docs/dev/release.md)). |
 
 ## Developers (`scripts/dev/`)
 

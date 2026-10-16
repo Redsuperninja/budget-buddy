@@ -1,6 +1,6 @@
 # PyInstaller recipe for the packaged Home Base, "Budget Buddy Home Base.exe": the server with the
 # dashboard files bundled in (ADR-0005 asks the installer to ship them beside it). The desktop app starts
-# it (ADR-0008). Built by scripts\release\build-desktop.ps1. No console window: output goes nowhere unless
+# it (ADR-0008). Built by scripts/release/build_desktop.py. No console window: output goes nowhere unless
 # the program that starts it collects it.
 from pathlib import Path
 

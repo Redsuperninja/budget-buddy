@@ -12,7 +12,7 @@ You write for someone who has never used a terminal.
 - Guides go in `docs/guide/`, each listed in `docs/guide/README.md`. Keep the README quick start current.
   Guides only for testers (made-up data, test scripts) go in `docs/testing/`, listed in `docs/testing/README.md`.
 - Guides are for people only: no environment variables, API paths, file or module names, error codes, or code
-  (copy-paste PowerShell lines for testers are fine). Developer facts belong in `docs/dev/`; link there instead.
+  (copy-paste commands for testers are fine: `python3`, and `py` on Windows). Developer facts belong in `docs/dev/`; link there instead.
 - Add a "Something went wrong?" section with the most likely fixes first.
 - Follow `docs/dev/conventions.md`: one task per guide page, say each fact once and link to it.
 - Only document what exists. Check the code for the exact behavior and on-screen wording.
