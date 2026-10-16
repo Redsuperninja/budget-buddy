@@ -62,5 +62,27 @@ python -m app backup make [--to FOLDER]     # default: Documents (or the home fo
 python -m app backup restore FILE           # Budget Buddy must be closed; asks RESTORE before replacing data
 ```
 
-`make` works while the Home Base runs. The dashboard's **Make a backup** and **Restore** (roadmap 24b) use the same
-functions.
+`make` works while the Home Base runs.
+
+## In the dashboard (Devices → Backups)
+
+Routes in `server/app/routers/backup.py`, this computer only (not on the other-computers allow-list); page in
+`dashboard/js/screens/devices/backups.js`.
+
+| Route | Does |
+|---|---|
+| `GET /api/local/backup` | Status: this folder's key fingerprint, a waiting restore, and where replaced data went (only on the start that finished one) |
+| `GET /api/local/backup/file` | Makes a backup in the data folder (`.backup-*`), sends it, then deletes it |
+| `POST /api/local/backup/restore` | Upload (limit 4 GB), checked in full like the command line, then left waiting; `X-Recovery-Phrase` for another key's backup |
+| `DELETE /api/local/backup/restore` | Cancels a waiting restore (and drops its waiting key) |
+
+The page reads the fingerprint from the file's first 36 bytes in the browser (`backup-words.js`) and asks for the
+phrase only when it differs from the folder's. `app/backup/pending.py` swaps a waiting restore in at the next
+start, before keys and the database are opened; another computer's key waits in the vault under its own name
+until then.
+
+Crash safety: before moving anything, the start renames `restore-pending.json` to `restore-swapping.json`, and
+deletes it only after the key is stored. A start that finds it either finishes the last steps (the swap got to
+the end: `restore-pending/` is gone) or stops with a plain message (cut off mid-swap), never swapping twice.
+The download refuses a cross-site request (`Sec-Fetch-Site`), since a GET carries no CSRF token, and deletes its
+copy even if the browser stops early. One restore upload is checked at a time.

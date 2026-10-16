@@ -3,8 +3,8 @@
 
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]').content;
 
-export async function api(method, path, { json, body, contentType } = {}) {
-  const headers = {};
+export async function api(method, path, { json, body, contentType, headers: extra } = {}) {
+  const headers = { ...extra };
   if (method !== "GET") headers["X-CSRF-Token"] = csrfToken();
   let payload = body;
   if (json !== undefined) {

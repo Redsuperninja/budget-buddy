@@ -10,9 +10,10 @@ from fastapi import FastAPI
 from sqlalchemy.orm import Session
 
 from app import __version__, instance_proof, run_lock
+from app.backup import pending
 from app.backup.restore import sweep_leftovers
 from app.config import Settings
-from app.crypto import EncryptedFileStore, FieldCipher, load_keys
+from app.crypto import EncryptedFileStore, FieldCipher, get_key_store, load_keys
 from app.dashboard_files import default_dashboard_dir, load_dashboard
 from app.data_folder import warn_if_risky_data_dir
 from app.db import create_db_engine, run_migrations
@@ -22,7 +23,7 @@ from app.listeners import LanListener
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
-from app.routers import dashboard, health, instance
+from app.routers import backup, dashboard, health, instance
 from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.devices import pair, pairing, receipts, remote_computers, sync
 from app.routers.imports import activity_import, csv_import, history, stock_import
@@ -65,6 +66,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ensure_data_dir(settings.data_dir)
     warn_if_risky_data_dir(settings.data_dir)
     sweep_leftovers(settings.data_dir)  # from a backup or restore that was cut short
+    # A restore started in the dashboard, finished before anything is opened (ADR-0012).
+    restored_from = pending.finish(settings.data_dir, get_key_store(settings.key_store))
     keys = load_keys(settings)
     engine = create_db_engine(settings.data_dir, field_cipher=FieldCipher(keys.db_fields))
     run_migrations(engine)
@@ -99,6 +102,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.listener = LanListener(app, settings)  # opened by ``python -m app`` only
     app.state.keys = keys  # derived keys only (fields, files, backup); never the master key
     app.state.receipt_store = receipt_store
+    app.state.restored_from = restored_from  # where the replaced data went, if this start restored
     app.state.join_codes = JoinCodes()  # other computers' one-time codes, memory only (ADR-0009)
     app.state.join_limiter = RateLimiter(limit=10, window_seconds=60)  # per address
 
@@ -144,5 +148,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(price_feed.router)
     app.include_router(remote_computers.router)
     app.include_router(instance.router)
+    app.include_router(backup.router)
     app.include_router(dashboard.router)
     return app

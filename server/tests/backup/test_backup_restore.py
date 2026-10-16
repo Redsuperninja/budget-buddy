@@ -254,3 +254,23 @@ def test_a_running_home_base_holds_the_run_lock(data_dir, store):
     lock = run_lock.try_lock(data_dir)
     assert lock is not None
     run_lock.release(lock)
+
+
+def test_a_move_that_fails_is_undone_cleanly(saved, data_dir, monkeypatch, make_client):
+    """Like Windows refusing to move a file something holds open: nothing is left half-way."""
+    from pathlib import Path
+
+    backup, _ = saved
+    real_rename = Path.rename
+
+    def refuse_the_database(self, target):
+        if self.name == "budget.db" and self.parent == data_dir:
+            raise PermissionError(32, "in use")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", refuse_the_database)
+    code, text = run(["backup", "restore", str(backup)], ["RESTORE"])
+    monkeypatch.undo()
+    assert code == 1 and "put back as it was" in text
+    assert not list(data_dir.glob("before-restore-*")) and not list(data_dir.glob(".restore-*"))
+    make_client().app.state.engine.dispose()  # still starts on the data it had

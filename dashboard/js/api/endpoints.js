@@ -126,3 +126,11 @@ export const newJoinCode = () => api("POST", `${LOCAL}/remote-computers/join-cod
 export const listComputers = () => api("GET", `${LOCAL}/remote-computers`);
 export const removeComputer = (id) => api("POST", `${LOCAL}/remote-computers/${id}/remove`);
 export const joinThisComputer = (json) => api("POST", "/api/remote/join", { json });
+
+// Backups (ADR-0012): status, the file to download, and a restore that finishes at the next start.
+// phrase: the recovery phrase, only for a backup made with another key (a new computer).
+export const backupStatus = () => api("GET", `${LOCAL}/backup`);
+export const backupFileUrl = () => `${LOCAL}/backup/file`;
+export const startRestore = (file, phrase) => api("POST", `${LOCAL}/backup/restore`,
+  { body: file, contentType: "application/octet-stream", headers: phrase ? { "X-Recovery-Phrase": phrase } : {} });
+export const cancelRestore = () => api("DELETE", `${LOCAL}/backup/restore`);
