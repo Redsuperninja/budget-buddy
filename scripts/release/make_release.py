@@ -28,7 +28,9 @@ INSTALLER = (
 
 
 def version() -> str:
-    found = re.search(r'__version__ = "([^"]+)"', (SERVER_DIR / "app" / "__init__.py").read_text())
+    found = re.search(
+        r'__version__ = "([^"]+)"', (SERVER_DIR / "app" / "__init__.py").read_text("utf-8")
+    )
     if not found:
         stop("No __version__ in server/app/__init__.py.")
     return found[1]
@@ -45,17 +47,20 @@ def zip_folder(folder: Path, zip_path: Path) -> None:
 def main() -> int:
     argparse.ArgumentParser(description="Make the Windows download for a release.").parse_args()
     require_windows("The Windows download")
-    name = f"Budget-Buddy-{version()}-Windows"
+    number = version()
+    name = f"Budget-Buddy-{number}-Windows"
     stage, dist = REPO / "build" / "release" / name, REPO / "dist"
     zip_path = dist / f"{name}.zip"
     shutil.rmtree(stage, ignore_errors=True)
+    if stage.exists():  # an old file left behind would end up in the zip
+        stop(f"Couldn't clear {stage}. Close anything using it, then try again.")
     stage.mkdir(parents=True)
     dist.mkdir(exist_ok=True)
 
     build = [sys.executable, Path(__file__).with_name("build_desktop.py"), "--into", stage]
     if subprocess.run([str(part) for part in build]).returncode:
         return 1
-    (stage / "Budget Buddy" / "version.txt").write_text(version() + "\n", encoding="ascii")
+    (stage / "Budget Buddy" / "version.txt").write_text(number + "\n", encoding="ascii")
     for file in INSTALLER:
         shutil.copy(PACKAGING_DIR / file, stage)
 
