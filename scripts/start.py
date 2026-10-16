@@ -2,7 +2,7 @@
 opens the dashboard in your browser. Close this window (or press Ctrl+C) to stop Budget Buddy.
 
     Double-click "Start Budget Buddy" in the launch folder, or run from the Budget Buddy folder:
-    python3 scripts/start.py [--no-browser]          (on Windows: py scripts\\start.py)
+    python3 scripts/start.py [--no-browser]          (on Windows, type py instead of python3)
 
 Uses your real data folder and port 8765 (or BUDGET_BUDDY_DATA_DIR / BUDGET_BUDDY_PORT if set).
 Testers with made-up data use scripts/testing/start_test_server.py instead.

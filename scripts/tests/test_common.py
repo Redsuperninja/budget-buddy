@@ -16,7 +16,7 @@ def test_venv_python_matches_the_platform(tmp_path, monkeypatch):
 
 def test_command_for_says_how_to_run_a_script_here(monkeypatch):
     monkeypatch.setattr(_common, "WINDOWS", True)
-    assert _common.command_for("scripts/testing/set_up.py") == r"py scripts\testing\set_up.py"
+    assert _common.command_for("scripts/testing/set_up.py") == "py scripts/testing/set_up.py"
     monkeypatch.setattr(_common, "WINDOWS", False)
     assert _common.command_for("scripts/testing/set_up.py") == "python3 scripts/testing/set_up.py"
 

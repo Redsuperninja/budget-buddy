@@ -78,16 +78,40 @@ if sys.version_info < (3, 12):  # noqa: UP036
 
 
 def command_for(script: str) -> str:
-    """How to run a script from the Budget Buddy folder, for messages: ``scripts/x.py`` becomes
-    ``py scripts\\x.py`` on Windows and ``python3 scripts/x.py`` elsewhere."""
-    if WINDOWS:
-        return "py " + script.replace("/", "\\")
-    return "python3 " + script
+    """How to run a script from the Budget Buddy folder, for messages: ``py scripts/x.py`` on
+    Windows (Python takes / there too) and ``python3 scripts/x.py`` elsewhere."""
+    return ("py " if WINDOWS else "python3 ") + script
 
 
 def venv_python(part_dir: Path) -> Path:
     """The Python inside a part's own .venv."""
     return part_dir / ".venv" / ("Scripts/python.exe" if WINDOWS else "bin/python")
+
+
+def open_file(path: Path) -> None:
+    """Open a file in its usual app (a picture viewer for a .png). Raises OSError if it can't."""
+    if WINDOWS:
+        os.startfile(path)  # noqa: S606 -- a file this script just made
+    else:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        try:
+            subprocess.Popen([opener, str(path)], stderr=subprocess.DEVNULL)
+        except FileNotFoundError as exc:
+            raise OSError(f"{opener} isn't available") from exc
+
+
+def rerun_with(python: Path) -> None:
+    """Run this script again with ``python`` (a part's .venv, which has its packages) and end with
+    its exit code, unless this already is that Python."""
+    if Path(sys.prefix).resolve() == python.parent.parent.resolve():
+        return
+    command = [str(python), sys.argv[0], *sys.argv[1:]]
+    if not WINDOWS:
+        os.execv(command[0], command)  # becomes that Python, so Ctrl+C and exit codes just work
+    try:
+        raise SystemExit(subprocess.run(command).returncode)
+    except KeyboardInterrupt:  # the other Python got the Ctrl+C too
+        raise SystemExit(130) from None
 
 
 def run(command: list, cwd: Path, failure: str) -> None:
