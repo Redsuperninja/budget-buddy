@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- For developers: `scripts/dev/check_all.py`, `check_pages.py` and `tidy_branches.py` replace the PowerShell versions and work on macOS and Linux too (`--apply` instead of `-Apply`). `check_all.py` also lints and tests the scripts themselves; the page check finds Chrome or Chromium on a Mac or Linux.
 - For testers: the testing scripts work on a Mac and on Linux too, and are run the same way everywhere, for example `python3 scripts/testing/start_test_server.py` (on Windows, `py` instead of `python3`). Their names changed: `set_up.py`, `start_test_server.py` (`--reset` to start over), `load_demo_data.py`, `import_csv.py`, `pair_phone.py`, `start_phone_app.py`. The guides in `docs/testing` show the new commands.
 - **Start Budget Buddy** now works on a Mac and on Linux too: double-click **Start Budget Buddy.command** in the launch folder on a Mac, or run `launch/start-budget-buddy.sh` on Linux. On Windows, double-click **Start Budget Buddy** as before. Budget Buddy also stops cleanly if its window is closed.
 - Fixed: a few dashboard buttons now say what went wrong instead of doing nothing (**Forget this file** on Investments, **Remove my key and turn off** for live prices, **Undo** after linking a sweep), the bank import button can be tried again after an error (and can't be pressed with nothing new to import), and importing the same brokerage file from two windows at once says so plainly.

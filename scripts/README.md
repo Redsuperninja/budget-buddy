@@ -47,10 +47,10 @@ in the test data folder, so made-up data can't end up in real data.
 | `install-desktop.ps1` | Installs the built app with `packaging\windows\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps. `launch\Install desktop app.bat` runs it. |
 | `make-release.ps1` | Builds the release download, `dist\Budget-Buddy-<version>-Windows.zip` and its `.sha256` ([release.md](../docs/dev/release.md)). |
 
-## Developers (`scripts\dev\`)
+## Developers (`scripts/dev/`)
 
 | Script | What it does |
 | --- | --- |
-| `check-all.ps1` | Runs every part's checks, as CI does, and lists which passed ([testing.md](../docs/dev/testing.md)). |
-| `check-pages.ps1` (`check-pages.mjs`) | Opens every dashboard page in headless Edge or Chrome against a throwaway Home Base with demo data (temporary folder, deleted after), and fails on a script error, a file that didn't load, an error on the page or an empty page. `check-all.ps1` runs it too. |
-| `tidy-branches.ps1` | Tidies local branches after their pull requests merge ([workflow.md](../docs/dev/workflow.md)). |
+| `check_all.py` | Runs every part's checks, as CI does, plus the scripts' lint (`ruff.toml`) and tests (`tests/`), and lists which passed ([testing.md](../docs/dev/testing.md)). Skips the Windows-only desktop app elsewhere. |
+| `check_pages.py` (`check-pages.mjs`) | Opens every dashboard page in headless Edge, Chrome or Chromium (`--browser` to pick one) against a throwaway Home Base with demo data (temporary folder, deleted after), and fails on a script error, a file that didn't load, an error on the page or an empty page. `check_all.py` runs it too. |
+| `tidy_branches.py` | Tidies local branches after their pull requests merge (`--apply` to do it; [workflow.md](../docs/dev/workflow.md)). Run it inside the repo. |
