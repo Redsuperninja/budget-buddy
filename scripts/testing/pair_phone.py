@@ -1,6 +1,7 @@
 """Start pairing on the TEST Home Base and show the QR code for the phone to scan.
 
-Run it via scripts/testing/pair-phone.ps1. The code works once, for 10 minutes. It is a secret while it's
+Start the test Home Base first, then run python3 scripts/testing/pair_phone.py (on Windows, type
+py instead of python3). The code works once, for 10 minutes. It is a secret while it's
 valid, so it is only shown on screen and in a temporary picture that is deleted when you press
 Enter or the code expires, whichever comes first.
 """
@@ -14,10 +15,14 @@ import time
 from pathlib import Path
 
 from _local_api import ApiError, LocalApi, NotRunning
+from _test_settings import SET_UP, START_TEST_SERVER, require_set_up
 from _testguard import refuse_unless_test_server
+
+from _common import open_file, rerun_with
 
 
 def main() -> int:
+    rerun_with(require_set_up())  # the Home Base's Python has the QR code tool
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8766)
     port = parser.parse_args().port
@@ -30,36 +35,30 @@ def main() -> int:
         started = api.call("POST", "/api/local/pairing")
     except NotRunning:
         print(f"The test Home Base isn't running on port {port}.")
-        print("Start it first with scripts\\testing\\start-test-server.ps1 (in its own window).")
+        print(f"Start it first with {START_TEST_SERVER} (in its own window).")
         return 1
     except ApiError as exc:
         print(exc)
         return 1
 
     if not started.get("phone_can_connect", False):
-        print(
-            started.get("message") or "Your phone can't reach this computer right now."
-        )
+        print(started.get("message") or "Your phone can't reach this computer right now.")
         return 1
 
     try:
         import segno
     except ImportError:
-        print("The QR code tool isn't installed. Run scripts\\testing\\setup.ps1 again.")
+        print(f"The QR code tool isn't installed. Run {SET_UP} again.")
         return 1
 
     qr = segno.make(started["payload_text"], error="m")
-    print(
-        "On your phone: open Budget Buddy > Settings > Connect, then scan this code.\n"
-    )
+    print("On your phone: open Budget Buddy > Settings > Connect, then scan this code.\n")
     try:
-        qr.terminal()  # uses console colors, so it works in any Windows console
+        qr.terminal()  # console colors, so it works in any terminal or Windows console
     except (UnicodeEncodeError, OSError):
         print("(This window can't draw the code; use the picture window instead.)")
     seconds_left = max(0, started["expires_at"] - time.time())
-    print(
-        f"\nThe code works once and for about {max(1, round(seconds_left / 60))} minutes."
-    )
+    print(f"\nThe code works once and for about {max(1, round(seconds_left / 60))} minutes.")
     show_bigger_copy(qr, seconds_left)
     return 0
 
@@ -71,7 +70,7 @@ def show_bigger_copy(qr, seconds_left: float) -> None:
     picture = Path(name)
     try:
         qr.save(picture, scale=8)
-        os.startfile(picture)  # Windows: opens it in the picture viewer
+        open_file(picture)
         print("A bigger copy is open in a picture window.")
         done = threading.Event()
         threading.Thread(

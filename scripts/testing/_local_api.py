@@ -81,4 +81,3 @@ class LocalApi:
         if isinstance(result, dict) and "items" in result:
             return result["items"]
         return result
-

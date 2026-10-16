@@ -96,4 +96,4 @@ snapshot example are unit tests in `mobile/src/sync/__tests__/`.
 
 `scripts/` starts a separate **test** Home Base (port 8766, its own data folder) and fills it with made-up
 data. The Python helpers refuse to run against the real Home Base: they talk only to `127.0.0.1:8766` and need
-the marker file `start-test-server.ps1` makes in the test data folder. See [scripts/README.md](../../scripts/README.md).
+the marker file `start_test_server.py` makes in the test data folder. See [scripts/README.md](../../scripts/README.md).

@@ -16,6 +16,12 @@ User guides never name them; they say "ask whoever set up Budget Buddy" and link
 | `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. `memory` is for automated tests only and also needs `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1` ([testing.md](testing.md)). |
 | `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE` | unset | Test-only switch that allows the memory key store. Never use it for real data. |
 
+Read by the tester scripts only (`scripts/testing/`), not the Home Base:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `BUDGET_BUDDY_TEST_DATA_DIR` | `%LOCALAPPDATA%\BudgetBuddy-Test` (Windows), `~/.local/share/budget-buddy-test` (others) | The TEST Home Base's data folder. The page checker (`scripts/dev/`) points it at a temporary folder. |
+
 ## Moving your data folder
 
 If the Home Base warns that the data folder is inside a code project or a cloud-synced folder (OneDrive,

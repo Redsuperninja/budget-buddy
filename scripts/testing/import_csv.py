@@ -1,7 +1,12 @@
 """Preview a bank CSV file, then import it into an account on the TEST Home Base.
 
-Run it via scripts/testing/import-csv.ps1. Shows what Budget Buddy understood (columns, dates, amounts, and
-any problem rows) and asks before saving anything.
+Shows what Budget Buddy understood (columns, dates, amounts, and any problem rows) and asks before
+saving anything. Start the test Home Base first, then:
+
+    python3 scripts/testing/import_csv.py                          the sample file, demo checking
+    python3 scripts/testing/import_csv.py my.csv --account "Demo Credit Card" --flip-sign
+    (on Windows, type py instead of python3); add --skip-invalid to import the good rows when a few
+    rows can't be read
 """
 
 import argparse
@@ -10,6 +15,7 @@ import urllib.parse
 from pathlib import Path
 
 from _local_api import ApiError, LocalApi, NotRunning
+from _test_settings import START_TEST_SERVER
 from _testguard import refuse_unless_test_server
 
 
@@ -19,7 +25,7 @@ def call(api: LocalApi, method: str, path: str, body: bytes | None = None):
         return api.call(method, path, body=body, content_type="text/csv", timeout=30)
     except NotRunning:
         raise SystemExit(
-            "The test Home Base isn't running. Start scripts\\testing\\start-test-server.ps1 first."
+            f"The test Home Base isn't running. Start it first with {START_TEST_SERVER}."
         ) from None
     except ApiError as exc:
         raise SystemExit(f"Budget Buddy said: {exc}") from None
@@ -27,14 +33,16 @@ def call(api: LocalApi, method: str, path: str, body: bytes | None = None):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("file", type=Path)
     parser.add_argument(
-        "--account", default="Demo Everyday Checking", help="account name"
+        "file",
+        type=Path,
+        nargs="?",
+        default=Path(__file__).with_name("sample-bank-statement.csv"),
+        help="the bank CSV file (default: the sample one)",
     )
+    parser.add_argument("--account", default="Demo Everyday Checking", help="account name")
     parser.add_argument("--port", type=int, default=8766)
-    parser.add_argument(
-        "--flip-sign", action="store_true", help="for credit card files"
-    )
+    parser.add_argument("--flip-sign", action="store_true", help="for credit card files")
     parser.add_argument(
         "--skip-invalid",
         action="store_true",
@@ -72,7 +80,8 @@ def main() -> int:
 
     mapping = preview.get("mapping") or {}
     print(
-        f'Reading "{args.file.name}" into "{match[0]["name"]}". Dates look like {mapping.get("date_format")}.'
+        f'Reading "{args.file.name}" into "{match[0]["name"]}". '
+        f"Dates look like {mapping.get('date_format')}."
     )
     if preview.get("message"):
         print(preview["message"])
@@ -80,20 +89,18 @@ def main() -> int:
     print(f"\n{'Row':>4}  {'Date':10}  {'Amount':>11}  {'Status':10}  Description")
     for row in rows[:25]:
         cents = row.get("amount_cents")
-        amount = (
-            ""
-            if cents is None
-            else f"{'-' if cents < 0 else ''}${abs(cents) / 100:,.2f}"
-        )
+        amount = "" if cents is None else f"{'-' if cents < 0 else ''}${abs(cents) / 100:,.2f}"
         status = row.get("status") or ""
-        line = f"{row['row_number']:>4}  {row.get('date') or '?':10}  {amount:>11}  {status:10}  {row.get('description') or ''}"
+        date, description = row.get("date") or "?", row.get("description") or ""
+        line = f"{row['row_number']:>4}  {date:10}  {amount:>11}  {status:10}  {description}"
         print(line + (f"   <- {row['problem']}" if row.get("problem") else ""))
     if len(rows) > 25:
         print(f"   ...and {len(rows) - 25} more rows")
 
     if any(r.get("status") == "invalid" for r in rows) and not args.skip_invalid:
         print(
-            "\nSome rows have problems. Fix the file, or run again with -SkipInvalid to import the rest."
+            "\nSome rows have problems. Fix the file, or run again with --skip-invalid "
+            "to import the rest."
         )
         return 1
     if input("\nImport these rows? Type y and press Enter: ").strip().lower() != "y":
