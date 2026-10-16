@@ -55,7 +55,7 @@ here changes what the app does.
    `devices/`, with each section's parts next to its page (for example `money/transactions.js` with
    `give-to-charity.js`, `stock-trade-cell.js` and `category-picker.js`). `main.js` already lists pages by section,
    so the folders follow it one to one.
-2. **Done (locally, `scripts\dev\check-pages.ps1`; not in CI yet): screens have no automated test.** Only the logic modules and the static safety rules are tested. Add a small
+2. **Done (locally, `scripts/dev/check_pages.py`; not in CI yet): screens have no automated test.** Only the logic modules and the static safety rules are tested. Add a small
    smoke test that starts a test Home Base with demo data, opens every page in headless Edge or Chrome through the
    DevTools protocol (no packages; Node 22 has `WebSocket`) and fails on a script error or an empty page. A working
    prototype of the screenshot side was used for this hand-off.

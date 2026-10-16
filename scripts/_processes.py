@@ -37,17 +37,25 @@ def port_in_use(port: int) -> bool:
         return False
 
 
-def start_home_base(
-    python: Path, env: dict[str, str], background: bool = False, **popen
+def start(
+    command: list, env: dict[str, str], background: bool = False, **popen
 ) -> subprocess.Popen:
-    """Start ``python -m app`` in server/. ``background`` puts it in its own process group, so
-    Ctrl+C in this window doesn't reach it and :func:`stop_tree` can stop everything it started."""
-    env = {**os.environ, **env, "BUDGET_BUDDY_STOP_WITH_PID": str(os.getpid())}
+    """Start a command with ``env`` added to this one's settings. ``background`` puts it in its own
+    process group, so Ctrl+C in this window doesn't reach it and :func:`stop_tree` can stop
+    everything it started."""
     if background:
         popen["creationflags" if WINDOWS else "start_new_session"] = (
             subprocess.CREATE_NEW_PROCESS_GROUP if WINDOWS else True
         )
-    return subprocess.Popen([str(python), "-m", "app"], cwd=SERVER_DIR, env=env, **popen)
+    return subprocess.Popen([str(part) for part in command], env={**os.environ, **env}, **popen)
+
+
+def start_home_base(python: Path, env: dict[str, str], **options) -> subprocess.Popen:
+    """Start ``python -m app`` in server/, stopping by itself when this script ends, or when the
+    script that started this one does if it said so (see :func:`start` for the options)."""
+    watch = os.environ.get("BUDGET_BUDDY_STOP_WITH_PID") or str(os.getpid())
+    env = {**env, "BUDGET_BUDDY_STOP_WITH_PID": watch}
+    return start([python, "-m", "app"], env, cwd=SERVER_DIR, **options)
 
 
 def wait_until_up(port: int | str, process: subprocess.Popen, seconds: float = 30) -> bool:

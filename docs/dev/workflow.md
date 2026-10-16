@@ -41,7 +41,7 @@ those commits and decides which ones become pull requests and get merged on GitH
    push or merge when the owner asks.
 6. **Clean up:** PRs are squash-merged, and GitHub deletes the branch automatically after the merge. The merged
    PR keeps the full record (commits, description, reviews, checks), and its branch can be restored from the PR
-   page if ever needed. Then run `scripts\dev\tidy-branches.ps1 -Apply` (without `-Apply` it only shows what it
+   page if ever needed. Then run `python3 scripts/dev/tidy_branches.py --apply` (`py` on Windows; without `--apply` it only shows what it
    would do): it deletes local branches and agent worktrees whose PR merged, never anything unpushed, and moves
    any branches stacked on them onto the new `main`.
 
@@ -58,7 +58,7 @@ those commits and decides which ones become pull requests and get merged on GitH
 GitHub squash-merges a PR by replaying it onto `main`. If the next PR in a stack still contains the earlier
 PR's original commits, that replay can add the same lines twice. So for each PR, bottom first:
 1. Rebase what's left of the stack onto the new `main` (`git rebase --onto origin/main <merged branch> <top>
-   --update-refs`, or `scripts\dev\tidy-branches.ps1 -Apply`) and force-push those branches.
+   --update-refs`, or `scripts/dev/tidy_branches.py --apply`) and force-push those branches.
 2. Point the next PR at `main`, wait until GitHub says it can merge, then squash-merge it.
 3. Check `main` now has exactly the branch's content: `git rev-parse origin/main^{tree}` equals
    `git rev-parse <branch>^{tree}`.
@@ -70,7 +70,7 @@ Never use `gh pr merge --delete-branch` on a stack: deleting a branch yourself c
 - Work that needs an unmerged branch is **stacked** on it. Its PR targets that branch; when the lower PR merges,
   GitHub retargets the next one to `main`. Merge stacks bottom-first.
 - The repo sets `rebase.updateRefs`, so one `git rebase` moves a whole stack and every branch label in it
-  follows. After the bottom PR is squash-merged, `tidy-branches.ps1` does this for you.
+  follows. After the bottom PR is squash-merged, `tidy_branches.py` does this for you.
 
 ## Rules every agent follows
 - Small changes, one purpose each. Commit locally; the owner decides what gets pushed.

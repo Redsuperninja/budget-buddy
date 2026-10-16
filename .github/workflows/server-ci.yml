@@ -62,3 +62,9 @@ jobs:
           BUDGET_BUDDY_KEY_STORE: memory
           BUDGET_BUDDY_INSECURE_TEST_KEYSTORE: "1"
         run: pytest --cov
+      - name: Scripts (lint, format, tests)
+        working-directory: .
+        run: |
+          ruff check scripts
+          ruff format --check scripts
+          pytest -q scripts/tests

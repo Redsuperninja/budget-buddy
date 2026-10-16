@@ -15,8 +15,9 @@ How to check your work in each part, and what CI runs. (Testers trying Budget Bu
 On macOS/Linux use `.venv/bin/...`. Run the tests you touched first (`pytest -q path::test`,
 `npm test -- <pattern>`), then the full suite.
 
-**Everything at once:** `powershell -ExecutionPolicy Bypass -File scripts\dev\check-all.ps1` runs every part's
-checks (the same as CI) and lists which passed. Run it before pushing or merging, and always for a change one part
+**Everything at once:** `python3 scripts/dev/check_all.py` (on Windows, `py scripts/dev/check_all.py`) runs every
+part's checks (the same as CI, plus the scripts' own lint and tests) and lists which passed; on macOS and Linux it
+skips the Windows-only desktop app. Run it before pushing or merging, and always for a change one part
 makes that another relies on (below).
 
 ## Checks between parts
@@ -30,7 +31,7 @@ tests catch it; each reads the other side's files or a published example, never 
 | The phone snapshot gains, loses or retypes a field | The example in [sync-contract/05-snapshot.md](../api/sync-contract/05-snapshot.md) §5.2, read by `server/tests/devices/test_snapshot_contract_example.py` and `mobile/src/sync/__tests__/snapshot.test.ts` |
 | Pairing and sync encryption | The §4.7 vectors, in `server/tests/contract_vectors.py` and the phone's `pairing.test.ts` |
 | The desktop app's copies of the data folder rule, the default port and the "really Budget Buddy" proof | The example in [desktop-handshake.md](../api/desktop-handshake.md), read by `server/tests/test_desktop_handshake.py` and `desktop/tests/test_genuine.py` |
-| A dashboard screen breaks when it runs (a moved file, a renamed field the screen reads) | `scripts\dev\check-pages.ps1`: every page in a headless browser against a Home Base with demo data (needs Edge or Chrome; not in CI yet) |
+| A dashboard screen breaks when it runs (a moved file, a renamed field the screen reads) | `scripts/dev/check_pages.py`: every page in a headless browser against a Home Base with demo data (needs Edge, Chrome or Chromium; not in CI yet) |
 | The dashboard outgrows what the Home Base serves (past its file limit the page disappears) | `test_the_real_dashboard_is_served_whole_with_room_to_grow` in `server/tests/test_dashboard_serving.py` |
 
 Changing one of these on purpose: change the published example (or route) and both sides in the same branch.
@@ -85,7 +86,7 @@ Node's built-in runner reads the files with `fs` (no browser, no packages). `tes
 enforces the safety rules (no `innerHTML`, no inline script or style, no internet addresses, route strings only
 in `js/api/`); the other test files cover the logic modules (the list is in
 [dashboard/README.md](../../dashboard/README.md)). The screens themselves run in a real browser in
-`scripts\dev\check-pages.ps1` (above).
+`scripts/dev/check_pages.py` (above).
 
 ## Phone tests
 

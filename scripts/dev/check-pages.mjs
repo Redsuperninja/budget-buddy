@@ -1,9 +1,9 @@
 // Opens every dashboard page in a headless browser and fails on a script error, a file that didn't load, an error
 // message on the page, or a page that drew nothing. Talks to the browser over the DevTools protocol (Node 22's
 // built-in WebSocket; no packages). The page list comes from dashboard/js/main.js, so new pages are checked too.
-// Run by check-pages.ps1, which starts a throwaway Home Base with demo data first.
+// Run by check_pages.py, which starts a throwaway Home Base with demo data first.
 //
-//   node scripts/dev/check-pages.mjs <browser.exe> <Home Base address> <empty profile folder>
+//   node scripts/dev/check-pages.mjs <browser program> <Home Base address> <empty profile folder>
 
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
