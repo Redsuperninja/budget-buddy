@@ -1,7 +1,9 @@
 """Fill a TEST Home Base with made-up demo data, through its normal API.
 
 Everything here is fake: no real names, employers, charities or accounts. Dates are relative to
-today, so the last three months always have activity. Run it via scripts/testing/load-demo-data.ps1.
+today, so the last three months always have activity. Start the test Home Base first, then:
+
+    python3 scripts/testing/load_demo_data.py      (on Windows, type py instead of python3)
 
 Only talks to 127.0.0.1 on the test port (8766 by default), never the real Home Base on 8765.
 """
@@ -11,6 +13,7 @@ import datetime as dt
 import sys
 
 from _local_api import ApiError, LocalApi
+from _test_settings import START_TEST_SERVER
 from _testguard import refuse_unless_test_server
 
 DEMO_CHECKING = "Demo Everyday Checking"
@@ -43,23 +46,17 @@ def main() -> int:
         api.call("GET", "/api/health")
     except ApiError:
         print(f"The test Home Base isn't running on port {port}.")
-        print("Start it first with scripts\\testing\\start-test-server.ps1 (in its own window).")
+        print(f"Start it first with {START_TEST_SERVER} (in its own window).")
         return 1
 
     try:
         accounts = api.items("/api/local/accounts")
         if any(not a["name"].startswith("Demo ") for a in accounts):
-            print(
-                "Refusing: this Home Base has accounts that aren't demo data. Demo data only"
-            )
-            print(
-                "goes into an empty test Home Base (scripts\\testing\\start-test-server.ps1 -Reset)."
-            )
+            print("Refusing: this Home Base has accounts that aren't demo data. Demo data only")
+            print(f"goes into an empty test Home Base ({START_TEST_SERVER} --reset).")
             return 2
         if any(a["name"] == DEMO_CHECKING for a in accounts):
-            print(
-                "Demo data is already loaded. To start over: scripts\\testing\\start-test-server.ps1 -Reset"
-            )
+            print(f"Demo data is already loaded. To start over: {START_TEST_SERVER} --reset")
             return 0
         load(api, dt.date.today())  # noqa: DTZ011 -- the tester's local calendar date is what we want
     except ApiError as exc:
@@ -78,9 +75,7 @@ def load(api: LocalApi, today: dt.date) -> None:
         ("Demo Credit Card", "credit_card"),
         ("Demo Brokerage", "brokerage"),
     ]:
-        acct[kind] = api.call(
-            "POST", "/api/local/accounts", {"name": name, "kind": kind}
-        )["id"]
+        acct[kind] = api.call("POST", "/api/local/accounts", {"name": name, "kind": kind})["id"]
 
     print("Setting monthly budgets...")
     cats = {c["name"]: c["id"] for c in api.items("/api/local/categories")}
@@ -101,9 +96,7 @@ def load(api: LocalApi, today: dt.date) -> None:
     }
     for name, cents in budgets.items():
         if name in cats:
-            api.call(
-                "PATCH", f"/api/local/categories/{cats[name]}", {"budget_cents": cents}
-            )
+            api.call("PATCH", f"/api/local/categories/{cats[name]}", {"budget_cents": cents})
 
     def tx(account, date, cents, description, category=None, kind="normal"):
         body = {
@@ -192,17 +185,11 @@ def load(api: LocalApi, today: dt.date) -> None:
                 "Shopping",
                 kind="refund",
             )
-            tx(
-                "credit_card", day(20), -1875, "DEMO UNKNOWN SHOP"
-            )  # left unsorted on purpose
-        if happened(
-            day(22)
-        ):  # move money to savings: linking the two sides makes it a transfer
+            tx("credit_card", day(20), -1875, "DEMO UNKNOWN SHOP")  # left unsorted on purpose
+        if happened(day(22)):  # move money to savings: linking the two sides makes it a transfer
             out = tx("checking", day(22), -30000, "Transfer to savings")
             back = tx("savings", day(22), 30000, "Transfer from checking")
-            api.call(
-                "POST", f"/api/local/transactions/{out}/transfer", {"other_id": back}
-            )
+            api.call("POST", f"/api/local/transactions/{out}/transfer", {"other_id": back})
 
     year = today.year
     print("Adding demo donations...")

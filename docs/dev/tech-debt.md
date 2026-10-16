@@ -46,7 +46,7 @@ here changes what the app does.
    - `dt.date(year, 1, 1), dt.date(year, 12, 31)` in about nine tax/investing files: a public `year_range(year)`;
    - "not dismissed and no sweep yet" in `bank_trades.py`, `combined_sweeps.py`, `dividend_matching.py` and
      `sweep_check.py`: one `unlinked(model)` in `investing/sweeps.py`;
-   - the test-server setup repeated in `scripts/testing/demo_data.py`, `pair_phone.py` and `import_csv.py`: a
+   - the test-server setup repeated in `scripts/testing/load_demo_data.py`, `pair_phone.py` and `import_csv.py`: a
      `connect_test_server(port)` in `_local_api.py`.
 
 ## 3. Code debt (dashboard)

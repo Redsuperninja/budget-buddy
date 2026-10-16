@@ -47,20 +47,20 @@ foreach ($name in $Settings.Keys) {
 $server = $null
 $exitCode = 1
 try {
-    $server = Start-Process powershell -PassThru -WindowStyle Hidden -RedirectStandardOutput "$Run\server.log" `
+    $server = Start-Process $Python -PassThru -WindowStyle Hidden -RedirectStandardOutput "$Run\server.log" `
         -RedirectStandardError "$Run\server-errors.log" `
-        -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$RepoRoot\scripts\testing\start-test-server.ps1"
+        -ArgumentList "`"$RepoRoot\scripts\testing\start_test_server.py`""
     $up = $false
     for ($i = 0; $i -lt 60 -and -not $up; $i++) {
         try { Invoke-RestMethod "http://127.0.0.1:8766/api/health" -TimeoutSec 2 | Out-Null; $up = $true } catch { Start-Sleep 1 }
     }
     if (-not $up) { throw "The test Home Base didn't start; see $Run\server-errors.log." }
-    & powershell -NoProfile -ExecutionPolicy Bypass -File "$RepoRoot\scripts\testing\load-demo-data.ps1" | Out-Null
+    & $Python "$RepoRoot\scripts\testing\load_demo_data.py" | Out-Null
     if ($LASTEXITCODE) { throw "Loading the demo data failed." }
     & node "$PSScriptRoot\check-pages.mjs" $Browser "http://127.0.0.1:8766" "$Run\browser"
     $exitCode = $LASTEXITCODE
 } finally {
-    # Stop only what this run started: the Home Base its start-test-server.ps1 started, and browsers using this
+    # Stop only what this run started: the Home Base its start_test_server.py started, and browsers using this
     # run's own folder.
     if ($server) {
         Get-NetTCPConnection -LocalPort 8766 -State Listen -ErrorAction SilentlyContinue |
