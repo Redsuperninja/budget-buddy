@@ -13,7 +13,7 @@ Expo phone app isn't published to app stores yet.
 | `Uninstall Budget Buddy.bat` | Removes the app, its shortcuts, the Apps entry and Start with Windows. Never the data folder |
 | `READ ME FIRST.txt` | Plain-English install, first steps, phone, update and remove |
 
-The sources are in `packaging/windows/`, with both PyInstaller recipes; `scripts/release/install-desktop.ps1` uses the same `install.ps1` for a build
+The sources are in `packaging/windows/`, with both PyInstaller recipes; `scripts/release/install_desktop.py` uses the same `install.ps1` for a build
 from source.
 
 ## Checklist
@@ -21,7 +21,7 @@ from source.
 1. On `main`, with every part's checks green ([testing.md](testing.md)).
 2. Set the version in `server/app/__init__.py`, the only place it lives (the zip name and the installer's
    `version.txt` come from it). Move the `## Unreleased` lines in `CHANGELOG.md` under `## <version> - <date>`.
-3. Build and try it locally: `powershell -ExecutionPolicy Bypass -File scripts\release\make-release.ps1`, unzip
+3. Build and try it locally: `py scripts/release/make_release.py`, unzip
    `dist\Budget-Buddy-<version>-Windows.zip` somewhere new, run **Install Budget Buddy**, open it from the Start
    menu, check Home's Get started list, then uninstall from Windows Settings, Apps.
 4. Commit, tag `v<version>` and push the tag (only when the owner says so). `.github/workflows/release.yml`

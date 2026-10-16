@@ -123,14 +123,17 @@ def run(command: list, cwd: Path, failure: str) -> None:
 def install_part(part_dir: Path, extras: tuple[str, ...], label: str) -> Path:
     """Install a part (server or desktop) into its own .venv, or update it when its pyproject.toml
     or the extras (e.g. "dev", "build") changed since last time; a stamp in .venv remembers.
+    Extras installed before are kept, so building the app doesn't undo a tester's setup.
     Returns the .venv's Python."""
     python = venv_python(part_dir)
     stamp = part_dir / ".venv" / "budget-buddy-install.txt"
     digest = hashlib.sha256((part_dir / "pyproject.toml").read_bytes()).hexdigest().upper()
     if python.exists() and stamp.exists():
         had_digest, _, had = stamp.read_text(encoding="ascii").strip().partition(" ")
-        if had_digest == digest and set(extras) <= set(filter(None, had.split(","))):
+        installed = set(filter(None, had.split(",")))
+        if had_digest == digest and set(extras) <= installed:
             return python
+        extras = tuple(sorted(installed | set(extras)))
     say(f"Installing {label} (this can take a few minutes the first time)...")
     if not python.exists():
         hint = (
@@ -152,6 +155,12 @@ def install_part(part_dir: Path, extras: tuple[str, ...], label: str) -> Path:
     )
     stamp.write_text(f"{digest} {','.join(extras)}", encoding="ascii")
     return python
+
+
+def require_windows(what: str) -> None:
+    """End the script on other systems: ``what`` (say, "The desktop app") is Windows-only."""
+    if not WINDOWS:
+        stop(f"{what} is Windows-only (ADR-0008). On a Mac or Linux, use Start Budget Buddy.")
 
 
 def install_home_base(dev: bool = False) -> Path:

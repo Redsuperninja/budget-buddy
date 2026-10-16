@@ -37,9 +37,9 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 
 ## Building
 
-`scripts\release\build-desktop.ps1` (or `launch\Build desktop app.bat`) installs the `build` extra in `desktop/.venv` and the
+`scripts/release/build_desktop.py` (or `launch\Build desktop app.bat`) installs the `build` extra in `desktop/.venv` and the
 `package` extra in `server/.venv`, draws the icon, and runs both PyInstaller recipes
 (`packaging/windows/desktop.spec`, `packaging/windows/home-base.spec`) into `launch\Budget Buddy\`. The Home Base
 recipe bundles only the files the server serves (`index.html`, top-level CSS, `js/**/*.js`), the migrations and the
-tax data. `scripts\release\install-desktop.ps1` copies the result to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
+tax data. `scripts/release/install_desktop.py` copies the result (with `packaging/windows/install.ps1`) to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
 menu and desktop shortcuts. `THIRD-PARTY-NOTICES.txt` (the bundled packages' licenses) goes in the output too.

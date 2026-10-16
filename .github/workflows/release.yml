@@ -1,6 +1,6 @@
 name: release
 
-# Pushing a tag like v0.2.0 builds the Windows download (scripts/release/make-release.ps1) and attaches it to a draft
+# Pushing a tag like v0.2.0 builds the Windows download (scripts/release/make_release.py) and attaches it to a draft
 # GitHub Release, which the owner checks and publishes by hand (docs/dev/release.md). Nothing is signed yet.
 
 on:
@@ -24,8 +24,7 @@ jobs:
           $version = (Select-String -Path server/app/__init__.py -Pattern '__version__ = "([^"]+)"').Matches[0].Groups[1].Value
           if ("v$version" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} doesn't match version $version." }
       - name: Build the download
-        shell: powershell
-        run: powershell -ExecutionPolicy Bypass -File scripts\release\make-release.ps1
+        run: python scripts/release/make_release.py
       - name: Attach it to a draft release
         shell: pwsh
         env:

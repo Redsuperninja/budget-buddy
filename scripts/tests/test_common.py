@@ -49,22 +49,33 @@ def commands(monkeypatch):
 
 def test_nothing_is_installed_when_nothing_changed(part, commands):
     assert _common.install_part(part, ("dev",), "x") == _common.venv_python(part)
-    assert _common.install_part(part, (), "x") == _common.venv_python(
-        part
-    )  # fewer extras than installed
+    fewer = _common.install_part(part, (), "x")  # fewer extras than installed
+    assert fewer == _common.venv_python(part)
     assert commands == []
 
 
-def test_new_extras_install_again(part, commands):
-    _common.install_part(part, ("dev", "build"), "x")
-    assert commands[-1][-1] == ".[dev,build]"
-    assert (part / ".venv" / "budget-buddy-install.txt").read_text().endswith(" dev,build")
+def test_new_extras_install_again_keeping_the_old_ones(part, commands):
+    _common.install_part(part, ("build",), "x")  # building the app after a tester's setup
+    assert commands[-1][-1] == ".[build,dev]"
+    assert (part / ".venv" / "budget-buddy-install.txt").read_text().endswith(" build,dev")
 
 
-def test_a_changed_pyproject_installs_again(part, commands):
+def test_a_changed_pyproject_installs_again_with_the_same_extras(part, commands):
     (part / "pyproject.toml").write_text("[project]\nname = 'y'\n")
     _common.install_part(part, (), "x")
+    assert commands[-1][-2:] == ["-e", ".[dev]"]
+
+
+def test_a_new_venv_installs_just_what_was_asked(tmp_path, commands):
+    (tmp_path / "pyproject.toml").write_text("")
+    _common.install_part(tmp_path, (), "x")
     assert commands[-1][-2:] == ["-e", "."]
+
+
+def test_windows_only_scripts_stop_elsewhere(monkeypatch):
+    monkeypatch.setattr(_common, "WINDOWS", False)
+    with pytest.raises(SystemExit):
+        _common.require_windows("The desktop app")
 
 
 def test_a_missing_venv_is_made_first(tmp_path, commands):
