@@ -1,33 +1,31 @@
 # Budget Buddy: notes for Claude
 
-Local-first budgeting + tax-prep app. Home Base server in `server/` (Python/FastAPI/SQLite), phone app in
-`mobile/` (Expo), web dashboard in `dashboard/`, Windows app in `desktop/`, double-click launchers in `launch/`. Read `docs/dev/architecture/README.md`, `docs/ROADMAP.md`, and
-`docs/adr/` first (map of all docs: `docs/README.md`).
+Local-first budgeting + tax-prep app: Home Base server `server/` (Python/FastAPI/SQLite), phone app `mobile/`
+(Expo), web dashboard `dashboard/`, Windows app `desktop/`, launchers `launch/`. Docs map: `docs/README.md`;
+read only the `docs/dev/architecture/<topic>.md` and ADRs your task touches.
 
-## How work is done
-- Work is split across the specialized agents in `.claude/agents/`; see `docs/dev/workflow.md`.
-- One roadmap item = one small local branch (`feat/|fix/|docs/|chore/`). Never commit to `main` directly.
-- Any change to storage, encryption, pairing, sync, auth, or uploads gets a `security-reviewer` pass.
-  Any change to budget or tax math gets a `finance-tax-expert` pass.
+## Agents and reviewers
+Agents in `.claude/agents/` (`docs/dev/workflow.md`). Storage, encryption, pairing, sync, auth or uploads →
+`security-reviewer`. Budget or tax math → `finance-tax-expert`.
 
 ## Hard rules
-- Never commit real financial data, keys, tokens, `.env`, databases, or receipt images.
-- Money is integer cents. Dates are ISO `YYYY-MM-DD`.
-- Tax-year numbers live in per-year data files with sources, not in logic.
-- User-facing text is plain English for non-technical users.
-- Small files, no repetition: one job per file, reuse shared helpers, one topic per doc. See `docs/dev/conventions.md`.
-- Attribution: code is built by Claude, designed and reviewed by the owner (stated in README and `docs/dev/workflow.md`).
-  Do NOT add `Co-Authored-By: Claude` trailers or "Generated with Claude Code" lines. PR descriptions end with
-  exactly one line: "Built with Claude Code; designed and reviewed by @Redsuperninja."
-- Commit to local branches by default. Push, open PRs, or merge only when the owner asks for it.
-- Docs ship with the code, in the same branch: tick `docs/ROADMAP.md`, add a `CHANGELOG.md` line, update
-  the matching `docs/dev/architecture/<topic>.md` and the part's README (`server/`, `dashboard/`, `mobile/`,
-  `desktop/`, `scripts/`) for any API, data, or setup change, keep the root `README.md` accurate, and add or update a
-  plain-English guide in `docs/guide/` (listed in `docs/guide/README.md`) for any user-facing feature.
+- Never commit real financial data, keys, `.env`, databases, receipt images, or real hostnames/IPs.
+- Money is integer cents. Dates are ISO `YYYY-MM-DD`. Tax-year numbers live in per-year data files with sources.
+- Conventions: `docs/dev/conventions.md`.
+
+## Docs in the same branch
+Tick `docs/ROADMAP.md`, add a `CHANGELOG.md` line, update `docs/dev/architecture/<topic>.md` and the part's
+README for API/data/setup changes, and a plain-English guide in `docs/guide/` (listed in its README) for
+anything users see.
+
+## Git and attribution
+Local `feat/|fix/|docs/|chore/` branches; push, PR or merge only when the owner asks. No Claude trailers; PRs end
+with exactly: "Built with Claude Code; designed and reviewed by @Redsuperninja."
 
 ## Commands
-- Server: `cd server && python -m venv .venv && .venv/Scripts/pip install -e ".[dev]" && .venv/Scripts/pytest`
+- Server: `cd server && .venv/Scripts/pytest` (setup: `python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"`).
+  The full suite takes ~14 min: run tests for what you touched, and the full suite once, in the background, before committing.
 - Dashboard: `cd dashboard && node --test`
-- Mobile: `cd mobile && npm install && npx tsc --noEmit && npm test`
-- Desktop (Windows): `cd desktop && py -3 -m venv .venv && .venv/Scripts/pip install -e ".[dev]" && .venv/Scripts/pytest`
-- More (CI, test-only key store, fake dashboard): `docs/dev/testing.md`
+- Mobile: `cd mobile && npx tsc --noEmit && npm test`
+- Desktop: `cd desktop && .venv/Scripts/pytest`
+- More: `docs/dev/testing.md`

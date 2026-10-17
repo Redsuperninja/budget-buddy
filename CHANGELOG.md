@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- For developers: shorter Claude instructions (`CLAUDE.md` and `.claude/agents/`), so each session and agent reads less; agents run only the tests they touch, and the full suite runs once before a commit.
 - Backups in the dashboard: on the Budget Buddy computer, **Devices → Backups** downloads an encrypted backup of all your data and receipt photos, or restores one. A restore is checked first and finishes the next time Budget Buddy starts (it can be cancelled until then); a backup from another computer asks for its recovery phrase. Also fixed: a new computer could refuse a restore because of its starting categories.
 - Encrypted backups, first step: `python -m app backup make` saves all your data and receipt photos in one encrypted file, and `backup restore` brings it back (with Budget Buddy closed), checking the whole file before changing anything and keeping what it replaces. On another computer it asks for your recovery phrase. Buttons in the dashboard come next.
 - Behind the scenes: the build, install and release scripts are Python too (`scripts/release/build_desktop.py`, `install_desktop.py`, `make_release.py`), so no script needs PowerShell any more; only the Windows installer inside the download still uses it. **Build desktop app** and **Install desktop app** in the launch folder work as before, and the download is the same.
