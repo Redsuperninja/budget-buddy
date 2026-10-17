@@ -75,6 +75,7 @@ Routes in `server/app/routers/backup.py`, this computer only (not on the other-c
 | `GET /api/local/backup/file` | Makes a backup in the data folder (`.backup-*`), sends it, then deletes it |
 | `POST /api/local/backup/restore` | Upload (limit 4 GB), checked in full like the command line, then left waiting; `X-Recovery-Phrase` for another key's backup |
 | `DELETE /api/local/backup/restore` | Cancels a waiting restore (and drops its waiting key) |
+| `POST /api/local/backup/recovery-phrase` | The folder's phrase, read from the vault each time (never kept in the running Home Base), `Cache-Control: no-store`; a POST so it needs the CSRF token |
 
 The page reads the fingerprint from the file's first 36 bytes in the browser (`backup-words.js`) and asks for the
 phrase only when it differs from the folder's. `app/backup/pending.py` swaps a waiting restore in at the next

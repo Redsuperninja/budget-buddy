@@ -10,10 +10,10 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 
 from app.backup import pending, uploads
-from app.crypto import get_key_store
-from app.crypto.keys import read_fingerprint
+from app.crypto import get_key_store, load_master_key, master_key_to_phrase
+from app.crypto.keys import matches_fingerprint, read_fingerprint
 from app.errors import ApiError
-from app.schemas.backup import BackupStatus, PendingRestore
+from app.schemas.backup import BackupStatus, PendingRestore, RecoveryPhrase
 
 router = APIRouter(prefix="/api/local/backup", tags=["backup"])
 _one_upload = asyncio.Lock()  # a restore upload can be gigabytes: one at a time
@@ -71,3 +71,20 @@ def cancel_restore(request: Request) -> Response:
     settings = request.app.state.settings
     pending.cancel(settings.data_dir, get_key_store(settings.key_store))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/recovery-phrase")
+def show_recovery_phrase(request: Request, response: Response) -> RecoveryPhrase:
+    """The phrase for this folder's key, read from the vault each time (roadmap 24c). A POST, so
+    it needs the page's CSRF token; never cached, logged or kept in the running Home Base."""
+    settings = request.app.state.settings
+    key = load_master_key(get_key_store(settings.key_store), settings.data_dir)
+    if key is None or matches_fingerprint(settings.data_dir, key) is False:
+        raise ApiError(
+            409,
+            "no_recovery_phrase",
+            "Budget Buddy can't find the right key in this computer's password vault, so it "
+            "can't show a recovery phrase. Nothing was changed.",
+        )
+    response.headers["Cache-Control"] = "no-store"
+    return RecoveryPhrase(phrase=master_key_to_phrase(key))

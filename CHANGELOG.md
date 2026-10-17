@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Show my recovery phrase** on Devices → Backups (Budget Buddy computer only): shows the words that unlock your data and backups, after a warning, and hides them again when you leave the page. Before, it was only shown in a terminal window.
 - For developers: shorter Claude instructions (`CLAUDE.md` and `.claude/agents/`), so each session and agent reads less; agents run only the tests they touch, and the full suite runs once before a commit.
 - Backups in the dashboard: on the Budget Buddy computer, **Devices → Backups** downloads an encrypted backup of all your data and receipt photos, or restores one. A restore is checked first and finishes the next time Budget Buddy starts (it can be cancelled until then); a backup from another computer asks for its recovery phrase. Also fixed: a new computer could refuse a restore because of its starting categories.
 - Encrypted backups, first step: `python -m app backup make` saves all your data and receipt photos in one encrypted file, and `backup restore` brings it back (with Budget Buddy closed), checking the whole file before changing anything and keeping what it replaces. On another computer it asks for your recovery phrase. Buttons in the dashboard come next.

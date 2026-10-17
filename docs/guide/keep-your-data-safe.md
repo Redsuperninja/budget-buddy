@@ -29,7 +29,13 @@ The encryption key is created the first time Budget Buddy starts. **Save your re
 
 If your computer's password vault is ever lost (for example after reinstalling Windows or moving to a new computer), you can put the key back using your recovery phrase. Without the phrase, a lost key means the encrypted data can't be recovered.
 
-To save your recovery phrase, ask whoever set up Budget Buddy how to get it — it's kept in your password vault, not written to the computer.
+To see your recovery phrase:
+1. On the Budget Buddy computer, open the dashboard and go to **Devices → Backups**.
+2. Make sure nobody else can see your screen, then click **Show my recovery phrase** and confirm.
+3. Write the words on paper, or keep them in a password manager. Don't save a photo or a file on the computer.
+4. Click **Hide it**.
+
+The phrase also unlocks your backups: see [Back up and restore your data](back-up-and-restore.md).
 
 ## Old backup copies
 
@@ -41,6 +47,11 @@ To delete them safely:
 3. Delete the old `.bak-*` copies (keep the current `.db` file)
 
 ## Something went wrong?
+
+**"Budget Buddy can't find the right key in this computer's password vault"**
+
+The key isn't in this computer's password vault (or it's a different one), so there's no phrase to show. If you
+saved your phrase before, ask whoever set up Budget Buddy to put it back.
 
 **"We found an old backup copy of your data folder that isn't encrypted"**
 

@@ -57,6 +57,13 @@ def test_a_computer_that_hasnt_joined_gets_nothing(laptop):
     assert code_of(response) == "not_this_computer"
 
 
+def test_a_joined_computer_never_gets_the_recovery_phrase(home, laptop):
+    laptop = joined(home, laptop)
+    response = laptop.post("/api/local/backup/recovery-phrase")
+    assert response.status_code == 403
+    assert code_of(response) == "not_this_computer" and 'phrase"' not in response.text
+
+
 def test_joining_lets_the_computer_use_the_dashboard(home, laptop):
     laptop = joined(home, laptop)
     assert service.COOKIE_NAME in laptop.cookies

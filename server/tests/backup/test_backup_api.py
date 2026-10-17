@@ -222,3 +222,22 @@ def test_a_start_cut_short_during_the_swap_stops(backup, make_client, data_dir):
     with pytest.raises(RestoreStuckError, match="stopped in the middle"):
         make_client()
     assert (data_dir / pending.PENDING_DIR).is_dir()  # nothing deleted or swapped again
+
+
+def test_the_recovery_phrase_is_shown_on_this_computer(store, client, data_dir):
+    response = client.post("/api/local/backup/recovery-phrase")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json()["phrase"] == master_key_to_phrase(store.get(key_name_for(data_dir)))
+
+
+def test_the_recovery_phrase_needs_the_pages_token(client):
+    response = client.post("/api/local/backup/recovery-phrase", headers={"X-CSRF-Token": "wrong"})
+    assert response.status_code == 403
+    assert "phrase" not in response.text
+
+
+def test_no_recovery_phrase_without_the_right_key(store, client, data_dir):
+    store.delete(key_name_for(data_dir))
+    response = client.post("/api/local/backup/recovery-phrase")
+    assert response.status_code == 409 and response.json()["error"]["code"] == "no_recovery_phrase"
