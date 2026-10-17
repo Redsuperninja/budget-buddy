@@ -17,7 +17,9 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 - The memory key store is for automated tests only and needs a second switch ([../testing.md](../testing.md)).
 - Backup copies `budget.db.bak-0001`/`-0002` predate encryption and are plaintext; the Home Base tells the user
   so they can delete them.
-- Planned: an encrypted single-file backup export the user can copy to a USB drive.
+- **Backups** ([backup.md](backup.md), [ADR-0012](../../adr/0012-encrypted-backups.md)): one file, encrypted as a whole
+  with a per-file key from the backup subkey; it holds no key. Restoring checks all of it before changing
+  anything, never runs while the Home Base does, and keeps the replaced data in `before-restore-*`.
 
 ## The desktop app and a Home Base already running
 

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Encrypted backups, first step: `python -m app backup make` saves all your data and receipt photos in one encrypted file, and `backup restore` brings it back (with Budget Buddy closed), checking the whole file before changing anything and keeping what it replaces. On another computer it asks for your recovery phrase. Buttons in the dashboard come next.
 - Behind the scenes: the build, install and release scripts are Python too (`scripts/release/build_desktop.py`, `install_desktop.py`, `make_release.py`), so no script needs PowerShell any more; only the Windows installer inside the download still uses it. **Build desktop app** and **Install desktop app** in the launch folder work as before, and the download is the same.
 - For developers: `scripts/dev/check_all.py`, `check_pages.py` and `tidy_branches.py` replace the PowerShell versions and work on macOS and Linux too (`--apply` instead of `-Apply`). `check_all.py` also lints and tests the scripts themselves; the page check finds Chrome or Chromium on a Mac or Linux.
 - For testers: the testing scripts work on a Mac and on Linux too, and are run the same way everywhere, for example `python3 scripts/testing/start_test_server.py` (on Windows, `py` instead of `python3`). Their names changed: `set_up.py`, `start_test_server.py` (`--reset` to start over), `load_demo_data.py`, `import_csv.py`, `pair_phone.py`, `start_phone_app.py`. The guides in `docs/testing` show the new commands.

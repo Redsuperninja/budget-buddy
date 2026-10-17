@@ -61,6 +61,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [security.md](security.md) | Encryption at rest, what stays plain text, which routes face the network |
 | [data-model.md](data-model.md) | Tables and key fields |
 | [database.md](database.md) | Alembic migrations, automatic upgrade, backup copies |
+| [backup.md](backup.md) | Encrypted backup files: the format, what's inside, checking and swapping on restore |
 | [ledger.md](ledger.md) | Accounts and transactions: kinds, signs, balances, routes |
 | [budget-summary.md](budget-summary.md) | Categories and the monthly summary |
 | [budget-engine.md](budget-engine.md) | Suggested budget (50/30/20 from recent months) |

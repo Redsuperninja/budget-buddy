@@ -1,6 +1,6 @@
 """Run the Home Base with ``python -m app``.
 
-Also: ``python -m app recovery-phrase show|restore`` (see ``app/cli.py``).
+Also: ``python -m app recovery-phrase show|restore`` and ``backup make|restore`` (``app/cli.py``).
 """
 
 import os

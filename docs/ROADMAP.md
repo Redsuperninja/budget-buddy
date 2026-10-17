@@ -129,6 +129,7 @@ done.
 - [x] 22c. Scripts work on Windows, macOS and Linux: Python with thin launchers (ADR-0011) — *backend-engineer*
 - [ ] 23. Plain-English user guide with screenshots — *docs-writer*
 - [ ] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
+  - Done so far: 24a, the backup file and `python -m app backup make|restore` ([ADR-0012](adr/0012-encrypted-backups.md)); next 24b (dashboard) and 24c (recovery phrase in the dashboard)
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
   - Done so far: Windows download with installer and uninstall (`scripts/release/make_release.py`, release workflow, [release.md](dev/release.md)); simple view with All tools; Get started checklist on Home; phone-friendly dashboard for a phone's browser
 
