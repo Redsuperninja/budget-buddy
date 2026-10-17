@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Safer key storage (#27): Budget Buddy keeps its encryption key only in a real password vault (Windows Credential Manager, macOS Keychain, GNOME Keyring or KWallet). On Linux, a keyring that saves passwords in a file (like `keyrings.alt`) is now refused with a clear message instead of being used.
 - Behind the scenes (#6, part 2): the Home Base and desktop app install exact versions from lock files with hashes (`requirements.txt`, `requirements-dev.txt`; ADR-0013), on every computer and in CI, so a changed or hijacked package fails the install instead of running. Developers: after changing a `pyproject.toml`, run `scripts/dev/lock_dependencies.py`.
 - Behind the scenes (#6, part 1): the Home Base installs fewer packages (plain `uvicorn`, without extras it never used); GitHub Actions are pinned to exact commits; Dependabot opens weekly update PRs. Lock files with hashes come next.
 - The user guide has pictures: each dashboard page's guide shows what the page looks like (made-up demo data). For developers: `scripts/dev/check_pages.py --screenshots docs/guide/images` takes them again after a screen changes.

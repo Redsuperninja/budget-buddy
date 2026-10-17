@@ -63,6 +63,31 @@ _NO_VAULT_MESSAGE = (
 )
 
 
+# The OS password vaults (ADR-0003). Anything else, like keyrings.alt's plaintext or "encrypted"
+# file backends or the null backend, would keep the master key in a file (issue #27).
+OS_VAULTS = frozenset(
+    {
+        "keyring.backends.Windows.WinVaultKeyring",
+        "keyring.backends.macOS.Keyring",
+        "keyring.backends.SecretService.Keyring",
+        "keyring.backends.libsecret.Keyring",  # the Secret Service too, through libsecret
+        "keyring.backends.kwallet.DBusKeyring",
+        "keyring.backends.kwallet.DBusKeyringKWallet4",
+    }
+)
+
+
+def is_os_vault(backend) -> bool:
+    """Whether a keyring backend is one of the OS vaults. The chainer reads from every backend it
+    chains and writes to the first that takes it, so it counts only when all of them are vaults."""
+    import keyring.backends.chainer
+
+    if isinstance(backend, keyring.backends.chainer.ChainerBackend):
+        chained = list(backend.backends)
+        return bool(chained) and all(is_os_vault(each) for each in chained)
+    return f"{type(backend).__module__}.{type(backend).__qualname__}" in OS_VAULTS
+
+
 class KeyringKeyStore:
     """Keeps keys in the OS password vault via the ``keyring`` package."""
 
@@ -72,9 +97,8 @@ class KeyringKeyStore:
     @staticmethod
     def _keyring():
         import keyring
-        import keyring.backends.fail
 
-        if isinstance(keyring.get_keyring(), keyring.backends.fail.Keyring):
+        if not is_os_vault(keyring.get_keyring()):
             raise KeyStoreError(_NO_VAULT_MESSAGE)
         return keyring
 

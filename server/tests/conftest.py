@@ -14,6 +14,19 @@ def memory_key_store(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BUDGET_BUDDY_INSECURE_TEST_KEYSTORE", "1")
 
 
+@pytest.fixture(autouse=True, scope="session")
+def no_real_password_vault():
+    """If a test still reaches for the keyring (say after monkeypatch.undo()), it fails loudly
+    instead of writing a key into this computer's real vault. test_keys.py sets its own fakes."""
+    import keyring
+    import keyring.backends.fail
+
+    previous = keyring.get_keyring()
+    keyring.set_keyring(keyring.backends.fail.Keyring())
+    yield
+    keyring.set_keyring(previous)
+
+
 @pytest.fixture(autouse=True)
 def fixed_lan_ip(monkeypatch: pytest.MonkeyPatch) -> None:
     """Tests never depend on the real network: pretend this computer is 192.168.1.20."""

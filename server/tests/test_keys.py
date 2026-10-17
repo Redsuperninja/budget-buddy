@@ -1,5 +1,6 @@
 """Encryption keys: derivation, key stores, the memory-store guard, master-key lifecycle."""
 
+import importlib
 import stat
 import sys
 import threading
@@ -7,7 +8,9 @@ import time
 
 import keyring
 import keyring.backend
+import keyring.backends.chainer
 import keyring.backends.fail
+import keyring.backends.null
 import pytest
 from crypto_helpers import KEY, OTHER_KEY
 
@@ -23,6 +26,7 @@ from app.crypto import (
     derive_key,
     get_key_store,
     key_name_for,
+    keystore,
     load_keys,
     load_or_create_master_key,
 )
@@ -102,12 +106,57 @@ class _DictKeyring(keyring.backend.KeyringBackend):
 
 
 @pytest.fixture
-def fake_keyring():
+def fake_keyring(monkeypatch):
+    """A dict-backed keyring, counted as an OS vault for this test only."""
     previous = keyring.get_keyring()
     backend = _DictKeyring()
+    monkeypatch.setattr(keystore, "OS_VAULTS", keystore.OS_VAULTS | {_name(backend)})
     keyring.set_keyring(backend)
     yield backend
     keyring.set_keyring(previous)
+
+
+def _name(backend) -> str:
+    return f"{type(backend).__module__}.{type(backend).__qualname__}"
+
+
+@pytest.mark.parametrize("name", sorted(keystore.OS_VAULTS))
+def test_every_allowed_vault_is_a_real_keyring_class(name):
+    module, _, cls = name.rpartition(".")
+    assert issubclass(getattr(importlib.import_module(module), cls), keyring.backend.KeyringBackend)
+
+
+@pytest.mark.parametrize("use", ["get", "set", "delete"])
+@pytest.mark.parametrize("backend", [_DictKeyring(), keyring.backends.null.Keyring()])
+def test_a_backend_that_is_not_an_os_vault_is_refused(backend, use):
+    """Like keyrings.alt's PlaintextKeyring: the key would sit in a file (issue #27)."""
+    previous = keyring.get_keyring()
+    keyring.set_keyring(backend)
+    store = KeyringKeyStore()
+    try:
+        with pytest.raises(KeyStoreError, match="password vault"):
+            store.set("data-x", KEY) if use == "set" else getattr(store, use)("data-x")
+    finally:
+        keyring.set_keyring(previous)
+    assert getattr(backend, "passwords", {}) == {}
+
+
+class _PlaintextKeyring(_DictKeyring):
+    """Stands in for keyrings.alt's file backends."""
+
+
+@pytest.mark.parametrize(
+    ("chained", "allowed"),
+    [(["vault"], True), (["vault", "plaintext"], False), (["plaintext"], False), ([], False)],
+)
+def test_the_chainer_counts_only_when_every_chained_backend_is_a_vault(
+    monkeypatch, chained, allowed
+):
+    backends = {"vault": _DictKeyring(), "plaintext": _PlaintextKeyring()}
+    monkeypatch.setattr(keystore, "OS_VAULTS", frozenset({_name(backends["vault"])}))
+    chainer_class = keyring.backends.chainer.ChainerBackend
+    monkeypatch.setattr(chainer_class, "backends", [backends[each] for each in chained])
+    assert keystore.is_os_vault(chainer_class()) is allowed
 
 
 def test_keyring_store_round_trip(fake_keyring):
