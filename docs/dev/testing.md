@@ -7,10 +7,10 @@ How to check your work in each part, and what CI runs. (Testers trying Budget Bu
 
 | Part | Set up once | Check |
 | --- | --- | --- |
-| Server | `cd server`, `python -m venv .venv`, `.venv\Scripts\pip install -e ".[dev]"` | `.venv\Scripts\ruff check .`, `.venv\Scripts\ruff format --check .`, `.venv\Scripts\pytest` |
+| Server | `cd server`, `python -m venv .venv`, `.venv\Scripts\pip install --require-hashes -r requirements-build.txt`, `.venv\Scripts\pip install --require-hashes --no-build-isolation -r requirements-dev.txt`, `.venv\Scripts\pip install --no-deps --no-build-isolation -e .` | `.venv\Scripts\ruff check .`, `.venv\Scripts\ruff format --check .`, `.venv\Scripts\pytest` |
 | Dashboard | Node 22+, nothing to install | `cd dashboard`, `node --test` |
 | Phone | `cd mobile`, `npm install` | `npx tsc --noEmit` (or `npm run typecheck`), `npm test` |
-| Desktop (Windows) | `cd desktop`, `py -3 -m venv .venv`, `.venv\Scripts\pip install -e ".[dev]"` | `.venv\Scripts\ruff check .`, `.venv\Scripts\pytest --cov` |
+| Desktop (Windows) | `cd desktop`, `py -3 -m venv .venv`, `.venv\Scripts\pip install --require-hashes -r requirements-build.txt`, `.venv\Scripts\pip install --require-hashes --no-build-isolation -r requirements-dev.txt`, `.venv\Scripts\pip install --no-deps --no-build-isolation -e .` | `.venv\Scripts\ruff check .`, `.venv\Scripts\pytest --cov` |
 
 On macOS/Linux use `.venv/bin/...`. Run the tests you touched first (`pytest -q path::test`,
 `npm test -- <pattern>`), then the full suite.
