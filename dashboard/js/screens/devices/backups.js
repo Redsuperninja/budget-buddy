@@ -6,6 +6,7 @@ import { backupFileUrl, backupStatus, cancelRestore, startRestore } from "../../
 import { describeBackup, fingerprintOf } from "../../backup-words.js";
 import { fill, h, showError } from "../../dom.js";
 import { card, empty, note } from "../../widgets.js";
+import { phraseCard } from "./recovery-phrase.js";
 
 const RESTART = "To finish, close Budget Buddy and start it again. Your data is replaced then, not before.";
 
@@ -86,7 +87,8 @@ export async function render(root) {
         h("a", { class: "button", href: backupFileUrl(), download: "" }, "Download a backup"),
         empty("Making the file can take a minute if you have many receipt photos.")),
       waitingRestore(status, refresh),
-      status.pending ? null : restoreCard(status, refresh));
+      status.pending ? null : restoreCard(status, refresh),
+      phraseCard());
   }
   await refresh();
 }

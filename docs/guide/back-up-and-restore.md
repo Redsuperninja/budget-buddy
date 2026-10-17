@@ -12,8 +12,8 @@ Backups are on the Budget Buddy computer only: open the dashboard there and go t
    have many receipt photos.
 3. Copy the file somewhere safe, away from this computer.
 
-The file is encrypted. Only this computer, or someone with your recovery phrase, can open it. Keep your
-recovery phrase safe too: see [Keep your data safe](keep-your-data-safe.md).
+The file is encrypted. Only this computer, or someone with your recovery phrase, can open it. Save your
+recovery phrase too: click **Show my recovery phrase** at the bottom of the Backups page.
 
 ## Restore a backup
 

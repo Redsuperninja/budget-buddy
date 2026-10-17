@@ -15,3 +15,9 @@ class BackupStatus(BaseModel):
     key_fingerprint: str | None  # which key this folder's backups are made with (not a secret)
     pending: PendingRestore | None
     restored_from: str | None  # set once, on the start that finished a restore
+
+
+class RecoveryPhrase(BaseModel):
+    """The words that unlock this folder's data and backups. Shown, never stored."""
+
+    phrase: str
