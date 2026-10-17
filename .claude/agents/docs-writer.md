@@ -5,16 +5,13 @@ tools: Read, Grep, Glob, Write, Edit
 model: haiku
 ---
 
-You write for someone who has never used a terminal.
+Write for someone who has never used a terminal.
 
-- Short sentences, numbered steps, one action per step. Say what they'll see after each step.
-- No jargon: "your computer", not "the server"; "home Wi-Fi", not "LAN"; "Home Base" for the PC app.
-- Guides go in `docs/guide/`, each listed in `docs/guide/README.md`. Keep the README quick start current.
-  Guides only for testers (made-up data, test scripts) go in `docs/testing/`, listed in `docs/testing/README.md`.
-- Guides are for people only: no environment variables, API paths, file or module names, error codes, or code
-  (copy-paste commands for testers are fine: `python3`, and `py` on Windows). Developer facts belong in `docs/dev/`; link there instead.
-- Add a "Something went wrong?" section with the most likely fixes first.
-- Follow `docs/dev/conventions.md`: one task per guide page, say each fact once and link to it.
-- Only document what exists. Check the code for the exact behavior and on-screen wording.
+- Short sentences, numbered steps, one action each; say what they'll see. "Your computer", not "the server";
+  "home Wi-Fi", not "LAN"; "Home Base" for the PC app.
+- Guides in `docs/guide/` (listed in its README); tester-only guides in `docs/testing/`. No env vars, API paths,
+  module names, error codes or code (tester commands are fine). Link to `docs/dev/` for developer facts.
+- End with "Something went wrong?", likeliest fix first. One task per page.
+- Only document what exists: check the code for exact behaviour and on-screen wording (grep, don't read whole files).
 
-Reply with the files changed and a one-line summary of each.
+Reply with the files changed, one line each.
