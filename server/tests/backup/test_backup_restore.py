@@ -268,9 +268,10 @@ def test_a_move_that_fails_is_undone_cleanly(saved, data_dir, monkeypatch, make_
             raise PermissionError(32, "in use")
         return real_rename(self, target)
 
-    monkeypatch.setattr(Path, "rename", refuse_the_database)
-    code, text = run(["backup", "restore", str(backup)], ["RESTORE"])
-    monkeypatch.undo()
+    # Undo only this patch (monkeypatch.undo() would also drop the memory key store).
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "rename", refuse_the_database)
+        code, text = run(["backup", "restore", str(backup)], ["RESTORE"])
     assert code == 1 and "put back as it was" in text
     assert not list(data_dir.glob("before-restore-*")) and not list(data_dir.glob(".restore-*"))
     make_client().app.state.engine.dispose()  # still starts on the data it had

@@ -6,7 +6,9 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 ## At rest
 
 - The master key lives in the OS password vault (Windows Credential Manager, macOS Keychain, Linux Secret
-  Service, via `keyring`), never in files. The data folder holds only a `key-fingerprint` to check the key
+  Service or KWallet, via `keyring`), never in files. `keystore.is_os_vault` accepts only those backends (a
+  chainer only when everything it chains is one), so a file-based keyring such as `keyrings.alt` is refused
+  (#27). The data folder holds only a `key-fingerprint` to check the key
   belongs to it. Only derived keys (fields, files, backup) are kept in memory.
 - Sensitive columns (account numbers, notes, device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.

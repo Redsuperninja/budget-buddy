@@ -53,6 +53,12 @@ To delete them safely:
 The key isn't in this computer's password vault (or it's a different one), so there's no phrase to show. If you
 saved your phrase before, ask whoever set up Budget Buddy to put it back.
 
+**"Budget Buddy couldn't use this computer's password vault"**
+
+Budget Buddy keeps its key only in the computer's own password vault. On Linux, install and unlock GNOME
+Keyring or KWallet. A keyring that saves passwords in a plain file (like `keyrings.alt`) isn't used, because the
+key would then sit in a file anyone with the computer could read.
+
 **"We found an old backup copy of your data folder that isn't encrypted"**
 
 The old copy was made before encryption existed. You can delete it safely once you've saved your recovery phrase and verified that Budget Buddy is working well.
