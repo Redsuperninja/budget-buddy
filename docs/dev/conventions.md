@@ -35,6 +35,16 @@ reviewers check them.
 - **Refactor as you go, in scope.** Tidy the code you touch. Large clean-ups of unrelated code go in their
   own `chore/` branch.
 
+## Dependencies
+
+- **Add as few as possible.** The dashboard and scripts have none; prefer the standard library. A new package
+  needs a reason in its PR and a `security-reviewer` look (licence, maintainers, what it pulls in).
+- **No optional extras we don't use** (the Home Base takes plain `uvicorn`, not `uvicorn[standard]`).
+- **GitHub Actions are pinned to a full commit**, with the version in a comment
+  (`actions/checkout@<40-character commit> # v7.0.1`), so a moved tag can't change what CI runs.
+- **Dependabot** (`.github/dependabot.yml`) opens weekly update PRs (for versions at least a week old) for Actions, the server, the desktop app and the
+  phone app. Read what changed before merging; the phone's Expo upgrades are done by hand.
+
 ## Docs
 
 - **One topic per file**, aim for under ~200 lines. Long documents become a short index page that links
