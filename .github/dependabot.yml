@@ -15,6 +15,8 @@ updates:
     directories: [/server, /desktop]
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
+    # Only the lock files (requirements*.txt, ADR-0013); pyproject.toml keeps its lower limits.
+    versioning-strategy: lockfile-only
     open-pull-requests-limit: 5
     groups:
       python-minor-and-patch:

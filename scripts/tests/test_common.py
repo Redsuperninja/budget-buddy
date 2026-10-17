@@ -1,7 +1,5 @@
 """The shared script helpers: paths per platform, and installing a part only when it changed."""
 
-import hashlib
-
 import pytest
 
 import _common
@@ -28,7 +26,7 @@ def part(tmp_path):
     python = _common.venv_python(tmp_path)
     python.parent.mkdir(parents=True)
     python.write_text("")
-    digest = hashlib.sha256((tmp_path / "pyproject.toml").read_bytes()).hexdigest().upper()
+    digest = _common.install_digest(tmp_path)
     (tmp_path / ".venv" / "budget-buddy-install.txt").write_text(f"{digest} dev")
     return tmp_path
 
@@ -56,20 +54,28 @@ def test_nothing_is_installed_when_nothing_changed(part, commands):
 
 def test_new_extras_install_again_keeping_the_old_ones(part, commands):
     _common.install_part(part, ("build",), "x")  # building the app after a tester's setup
-    assert commands[-1][-1] == ".[build,dev]"
+    assert commands[-2][-1] == "requirements-dev.txt"
     assert (part / ".venv" / "budget-buddy-install.txt").read_text().endswith(" build,dev")
 
 
 def test_a_changed_pyproject_installs_again_with_the_same_extras(part, commands):
     (part / "pyproject.toml").write_text("[project]\nname = 'y'\n")
     _common.install_part(part, (), "x")
-    assert commands[-1][-2:] == ["-e", ".[dev]"]
+    assert commands[-2][-1] == "requirements-dev.txt"
+
+
+def test_a_changed_lock_file_installs_again(part, commands):
+    (part / "requirements.txt").write_text("x==1 --hash=sha256:00")
+    _common.install_part(part, ("dev",), "x")
+    assert commands
 
 
 def test_a_new_venv_installs_just_what_was_asked(tmp_path, commands):
     (tmp_path / "pyproject.toml").write_text("")
     _common.install_part(tmp_path, (), "x")
-    assert commands[-1][-2:] == ["-e", "."]
+    assert commands[-3][-3:] == ["--require-hashes", "-r", "requirements-build.txt"]
+    assert commands[-2][-3:] == ["--no-build-isolation", "-r", "requirements.txt"]
+    assert commands[-1][-4:] == ["--no-deps", "--no-build-isolation", "-e", "."]
 
 
 def test_windows_only_scripts_stop_elsewhere(monkeypatch):

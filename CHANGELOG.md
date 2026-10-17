@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Behind the scenes (#6, part 2): the Home Base and desktop app install exact versions from lock files with hashes (`requirements.txt`, `requirements-dev.txt`; ADR-0013), on every computer and in CI, so a changed or hijacked package fails the install instead of running. Developers: after changing a `pyproject.toml`, run `scripts/dev/lock_dependencies.py`.
 - Behind the scenes (#6, part 1): the Home Base installs fewer packages (plain `uvicorn`, without extras it never used); GitHub Actions are pinned to exact commits; Dependabot opens weekly update PRs. Lock files with hashes come next.
 - The user guide has pictures: each dashboard page's guide shows what the page looks like (made-up demo data). For developers: `scripts/dev/check_pages.py --screenshots docs/guide/images` takes them again after a screen changes.
 - **Show my recovery phrase** on Devices → Backups (Budget Buddy computer only): shows the words that unlock your data and backups, after a warning, and hides them again when you leave the page. Before, it was only shown in a terminal window.

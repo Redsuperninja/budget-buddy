@@ -39,6 +39,9 @@ reviewers check them.
 
 - **Add as few as possible.** The dashboard and scripts have none; prefer the standard library. A new package
   needs a reason in its PR and a `security-reviewer` look (licence, maintainers, what it pulls in).
+- **Exact versions with hashes:** the server and desktop install from lock files (`requirements-build.txt`,
+  `requirements.txt`, `requirements-dev.txt`; [ADR-0013](../adr/0013-dependency-lock-files.md)). After changing a `pyproject.toml`, run
+  `scripts/dev/lock_dependencies.py` (needs uv) in the same branch; a test fails until you do. Never edit them by hand; review their changes like code.
 - **No optional extras we don't use** (the Home Base takes plain `uvicorn`, not `uvicorn[standard]`).
 - **GitHub Actions are pinned to a full commit**, with the version in a comment
   (`actions/checkout@<40-character commit> # v7.0.1`), so a moved tag can't change what CI runs.

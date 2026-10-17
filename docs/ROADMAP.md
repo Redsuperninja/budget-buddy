@@ -53,7 +53,7 @@ done.
 
 **G. Public release.**
 1. ~~**24. Encrypted backup & restore**~~, ~~**23. User guide with screenshots**~~ (done).
-2. Security hardening: #6 (supply chain: lock file, pinned actions, Dependabot), #26, #27 and #28 (key and
+2. Security hardening: ~~#6~~ (supply chain: lock files, pinned Actions, Dependabot; done), #26, #27 and #28 (key and
    encryption hardening), #21 (npm advisories).
 3. **25. Public release prep.**
 

@@ -10,8 +10,12 @@ How it works: [docs/dev/architecture/](../docs/dev/architecture/README.md) (star
 
 ```powershell
 py -m venv .venv
-.venv\Scripts\pip install -e ".[dev]"
+.venv\Scripts\pip install --require-hashes -r requirements-build.txt
+.venv\Scripts\pip install --require-hashes --no-build-isolation -r requirements-dev.txt
+.venv\Scripts\pip install --no-deps --no-build-isolation -e .
 ```
+
+The exact versions, with hashes, come from the lock files (`requirements*.txt`, [ADR-0013](../docs/adr/0013-dependency-lock-files.md)). After changing `pyproject.toml`, run `scripts/dev/lock_dependencies.py`.
 
 On macOS/Linux use `python3 -m venv .venv` and `.venv/bin/...` instead.
 

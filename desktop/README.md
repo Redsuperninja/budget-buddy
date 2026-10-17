@@ -9,7 +9,9 @@ the Home Base as its own program and talks to it over its local address, like a 
 ```powershell
 cd desktop
 py -3 -m venv .venv
-.venv\Scripts\pip install -e ".[dev]"
+.venv\Scripts\pip install --require-hashes -r requirements-build.txt
+.venv\Scripts\pip install --require-hashes --no-build-isolation -r requirements-dev.txt
+.venv\Scripts\pip install --no-deps --no-build-isolation -e .
 .venv\Scripts\python -m budget_buddy_desktop            # tray icon + window
 .venv\Scripts\python -m budget_buddy_desktop --window   # just the window
 ```
