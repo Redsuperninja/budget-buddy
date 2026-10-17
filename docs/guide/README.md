@@ -59,7 +59,8 @@ Track income, donations, and stock gains to help prepare for tax time.
 Your data stays on your computer. Learn how to protect it and move it if needed.
 
 1. [Keep your data safe](keep-your-data-safe.md) — What's encrypted; your recovery phrase; old backup copies.
-2. [Move your data folder](move-your-data-folder.md) — If Budget Buddy warns you; how to set it up.
+2. [Back up and restore your data](back-up-and-restore.md) — Download an encrypted backup; restore one, even on a new computer.
+3. [Move your data folder](move-your-data-folder.md) — If Budget Buddy warns you; how to set it up.
 
 ## Testing and feedback
 

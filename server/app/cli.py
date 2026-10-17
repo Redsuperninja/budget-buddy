@@ -6,6 +6,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+from app.backup.restore import RestoreError
 from app.config import Settings
 from app.crypto import (
     EncryptionError,
@@ -195,7 +196,7 @@ def main(
         if args.action == "show":
             return show_phrase(settings, output, ask, force=args.force)
         return restore_phrase(settings, output, ask, ask_secret)
-    except (EncryptionError, DatabaseUpgradeError) as exc:
+    except (EncryptionError, DatabaseUpgradeError, RestoreError) as exc:
         output(str(exc))
         return 1
     except (KeyboardInterrupt, EOFError):

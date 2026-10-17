@@ -10,6 +10,7 @@ import shutil
 import sqlite3
 import time
 import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from app import run_lock
@@ -23,7 +24,7 @@ from app.crypto.keys import (
     PURPOSE_BACKUP,
     derive_key,
     fingerprint,
-    write_fingerprint,
+    save_fingerprint,
 )
 from app.crypto.stream import read_header
 from app.db import (
@@ -39,7 +40,7 @@ from app.parent_watch import process_alive
 from app.services.devices.pairing_sessions import SERVER_ID_FILENAME
 
 STAGING_PREFIX = ".restore-"
-COPY_PREFIX = ".backup-"  # archive.py's temporary database copy
+COPY_PREFIX = ".backup-"  # temporary database copies and dashboard downloads
 BEFORE_PREFIX = "before-restore-"
 STALE_SECONDS = 3600
 # What a restore replaces. Keys, lock files and older .bak copies stay as they are.
@@ -51,6 +52,19 @@ REPLACED = (
     RECEIPTS_DIRNAME,
 )
 CLOSE_FIRST = "Budget Buddy is running. Close it first, then restore."
+
+
+@dataclass(frozen=True)
+class BackupKey:
+    """What opening a backup needs: which master key it must be (fingerprint) and its backup
+    subkey. The running Home Base has these without ever holding the master key."""
+
+    fingerprint: str
+    backup: bytes = field(repr=False)
+
+    @classmethod
+    def from_master(cls, master_key: bytes) -> "BackupKey":
+        return cls(fingerprint(master_key), derive_key(master_key, PURPOSE_BACKUP))
 
 
 class RestoreError(RuntimeError):
@@ -78,12 +92,18 @@ def home_base_running(data_dir: Path) -> bool:
     return isinstance(pid, int) and process_alive(pid)
 
 
+# Tables a new Budget Buddy already fills (default categories, nothing encrypted), so rows there
+# don't count as data of the folder's own.
+_STARTER_TABLES = frozenset({"categories"})  # a new Home Base fills it with defaults
+
+
 def has_own_data(data_dir: Path) -> bool:
-    """True if the folder holds anything a key change would make unreadable: rows, receipt
-    files, an earlier restore's set-aside data or an update's ``.bak`` copy."""
+    """True if the folder holds anything a key change would make unreadable: rows of the
+    person's own, receipt files, an earlier restore's set-aside data or an update's ``.bak``
+    copy. A newly started Budget Buddy (default categories only) has none."""
     receipts = data_dir / RECEIPTS_DIRNAME
     return (
-        database_has_rows(data_dir)
+        database_has_rows(data_dir, ignore=_STARTER_TABLES)
         or (receipts.is_dir() and any(receipts.iterdir()))
         or any(data_dir.glob(f"{BEFORE_PREFIX}*"))
         or any(data_dir.glob(f"{DB_FILENAME}.bak-*"))
@@ -94,7 +114,7 @@ def sweep_leftovers(data_dir: Path) -> None:
     """Delete staging folders and database copies left by a backup or restore that was cut
     short (an hour old or more, so one still running is left alone)."""
     cutoff = time.time() - STALE_SECONDS
-    for path in [*data_dir.glob(f"{STAGING_PREFIX}*"), *data_dir.glob(f"{COPY_PREFIX}*.db")]:
+    for path in [*data_dir.glob(f"{STAGING_PREFIX}*"), *data_dir.glob(f"{COPY_PREFIX}*")]:
         try:
             if path.stat().st_mtime < cutoff:
                 shutil.rmtree(path) if path.is_dir() else path.unlink()
@@ -117,7 +137,7 @@ def _check_database(db_path: Path) -> None:
         raise RestoreError(NEWER_DATABASE_MESSAGE)
 
 
-def check_backup(path: Path, data_dir: Path, master_key: bytes) -> tuple[Path, dict]:
+def check_backup(path: Path, data_dir: Path, key: BackupKey) -> tuple[Path, dict]:
     """Decrypt and check all of the backup at ``path`` into a new staging folder inside
     ``data_dir``. Returns (staging folder, manifest). Nothing in the data folder changes."""
     if not path.is_file():
@@ -127,10 +147,9 @@ def check_backup(path: Path, data_dir: Path, master_key: bytes) -> tuple[Path, d
     try:
         with open(path, "rb") as source:
             made_by, salt, header = read_header(source)
-            if made_by != fingerprint(master_key):
+            if made_by != key.fingerprint:
                 raise RestoreError("That backup was made with a different key.")
-            key = derive_key(master_key, PURPOSE_BACKUP)
-            manifest = extract_backup(source, key, salt, header, staging)
+            manifest = extract_backup(source, key.backup, salt, header, staging)
         _check_database(staging / DB_FILENAME)
         return staging, manifest
     except (DecryptionError, BackupContentsError) as exc:
@@ -141,8 +160,9 @@ def check_backup(path: Path, data_dir: Path, master_key: bytes) -> tuple[Path, d
         raise
 
 
-def _tables(connection: sqlite3.Connection) -> set[str]:
-    return {name for (name,) in connection.execute("SELECT name FROM sqlite_master")}
+def _tables(connection: sqlite3.Connection, kind: str = "table") -> set[str]:
+    query = "SELECT name FROM sqlite_master WHERE type = ?"
+    return {name for (name,) in connection.execute(query, (kind,))}
 
 
 def carry_over_removals(old_db: Path, new_db: Path) -> None:
@@ -200,11 +220,11 @@ def _swap(data_dir: Path, staging: Path, before: Path) -> None:
     try:
         for name in REPLACED:
             if (data_dir / name).exists():
-                moves.append((data_dir / name, before / name))
-                moves[-1][0].rename(moves[-1][1])
+                (data_dir / name).rename(before / name)
+                moves.append((data_dir / name, before / name))  # only once it has happened
         for item in list(staging.iterdir()):
+            item.rename(data_dir / item.name)
             moves.append((item, data_dir / item.name))
-            item.rename(moves[-1][1])
     except OSError as exc:
         stuck = []
         for source, target in reversed(moves):
@@ -224,7 +244,7 @@ def _swap(data_dir: Path, staging: Path, before: Path) -> None:
         ) from exc
 
 
-def apply_restore(data_dir: Path, staging: Path, master_key: bytes) -> Path:
+def apply_restore(data_dir: Path, staging: Path, fingerprint_hex: str) -> Path:
     """Move the current data aside and the checked backup in. Returns the folder the old data
     is in. Deletes ``staging`` unless a failed swap couldn't be undone (RestoreStuckError). The
     key goes into the password vault afterwards (the caller's job)."""
@@ -250,7 +270,7 @@ def apply_restore(data_dir: Path, staging: Path, master_key: bytes) -> Path:
                 shutil.rmtree(before, ignore_errors=True)
                 raise
             staging.rmdir()
-            write_fingerprint(data_dir, master_key)
+            save_fingerprint(data_dir, fingerprint_hex)
             return before
     finally:
         run_lock.release(lock)

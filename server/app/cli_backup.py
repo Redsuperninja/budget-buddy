@@ -11,6 +11,7 @@ from app import __version__
 from app.backup.archive import BackupError, write_backup
 from app.backup.restore import (
     CLOSE_FIRST,
+    BackupKey,
     RestoreError,
     RestoreStuckError,
     apply_restore,
@@ -159,7 +160,7 @@ def restore_backup(
 
         ensure_data_dir(data_dir)
         output("Checking the whole backup first...")
-        staging, manifest = check_backup(file, data_dir, key)
+        staging, manifest = check_backup(file, data_dir, BackupKey.from_master(key))
     except RestoreError as exc:
         output(f"{exc} Nothing was changed.")
         return 1
@@ -175,7 +176,7 @@ def restore_backup(
                 output("Cancelled. Nothing was changed.")
                 return 1
         try:
-            before = apply_restore(data_dir, staging, key)
+            before = apply_restore(data_dir, staging, fingerprint(key))
         except RestoreStuckError as exc:
             keep_staging = True
             output(str(exc))

@@ -216,6 +216,7 @@ def test_every_dashboard_route_is_classified(data_dir):
         "csrf-token",
         "instance",
         "price-feed",
+        "backup",  # downloading or restoring all data: this computer only (ADR-0012)
     }
 
     def paths(routes):  # included routers are wrapped; their routes carry the full path

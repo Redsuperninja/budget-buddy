@@ -91,8 +91,12 @@ def read_fingerprint(data_dir: Path) -> str | None:
     return path.read_text(encoding="ascii").strip() or None
 
 
+def save_fingerprint(data_dir: Path, fingerprint_hex: str) -> None:
+    write_private_bytes(fingerprint_path(data_dir), (fingerprint_hex + "\n").encode())
+
+
 def write_fingerprint(data_dir: Path, master_key: bytes) -> None:
-    write_private_bytes(fingerprint_path(data_dir), (fingerprint(master_key) + "\n").encode())
+    save_fingerprint(data_dir, fingerprint(master_key))
 
 
 def matches_fingerprint(data_dir: Path, master_key: bytes) -> bool | None:

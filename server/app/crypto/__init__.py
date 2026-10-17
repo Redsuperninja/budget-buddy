@@ -41,9 +41,10 @@ MEMORY_STORE_IN_USE_MESSAGE = (
 )
 
 
-def database_has_rows(data_dir: Path) -> bool:
-    """True if ``budget.db`` exists and any of its tables (other than Alembic's) holds a row.
-    A database that can't be read counts as having rows, so nothing treats it as empty."""
+def database_has_rows(data_dir: Path, ignore: frozenset[str] = frozenset()) -> bool:
+    """True if ``budget.db`` exists and any of its tables (other than Alembic's and ``ignore``)
+    holds a row. A database that can't be read counts as having rows, so nothing treats it as
+    empty."""
     from app.db import open_read_only  # imported here: app.db imports this package
 
     path = data_dir / "budget.db"
@@ -57,6 +58,7 @@ def database_has_rows(data_dir: Path) -> bool:
                     "SELECT name FROM sqlite_master WHERE type = 'table' "
                     "AND name NOT LIKE 'sqlite_%' AND name != 'alembic_version'"
                 )
+                if name not in ignore
             ]
             quoted = ('"' + name.replace('"', '""') + '"' for name in tables)
             return any(connection.execute(f"SELECT 1 FROM {q} LIMIT 1").fetchone() for q in quoted)

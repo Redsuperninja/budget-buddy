@@ -32,6 +32,9 @@ class KeyStore(Protocol):
     def set(self, name: str, key: bytes) -> None:
         """Store (or replace) a key."""
 
+    def delete(self, name: str) -> None:
+        """Remove a key if there is one."""
+
 
 class MemoryKeyStore:
     """Keeps keys in this process only. For tests and CI: keys vanish when the process ends."""
@@ -47,6 +50,10 @@ class MemoryKeyStore:
     def set(self, name: str, key: bytes) -> None:
         with self._lock:
             self._keys[name] = bytes(key)
+
+    def delete(self, name: str) -> None:
+        with self._lock:
+            self._keys.pop(name, None)
 
 
 _NO_VAULT_MESSAGE = (
@@ -94,6 +101,17 @@ class KeyringKeyStore:
         kr = self._keyring()
         try:
             kr.set_password(self.service, name, base64.b64encode(key).decode("ascii"))
+        except keyring.errors.KeyringError as exc:
+            raise KeyStoreError(_NO_VAULT_MESSAGE) from exc
+
+    def delete(self, name: str) -> None:
+        import keyring.errors
+
+        kr = self._keyring()
+        try:
+            kr.delete_password(self.service, name)
+        except keyring.errors.PasswordDeleteError:
+            pass  # there was none
         except keyring.errors.KeyringError as exc:
             raise KeyStoreError(_NO_VAULT_MESSAGE) from exc
 

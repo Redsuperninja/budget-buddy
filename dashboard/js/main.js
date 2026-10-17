@@ -6,6 +6,7 @@ import { start } from "./router.js";
 import { addSettingsMenu } from "./settings-menu.js";
 import * as accounts from "./screens/money/accounts.js";
 import * as categories from "./screens/budget/categories.js";
+import * as backups from "./screens/devices/backups.js";
 import * as connectPhone from "./screens/devices/connect-phone.js";
 import * as donations from "./screens/tax/donations.js";
 import * as home from "./screens/home/home.js";
@@ -50,6 +51,7 @@ const sections = [
   { id: "devices", label: "Devices", pages: [
     { id: "phone", label: "Connect phone", render: connectPhone.render },
     { id: "computers", label: "Other devices", render: otherComputers.render },
+    { id: "backups", label: "Backups", render: backups.render },
   ] },
 ];
 

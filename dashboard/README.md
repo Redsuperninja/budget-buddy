@@ -72,5 +72,5 @@ Screens, by section: **Home** (a Get started checklist for someone new in `home-
 and net worth over time (`home-trends.js`), what you have and owe); **Money**: Transactions (search, filters by account, month, category and how it was sorted, a totals line, and options like `#transactions?category=3&month=2026-10` that Home's category links use; with a Charity column to
 sort a payment into charity), Accounts, Investments (holdings, prices, retirement limits), Import files (bank and brokerage activity), Import history (undo an import), Receipts (photos, delete), Auto-sort (rules); **Budget**: Categories, Suggested budget;
 **Taxes**: Tax summary (with a CSV download, and print styles in `app.css`), Donations, Paychecks, Stocks (with CSV import); **Devices**:
-Connect phone, Other devices (`other-computers.js`: another computer or a phone's browser). `join.js` is the join page for another computer or phone
+Connect phone, Other devices (`other-computers.js`: another computer or a phone's browser), Backups (`backups.js`: download, and a restore finished at the next start; words in `backup-words.js`; [ADR-0012](../docs/adr/0012-encrypted-backups.md)). `join.js` is the join page for another computer or phone
 ([ADR-0009](../docs/adr/0009-other-computers.md)).

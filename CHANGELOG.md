@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Backups in the dashboard: on the Budget Buddy computer, **Devices → Backups** downloads an encrypted backup of all your data and receipt photos, or restores one. A restore is checked first and finishes the next time Budget Buddy starts (it can be cancelled until then); a backup from another computer asks for its recovery phrase. Also fixed: a new computer could refuse a restore because of its starting categories.
 - Encrypted backups, first step: `python -m app backup make` saves all your data and receipt photos in one encrypted file, and `backup restore` brings it back (with Budget Buddy closed), checking the whole file before changing anything and keeping what it replaces. On another computer it asks for your recovery phrase. Buttons in the dashboard come next.
 - Behind the scenes: the build, install and release scripts are Python too (`scripts/release/build_desktop.py`, `install_desktop.py`, `make_release.py`), so no script needs PowerShell any more; only the Windows installer inside the download still uses it. **Build desktop app** and **Install desktop app** in the launch folder work as before, and the download is the same.
 - For developers: `scripts/dev/check_all.py`, `check_pages.py` and `tidy_branches.py` replace the PowerShell versions and work on macOS and Linux too (`--apply` instead of `-Apply`). `check_all.py` also lints and tests the scripts themselves; the page check finds Chrome or Chromium on a Mac or Linux.
