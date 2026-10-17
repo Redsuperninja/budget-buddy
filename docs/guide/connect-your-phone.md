@@ -2,6 +2,8 @@
 
 Pairing connects your phone to Budget Buddy on this computer. You do it once per phone. Your computer and phone need to be on the same home Wi-Fi.
 
+![Devices, Connect phone: the Show pairing code button and connected phones](images/phone.png)
+
 ## Pair your phone
 
 1. Make sure both your phone and computer are on the same home Wi-Fi (not a guest network)

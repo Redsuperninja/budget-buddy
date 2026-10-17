@@ -2,6 +2,10 @@
 
 Both pages are in the **Money** section: click **Money** at the top, then the **Transactions** or **Accounts** tab.
 
+![The Accounts page with made-up accounts and balances](images/accounts.png)
+
+![The Transactions page: date, description, account, amount and category](images/transactions.png)
+
 ## Your accounts
 
 Lists all your bank and savings accounts, and their current balances. A credit card or loan shows what you owe

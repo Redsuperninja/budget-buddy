@@ -55,5 +55,5 @@ elsewhere.
 | Script | What it does |
 | --- | --- |
 | `check_all.py` | Runs every part's checks, as CI does, plus the scripts' lint (`ruff.toml`) and tests (`tests/`), and lists which passed ([testing.md](../docs/dev/testing.md)). Skips the Windows-only desktop app elsewhere. |
-| `check_pages.py` (`check-pages.mjs`) | Opens every dashboard page in headless Edge, Chrome or Chromium (`--browser` to pick one) against a throwaway Home Base with demo data (temporary folder, deleted after), and fails on a script error, a file that didn't load, an error on the page or an empty page. `check_all.py` runs it too. |
+| `check_pages.py` (`check-pages.mjs`) | Opens every dashboard page in headless Edge, Chrome or Chromium (`--browser` to pick one) against a throwaway Home Base with demo data (temporary folder, deleted after), and fails on a script error, a file that didn't load, an error on the page or an empty page. `--screenshots <folder>` also saves each page as `<page>.png` (light theme, 1280×900): that's how the user guide's pictures in `docs/guide/images/` are made. `check_all.py` runs it too. |
 | `tidy_branches.py` | Tidies local branches after their pull requests merge (`--apply` to do it; [workflow.md](../docs/dev/workflow.md)). Run it inside the repo. |

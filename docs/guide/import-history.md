@@ -4,6 +4,8 @@ Every file you import (a bank file, stock trades, a brokerage activity file or a
 **Money**, **Import history** (in the [All tools](open-the-dashboard.md#simple-view-or-all-tools) view), newest first: when you imported it, what kind of file it was, the account, the file's
 name and how much it added. Importing a file that adds nothing new isn't listed.
 
+![The Import history page, with nothing imported yet](images/import-history.png)
+
 ## Remove an outdated or wrong import
 
 Click **Remove** next to it and confirm. Everything that file added is deleted:

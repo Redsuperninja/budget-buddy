@@ -2,6 +2,8 @@
 
 > **Estimates, not tax advice.** Budget Buddy helps you keep your pay stubs organized and spot things worth a second look. Check your W-2 and the IRS instructions, tax software, or a tax professional before you file.
 
+![The Paychecks page with the year's totals and each pay stub](images/paychecks.png)
+
 ## What to enter
 
 Copy each line from your pay stub.

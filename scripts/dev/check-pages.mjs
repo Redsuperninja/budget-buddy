@@ -1,14 +1,16 @@
 // Opens every dashboard page in a headless browser and fails on a script error, a file that didn't load, an error
 // message on the page, or a page that drew nothing. Talks to the browser over the DevTools protocol (Node 22's
 // built-in WebSocket; no packages). The page list comes from dashboard/js/main.js, so new pages are checked too.
-// Run by check_pages.py, which starts a throwaway Home Base with demo data first.
+// Run by check_pages.py, which starts a throwaway Home Base with demo data first. Given a folder, it also saves the
+// top of each page there as <page>.png, for the user guide.
 //
-//   node scripts/dev/check-pages.mjs <browser program> <Home Base address> <empty profile folder>
+//   node scripts/dev/check-pages.mjs <browser program> <Home Base address> <empty profile folder> [screenshot folder]
 
 import { spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const [browserPath, base, profile] = process.argv.slice(2);
+const [browserPath, base, profile, shots] = process.argv.slice(2);
 const MAIN = new URL("../../dashboard/js/main.js", import.meta.url);
 const PAGES = [...readFileSync(MAIN, "utf8").matchAll(/\{ id: "([\w-]+)", label: "[^"]+", render:/g)].map((m) => m[1]);
 const PORT = 9333;
@@ -59,6 +61,10 @@ const evaluate = async (expression) =>
 
 try {
   for (const domain of ["Runtime", "Log", "Page"]) await send(`${domain}.enable`);
+  if (shots) {
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "light" }] });
+  }
   await send("Page.navigate", { url: `${base}/#${PAGES[0]}` });
   await sleep(3000);
   for (const page of PAGES) {
@@ -71,6 +77,10 @@ try {
     })`);
     if (shown.characters < 20) problems.push(`${page}: the page drew almost nothing (${shown.characters} characters)`);
     for (const error of shown.errors) problems.push(`${page}: error shown on the page: ${error}`);
+    if (shots) {
+      const { data } = await send("Page.captureScreenshot", { format: "png" });
+      writeFileSync(join(shots, `${page}.png`), Buffer.from(data, "base64"));
+    }
     console.log(`${page.padEnd(16)} ${shown.errors.length || shown.characters < 20 ? "PROBLEM" : "ok"}`);
   }
 } finally {

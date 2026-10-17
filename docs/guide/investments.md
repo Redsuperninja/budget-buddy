@@ -6,6 +6,8 @@
 The **Investments** page (click **Money** at the top, then the **Investments** tab) shows what you own in each
 account and how much you've put into retirement accounts and an HSA this year.
 
+![The Investments page with holdings and retirement savings](images/investments.png)
+
 ## What you hold, by account
 
 Budget Buddy works this out from the purchases and sales you entered on the **Stocks** page (under **Taxes**).

@@ -52,7 +52,7 @@ done.
 4. **32. Standalone mode:** use the phone with no Home Base; pair one later.
 
 **G. Public release.**
-1. **24. Encrypted backup & restore**, **23. User guide with screenshots**.
+1. ~~**24. Encrypted backup & restore**~~, ~~**23. User guide with screenshots**~~ (done).
 2. Security hardening: #6 (supply chain: lock file, pinned actions, Dependabot), #26, #27 and #28 (key and
    encryption hardening), #21 (npm advisories).
 3. **25. Public release prep.**
@@ -127,7 +127,7 @@ done.
 - [x] 22. Desktop app: `Budget Buddy.exe` with its own window (pywebview + PyInstaller), shortcuts — *backend-engineer* + *security-reviewer*
 - [x] 22b. Light start at login: tray icon, full start on open, start-with-Windows setting — *backend-engineer* + *security-reviewer*
 - [x] 22c. Scripts work on Windows, macOS and Linux: Python with thin launchers (ADR-0011) — *backend-engineer*
-- [ ] 23. Plain-English user guide with screenshots — *docs-writer*
+- [x] 23. Plain-English user guide with screenshots — *docs-writer*
 - [x] 24. Encrypted backup & restore — *backend-engineer* + *security-reviewer*
   - 24a, the backup file and `python -m app backup make|restore` ([ADR-0012](adr/0012-encrypted-backups.md)); 24b, Devices → Backups in the dashboard; 24c, Show my recovery phrase there
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*

@@ -11,6 +11,8 @@ The web browser is the quickest way to use Budget Buddy on your phone at home.)
 > talks to Budget Buddy without it. Someone who can watch your Wi-Fi traffic could see your pages. Use a strong
 > Wi-Fi password, don't do this on public or shared Wi-Fi, and remove devices you no longer use.
 
+![Devices, Other devices: the Allow another device button](images/computers.png)
+
 ## Connect a computer or phone (once)
 
 On the **Budget Buddy computer**:

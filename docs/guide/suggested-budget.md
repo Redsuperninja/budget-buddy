@@ -2,6 +2,8 @@
 
 Not sure what to budget? Budget Buddy can suggest a budget from your own spending over the last three months.
 
+![The Suggested budget page with a 50/30/20 plan](images/plan.png)
+
 ## Open it
 
 1. Open the dashboard, click **Budget** at the top, then the **Suggested budget** tab.
