@@ -2,6 +2,8 @@
 
 Typing a category for every coffee and grocery trip gets old. Auto-sort rules do it for you.
 
+![The Auto-sort page with sorting rules](images/rules.png)
+
 ## What a rule is
 
 A rule says: **"If the description contains this text, put it in this category."**

@@ -4,6 +4,8 @@ The Budget Buddy dashboard is a web page that shows your budget, accounts, and s
 Buddy computer; a phone or another computer at home can open it too once you connect it with a one-time code.
 If you installed the [desktop app](desktop-app.md), it shows the same pages in its own window.
 
+![The Home page: money in, spent, saved and left over this month, with charts](images/home.png)
+
 ## Open it in your browser
 
 1. Start Budget Buddy on your computer (the Home Base server)

@@ -2,7 +2,8 @@
 
 Budget Buddy helps you track your money on your computer and phone. Everything runs on your own devices; nothing goes to the cloud.
 
-Start here, then pick the section that fits what you're doing.
+Start here, then pick the section that fits what you're doing. Each page's guide has a picture of it, filled with
+made-up example data.
 
 ## Getting started
 

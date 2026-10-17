@@ -6,6 +6,8 @@
 
 Budget Buddy keeps a list of the gifts you give to charities and, for each tax year, tells you what proof to keep. Add gifts in the Budget Buddy dashboard on your computer: click **Taxes** at the top, then the **Donations** tab. You can also turn a payment you already have into a gift (see [Sort a payment into charity](#sort-a-payment-into-charity)).
 
+![The Donations page with totals and the paperwork to keep for each gift](images/donations.png)
+
 ## Logging a gift
 
 For each gift, enter:

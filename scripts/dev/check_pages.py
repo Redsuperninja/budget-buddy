@@ -3,7 +3,12 @@ and fail on a script error, a file that didn't load, an error on the page, or an
 Catches what file-reading tests can't, like a screen that breaks only when it runs. Needs Microsoft
 Edge, Google Chrome or Chromium, and Node 22+.
 
-    python3 scripts/dev/check_pages.py [--browser <path>]      (on Windows, type py)
+    python3 scripts/dev/check_pages.py [--browser <path>] [--screenshots <folder>]
+
+On Windows, type py instead of python3.
+
+With --screenshots, it also saves the top of each page as <page>.png in that folder; the user
+guide's pictures (docs/guide/images/) are made this way, from made-up demo data only.
 
 Your real data and your own test data are never touched: everything lives in a new temporary
 folder (with the encryption key in memory only) that is deleted afterwards. Uses the test port,
@@ -64,7 +69,9 @@ def find_browser() -> str | None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Open every dashboard page in a headless browser.")
     parser.add_argument("--browser", help="the browser program to use (default: Edge or Chrome)")
-    browser = parser.parse_args().browser or find_browser()
+    parser.add_argument("--screenshots", type=Path, help="also save each page as a picture here")
+    args = parser.parse_args()
+    browser = args.browser or find_browser()
     python, node = venv_python(SERVER_DIR), shutil.which("node")
     if not browser:
         stop("Needs Microsoft Edge, Google Chrome or Chromium (or give one with --browser).")
@@ -107,7 +114,11 @@ def main() -> int:
         if demo.returncode:
             stop(f"Loading the demo data failed:\n{demo.stdout}{demo.stderr}")
         base = f"http://127.0.0.1:{TEST_PORT}"
-        checker = start([node, HERE / "check-pages.mjs", browser, base, run / "browser"], {}, True)
+        command = [node, HERE / "check-pages.mjs", browser, base, run / "browser"]
+        if args.screenshots:
+            args.screenshots.mkdir(parents=True, exist_ok=True)
+            command.append(args.screenshots.resolve())
+        checker = start(command, {}, True)
         return checker.wait()
     finally:
         # Stop only what this run started (the browser is the checker's), then delete the folder.

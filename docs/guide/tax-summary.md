@@ -6,6 +6,8 @@ deductions. You can download it as a spreadsheet for a tax preparer, or print it
 **These are estimates to help you gather your records, not tax advice.** They don't say how much you can
 deduct; that depends on your income, your filing status and whether you itemize.
 
+![The yearly Tax summary page](images/taxes.png)
+
 ## Open it
 
 1. Open the dashboard and click **Taxes** at the top. The **Tax summary** tab opens first.

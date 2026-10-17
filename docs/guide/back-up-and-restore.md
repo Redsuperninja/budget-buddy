@@ -5,6 +5,8 @@ safe (a USB drive, for example) so a broken or lost computer doesn't take your r
 
 Backups are on the Budget Buddy computer only: open the dashboard there and go to **Devices → Backups**.
 
+![Devices, Backups: make a backup, restore one, and show your recovery phrase](images/backups.png)
+
 ## Make a backup
 
 1. Click **Download a backup**.

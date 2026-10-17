@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The user guide has pictures: each dashboard page's guide shows what the page looks like (made-up demo data). For developers: `scripts/dev/check_pages.py --screenshots docs/guide/images` takes them again after a screen changes.
 - **Show my recovery phrase** on Devices → Backups (Budget Buddy computer only): shows the words that unlock your data and backups, after a warning, and hides them again when you leave the page. Before, it was only shown in a terminal window.
 - For developers: shorter Claude instructions (`CLAUDE.md` and `.claude/agents/`), so each session and agent reads less; agents run only the tests they touch, and the full suite runs once before a commit.
 - Backups in the dashboard: on the Budget Buddy computer, **Devices → Backups** downloads an encrypted backup of all your data and receipt photos, or restores one. A restore is checked first and finishes the next time Budget Buddy starts (it can be cancelled until then); a backup from another computer asks for its recovery phrase. Also fixed: a new computer could refuse a restore because of its starting categories.

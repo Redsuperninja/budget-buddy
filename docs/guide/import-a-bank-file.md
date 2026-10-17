@@ -2,6 +2,8 @@
 
 Most banks let you download your transactions as a CSV file. Budget Buddy can read that file straight into one of your accounts.
 
+![The Import files page: pick an account and a CSV file, then Preview](images/import.png)
+
 ## Before you start
 
 - You need at least one account set up (go to **Accounts** first)

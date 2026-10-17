@@ -2,6 +2,8 @@
 
 Budget Buddy sorts your money into categories so you can see where it goes each month.
 
+![The Categories page with each category's budget and spending](images/categories.png)
+
 ## The four kinds of category
 
 - **Needs**: things you have to pay for, like rent, groceries, utilities, and insurance.

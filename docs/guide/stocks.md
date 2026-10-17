@@ -9,6 +9,8 @@ an HSA. Sales inside a retirement account or HSA aren't taxed, so they're left o
 and its value are on the [Investments](investments.md) page. It works out how much you gained or lost on each sale, whether that counts as
 short term or long term, and adds it all up for each tax year. Enter your purchases and sales in the Budget Buddy dashboard on your computer.
 
+![The Stocks page with purchases, sales, and gains](images/stocks.png)
+
 ## Entering a purchase
 
 For each time you bought shares, enter:
