@@ -56,7 +56,9 @@ done.
 2. Security hardening: ~~#6~~ (supply chain: lock files, pinned Actions, Dependabot; done), ~~#26~~ (key check in the
    database; done), ~~#27~~ (done) and #28 (key and encryption hardening; names encrypted, done; whole-database
    encryption evaluated, ADR-0014 proposed), #21 (npm advisories; uuid done, the rest wait on upstream fixes).
-3. **25. Public release prep.**
+3. **25. Public release prep**, split into 25a to 25k below; setup design in
+   [ADR-0015](adr/0015-first-start-setup.md) (proposed). Blockers for 0.1.0: 25a to 25g and 25k; 25h to 25j can
+   follow.
 
 ## Phase 1: Foundation
 - [x] 1. Repo scaffold, docs, agent definitions — *architect*
@@ -133,6 +135,46 @@ done.
   - 24a, the backup file and `python -m app backup make|restore` ([ADR-0012](adr/0012-encrypted-backups.md)); 24b, Devices → Backups in the dashboard; 24c, Show my recovery phrase there
 - [ ] 25. Prep for public release: setup wizard, no personal defaults — *architect*
   - Done so far: Windows download with installer and uninstall (`scripts/release/make_release.py`, release workflow, [release.md](dev/release.md)); simple view with All tools; Get started checklist on Home; phone-friendly dashboard for a phone's browser
+  - Checked 2026-10-20, no personal defaults found: starter categories are generic with $0 budgets, the server
+    name is "Home Base", data folders are the usual per-OS ones, no filing status or state is stored, demo data is
+    fake, test addresses are private examples, and the only outside call is the opt-in Finnhub price feed.
+  - Found for #28, not part of 25: `dividends.payer` is stored in plain text, but it names what you own. Add it to
+    the encrypted columns, or let ADR-0014 cover it.
+- [ ] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
+  databases, `.bbbackup`, images outside `docs/` and `assets/`), and example payers in comments made up
+  ("FAKECO", not "JOHNSON & JOHNSON"); real bank line formats stay in tests — *backend-engineer* + *security-reviewer*
+- [ ] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged
+  libraries' own licence files, with a test that every package in both `requirements-package.txt` has one —
+  *backend-engineer* + *security-reviewer*
+  - Today's list has no licence texts and misses bottle, proxy-tools, Mako, MarkupSafe, jaraco.*, more-itertools,
+    click, h11, anyio, idna, cffi, pycparser, pywin32-ctypes, python-dotenv, opentelemetry-api, and the
+    bundled OpenSSL (cryptography), libsodium (PyNaCl) and Pillow's image libraries
+- [ ] 25c. Privacy statement (`docs/PRIVACY.md`: what's kept, where, encrypted, the one opt-in outside call, no
+  analytics, how to delete everything) and `SECURITY.md` (report a problem privately) — *docs-writer* + *security-reviewer*
+- [ ] 25d. Front door for strangers: README (needs, US federal taxes only and no state taxes, privacy and security
+  links), short `CONTRIBUTING.md`, bug and idea issue templates with `config.yml`, PR template with reviewers and
+  the attribution line, READ ME FIRST with the guide's real address — *docs-writer* + *release-manager*
+  - The user-testing template still points at an "API explorer page"
+- [ ] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
+  `GET`/`PUT /api/local/setup` (this computer only), `last_backup_at` set when a backup file is written —
+  *backend-engineer* + *security-reviewer*
+- [ ] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
+  phone (optional); "Finish later"; guide `docs/guide/first-start.md` — *backend-engineer* + *security-reviewer*
+- [ ] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
+  30 days, and two fixes — *backend-engineer* + *security-reviewer*
+  - Bug: on a joined phone or computer, Get started's phone step links to `#phone` and `#computers`, which don't
+    exist there (`main.js` drops Devices)
+  - Bug: the simple view and Get started offer "Connect the phone app", which isn't published
+    ([release.md](dev/release.md)); show only the browser way until it is
+- [ ] 25h. Starter budget step in Setup: untick categories you don't need, optional monthly take-home pay as
+  planned income — *backend-engineer* + *finance-tax-expert*
+- [ ] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
+  the desktop window) — *backend-engineer* + *security-reviewer*
+- [ ] 25j. Only if the owner wants it: a filing status setting that narrows the tax summary to one status —
+  *finance-tax-expert*
+- [ ] 25k. Version 0.1.0 everywhere (the mobile app says 1.0.0, `desktop/pyproject.toml` says 0), version info in the
+  `.exe`, `CHANGELOG.md`'s long Unreleased list condensed for 0.1.0, and a dry run on a clean Windows user —
+  *release-manager* + *backend-engineer*
 
 ## Phase 7: Bank data (ADR-0006: free and open source first)
 - [x] 26b. Brokerage activity CSV: every row a transaction, buys and sells linked as stock trades, dividends filed — *backend-engineer* + *finance-tax-expert*
