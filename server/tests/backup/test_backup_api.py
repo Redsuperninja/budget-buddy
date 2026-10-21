@@ -9,6 +9,8 @@ from app.crypto import MemoryKeyStore, key_name_for, master_key_to_phrase
 from app.crypto import keystore as keystore_module
 from app.models.ledger import Account
 
+pytestmark = pytest.mark.real_migrations
+
 
 @pytest.fixture
 def store(monkeypatch):

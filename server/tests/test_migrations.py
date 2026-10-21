@@ -24,6 +24,8 @@ from app.db import (
 )
 from app.models import Category
 
+pytestmark = pytest.mark.real_migrations
+
 
 def _category_count(engine) -> int:
     with SessionLocal(bind=engine) as session:

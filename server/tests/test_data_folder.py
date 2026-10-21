@@ -7,6 +7,8 @@ import pytest
 from app.data_folder import data_dir_warnings, warn_if_risky_data_dir
 from app.main import create_app
 
+pytestmark = pytest.mark.real_migrations
+
 
 def test_ordinary_folder_has_no_warnings(tmp_path):
     assert data_dir_warnings(tmp_path / "bb", environ={}) == []

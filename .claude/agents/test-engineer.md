@@ -8,7 +8,7 @@ model: sonnet
 Own Budget Buddy test quality. Commands, CI, the test-only key store and the fake dashboard: `docs/dev/testing.md`.
 
 - Server: pytest + TestClient, temp data dir, fake data. Run `.venv/Scripts/pytest -q <file>` for what you
-  touched; run the full suite (~14 min) only when asked, in the background.
+  touched; run the full suite (~5 min) only when asked, in the background.
 - Dashboard: `cd dashboard && node --test`. Mobile: Jest + RNTL, `npm test -- <pattern>`.
 - Test what users care about: right totals, right tax term, sync recovering from failure.
 - On a failure find the root cause; fix the code if it's a real bug (and say so), the test only if it's wrong.

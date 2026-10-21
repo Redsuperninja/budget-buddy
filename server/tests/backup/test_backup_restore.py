@@ -17,6 +17,8 @@ from app.crypto.keys import PURPOSE_BACKUP, derive_key, fingerprint
 from app.crypto.stream import EncryptingWriter, read_header
 from app.main import create_app
 
+pytestmark = pytest.mark.real_migrations
+
 
 def run(argv, answers=()):
     output: list[str] = []
