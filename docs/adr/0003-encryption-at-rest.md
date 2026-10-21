@@ -59,3 +59,9 @@ How this was built, where it differs from or adds to the decision above:
   marker is written. Each start then runs VACUUM and `wal_checkpoint(TRUNCATE)` while the marker
   exists, and removes it only once the checkpoint reports it wasn't busy. `secure_delete` is on,
   so deleted rows are zeroed rather than left in free pages.
+
+## Update (#28, 2026-10-20)
+The re-evaluation promised above is done: SQLCipher now has Windows, macOS and Linux wheels (`sqlcipher3` 0.6.2
+and later) and works with SQLAlchemy and Alembic. [ADR-0014](0014-whole-database-encryption.md) proposes
+encrypting the whole database with it and keeping the field encryption above. Until it is accepted and built,
+the plain-text list above still applies.
