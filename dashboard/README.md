@@ -37,10 +37,11 @@ All under `js/` (each file starts with a one-line purpose):
 
 | File | Job |
 | --- | --- |
-| `main.js` | Starts the dashboard (each page's module is loaded with `import()` only when opened): the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order (`advanced: true` pages get a tab only in the All tools view); the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
+| `main.js` | Starts the dashboard (each page's module is loaded with `import()` only when opened): the sections (Home, Money, Budget, Taxes, Devices); Home also has the advanced Setup page, this computer only and the pages in each, in order (`advanced: true` pages get a tab only in the All tools view); the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
 | `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page, plus optional choices like `#transactions?sorted=none` passed to `render` as options), `reload()` and `onLeave()` for screens |
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |
+| `setup-steps.js` | When the Setup page is offered (first start on this computer, no data, not finished) and which steps are done; `screens/setup.js` draws it (ADR-0015) |
 | `dom.js` | `h()`, `fill()`, `showError()` (textContent only, never `innerHTML`), `browserStorage()` |
 | `widgets.js` | `card` (with a title it folds up; `formCard` starts folded; `fold` for a folding group inside a card), `statCard`, `table` (optional power-user columns), `select`, `empty`, `note`, `aboutNote` (a folded explanation), `advanced` (marks a piece as All tools only) |
 | `folds.js` | Which cards you folded, remembered in this browser (pure, tested) |

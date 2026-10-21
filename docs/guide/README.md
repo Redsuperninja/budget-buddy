@@ -10,6 +10,7 @@ made-up example data.
 Set up Budget Buddy on your Windows computer, then use the dashboard (web page) to enter your money.
 
 1. [Download and install Budget Buddy](install.md) — The easy way on Windows: download, unzip, double-click Install.
+   - [The first time you open it](first-start.md) — The short Setup page: recovery phrase, first account, restoring a backup.
 2. [Start Budget Buddy](start-budget-buddy.md) — For everyday use: double-click to start; how to stop it.
 3. [The desktop app](desktop-app.md) — Budget Buddy in its own window, with a tray icon; ready when Windows starts.
 4. [Open the dashboard](open-the-dashboard.md) — What you'll see; the tabs along the top; folding boxes up; where to type the address.

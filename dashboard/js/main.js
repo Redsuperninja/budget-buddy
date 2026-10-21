@@ -3,14 +3,19 @@
 // advanced only get a tab in the All tools view (Settings, View). Another computer
 // or phone that hasn't joined yet (no CSRF token in the page) sees only the join page (ADR-0009).
 
+import { getSetup, listAccounts, listTransactions } from "./api/endpoints.js";
 import { devicePages, onThisComputer } from "./features.js";
 import { start } from "./router.js";
+import { SKIPPED_KEY, shouldShowSetup } from "./setup-steps.js";
 import { addSettingsMenu } from "./settings-menu.js";
 
 const joinedOrLocal = document.querySelector('meta[name="csrf-token"]').content !== "";
 
 const sections = [
-  { id: "home", label: "Home", pages: [{ id: "home", label: "Home", load: () => import("./screens/home/home.js") }] },
+  { id: "home", label: "Home", pages: [
+    { id: "home", label: "Home", load: () => import("./screens/home/home.js") },
+    { id: "setup", label: "Setup", load: () => import("./screens/setup.js"), advanced: true },
+  ] },
   { id: "money", label: "Money", pages: [
     { id: "transactions", label: "Transactions", load: () => import("./screens/money/transactions.js") },
     { id: "accounts", label: "Accounts", load: () => import("./screens/money/accounts.js") },
@@ -37,6 +42,26 @@ const sections = [
   }) },
 ];
 
+// First start on this computer: open Setup instead of Home (ADR-0015). Any problem asking just shows Home.
+async function openSetupFirst() {
+  try {
+    const [progress, accounts, transactions] = await Promise.all(
+      [getSetup(), listAccounts(), listTransactions(new URLSearchParams({ limit: "1" }))]);
+    let skipped = false;
+    try { skipped = sessionStorage.getItem(SKIPPED_KEY) === "1"; } catch { /* storage blocked */ }
+    if (shouldShowSetup({ onThisComputer: true, hash: location.hash, progress, skipped,
+      have: { accounts: accounts.length, transactions: transactions.total } })) location.hash = "setup";
+  } catch { /* Home opens as usual */ }
+}
+
+// Devices and Setup exist only on the Budget Buddy computer itself, never on a joined computer or phone.
+const withoutLocalOnly = () => sections
+  .filter((s) => s.id !== "devices")
+  .map((s) => ({ ...s, pages: s.pages.filter((p) => p.id !== "setup") }));
+
 addSettingsMenu();
-if (joinedOrLocal) start(onThisComputer() ? sections : sections.filter((s) => s.id !== "devices"));
+if (joinedOrLocal) {
+  if (onThisComputer()) await openSetupFirst();
+  start(onThisComputer() ? sections : withoutLocalOnly());
+}
 else import("./screens/devices/join.js").then((join) => join.render(document.getElementById("view")));
