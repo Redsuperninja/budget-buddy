@@ -3,6 +3,11 @@
     home-base/                  the packaged Home Base it starts (server/, with the dashboard files)
 Nobody needs Python to run the result. Then install_desktop.py adds it to the Start menu.
 
+Each part is built in a new, empty venv (build/desktop/venv-<part>) from its
+requirements-package.txt: the app's packages and PyInstaller, checked against their hashes
+(ADR-0013). Nothing from a developer's .venv (test tools, the linter, packages left over from
+older versions) ends up in the app.
+
     py scripts/release/build_desktop.py [--into <folder>]
 
 --into builds into <folder>/Budget Buddy instead (for example to test a build while another one
@@ -20,10 +25,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/, for _c
 from _common import (  # noqa: E402
     DESKTOP_DIR,
     LAUNCH_DIR,
+    PACKAGE_LOCK,
     PACKAGING_DIR,
     REPO,
     SERVER_DIR,
-    install_part,
+    install_locked,
     require_windows,
     run,
     say,
@@ -45,6 +51,19 @@ def running_from(folder: Path) -> bool:
     return any(Path(path.strip()).is_relative_to(folder) for path in paths if path.strip())
 
 
+def fresh_venv(part_dir: Path, label: str) -> Path:
+    """A new venv with only what ``part_dir`` runs on, plus PyInstaller. Returns its Python."""
+    venv = WORK / f"venv-{part_dir.name}"
+    shutil.rmtree(venv, ignore_errors=True)
+    if venv.exists():  # a left-over package would end up in the app
+        stop(f"Couldn't clear {venv}. Close anything using it, then try again.")
+    say(f"Installing {label} into a new, empty folder (a minute or two)...")
+    run([sys.executable, "-m", "venv", venv], REPO, f"Setting up {label} failed.")
+    python = venv / "Scripts" / "python.exe"
+    install_locked(python, part_dir, PACKAGE_LOCK, label)
+    return python
+
+
 def pyinstaller(python: Path, spec: str, dist: Path) -> None:
     command = [python, "-m", "PyInstaller", "--noconfirm", "--clean", "--log-level", "WARN"]
     command += ["--workpath", WORK, "--distpath", dist, PACKAGING_DIR / spec]
@@ -64,9 +83,9 @@ def main() -> int:
             "icon, then build again."
         )
 
-    server = install_part(SERVER_DIR, ("package",), "the Home Base packaging tools")
-    desktop = install_part(DESKTOP_DIR, ("build",), "the desktop app tools")
     WORK.mkdir(parents=True, exist_ok=True)
+    server = fresh_venv(SERVER_DIR, "the Home Base packaging tools")
+    desktop = fresh_venv(DESKTOP_DIR, "the desktop app tools")
     icon = WORK / "budget-buddy.ico"
     run([desktop, "-m", "budget_buddy_desktop.icon", icon], REPO, "Drawing the icon failed.")
 
