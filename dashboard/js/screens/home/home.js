@@ -18,6 +18,7 @@ import { reload } from "../../router.js";
 import { categoriesChart, changesChart, groupsChart, trendChart } from "./home-charts.js";
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
 import { paceCard } from "./home-pace.js";
+import { onThisComputer } from "../../features.js";
 import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
 import { leftOverChart, netWorthChart } from "./home-trends.js";
@@ -88,7 +89,8 @@ export async function render(root, options) {
   const hasTransactions = anyTransaction.total > 0;
   fill(root,
     startCard({ accounts: accounts.length > 0, transactions: hasTransactions,
-      budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) }),
+      budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) },
+      { onThisComputer: onThisComputer() }),
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker), freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
     monthTiles(summary, days.through ? months.slice(0, -1) : months, provisional),
