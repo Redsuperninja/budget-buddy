@@ -12,11 +12,14 @@ Justified exceptions go in `scripts/dev/public_allowlist.txt` (format explained 
 
 import codecs
 import fnmatch
+import hashlib
 import ipaddress
 import re
 import subprocess
 import sys
 from pathlib import Path
+
+from public_secrets import secrets_in
 
 REPO = Path(__file__).resolve().parents[2]
 ALLOWLIST = Path(__file__).with_name("public_allowlist.txt")
@@ -48,11 +51,12 @@ HOME_PATH = re.compile(
     + _NAME,
     re.I,
 )
-UNC_PATH = re.compile(r"(?<![\w\\])\\\\([A-Za-z0-9][A-Za-z0-9._-]*)\\[A-Za-z0-9$._-]")
+# A network path (two backslashes, a computer, a share), also with escaped backslashes.
+UNC_PATH = re.compile(r"(?<![\w\\:])\\{2,4}([A-Za-z0-9][A-Za-z0-9._-]*)\\{1,4}[A-Za-z0-9$._-]")
 PLACEHOLDER_NAME = re.compile(
     r"^(<.*>|\{.*\}|\$.*|%.*%|~.*|\.\.\.|x+|you|your[-_ ]?name|your[-_ ]?user(name)?|user(name)?|"
     r"me|name|example|test|public|default|runner|someone|foo|bar|host|server|localhost|"
-    r"all users|defaultuser0)$",
+    r"all users|defaultuser0|users|home)$",
     re.I,
 )
 
@@ -65,19 +69,6 @@ VERSION_BEFORE = re.compile(r"(?i)(?:\b(?:version|ver|v)|==|~=|>=|<=|\^|~)\s*$")
 # Dependency lock files are full of version numbers and hashes, not addresses.
 IP_SKIP = ("package-lock.json", "requirements*.txt", "*.lock")
 
-# --- Secrets inside text (pieces joined, so this file doesn't match its own patterns) -------------
-SECRET_PATTERNS = [
-    re.compile("-----" + "BEGIN [A-Z ]*PRIVATE" + " KEY[A-Z ]*-----"),
-    re.compile(r"\bgh[pousr]" + r"_[A-Za-z0-9]{30,}"),
-    re.compile(r"\bgithub" + r"_pat_[A-Za-z0-9_]{30,}"),
-    re.compile(r"\bsk" + r"-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}"),
-    re.compile(r"\bAK" + r"IA[0-9A-Z]{16}\b"),
-    re.compile(r"\bxox" + r"[bpars]-[A-Za-z0-9-]{10,}"),
-    re.compile(r"\bAI" + r"za[0-9A-Za-z_-]{35}\b"),
-    re.compile(r"\b[sr]k" + r"_live_[0-9A-Za-z]{20,}"),
-    re.compile(r"\bey" + r"J[A-Za-z0-9_-]{10,}\.ey" + r"J[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
-]
-
 # --- File kinds (by name and place) ---------------------------------------------------------------
 KEY_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".crt", ".cer", ".der", ".jks", ".keystore", ".p8"}
 KEY_NAMES = {"id_rsa", "id_ed25519", "id_ecdsa", "id_dsa", "secrets.json", ".npmrc", ".netrc"}
@@ -87,6 +78,9 @@ STATEMENT_SUFFIXES = {".csv", ".ofx", ".qfx", ".qif", ".xlsx", ".xls"}
 PICTURE_SUFFIXES = {".png", ".jpg", ".jpeg", ".jfif", ".gif", ".webp", ".bmp", ".heic", ".tif"}
 PICTURE_SUFFIXES |= {".tiff", ".pdf", ".svg", ".ico", ".avif"}
 SAFE_PICTURE_SUFFIXES = {".png", ".svg"}
+ASSET_SUFFIXES = {".png", ".ico", ".ttf", ".otf", ".woff", ".woff2", ".eot"}  # icons, fonts, images
+ARCHIVE_SUFFIXES = {".zip", ".7z", ".rar", ".gz", ".tgz", ".tar", ".docx", ".doc", ".pptx", ".odt"}
+ARCHIVE_SUFFIXES |= {".bin", ".exe", ".dll", ".dmg", ".msi", ".apk", ".ipa"}
 IMAGE_DIRS = (
     "docs/guide/images/",
     "docs/showcase/images/",
@@ -117,7 +111,14 @@ def load_allowlist(path: Path = ALLOWLIST) -> list[tuple[str, str, str]]:
     return entries
 
 
+def secret_digest(value: str) -> str:
+    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
 def is_allowed(rule: str, rel: str, value: str, allowlist: list[tuple[str, str, str]]) -> bool:
+    """A secret is allowlisted by the SHA-256 of its text (`sha256:<hex>`), never by the text."""
+    if rule == "secret":
+        value = secret_digest(value)
     return any(r == rule and v == value and fnmatch.fnmatch(rel, g) for r, g, v in allowlist)
 
 
@@ -144,14 +145,18 @@ def ip_is_public(text: str, before: str) -> bool:
     return not VERSION_BEFORE.search(before)  # "version 1.2.3.4" is a version
 
 
-def scan_text(rel: str, text: str) -> list[Finding]:
-    """Findings in one file's text."""
+def scan_text(rel: str, text: str, only: set[str] | None = None) -> list[Finding]:
+    """Findings in one file's text (only those of the rules in `only`, if given)."""
+    found = [f for f in _scan_text(rel, text) if only is None or f[1] in only]
+    return found
+
+
+def _scan_text(rel: str, text: str) -> list[Finding]:
     found: list[Finding] = []
     skip_ip = any(fnmatch.fnmatch(Path(rel).name, g) for g in IP_SKIP)
     for number, line in enumerate(text.splitlines(), 1):
-        for pattern in SECRET_PATTERNS:
-            for m in pattern.finditer(line):
-                found.append((number, "secret", "a key, token or password", m.group(0)))
+        for secret in secrets_in(line):
+            found.append((number, "secret", "a key, token or password", secret))
         for m in EMAIL.finditer(line):
             if email_is_real(m):
                 found.append((number, "email", "an email address that looks real", m.group(0)))
@@ -196,11 +201,26 @@ def scan_name(rel: str) -> list[tuple[str, str]]:
         return [("key-file", "a key, certificate or credentials file")]
     if suffix in STATEMENT_SUFFIXES:
         return [("statement", "a spreadsheet or bank file (it could be real transactions)")]
+    if suffix in ARCHIVE_SUFFIXES:
+        return [("binary", "an archive, document or program (it could hold anything)")]
     if suffix in PICTURE_SUFFIXES and not (
         suffix in SAFE_PICTURE_SUFFIXES and rel.startswith(IMAGE_DIRS)
     ):
         return [("image", "a picture or PDF outside the image folders (it could be a receipt)")]
     return []
+
+
+def allowlist_findings(rel: str, text: str) -> list[Finding]:
+    """The allowlist itself: secrets anywhere, emails in reasons and comments, all else in the
+    rule and path columns. The value column of an email or IP entry is the text it excuses."""
+    found = scan_text(rel, text, only={"secret"})
+    for number, line in enumerate(text.splitlines(), 1):
+        entry, _, reason = line.partition("  #")
+        comment = line if line.lstrip().startswith("#") else reason
+        head = "" if line.lstrip().startswith("#") else " ".join(entry.split(None, 2)[:2])
+        for part, only in ((comment, {"email"}), (head, None)):
+            found += [(number, *f[1:]) for f in scan_text(rel, part, only=only)]
+    return found
 
 
 def file_findings(repo: Path, rel: str) -> list[Finding]:
@@ -211,7 +231,9 @@ def file_findings(repo: Path, rel: str) -> list[Finding]:
     if file.stat().st_size > MAX_BYTES:
         return hits + [(0, "too-big", "a file too big to check (over 2 MB)", "")]
     text = decode(file.read_bytes())
-    if text is None:
+    if text is None:  # binary: fine only for the asset kinds a project needs
+        if not hits and Path(rel).suffix.lower() not in ASSET_SUFFIXES:
+            hits.append((0, "binary", "a binary file of an unknown kind", ""))
         return hits
     if rel == ALLOWLIST_REL:
         # Only "rule path" is checked: the value and the reason are the very text it excuses.

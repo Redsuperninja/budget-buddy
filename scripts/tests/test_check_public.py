@@ -23,7 +23,14 @@ TOKENS = [
     "AK" + "IA" + "ABCDEFGHIJKLMNOP",
     "xo" + "xb-" + "1234567890-abcdef",
     "AI" + "za" + "A" * 35,
+    "np" + "m_" + "aB3dE5" * 6,
+    "pyp" + "i-AgE" + "nRlc3Q" * 10,
+    "glp" + "at-" + "abcDEF1234567890xyzAB",
+    "AS" + "IA" + "ABCDEFGHIJKLMNOP",
+    "sk" + "_test_" + "abcDEF1234567890xyzAB",
 ]
+GENERIC_SECRET = "api" + '_key = "q8Zr3LmV7xT2bNp9Kd4Wc"'
+FINNHUB = "X-Finnhub" + '-Token": "q8Zr3LmV7' + 'xT2bNp9Kd4Wc"'
 
 
 def rules(text, rel="a.md"):
@@ -103,6 +110,72 @@ def test_lock_files_skip_ip_check():
 )
 def test_scan_name(rel, expected):
     assert [rule for rule, _ in cp.scan_name(rel)] == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (GENERIC_SECRET, ["secret"]),
+        ("headers = {'" + FINNHUB + "}", ["secret"]),
+        ("pass" + 'word: "q8Zr3LmV7xT2bNp9Kd4Wc"', ["secret"]),
+        ('api_key = "your-key-here-please-0000"', []),
+        ('token = "xxxxxxxxxxxxxxxxxxxx"', []),
+        ('secret: "<paste-the-value-here>"', []),
+        ('token: "${{ secrets.NAME_OF_IT }}"', []),
+        ('password = "short"', []),
+        ("token = some_variable_with_a_long_name", []),
+        ("aws_secret_access_key = " + "A1b2C3d4" * 5, ["secret"]),
+    ],
+)
+def test_generic_secrets(text, expected):
+    assert rules(text) == expected
+
+
+def test_escaped_unc_paths():
+    assert rules("\\\\\\\\" + "OFFICEPC\\\\share") == ["home-path"]
+    assert rules("\\\\" + "OFFICEPC\\share") == ["home-path"]
+    assert rules('"C:\\\\Apps\\\\Tool\\\\tool.exe"') == []
+
+
+def test_allowlist_file_is_scanned(tmp_path):
+    token = TOKENS[0]
+    text = (
+        "# note with bob@" + "gmail.com\n"
+        f"secret a.txt sha256:abc  # leaked {token}\n"
+        f"secret b.txt {token}\n"
+        "email c.txt bob@" + "gmail.com  # fine: the value is what it excuses\n"
+        "email d.txt x@example.com  # reason mentions bob@" + "gmail.com\n"
+    )
+    found = [(n, rule) for n, rule, _, _ in cp.allowlist_findings("allow.txt", text)]
+    assert found == [(2, "secret"), (3, "secret"), (1, "email"), (5, "email")]
+
+
+def test_secret_allowlisted_by_hash_only():
+    token = TOKENS[0]
+    entry = ("secret", "a/*.txt", cp.secret_digest(token))
+    assert cp.is_allowed("secret", "a/b.txt", token, [entry])
+    assert not cp.is_allowed("secret", "a/b.txt", token, [("secret", "a/*.txt", token)])
+    assert not cp.is_allowed("secret", "a/b.txt", "other", [entry])
+
+
+def test_unknown_binary_and_archives_flagged(tmp_path):
+    make_repo(
+        tmp_path,
+        {
+            "a.dat": b"\x00\x01\x02",
+            "font.woff2": b"\x00\x01\x02",
+            "x/icon.png": b"\x89PNG\x00",
+            "pack.zip": b"PK\x03\x04\x00",
+        },
+    )
+    assert cp.scan_repo(tmp_path, allowlist=[]) == [
+        "a.dat:0: [binary] a binary file of an unknown kind",
+        "pack.zip:0: [binary] an archive, document or program (it could hold anything)",
+        "x/icon.png:0: [image] a picture or PDF outside the image folders (it could be a receipt)",
+    ]
+    assert cp.scan_repo(tmp_path, allowlist=[("binary", "*.dat", ""), ("binary", "*.zip", "")]) == [
+        "x/icon.png:0: [image] a picture or PDF outside the image folders (it could be a receipt)"
+    ]
 
 
 def test_decode_by_bom():
