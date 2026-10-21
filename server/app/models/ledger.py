@@ -17,7 +17,7 @@ class Account(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     kind: Mapped[AccountKind] = mapped_column(str_enum(AccountKind, "account_kind"))
-    institution: Mapped[str | None] = mapped_column(String(100))
+    institution: Mapped[str | None] = mapped_column(EncryptedString("accounts.institution"))
     last4: Mapped[str | None] = mapped_column(EncryptedString("accounts.last4"))
     notes: Mapped[str | None] = mapped_column(EncryptedString("accounts.notes"))
     # Retirement accounts only: Roth IRA, traditional IRA, 401(k)... (enums.RetirementType).
@@ -181,7 +181,7 @@ class Paycheck(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     pay_date: Mapped[dt.date] = mapped_column(Date, index=True)
-    employer: Mapped[str] = mapped_column(String(200))
+    employer: Mapped[str] = mapped_column(EncryptedString("paychecks.employer"))
     account_id: Mapped[int | None] = mapped_column(
         ForeignKey("accounts.id", ondelete="SET NULL")
     )  # where the money was deposited
@@ -213,7 +213,7 @@ class Receipt(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[dt.date] = mapped_column(Date, index=True)
-    merchant: Mapped[str] = mapped_column(String(200))
+    merchant: Mapped[str] = mapped_column(EncryptedString("receipts.merchant"))
     total_cents: Mapped[int]
     category_id: Mapped[int | None] = mapped_column(
         ForeignKey("categories.id", ondelete="SET NULL")

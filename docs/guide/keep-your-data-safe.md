@@ -4,23 +4,23 @@ Your Budget Buddy data stays on your computer only. Nothing goes to the cloud. L
 
 ## What's encrypted
 
-Account numbers, notes, and receipt photos are encrypted. The encryption key is kept in your computer's password vault (Windows Credential Manager, macOS Keychain, or Linux Secret Service), never in the data folder.
+Account numbers, bank names, notes, employer names, charity names, shop names on receipts, and receipt photos are encrypted. The encryption key is kept in your computer's password vault (Windows Credential Manager, macOS Keychain, or Linux Secret Service), never in the data folder.
 
-**Not everything is encrypted yet.** Amounts, dates, descriptions, shop names, employer names, and charity names are not encrypted, so anyone with a copy of the data folder can still read your spending, pay, and giving history. Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password.
+**Not everything is encrypted yet.** Amounts, dates, transaction descriptions, and account names are not encrypted, so anyone with a copy of the data folder can still read your spending, pay, and giving history. Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password.
 
 Encrypted on your computer:
-- Account numbers
+- Account numbers and bank names
 - Transaction notes
 - Receipt photos and text
-- Donation notes
+- Donation notes and charity names
+- Employer names on paychecks
+- Shop names on receipts
 
 **Not encrypted (but you need them for Budget Buddy to work):**
 - Every amount and date
 - Transaction description
-- Shop names on receipts
-- Employer names and pay details on paychecks
-- Account names and bank names
-- Charity names on donations
+- Pay amounts on paychecks
+- Account names
 - Stock symbols and lots
 
 ## Your recovery phrase

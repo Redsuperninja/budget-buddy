@@ -39,6 +39,10 @@ ENCRYPTED = {
     ("pairing_sessions", "pair_sk"),
     ("price_feed", "api_key"),
     ("imports", "file_name"),
+    ("accounts", "institution"),
+    ("paychecks", "employer"),
+    ("receipts", "merchant"),
+    ("donations", "organization"),
 }
 
 

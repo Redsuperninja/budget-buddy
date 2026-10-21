@@ -11,7 +11,8 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   (#27). The data folder holds only a `key-fingerprint` to check the key
   belongs to it; if that file is gone, `crypto/key_check.py` test-decrypts a stored value instead, and existing
   rows block a new key (#26). Only derived keys (fields, files, backup) are kept in memory.
-- Sensitive columns (account numbers, notes, device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
+- Sensitive columns (account numbers, notes, bank, employer, charity and shop names (`accounts.institution`,
+  `paychecks.employer`, `donations.organization`, `receipts.merchant`; migration 0028), device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.
 - Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
   names. The plain photo is never written to disk.
@@ -54,10 +55,8 @@ These stay readable so Budget Buddy can search, sort and add them up:
 
 - every amount and date, and each transaction's description
 - auto-sort rule text (`category_rules.pattern`), which is copied from transaction descriptions
-- shop names on receipts (`receipts.merchant`)
-- employer names and gross/net pay on paychecks (`paychecks.employer`)
-- account names and banks (`accounts.name`, `accounts.institution`)
-- charity names on donations (`donations.organization`)
+- gross and net pay on paychecks
+- account names (`accounts.name`; the account lists are sorted by it in SQL)
 - stock symbols and lots
 
 Encrypting more of them, or the whole database, is
