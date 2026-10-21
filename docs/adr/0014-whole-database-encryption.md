@@ -29,29 +29,42 @@ sqlite3mc; a full-table `LIKE` scan 2.6 → 3.8 ms; opening a connection 3.4 →
 a passphrase (PBKDF2, 256,000 rounds). Fine for a one-person budget.
 
 ## Decision (proposed)
-**Adopt SQLCipher through `sqlcipher3` (coleifer), and keep field-level encryption.**
-- `sqlcipher3`, not the `-wheels` fork: same API, newer SQLCipher and SQLite, the original maintainer. Not
-  sqlite3mc: no DB-API means writing and owning a SQLAlchemy dialect. Its `sqlcipher` mode stays the way out if
-  `sqlcipher3` stops shipping wheels; the files open there.
-- **Key:** a new HKDF-SHA256 subkey of the master key (info `budget-buddy/v1/database`), passed as a raw key, so
-  no PBKDF2. It is set first, in the engine's `connect` listener, before the other pragmas.
-- **Every connection goes through SQLCipher.** Today `db.open_read_only`, `db.copy_database`,
-  `backup/restore.py` and `crypto/__init__.py` use Python's `sqlite3`; they must take the key too. The backup API
-  refuses a keyed-to-plain copy, so a missed spot fails loudly instead of leaking.
-- **Moving existing data:** once, at start, before migrations: `sqlcipher_export` into a new file, check it
-  opens and its counts match, then swap and delete the plain file and its `-wal`. Keep the `scrub-pending` idea:
-  `budget.db.bak-*` copies and old free disk blocks may still hold plain data; the app says so.
-- **Backups (ADR-0012):** `VACUUM INTO` keeps the database encrypted with the same key, so the file inside a
-  backup is encrypted twice and the staging folder no longer holds a plain database. Restore opens the staged
-  copy with the database key derived from that backup's master key (the same recovery-phrase path as now).
-- **Build:** the lock files need no change in method: wheels exist for every OS we lock for. Add SQLCipher's BSD
-  and OpenSSL's Apache-2.0 notices to `packaging/windows/THIRD-PARTY-NOTICES.txt` (the wheel carries only the
-  wrapper's licence). Turn SQLCipher's stderr log off (`PRAGMA cipher_log_level = NONE`).
+**Adopt SQLCipher through `sqlcipher3` (coleifer), and keep field-level encryption.** Not the `-wheels` fork
+(older SQLCipher, one-person "Beta"); not sqlite3mc (no DB-API, so we'd own a SQLAlchemy dialect). sqlite3mc's
+`sqlcipher` mode opens our files, so it stays the way out if `sqlcipher3` stops shipping wheels.
+- **Key:** a new HKDF-SHA256 subkey of the master key (info `budget-buddy/v1/database`), used as a raw key (no PBKDF2).
+- **Backups (ADR-0012):** `VACUUM INTO` stays encrypted with the same key, so the staging folder no longer holds a
+  plain database; restore opens the staged copy with the key derived from that backup's master key.
+
+## Requirements for the build (from the security review of this ADR)
+1. **The key never appears in SQL text, URLs or logs.** `hide_parameters` hides values, not statement text, so
+   `PRAGMA key` runs only on the raw DB-API cursor inside the engine's `connect` listener, first; its hex string
+   is built there and dropped (a Python string can't be wiped; the field keys are the same today). `ATTACH` uses
+   a bound `KEY ?`. No `sqlite+pysqlcipher://` URL. A test checks that a failing connection's exception text and
+   the logs hold no hex key. `PRAGMA cipher_log_level = NONE`.
+2. **Every opener takes the key, and each gets an encrypted-database test.** Plain `sqlite3` today:
+   `db.open_read_only`, `db.copy_database`, `db.database_revision`, `crypto.database_has_rows`,
+   `backup/restore.py` (`_check_database`, `carry_over_removals`) and #26's `crypto/key_check.py`. A missed one
+   does **not** always fail loudly: `database_has_rows`, `database_revision` and `_check_database` swallow
+   `DatabaseError` and would quietly answer "has data", "no revision" or "corrupt".
+3. **Opening with the database key is the key check (#26).** "File is not a database" under a key is reported as
+   a wrong key, separately from "busy" (another copy open) and "corrupt".
+4. **Restore:** `carry_over_removals` opens this computer's database with this computer's key and the backup's
+   with the backup's key; if either fails, the restore stops, so a removed phone can't sync again. A backup from
+   before SQLCipher is detected, exported to an encrypted file, and its plain staging copy deleted.
+5. **Moving existing data, crash-safe, no plain copy kept:** write the `scrub-pending` marker, checkpoint the WAL,
+   `sqlcipher_export` to a new file (with `user_version`), check it opens and its counts match, swap it in
+   atomically, delete the plain `budget.db`, `-wal` and `-shm`, then clear the marker. A crash at any step resumes
+   from the marker on the next start. Every older `budget.db.bak-*` is flagged as unencrypted, with deletion offered.
+6. **Install wheels only** for `sqlcipher3` (`--only-binary`), so a missing wheel never builds from source against
+   the system's OpenSSL. Add SQLCipher's BSD and OpenSSL's Apache-2.0 notices to
+   `packaging/windows/THIRD-PARTY-NOTICES.txt` (the wheel carries only the wrapper's licence).
+7. **OpenSSL age:** at start, refuse a `PRAGMA cipher_provider_version` below a minimum we set.
 
 ## Consequences
 - A copied data folder reveals only file sizes. Step 1 of #28 (more encrypted columns) becomes optional.
-- OpenSSL fixes reach us only when `sqlcipher3` publishes new wheels; Dependabot shows them, and a long gap
-  means switching to sqlite3mc.
+- OpenSSL fixes arrive only with new `sqlcipher3` wheels, and Dependabot won't flag CVEs in the bundled copy. The
+  exposure is small (AES, HMAC and the KDF on local files; no TLS); a long gap means switching to sqlite3mc.
 - Opening `budget.db` with a plain SQLite tool no longer works; debugging needs the key.
 - Not tested yet: macOS, Linux, Python 3.12 and 3.13 (only the wheels on PyPI were checked), a PyInstaller build,
   Budget Buddy's own code and test suite on SQLCipher (no app code was changed), and migrating a real-sized database.
