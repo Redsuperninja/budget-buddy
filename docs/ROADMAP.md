@@ -53,8 +53,9 @@ done.
 
 **G. Public release.**
 1. ~~**24. Encrypted backup & restore**~~, ~~**23. User guide with screenshots**~~ (done).
-2. Security hardening: ~~#6~~ (supply chain: lock files, pinned Actions, Dependabot; done), ~~#26~~ (key check in the database; done), ~~#27~~ (done) and #28 (key and
-   encryption hardening), #21 (npm advisories).
+2. Security hardening: ~~#6~~ (supply chain: lock files, pinned Actions, Dependabot; done), ~~#26~~ (key check in the
+   database; done), ~~#27~~ (done) and #28 (key and encryption hardening; names encrypted, done; whole-database
+   encryption evaluated, ADR-0014 proposed), #21 (npm advisories; uuid done, the rest wait on upstream fixes).
 3. **25. Public release prep.**
 
 ## Phase 1: Foundation

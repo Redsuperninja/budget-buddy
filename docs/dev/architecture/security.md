@@ -67,7 +67,8 @@ These stay readable so Budget Buddy can search, sort and add them up:
 The encrypted names can also appear in transaction descriptions and account names, which stay plain.
 
 Encrypting more of them, or the whole database, is
-[issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28). Users are told to keep the data folder out
+[issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28); whole-database encryption with SQLCipher is
+proposed in [ADR-0014](../../adr/0014-whole-database-encryption.md). Users are told to keep the data folder out
 of cloud-synced folders and to protect their Windows account with a password.
 
 ## On the network
