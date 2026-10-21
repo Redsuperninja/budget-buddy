@@ -51,16 +51,18 @@ def make_download(data_dir: Path, engine: Engine, keys: DerivedKeys) -> Path:
     except BaseException:
         path.unlink(missing_ok=True)
         raise
-    record_backup(engine)
     return path
 
 
-def send_and_delete(path: Path, chunk_size: int = 1024 * 1024):
-    """The file's bytes for a download; deleted when sent, or when the browser stops early."""
+def send_and_delete(path: Path, chunk_size: int = 1024 * 1024, engine: Engine | None = None):
+    """The file's bytes for a download; deleted when sent, or when the browser stops early.
+    With an ``engine``, the last-backup date is noted only once the last chunk went out."""
     try:
         with open(path, "rb") as source:
             while chunk := source.read(chunk_size):
                 yield chunk
+        if engine is not None:
+            record_backup(engine)
     finally:
         path.unlink(missing_ok=True)
 

@@ -132,3 +132,77 @@ def test_a_failed_backup_leaves_it_unset(make_client, store, tmp_path):
     assert code == 1
     assert client.get(SETUP).json()["last_backup_at"] is None
     assert raw_rows(client.app.state.settings.data_dir, "SELECT * FROM setup_progress") == []
+
+
+@pytest.mark.real_migrations
+def test_the_download_is_stamped_only_after_the_last_chunk(client, store):
+    from app.backup import uploads
+
+    state = client.app.state
+    path = uploads.make_download(state.settings.data_dir, state.engine, state.keys)
+    assert client.get(SETUP).json()["last_backup_at"] is None  # written, not yet sent
+    stream = uploads.send_and_delete(path, chunk_size=16, engine=state.engine)
+    next(stream)
+    stream.close()  # the browser stopped early
+    assert client.get(SETUP).json()["last_backup_at"] is None
+    assert not path.exists()
+
+    path = uploads.make_download(state.settings.data_dir, state.engine, state.keys)
+    assert b"".join(uploads.send_and_delete(path, engine=state.engine))
+    assert client.get(SETUP).json()["last_backup_at"]
+
+
+@pytest.mark.real_migrations
+def test_a_stamping_error_never_breaks_a_backup(client):
+    from app.services.setup_progress import record_backup
+
+    with client.app.state.engine.begin() as conn:
+        conn.execute(text("DROP TABLE setup_progress"))
+    record_backup(client.app.state.engine)  # logs, doesn't raise
+
+
+@pytest.mark.real_migrations
+def test_a_restore_keeps_this_computers_setup_dates(store, make_client, tmp_path):
+    client = make_client()
+    client.app.state.engine.dispose()
+    out = tmp_path / "out"
+    out.mkdir()
+    assert cli.main(["backup", "make", "--to", str(out)], output=lambda _m: None) == 0
+    [backup] = out.glob("*.bbbackup")  # made before this computer's dates below
+
+    client = make_client()
+    client.put(SETUP, json={"finished": True, "phrase_saved": True})
+    before = client.get(SETUP).json()
+    assert before["last_backup_at"] and before["finished_at"]
+    client.app.state.engine.dispose()
+
+    code = cli.main(
+        ["backup", "restore", str(backup)], output=lambda _m: None, ask=lambda _p: "RESTORE"
+    )
+    assert code == 0
+    client = make_client()
+    assert client.get(SETUP).json() == before
+    client.app.state.engine.dispose()
+
+
+@pytest.mark.real_migrations
+def test_a_new_computer_that_ticked_setup_can_still_restore_another_keys_backup(
+    store, data_dir, tmp_path, monkeypatch, make_client
+):
+    from app.crypto import key_name_for, master_key_to_phrase
+
+    client = make_client()
+    client.post("/api/local/accounts", json={"name": "Everyday", "kind": "checking"})
+    backup = client.get("/api/local/backup/file").content
+    phrase = master_key_to_phrase(store.get(key_name_for(data_dir)))
+    client.app.state.engine.dispose()
+
+    monkeypatch.setattr(keystore_module, "_MEMORY_STORE", MemoryKeyStore())
+    monkeypatch.setenv("BUDGET_BUDDY_DATA_DIR", str(tmp_path / "other"))
+    new = make_client()
+    assert new.put(SETUP, json={"phrase_saved": True}).status_code == 200
+    response = new.post(
+        "/api/local/backup/restore", content=backup, headers={"X-Recovery-Phrase": phrase}
+    )
+    assert response.status_code == 200, response.text
+    new.app.state.engine.dispose()

@@ -1,9 +1,10 @@
 """First-start setup progress, kept by the Home Base (roadmap 25e, ADR-0015)."""
 
 import datetime as dt
+import logging
 
 from sqlalchemy import Engine
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
@@ -11,6 +12,7 @@ from app.models.setup import SetupProgress
 from app.schemas.setup import SetupProgressIn, SetupProgressOut
 
 ROW_ID = 1
+log = logging.getLogger(__name__)
 
 
 def _now() -> dt.datetime:
@@ -50,5 +52,5 @@ def record_backup(engine: Engine) -> None:
             row.last_backup_at = _now()
             session.add(row)
             session.commit()
-    except OperationalError:
-        pass
+    except SQLAlchemyError:
+        log.warning("Couldn't note the time of the last backup; the backup itself is fine.")
