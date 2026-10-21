@@ -17,7 +17,7 @@ labels: user-testing
 
 
 **Where?**
-- [ ] Computer (Home Base / API explorer page)
+- [ ] Computer (the dashboard in my web browser, at http://127.0.0.1:8766/)
 - [ ] Phone app (iPhone / Android: )
 - [ ] A test script (which one: )
 

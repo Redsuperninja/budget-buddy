@@ -49,5 +49,8 @@ here). Your data folder, %LOCALAPPDATA%\BudgetBuddy, is kept unless you delete i
 
 HELP
 ----
-The user guide is in the project's docs/guide folder on GitHub. Licensed under MIT; see
+The user guide is online, with pictures, at:
+https://github.com/Redsuperninja/budget-buddy/tree/main/docs/guide
+
+Licensed under MIT; see
 "Budget Buddy\THIRD-PARTY-NOTICES.txt" for the parts it is built from.
