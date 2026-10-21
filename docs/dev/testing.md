@@ -47,7 +47,7 @@ stacked branches), and only when that part's folder, the workflow file, or what 
 changed (the server's also on `dashboard/`, `mobile/src/`, `desktop/budget_buddy_desktop/`, `scripts/` and
 `docs/api/`; the phone's and the desktop's also on `docs/api/`):
 
-- `server-ci.yml`: Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.
+- `server-ci.yml`: Python 3.12 and 3.14; `scripts/dev/check_public.py` (nothing private in tracked files), `ruff check`, `ruff format --check`, `pytest --cov`.
 - `dashboard-ci.yml`: Node 22; `npm run coverage` (`node --test` with coverage; no dependencies to install).
 - `mobile-ci.yml`: Node 22; `npm ci`, `npx tsc --noEmit`, `npm test -- --ci --coverage`.
 - `desktop-ci.yml`: Windows, Python 3.12 and 3.14; `ruff check`, `ruff format --check`, `pytest --cov`.

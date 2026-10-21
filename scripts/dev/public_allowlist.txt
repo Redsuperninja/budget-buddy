@@ -1,0 +1,26 @@
+# Justified exceptions to scripts/dev/check_public.py. One per line:
+#   <rule> <path glob> <exact value>  # reason (two spaces, then #)
+# Rules: secret, email, home-path, ip, env-file, database, backup, key-file, statement, image, binary,
+# too-big. The value is the exact text found (a file-kind rule has no value). Only that text is excused,
+# not the whole file. For a `secret` the value is `sha256:<hex>` of the text (never the text itself):
+# get it from `secret_digest()` in check_public.py. Every entry needs a reason; keep this list short.
+# This file is scanned too: secrets anywhere in it, emails in reasons and comments.
+
+email mobile/package-lock.json i@izs.me  # npm's own deprecation text for glob names its author; third-party, already public on npm
+ip docs/adr/0014-*.md 3.54.0.0  # a package version in a table, not an address
+ip mobile/src/sync/__tests__/pairing.test.ts 8.8.8.8  # the example "public address" the phone must refuse to pair with
+ip mobile/src/sync/__tests__/transportHardening.test.ts 8.8.8.8  # a public address the phone must refuse to talk to
+ip server/tests/devices/test_pairing_listener.py 8.8.8.8  # a public address the Home Base must refuse to listen on
+ip server/tests/test_network.py 8.8.8.8  # a public address the LAN-only check must reject
+statement scripts/testing/sample-bank-statement.csv  # made-up DEMO rows for trying the importer
+ip mobile/src/sync/__tests__/pairing.test.ts 172.32.0.1  # just outside the private 172.16-31 range: the phone must refuse it
+ip mobile/src/sync/__tests__/pairing.test.ts 11.0.0.1  # a public address next to the private 10.x range, must be refused
+ip server/tests/test_network.py 172.32.0.1  # just outside the private range, must be rejected
+ip server/tests/test_network.py 2001:4860:4860::8888  # a public IPv6 address the LAN-only check must reject
+secret docs/api/sync-contract/03-endpoints.md sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret mobile/src/__tests__/syncButton.test.tsx sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret mobile/src/sync/__tests__/pairing.test.ts sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret mobile/src/sync/__tests__/reminders.test.ts sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret mobile/src/sync/__tests__/syncClient.test.ts sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret mobile/src/sync/__tests__/transportHardening.test.ts sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value
+secret server/tests/devices/test_envelope_vectors.py sha256:128a42f0efc787b4710881a27873ead95dfcf13a9dfbdf9ca1f2f0600ecb9407  # the sync contract's documented sample token: base64 of the bytes 0x60..0x7f, an obviously fake value

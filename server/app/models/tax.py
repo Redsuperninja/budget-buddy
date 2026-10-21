@@ -60,7 +60,7 @@ class Dividend(TimestampMixin, Base):
     sweep_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True
     )
-    payer: Mapped[str] = mapped_column(String(100))  # from the description: "JOHNSON & JOHNSON"
+    payer: Mapped[str] = mapped_column(String(100))  # from the description: "FAKECO"
     # Linked by hand ("Deposit sweeps to check"): Match everything again keeps it.
     sweep_by_hand: Mapped[bool] = mapped_column(default=False, server_default="0")
     # "Not a dividend": kept so it isn't found again, but left out of lists and totals.

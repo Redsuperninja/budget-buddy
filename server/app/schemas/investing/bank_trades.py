@@ -14,7 +14,7 @@ class BankTradeOut(Schema):
     date: dt.date
     account_id: int
     account_name: str
-    security: str  # the company, from the description: "ABBOTT LABORATORIES"
+    security: str  # the company, from the description: "FAKECO"
     side: Literal["buy", "sell"]  # money out is a buy, money in a sale
     amount_cents: int  # what it cost, or what the sale brought in (positive)
     # Once recorded as a stock purchase or sale: its ticker, shares and price per share.

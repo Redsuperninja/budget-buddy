@@ -142,7 +142,7 @@ done.
     fake, test addresses are private examples, and the only outside call is the opt-in Finnhub price feed.
   - Found for #28, not part of 25: `dividends.payer` is stored in plain text, but it names what you own. Add it to
     the encrypted columns, or let ADR-0014 cover it.
-- [ ] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
+- [x] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
   databases, `.bbbackup`, images outside `docs/` and `assets/`), and example payers in comments made up
   ("FAKECO", not "JOHNSON & JOHNSON"); real bank line formats stay in tests — *backend-engineer* + *security-reviewer*
 - [x] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged

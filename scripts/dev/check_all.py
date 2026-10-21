@@ -55,6 +55,8 @@ def parts() -> list[tuple[str, Path, bool, list[list]]]:
         ),
         ("Desktop", DESKTOP_DIR, desktop.exists(), python_checks(desktop)),
         # Every dashboard page in a real (headless) browser, against a throwaway Home Base.
+        # Nothing private (emails, user paths, public IPs, databases, keys) in tracked files.
+        ("Public", REPO, True, [[sys.executable, scripts / "dev" / "check_public.py"]]),
         ("Pages", REPO, server.exists(), [[sys.executable, scripts / "dev" / "check_pages.py"]]),
     ]
 
