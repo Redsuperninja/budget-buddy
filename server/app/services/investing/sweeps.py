@@ -13,7 +13,7 @@ import datetime as dt
 import re
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, lazyload, load_only
 
 from app.models import Transaction, TransactionKind
 from app.services.ledger.transaction_roles import (
@@ -28,7 +28,7 @@ from app.services.ledger.transaction_roles import (
 
 SWEEP_DAYS_BEFORE = 1
 SWEEP_DAYS_AFTER = 3
-SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I)
+SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I | re.A)
 
 
 def regular(query):
@@ -37,6 +37,24 @@ def regular(query):
         Transaction.kind == TransactionKind.NORMAL,
         Transaction.transfer_pair_id.is_(None),
         *none_of(paycheck_deposits(), donations()),
+    )
+
+
+def lean(query):
+    """Load transactions with only the columns the finders read, no encrypted notes and no linked
+    rows: far less work for thousands of rows. Anything else still loads if it is asked for."""
+    return query.options(
+        load_only(
+            Transaction.id,
+            Transaction.account_id,
+            Transaction.date,
+            Transaction.amount_cents,
+            Transaction.description,
+            Transaction.category_source,  # read when a dividend is filed
+        ),
+        lazyload(Transaction.account),
+        lazyload(Transaction.transfer_partner),
+        lazyload(Transaction.donation),
     )
 
 
@@ -53,7 +71,11 @@ def _not_taken():
 def candidates(session: Session, account_ids: set[int]) -> list[Transaction]:
     """Sweeps in these accounts not linked to anything yet."""
     rows = session.scalars(
-        regular(select(Transaction)).where(Transaction.account_id.in_(account_ids), *_not_taken())
+        lean(regular(select(Transaction))).where(
+            Transaction.account_id.in_(account_ids),
+            Transaction.description.ilike("%sweep%"),  # the regex below is stricter
+            *_not_taken(),
+        )
     )
     return [t for t in rows if SWEEP_WORDS.search(t.description)]
 

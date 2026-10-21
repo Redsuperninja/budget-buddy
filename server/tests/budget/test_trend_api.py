@@ -74,3 +74,14 @@ def test_this_months_net_worth_stops_at_today(client, make_account, add_txn):
     month = f"{today.year}-{today.month:02d}"
     [this] = client.get(TREND, params={"end": month, "months": 1}).json()["months"]
     assert this["net_worth_cents"] == 100_000  # like Home's balances: the rent isn't paid yet
+
+
+def test_net_worth_counts_history_before_the_first_month(client, make_account, add_txn):
+    checking = make_account()["id"]
+    add_txn(checking, 90_000, date="2024-12-31", kind="adjustment")
+    add_txn(checking, -10_000, date="2025-06-15")
+    add_txn(checking, -2_000, date="2026-02-01")
+    add_txn(checking, -3_000, date="2026-02-28")
+    add_txn(checking, 7_000, date="2026-03-01")
+    trend = client.get(TREND, params={"end": "2026-03", "months": 3}).json()["months"]
+    assert [m["net_worth_cents"] for m in trend] == [80_000, 75_000, 82_000]
