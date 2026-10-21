@@ -145,7 +145,7 @@ done.
 - [ ] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
   databases, `.bbbackup`, images outside `docs/` and `assets/`), and example payers in comments made up
   ("FAKECO", not "JOHNSON & JOHNSON"); real bank line formats stay in tests — *backend-engineer* + *security-reviewer*
-- [ ] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged
+- [x] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged
   libraries' own licence files, with a test that every package in both `requirements-package.txt` has one —
   *backend-engineer* + *security-reviewer*
   - Today's list has no licence texts and misses bottle, proxy-tools, Mako, MarkupSafe, jaraco.*, more-itertools,

@@ -1,6 +1,8 @@
 """Make the Windows download for a release: dist/Budget-Buddy-<version>-Windows.zip and its .sha256.
 The zip holds the built app (build_desktop.py), the installer and a plain-English READ ME FIRST.txt,
-so nobody needs Python or this repository to use it. The version comes from server/app/__init__.py.
+so nobody needs Python or this repository to use it. LICENSE and THIRD-PARTY-NOTICES.txt (made from
+the packaged libraries' own licence files) travel with it. The version comes from
+server/app/__init__.py.
 (docs/dev/release.md has the full checklist; .github/workflows/release.yml runs this for a v* tag.)
 
     py scripts/release/make_release.py
@@ -55,6 +57,10 @@ def main() -> int:
     (stage / "Budget Buddy" / "version.txt").write_text(number + "\n", encoding="ascii")
     for file in INSTALLER:
         shutil.copy(PACKAGING_DIR / file, stage)
+    shutil.copy(REPO / "LICENSE", stage)  # the app folder has one too; this one is easy to find
+    for needed in ("LICENSE", "THIRD-PARTY-NOTICES.txt"):
+        if not (stage / "Budget Buddy" / needed).is_file():
+            stop(f"The build has no {needed} in the app folder.")
 
     zip_path.unlink(missing_ok=True)
     zip_folder(stage, zip_path)

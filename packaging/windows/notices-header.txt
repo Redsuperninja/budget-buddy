@@ -1,0 +1,15 @@
+Budget Buddy: third-party notices
+
+Budget Buddy itself is MIT licensed (the LICENSE file in this download). The apps are built with the
+open-source software below, each under its own licence, whose text follows. This file is generated when
+the download is built, from the licence files the libraries ship with.
+
+Things worth knowing:
+- pystray (LGPL-3.0) is used unchanged, as plain .py files in the app's _internal\pystray folder (not packed
+  into the program). You may replace them with your own build of pystray. Its source is at https://github.com/moses-palmer/pystray
+- PyInstaller (GPL-2.0-or-later with a special exception) packages the apps. Its exception allows the
+  apps it builds to be distributed under any licence. Its source is at https://pyinstaller.org
+- Some packages are only used while building the download (for example PyInstaller, setuptools,
+  altgraph, pefile); they are listed because parts of them end up in the apps.
+- Some libraries carry C libraries inside them (OpenSSL, libsodium, Pillow's image libraries); those
+  have their own sections after the package list.

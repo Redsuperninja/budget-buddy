@@ -23,6 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/, for _common
 
 from _version import version_info  # noqa: E402
+from third_party_notices import write as write_notices  # noqa: E402
 
 from _common import (  # noqa: E402
     DESKTOP_DIR,
@@ -113,7 +114,15 @@ def main() -> int:
     say("Building Budget Buddy.exe and the Home Base (a few minutes)...")
     pyinstaller(desktop, "desktop.spec", dist)
     pyinstaller(server, "home-base.spec", out)
-    shutil.copy(PACKAGING_DIR / "THIRD-PARTY-NOTICES.txt", out)
+    shutil.copy(REPO / "LICENSE", out)
+    say("Collecting the licences of everything in the app...")
+    try:
+        write_notices(
+            out / "THIRD-PARTY-NOTICES.txt",
+            [(server, SERVER_DIR / PACKAGE_LOCK), (desktop, DESKTOP_DIR / PACKAGE_LOCK)],
+        )
+    except (ValueError, RuntimeError) as problem:
+        stop(str(problem))
 
     say()
     say(f"Built: {out / 'Budget Buddy.exe'}", "green")
