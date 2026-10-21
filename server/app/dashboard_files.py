@@ -41,8 +41,8 @@ class DashboardFiles:
     folder: Path  # resolved
     assets: dict[str, Path]  # URL path such as "js/main.js" -> file
     _rescanned_at: float = 0.0
-    # path -> (mtime_ns, size, text, etag): files are small, and a changed file is re-read.
-    _cache: dict[Path, tuple[int, int, str, str]] = field(default_factory=dict)
+    # path -> (mtime_ns, size, inode, ctime_ns, text, etag); a changed file is re-read.
+    _cache: dict[Path, tuple[int, int, int, int, str, str]] = field(default_factory=dict)
     _rescan_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def read_index(self) -> str | None:
@@ -79,6 +79,8 @@ class DashboardFiles:
             if len(assets) > MAX_FILES:
                 return False
             self.assets = assets
+            listed = set(assets.values())  # drop files an update removed or renamed
+            self._cache = {p: v for p, v in self._cache.items() if p in listed}
             return True
         finally:
             self._rescan_lock.release()
@@ -92,10 +94,10 @@ class DashboardFiles:
                 info = os.fstat(handle.fileno())
                 if not stat.S_ISREG(info.st_mode) or info.st_nlink > 1:
                     return None
-                key = (info.st_mtime_ns, info.st_size)
+                key = (info.st_mtime_ns, info.st_size, info.st_ino, info.st_ctime_ns)
                 cached = self._cache.get(path) if tagged else None
-                if cached and cached[:2] == key:
-                    return cached[2], cached[3]
+                if cached and cached[:4] == key:
+                    return cached[4], cached[5]
                 data = handle.read(MAX_FILE_BYTES + 1)
             if len(data) > MAX_FILE_BYTES:
                 return None

@@ -342,3 +342,31 @@ def test_html_page_and_api_get_no_etag_and_are_never_304(client):
 
 def test_missing_file_is_still_404_with_if_none_match(client):
     assert client.get("/static/js/nothing.js", headers={"If-None-Match": "*"}).status_code == 404
+
+
+def test_cache_is_dropped_for_files_an_update_removed(make_client, fake_dashboard):
+    client = make_client()
+    dashboard = client.app.state.dashboard
+    assert client.get("/static/js/main.js").status_code == 200
+    _write(fake_dashboard / "js" / "extra.js", "// extra")
+    assert client.get("/static/js/extra.js").status_code == 200
+    assert len(dashboard._cache) == 2
+    (fake_dashboard / "js" / "extra.js").unlink()
+    dashboard._rescanned_at = 0.0
+    assert client.get("/static/js/gone.js").status_code == 404  # triggers the rescan
+    assert [p.name for p in dashboard._cache] == ["main.js"]
+
+
+def test_same_size_replacement_with_the_old_mtime_is_not_served_stale(make_client, fake_dashboard):
+    client = make_client()
+    path = fake_dashboard / "js" / "main.js"
+    path.write_text("// aaaa", encoding="utf-8")
+    old = path.stat()
+    first = client.get("/static/js/main.js")
+    replacement = path.with_name("main.js.new")
+    replacement.write_text("// bbbb", encoding="utf-8")
+    os.utime(replacement, ns=(old.st_atime_ns, old.st_mtime_ns))
+    os.replace(replacement, path)  # new file: same size, same mtime, different inode
+    second = client.get("/static/js/main.js")
+    assert second.text == "// bbbb"
+    assert second.headers["etag"] != first.headers["etag"]
