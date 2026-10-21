@@ -56,12 +56,23 @@ def index(request: Request) -> Response:
 @router.get("/static/{name:path}")
 def asset(name: str, request: Request) -> Response:
     dashboard = request.app.state.dashboard
-    text = dashboard.read_asset(name) if dashboard else None
-    if text is None:
+    found = dashboard.read_asset_tagged(name) if dashboard else None
+    if found is None:
         raise not_found("page")
+    text, etag = found
     media_type = CONTENT_TYPES[PurePosixPath(name).suffix]
-    headers = {**SECURITY_HEADERS, "Cache-Control": "no-cache"}
+    # no-cache = the browser keeps a copy but asks every time; an unchanged file answers 304.
+    headers = {**SECURITY_HEADERS, "Cache-Control": "no-cache", "ETag": etag}
+    if _etag_matches(request.headers.get("if-none-match"), etag):
+        return Response(status_code=304, headers=headers)
     return Response(text, media_type=media_type, headers=headers)
+
+
+def _etag_matches(header: str | None, etag: str) -> bool:
+    if not header:
+        return False
+    sent = [part.strip().removeprefix("W/") for part in header.split(",")]
+    return "*" in sent or etag in sent
 
 
 @router.get("/api/local/csrf-token")

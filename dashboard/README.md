@@ -37,7 +37,7 @@ All under `js/` (each file starts with a one-line purpose):
 
 | File | Job |
 | --- | --- |
-| `main.js` | Starts the dashboard: the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order (`advanced: true` pages get a tab only in the All tools view); the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
+| `main.js` | Starts the dashboard (each page's module is loaded with `import()` only when opened): the sections (Home, Money, Budget, Taxes, Devices) and the pages in each, in order (`advanced: true` pages get a tab only in the All tools view); the join page on a computer that hasn't joined (no CSRF token); Devices only on the Budget Buddy computer |
 | `router.js` | Section buttons, the page tabs under them, `#hash` routing (a page id, or a section id for its first page, plus optional choices like `#transactions?sorted=none` passed to `render` as options), `reload()` and `onLeave()` for screens |
 | `api/client.js` | `fetch` wrapper: CSRF header, errors turned into plain English |
 | `api/endpoints.js` | One named function per server route. The only file with URL strings |

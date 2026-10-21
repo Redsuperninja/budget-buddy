@@ -27,10 +27,13 @@ function totalsLine(items) {
 }
 
 export async function render(root, options = {}) {
-  const [accounts, firstCategories] = await Promise.all([
-    listAccounts(), listCategories(),
+  const [accounts, firstCategories, firstLots, firstSales] = await Promise.all([
+    listAccounts(), listCategories(), listLots(), listSales(),
   ]);
+  // Kept between searches; fetched again only after an edit that can change them (see afterEdit).
   let categories = firstCategories;
+  let lots = firstLots;
+  let sales = firstSales;
   const list = h("div", {});
   const accountFilter = select(pickOptions(accounts, "All accounts"));
   const monthFilter = h("input", { type: "month", value: options.month || (options.sorted ? "" : currentMonth()) });
@@ -43,7 +46,7 @@ export async function render(root, options = {}) {
   const accountNames = new Map(accounts.map((a) => [a.id, a.name]));
   const accountKinds = new Map(accounts.map((a) => [a.id, a.kind]));
 
-  async function refresh() {
+  async function refresh(again = false) {
     const params = new URLSearchParams({ limit: "200" });
     if (accountFilter.value) params.set("account_id", accountFilter.value);
     if (categoryFilter.value) params.set("category_id", categoryFilter.value);
@@ -58,18 +61,21 @@ export async function render(root, options = {}) {
       params.set("date_to", to);
     }
     try {
-      // Categories again too: marking a gift can add "Charitable giving" or "Gifts".
-      let page, lots, sales;
-      [page, categories, lots, sales] = await Promise.all(
-        [listTransactions(params), listCategories(), listLots(), listSales()]);
+      let page;
+      if (again) { // after an edit: marking a gift can add "Charitable giving" or "Gifts"; a trade changes lots/sales
+        [page, categories, lots, sales] = await Promise.all(
+          [listTransactions(params), listCategories(), listLots(), listSales()]);
+      } else {
+        page = await listTransactions(params);
+      }
       const trades = tradeLabels(lots, sales);
       fill(list,
         monthFilter.value ? null : empty("Showing every month. Pick a month to narrow it down."),
         page.items.length
           ? table(["Date", "What", "Account", "Amount", "Category", "Mark as"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
-                categoryPicker(t, categories), h("span", {}, charityCell(t, refresh),
-                  stockTradeCell(t, accountKinds.get(t.account_id), trades, refresh))]), [3], [5])
+                categoryPicker(t, categories), h("span", {}, charityCell(t, afterEdit),
+                  stockTradeCell(t, accountKinds.get(t.account_id), trades, afterEdit))]), [3], [5])
           : empty(sortedFilter.value === "none" ? "Everything here has a category." : "No transactions for this choice."),
         page.total > page.items.length
           ? empty(`Showing ${page.items.length} of ${page.total}. Pick a month to narrow it down.`)
@@ -78,15 +84,16 @@ export async function render(root, options = {}) {
       showError(list, err);
     }
   }
-  accountFilter.addEventListener("change", refresh);
-  categoryFilter.addEventListener("change", refresh);
+  const afterEdit = () => refresh(true);
+  accountFilter.addEventListener("change", () => refresh());
+  categoryFilter.addEventListener("change", () => refresh());
   // Searches as you type, once you pause.
   let typing;
-  searchBox.addEventListener("input", () => { clearTimeout(typing); typing = setTimeout(refresh, 300); });
-  monthFilter.addEventListener("change", refresh);
-  sortedFilter.addEventListener("change", refresh);
-  hideDividends.addEventListener("change", refresh);
-  hideAdjustments.addEventListener("change", refresh);
+  searchBox.addEventListener("input", () => { clearTimeout(typing); typing = setTimeout(() => refresh(), 300); });
+  monthFilter.addEventListener("change", () => refresh());
+  sortedFilter.addEventListener("change", () => refresh());
+  hideDividends.addEventListener("change", () => refresh());
+  hideAdjustments.addEventListener("change", () => refresh());
 
   // Links card payments and moves between your accounts that weren't linked when they came in.
   const matchNote = h("span", { class: "muted", role: "status" });
@@ -94,7 +101,7 @@ export async function render(root, options = {}) {
     try {
       const { matched } = await matchTransfers();
       matchNote.textContent = matched ? ` Linked ${matched} transfer(s).` : " No new transfers found.";
-      await refresh();
+      await refresh(true);
     } catch (err) {
       matchNote.textContent = ` ${err.message}`;
     }
@@ -112,7 +119,7 @@ export async function render(root, options = {}) {
         ? ` Done: ${r.dividends_found} new dividend(s), ${r.trades_found} new stock trade(s), ` +
           `${r.sweeps_linked} deposit sweep(s) newly linked, ${r.transfers_linked} new transfer(s).`
         : " Nothing new to match.";
-      await refresh();
+      await refresh(true);
     } catch (err) {
       againNote.textContent = ` ${err.message}`;
     } finally {

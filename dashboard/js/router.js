@@ -53,7 +53,8 @@ async function show(id, options = {}) {
   const root = h("div", {}, h("p", { class: "muted" }, "Loading..."));
   fill(view, root);
   try {
-    await page.render(root, options);
+    const screen = page.render ? page : await page.load(); // load() imports the page's module on first use
+    await screen.render(root, options);
     const bar = foldAllBar(root);
     if (bar && root.isConnected) view.prepend(bar);
   } catch (err) {
@@ -61,7 +62,7 @@ async function show(id, options = {}) {
   }
 }
 
-// table: [{ id, label, pages: [{ id, label, render(root, options), advanced? }, ...] }, ...]
+// table: [{ id, label, pages: [{ id, label, load() -> module with render(root, options), advanced? }, ...] }, ...]
 // A section button opens its first page.
 export function start(table) {
   sections = table;
