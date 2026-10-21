@@ -15,6 +15,9 @@ Encrypted on your computer:
 - Donation notes and charity names
 - Employer names on paychecks
 - Shop names on receipts
+- Account notes and paycheck notes
+- Deduction descriptions and the names of imported files
+- Your Finnhub key, and the keys for your connected phones
 
 **Not encrypted (but you need them for Budget Buddy to work):**
 - Every amount and date
@@ -43,7 +46,7 @@ The phrase also unlocks your backups: see [Back up and restore your data](back-u
 
 ## Old backup copies
 
-Each time Budget Buddy updates its database, it first saves a copy of your data folder's database: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. Any copy made before the update that encrypted bank, employer, charity and shop names (copies numbered 0027 or lower) holds those names (and older ones, account numbers and notes) as plain text. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
+Each time Budget Buddy updates its database, it first saves a copy of your data folder's database: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. Every copy holds your amounts and transaction descriptions as plain text, just like the main database. Any copy made before the update that encrypted bank, employer, charity and shop names (copies numbered 0027 or lower) also holds those names as plain text, and older copies also hold account numbers and notes that way. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
 
 To delete them safely:
 1. Make sure Budget Buddy is running, so it makes a fresh backup if needed

@@ -15,7 +15,9 @@ Budget Buddy keeps your money records on your own devices. We don't run a server
 ## Where it's kept
 
 - **Your computer:** in the data folder. By default that's `%LOCALAPPDATA%\BudgetBuddy`, unless you moved it. Receipt photos and old copies are in it too.
-- **Your phone:** a short copy of this month's budget and any receipts waiting to go to your computer. Both are scrambled with a key that stays on the phone, and they're left out of phone backups.
+- **Your phone:** a copy of this month's budget: account names and balances, the last 60 days of transactions (date, short description and amount), and tax totals. It also holds receipt photos waiting to go to your computer. The budget copy, the receipt list and the photos are all scrambled with a key that stays on the phone.
+  - **Android:** phone backups are switched off for Budget Buddy, so none of this is backed up.
+  - **iPhone:** the scrambled copy and the receipt photos can be included in an iPhone backup, but the key isn't, so the backup can't be opened without it.
 - **Backup files:** wherever you save them. See Backups below.
 
 ## What's encrypted, and what isn't yet
@@ -45,7 +47,7 @@ Encrypted names can still show up in descriptions and account names, so keep you
 It's off until you turn it on. When it's on:
 
 - **What's sent:** the symbols you hold, such as VTI, one at a time, and your own free Finnhub key. Nothing else: no amounts, accounts or names.
-- **When:** only when you open the Investments page or click **Refresh prices**. Never in the background.
+- **When:** only when someone opens the Investments page or clicks **Refresh prices**, on this computer or on any other computer or phone browser you've connected. Never in the background.
 - **Who sees it:** Finnhub, the price service, sees those symbols tied to your Finnhub account. Like any website, it also sees your computer's internet connection.
 - **Turning it off:** choose **Off**, or click **Remove my key and turn off**.
 
@@ -81,18 +83,18 @@ Do these steps in order.
 
 1. **Close Budget Buddy.** If you use the desktop app, right-click its tray icon and choose **Quit**.
 2. **Remove your phones.** On the dashboard, go to **Devices**, find **Connected phones** and click **Remove** for each one. Then uninstall the phone app, and clear its storage first if you can. In your phone's web browser, clear the data for Budget Buddy's address.
-3. **Delete the data folder.** In File Explorer's address bar, type `%LOCALAPPDATA%\BudgetBuddy` and press Enter. Select the folder and press Delete. This removes your database, receipt photos, old copies and `before-restore` folders.
+3. **Delete the data folder.** In File Explorer's address bar, type `%LOCALAPPDATA%\BudgetBuddy` and press Enter. Select the folder and press Delete. This removes your database, receipt photos, old copies and `before-restore` folders. Then type `%LOCALAPPDATA%\BudgetBuddy-Window` and delete that folder too. It's the desktop window's own storage (its light or dark choice).
 4. **Delete your backup files.** Look in Downloads, on any USB drives and in any cloud folders for files ending in `.bbbackup`, and delete them.
-5. **Remove the password-vault entry.** Open Credential Manager, choose **Windows Credentials**, find the entry whose name starts with `budget-buddy`, and click **Remove**. Do this after step 3.
+5. **Remove the password-vault entries.** Open Credential Manager, choose **Windows Credentials**, and remove every entry whose name is `budget-buddy` or ends in `@budget-buddy` (for example `data-...@budget-buddy`). Click each one and choose **Remove**. Do this after step 3.
 6. **Uninstall.** Open Windows **Settings**, then **Apps**, then **Budget Buddy**, and choose **Uninstall**.
 7. **Empty the Recycle Bin.** Deleted files stay there until you empty it.
 
-Once steps 3 and 5 are done, your data can't be recovered, even with your recovery phrase, unless you kept a backup and its phrase.
+After step 5, Budget Buddy can no longer open its data, and a backup can only be opened with your recovery phrase. Until you empty the Recycle Bin, the deleted folder can still be restored. After that, undelete tools may still recover the parts that aren't encrypted, such as amounts and descriptions.
 
 ## Something went wrong?
 
 - **You can't find the data folder.** Type `%LOCALAPPDATA%\BudgetBuddy` into File Explorer's address bar. If you moved the folder, use the one you chose. See [Move your data folder](guide/move-your-data-folder.md).
-- **Credential Manager has no Budget Buddy entry.** Budget Buddy has no key saved on this Windows account, or it's already gone. There's nothing to remove.
+- **Credential Manager has no Budget Buddy entry.** Budget Buddy has no key saved on this Windows account, or it's already gone. There's nothing to remove. Check for entries ending in `@budget-buddy` too.
 - **Files come back after you delete them.** Empty the Recycle Bin, then check Downloads and your USB drives for backup files.
 
 For developers, the technical details are in [Security and privacy](dev/architecture/security.md).
