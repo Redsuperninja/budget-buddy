@@ -6,21 +6,21 @@ import { thisYear } from "../../dates.js";
 import { fill, h } from "../../dom.js";
 import { optionalText, taxYearHeader } from "../../fields.js";
 import { form, saveWithNote } from "../../form.js";
-import { DEDUCTION_KINDS, deductionKindLabel } from "../../labels.js";
+import { DEDUCTION_KINDS, byFilingStatus, deductionKindLabel, filingStatusLabel } from "../../labels.js";
 import { centsOrThrow, formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, note, table } from "../../widgets.js";
+import { filingStatusControl } from "./filing-status.js";
 
 const lineTable = (lines) => table(["", "Amount"], lines.map((l) => [l.label, formatCents(l.amount_cents)]), [1]);
 
-const STATUS_LABELS = [["single", "Single"], ["married_filing_jointly", "Married filing jointly"],
-  ["married_filing_separately", "Married filing separately"], ["head_of_household", "Head of household"]];
-
-function standardDeduction(amounts) {
+// Every filing status, or only the one chosen with the control above it (the server narrows it).
+function standardDeduction(amounts, status) {
   if (!amounts) return empty("Budget Buddy doesn't have this year's standard deduction yet.");
+  const whose = status ? ` for ${filingStatusLabel(status)}` : "";
   return h("div", {},
-    empty("For comparison, the basic standard deduction this year (more if you're 65 or older, or blind):"),
-    table(["Filing status", "Standard deduction"], STATUS_LABELS.map(([code, text]) => [text, formatCents(amounts[code])]), [1]));
+    empty(`For comparison, the basic standard deduction this year${whose} (more if you're 65 or older, or blind):`),
+    table(["Filing status", "Standard deduction"], byFilingStatus(amounts).map(([text, cents]) => [text, formatCents(cents)]), [1]));
 }
 
 function actions(year) {
@@ -57,7 +57,9 @@ export async function render(root, options) {
             [d.label, d.count, formatCents(d.amount_cents), d.where_text]), [1, 2])
         : empty("None recorded for this year."),
       empty("Different kinds follow different rules, so they aren't added together."),
-      standardDeduction(s.standard_deduction_cents)),
+      h("h3", {}, "Standard deduction"),
+      filingStatusControl(s.filing_status, year),
+      standardDeduction(s.standard_deduction_cents, s.filing_status)),
     card("Other deductions this year",
       items.length
         ? table(["Date", "Kind", "Description", "Amount", ""], items.map((d) => deductionRow(d, year)), [3])

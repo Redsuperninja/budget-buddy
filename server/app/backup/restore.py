@@ -92,9 +92,11 @@ def home_base_running(data_dir: Path) -> bool:
     return isinstance(pid, int) and process_alive(pid)
 
 
-# Tables a new Budget Buddy already fills (default categories, nothing encrypted), so rows there
-# don't count as data of the folder's own.
-_STARTER_TABLES = frozenset({"categories", "setup_progress"})  # defaults; setup dates only
+# Tables a new Budget Buddy already fills (default categories, nothing encrypted), or that hold only
+# unencrypted settings a key change can't make unreadable, so rows there don't count as data of
+# the folder's own. A restore still replaces them with the backup's (tax_preferences travels with
+# the backup like other data; setup_progress is handled in carry_over_removals).
+_STARTER_TABLES = frozenset({"categories", "setup_progress", "tax_preferences"})
 
 
 def has_own_data(data_dir: Path) -> bool:

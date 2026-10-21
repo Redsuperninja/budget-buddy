@@ -30,6 +30,16 @@ export const DEDUCTION_KINDS = [
 ];
 export const deductionKindLabel = (kind) => lookup(DEDUCTION_KINDS, kind);
 
+// Filing statuses the tax-year data covers (server app/tax_data).
+export const FILING_STATUSES = [
+  ["single", "Single"], ["married_filing_jointly", "Married filing jointly"],
+  ["married_filing_separately", "Married filing separately"], ["head_of_household", "Head of household"],
+];
+export const filingStatusLabel = (status) => lookup(FILING_STATUSES, status);
+// [label, amount] for each status in amounts ({ code: cents }), in the order above.
+export const byFilingStatus = (amounts) =>
+  FILING_STATUSES.filter(([code]) => code in amounts).map(([code, text]) => [text, amounts[code]]);
+
 // What kind of transfer a linked pair is (server app/transfer_types.py).
 export const TRANSFER_TYPES = [
   ["card_payment", "Credit card payment"], ["loan_payment", "Loan payment"], ["to_savings", "Into savings"],

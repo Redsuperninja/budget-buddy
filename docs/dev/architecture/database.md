@@ -46,6 +46,7 @@
 | 0027 | `sweep_by_hand` on dividends and bank trades: a sweep you linked yourself, kept by Match everything again |
 | 0028 | Encrypts `accounts.institution`, `paychecks.employer`, `donations.organization`, `receipts.merchant` (like 0003; needs the key) |
 | 0029 | `setup_progress`: one row of first-start setup dates (`finished_at`, `phrase_saved_at`, `last_backup_at`; ADR-0015) |
+| 0030 | `tax_preferences`: one row with the `filing_status` that narrows the tax summary (null = show all; not encrypted; roadmap 25j) |
 
 ## Adding a migration
 

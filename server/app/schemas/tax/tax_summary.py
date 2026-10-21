@@ -5,6 +5,7 @@ from typing import Literal
 
 from app.models import DeductionKind
 from app.schemas.common import Schema
+from app.schemas.tax.tax_preferences import FilingStatus
 
 
 class Line(Schema):
@@ -33,6 +34,8 @@ class TaxSummary(Schema):
     stocks: list[Line]  # short-term, long-term, total gain (negative = loss)
     possible_wash_sale_count: int
     deductions: list[DeductionTotal]
-    # Basic standard deduction by filing status from that year's tax data, for comparison;
-    # None when the year has no data file.
+    # The filing status chosen in tax preferences (roadmap 25j), or None: "Not set: show all".
+    filing_status: FilingStatus | None
+    # Basic standard deduction by filing status from that year's tax data, for comparison: every
+    # status, or only ``filing_status`` when one is chosen. None when the year has no data file.
     standard_deduction_cents: dict[str, int] | None

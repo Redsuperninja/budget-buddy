@@ -41,6 +41,7 @@ JOINED_AREAS = frozenset(
         "retirement",
         "stocks",
         "summary",
+        "tax-preferences",  # the filing status the tax summary shows (25j)
         "tax-summary",
         "transactions",
     }

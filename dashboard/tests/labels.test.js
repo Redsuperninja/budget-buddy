@@ -27,3 +27,16 @@ test("checkedLabel names what backs a trade up, and notVerified keeps the rest",
   const records = [{ id: 1, checked_by: "transaction" }, { id: 2, checked_by: null }, { id: 3 }];
   assert.deepEqual(notVerified(records).map((r) => r.id), [2, 3]);
 });
+
+test("byFilingStatus lists every status when not set, or only the chosen one, in a fixed order", async () => {
+  const { byFilingStatus, filingStatusLabel } = await import("../js/labels.js");
+  const all = { head_of_household: 2_415_000, single: 1_610_000, married_filing_jointly: 3_220_000,
+    married_filing_separately: 1_610_000 };
+  assert.deepEqual(byFilingStatus(all), [
+    ["Single", 1_610_000], ["Married filing jointly", 3_220_000],
+    ["Married filing separately", 1_610_000], ["Head of household", 2_415_000],
+  ]);
+  assert.deepEqual(byFilingStatus({ married_filing_jointly: 3_220_000 }), [["Married filing jointly", 3_220_000]]);
+  assert.deepEqual(byFilingStatus({}), []);
+  assert.equal(filingStatusLabel("head_of_household"), "Head of household");
+});

@@ -90,6 +90,8 @@ export const listDeductions = (year) => api("GET", `${LOCAL}/deductions?tax_year
 export const createDeduction = (json) => api("POST", `${LOCAL}/deductions`, { json });
 export const deleteDeduction = (id) => api("DELETE", `${LOCAL}/deductions/${id}`);
 export const taxSummary = (year) => api("GET", `${LOCAL}/tax-summary/${year}`);
+// json: { filing_status: "single" | ... | null } (null: show every status)
+export const saveTaxPreferences = (json) => api("PUT", `${LOCAL}/tax-preferences`, { json });
 // A link target, not a fetch: the browser downloads the file itself.
 export const taxExportUrl = (year) => `${LOCAL}/tax-summary/${year}/export.csv`;
 

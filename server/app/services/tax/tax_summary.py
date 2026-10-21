@@ -3,7 +3,8 @@ tax year, built from the existing services so it shows the same numbers as their
 
 Nothing here adds different kinds of deductions together: they follow different rules (see
 ``services/tax/deductions.py``). The standard deduction is shown from the year's tax data file only
-for comparison. An estimate to get records together, not tax advice.
+for comparison: for every filing status, or only the one chosen in tax preferences (roadmap 25j).
+An estimate to get records together, not tax advice.
 """
 
 import datetime as dt
@@ -15,7 +16,7 @@ from app import tax_data
 from app.models import Deduction, Donation, DonationKind
 from app.schemas.tax.tax_summary import DeductionTotal, Line, TaxSummary
 from app.services.investing import stock_sales
-from app.services.tax import deductions, paychecks
+from app.services.tax import deductions, paychecks, tax_preferences
 
 DISCLAIMER = (
     "These totals help you gather your records for tax time. They are estimates, not tax advice, "
@@ -68,15 +69,18 @@ def _donation_totals(session: Session, year: int) -> tuple[int, dict[DonationKin
     return sum(r[1] for r in rows), {kind: total for kind, _, total in rows}
 
 
-def _standard_deduction(year: int) -> dict[str, int] | None:
+def _standard_deduction(year: int, filing_status: str | None) -> dict[str, int] | None:
+    """Every status's amount, or only the chosen one's (the same number either way)."""
     try:
         basic = tax_data.load_tax_year(year).standard_deduction.basic_cents
     except tax_data.UnsupportedTaxYearError:
         return None
-    return {status: basic.for_status(status) for status in tax_data.FILING_STATUSES}
+    statuses = (filing_status,) if filing_status else tax_data.FILING_STATUSES
+    return {status: basic.for_status(status) for status in statuses}
 
 
 def build(session: Session, year: int) -> TaxSummary:
+    filing_status = tax_preferences.filing_status(session)
     pay = paychecks.year_summary(session, year)
     gift_count, gifts = _donation_totals(session, year)
     cash, goods = gifts.get(DonationKind.CASH, 0), gifts.get(DonationKind.GOODS, 0)
@@ -101,5 +105,6 @@ def build(session: Session, year: int) -> TaxSummary:
         ],
         possible_wash_sale_count=gains.possible_wash_sale_count,
         deductions=_deduction_totals(session, year),
-        standard_deduction_cents=_standard_deduction(year),
+        filing_status=filing_status,
+        standard_deduction_cents=_standard_deduction(year, filing_status),
     )
