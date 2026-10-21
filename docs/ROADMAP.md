@@ -178,7 +178,28 @@ done.
   `.exe`, `CHANGELOG.md`'s long Unreleased list condensed for 0.1.0, and a dry run on a clean Windows user —
   *release-manager* + *backend-engineer*
 - [ ] 25l. Whole-database encryption with SQLCipher ([ADR-0014](adr/0014-whole-database-encryption.md)), built
-  to the ADR's requirements list, in PR-sized steps — *backend-engineer* + *security-reviewer*
+  to the ADR's requirements list, in PR-sized steps (each under about 400 changed lines) — *backend-engineer* +
+  *security-reviewer*. M = must, L = low in the ADR's security review (requirements 1 to 7 there).
+  - [x] 25l-1. Dependency and engine: `sqlcipher3` installed from wheels only (L7), the `db-file` subkey, an engine
+    that keys the raw connection first and never puts the key in SQL text, URLs, logs or errors (M1), a wrong key
+    raised as `WrongKeyError`, the `cipher_provider_version` minimum (L6), all behind
+    `BUDGET_BUDDY_DATABASE_ENCRYPTION` (off)
+  - [ ] 25l-2. Every plain-`sqlite3` opener takes the key (M2): `db.open_read_only`, `db.database_revision`,
+    `crypto.database_has_rows`, `crypto/key_check.py`, `db.copy_database` (encrypted target), each with an
+    encrypted-database test, and none may swallow `DatabaseError` into "has data", "no revision" or "corrupt"; opening
+    with the database key becomes the key check, reported as wrong key, busy or corrupt separately (M3)
+  - [ ] 25l-3. One-time move of an existing database (M4/M5): `scrub-pending` marker, checkpoint, `sqlcipher_export`
+    with `user_version` to a new file, check it opens and the counts match, atomic swap, delete the plain
+    `budget.db`, `-wal` and `-shm`, clear the marker; every step resumable after a crash; no plain fallback; flag
+    every older `budget.db.bak-*` as unencrypted; the `.bak` copy made before an upgrade is written encrypted
+  - [ ] 25l-4. Backups and restore with two keys (M3/M4): `VACUUM INTO` stays encrypted so staging holds no plain
+    database; `backup/restore.py` (`_check_database`, `carry_over_removals`) opens this computer's database with this
+    computer's key and the backup's with the backup's key, and stops if either fails
+  - [ ] 25l-5. Old plain backups: a backup made before SQLCipher is detected on restore, exported to an encrypted file,
+    and its plain staging copy deleted
+  - [ ] 25l-6. Switch on and clean up: the setting becomes the only mode, a Windows build check with PyInstaller,
+    BSD and OpenSSL notices in `packaging/windows/THIRD-PARTY-NOTICES.txt` (L7), Python 3.12/3.13 and macOS/Linux
+    wheel checks in CI, privacy statement, user guide, `security.md` and ADR-0003 updated
 
 ## Phase 7: Bank data (ADR-0006: free and open source first)
 - [x] 26b. Brokerage activity CSV: every row a transaction, buys and sells linked as stock trades, dividends filed — *backend-engineer* + *finance-tax-expert*

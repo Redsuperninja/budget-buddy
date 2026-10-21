@@ -42,8 +42,13 @@ def run_migrations_online() -> None:
     settings = Settings()
     ensure_data_dir(settings.data_dir)
     # Some migrations encrypt or decrypt columns, so they need the data folder's key.
-    field_cipher = FieldCipher(load_keys(settings).db_fields)
-    engine = create_db_engine(settings.data_dir, field_cipher=field_cipher)
+    keys = load_keys(settings)
+    field_cipher = FieldCipher(keys.db_fields)
+    engine = create_db_engine(
+        settings.data_dir,
+        field_cipher=field_cipher,
+        database_key=keys.db_file if settings.database_encryption else None,
+    )
     try:
         with engine.begin() as connection:
             _run(connection)

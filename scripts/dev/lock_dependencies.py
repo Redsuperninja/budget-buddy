@@ -26,6 +26,10 @@ from _common import DESKTOP_DIR, LOCKS, SERVER_DIR, say, stop  # noqa: E402
 
 HEADER = "# Made by scripts/dev/lock_dependencies.py from pyproject.toml sha256 "
 PYTHON = "3.12"  # the oldest Python the parts support; the files work for newer ones too
+# Packages that are only ever installed from a ready-made wheel, never built from source: a missing
+# wheel must fail the install, not compile against whatever OpenSSL the computer has (ADR-0014).
+# uv writes a matching `--only-binary` line into the lock file, which pip obeys.
+BINARY_ONLY = ("sqlcipher3",)
 
 
 def lock_header(part_dir: Path) -> str:
@@ -45,7 +49,9 @@ def compile_lock(uv: str, part_dir: Path, out: str, extra: list[str], upgrade: b
     build_tools = "\n".join(pyproject["build-system"]["requires"])
     command = [uv, "pip", "compile", "-", "--universal", "--python-version", PYTHON,
                "--generate-hashes", "--no-header", "--annotation-style", "line", "--quiet",
-               "-o", out, *extra, *(["--upgrade"] if upgrade else [])]  # fmt: skip
+               "-o", out, *extra, *(["--upgrade"] if upgrade else []),
+               *[f"--only-binary={name}" for name in BINARY_ONLY],
+               "--emit-build-options"]  # fmt: skip
     done = subprocess.run(command, cwd=part_dir, input=build_tools, text=True)
     if done.returncode:
         stop(f"Locking {part_dir.name}/{out} failed; the messages above say why.")

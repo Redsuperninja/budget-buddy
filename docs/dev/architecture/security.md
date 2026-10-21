@@ -10,10 +10,18 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   chainer only when everything it chains is one), so a file-based keyring such as `keyrings.alt` is refused
   (#27). The data folder holds only a `key-fingerprint` to check the key
   belongs to it; if that file is gone, `crypto/key_check.py` test-decrypts a stored value instead, and existing
-  rows block a new key (#26). Only derived keys (fields, files, backup) are kept in memory.
+  rows block a new key (#26). Only derived keys (fields, database file, files, backup) are kept in memory.
 - Sensitive columns (account numbers, notes, bank, employer, charity and shop names (`accounts.institution`,
   `paychecks.employer`, `donations.organization`, `receipts.merchant`; migration 0028), device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.
+- **Whole-database encryption** ([ADR-0014](../../adr/0014-whole-database-encryption.md), roadmap 25l, in steps;
+  behind `BUDGET_BUDDY_DATABASE_ENCRYPTION`, off until the migration step lands): SQLCipher through `sqlcipher3`,
+  keyed with the HKDF subkey `db-file` as a raw 256-bit key (no PBKDF2). `app/crypto/sqlcipher.py` sets it with
+  `PRAGMA key` on the raw DB-API connection, from the engine's `do_connect` hook so it is the first statement
+  (SQLAlchemy's own set-up SQL runs before any `connect` listener). The key is never in the URL, in SQL run
+  through SQLAlchemy, in a log or in an exception (`from None`; tests check it). A wrong key raises `WrongKeyError`;
+  a locked file stays a locked-file error. Start-up refuses an OpenSSL older than `MIN_PROVIDER_VERSION` in
+  `cipher_provider_version`. `sqlcipher3` installs from wheels only (`--only-binary` in the lock files).
 - Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
   names. The plain photo is never written to disk.
 - **Recovery phrase:** `python -m app recovery-phrase show` prints it after the user types `SHOW` (terminal

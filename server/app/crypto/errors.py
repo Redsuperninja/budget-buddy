@@ -31,3 +31,7 @@ class FileTooLargeError(EncryptionError):
 
 class RecoveryPhraseError(EncryptionError):
     """A recovery phrase couldn't be read (usually a typo)."""
+
+
+class CipherProviderError(EncryptionError):
+    """The OpenSSL inside the database encryption library is older than we allow."""

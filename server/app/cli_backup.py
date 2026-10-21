@@ -81,7 +81,11 @@ def make_backup(settings: Settings, folder: Path | None, output: Output = print)
     target = backup_name(folder, dt.datetime.now())
     partial = target.with_name(target.name + ".partial")
     keys = DerivedKeys.from_master(key)
-    engine = create_db_engine(data_dir, field_cipher=FieldCipher(keys.db_fields))
+    engine = create_db_engine(
+        data_dir,
+        field_cipher=FieldCipher(keys.db_fields),
+        database_key=keys.db_file if settings.database_encryption else None,
+    )
     try:
         # Owner-only on macOS/Linux, like everything in the data folder (it's encrypted anyway).
         fd = os.open(
