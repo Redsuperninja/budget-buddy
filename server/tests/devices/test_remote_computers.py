@@ -224,6 +224,7 @@ def test_every_dashboard_route_is_classified(data_dir):
         "instance",
         "price-feed",
         "backup",  # downloading or restoring all data: this computer only (ADR-0012)
+        "setup",  # first-start setup progress (ADR-0015)
     }
 
     def paths(routes):  # included routers are wrapped; their routes carry the full path

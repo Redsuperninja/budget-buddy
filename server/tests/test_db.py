@@ -61,6 +61,7 @@ EXPECTED_TABLES = {
     "pairing_sessions",
     "pairing_nonces",
     "seen_nonces",
+    "setup_progress",
 }
 
 

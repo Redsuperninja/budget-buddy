@@ -27,6 +27,7 @@ from app.crypto.errors import DecryptionError, RecoveryPhraseError
 from app.crypto.keys import fingerprint, read_fingerprint
 from app.db import make_private_file
 from app.errors import ApiError
+from app.services.setup_progress import record_backup
 
 UPLOAD_LIMIT_BYTES = 4 * 1024**3  # far more than years of data and receipt photos
 DOWNLOAD_PREFIX = ".backup-"  # swept at start-up like the other leftovers
@@ -50,6 +51,7 @@ def make_download(data_dir: Path, engine: Engine, keys: DerivedKeys) -> Path:
     except BaseException:
         path.unlink(missing_ok=True)
         raise
+    record_backup(engine)
     return path
 
 
