@@ -91,7 +91,7 @@ describe('receipt queue safety', () => {
     const kept = receipt();
     await addReceipt(kept, JPEG);
     files.set('doc/receipts/00000000-0000-4000-8000-999999999999.bin', new Uint8Array([1, 2, 3]));
-    await cleanUpPhotos();
+    expect(await cleanUpPhotos()).toBe(1); // the waiting count, read with the same list
     expect([...files.keys()]).toEqual([`doc/receipts/${kept.client_id}.bin`]);
     expect(await waitingCount()).toBe(1);
   });

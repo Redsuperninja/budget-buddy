@@ -19,7 +19,7 @@ Folder: `mobile/` ([mobile/README.md](../../../mobile/README.md) for running it,
   delete the receipt and photo, `rejected` keeps it with the Home Base's message (cleaned like other server text,
   at most 200 characters) until you retake or delete it. A photo that won't open is marked to retake without
   being sent. An unreachable computer stops the sync; any other receipt problem leaves them queued and the sync
-  goes on to the snapshot (§8). At app start, photo files no receipt lists are deleted, and so are the camera's and image
+  goes on to the snapshot (§8). At app start (after the first screen is drawn), photo files no receipt lists are deleted, and so are the camera's and image
   manipulator's cache folders (`Camera`, `ImageManipulator`), in case a plain photo was left by an app that stopped
   mid-photo (`ReminderKeeper`). A photo is shrunk to 1600 px at JPEG 0.7 by re-encoding, which strips EXIF
   (`receipts/photo.ts`); its plain files are deleted at once and only the bytes are kept, sealed by the queue.

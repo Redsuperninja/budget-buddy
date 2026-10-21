@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { amountsText as amountsFor, barPercent, lineStatus, statusText } from '@/lib/budget';
@@ -79,7 +79,7 @@ function CategoryLine(props: LineProps) {
 }
 
 /** One budget group (Needs / Wants / Savings). Tap to show its categories. */
-export function GroupCard({ group, currency }: { group: BudgetGroup; currency: string }) {
+export const GroupCard = memo(function GroupCard({ group, currency }: { group: BudgetGroup; currency: string }) {
   const t = useTheme();
   const [expanded, setExpanded] = useState(false);
   const line: LineProps = {
@@ -154,4 +154,4 @@ export function GroupCard({ group, currency }: { group: BudgetGroup; currency: s
       ) : null}
     </View>
   );
-}
+});
