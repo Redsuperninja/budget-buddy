@@ -57,8 +57,10 @@ done.
    database; done), ~~#27~~ (done) and #28 (key and encryption hardening; names encrypted, done; whole-database
    encryption evaluated, ADR-0014 proposed), #21 (npm advisories; uuid done, the rest wait on upstream fixes).
 3. **25. Public release prep**, split into 25a to 25k below; setup design in
-   [ADR-0015](adr/0015-first-start-setup.md) (proposed). Blockers for 0.1.0: 25a to 25g and 25k; 25h to 25j can
-   follow.
+   [ADR-0015](adr/0015-first-start-setup.md) (accepted). The owner decided on 2026-10-20 that 0.1.0 needs 25a to
+   25k, including 25j, plus whole-database encryption (25l, [ADR-0014](adr/0014-whole-database-encryption.md),
+   accepted); "Connect the phone app" stays hidden until the phone app is published, and the phone app's version
+   becomes 0.1.0 too.
 
 ## Phase 1: Foundation
 - [x] 1. Repo scaffold, docs, agent definitions — *architect*
@@ -170,11 +172,13 @@ done.
   planned income — *backend-engineer* + *finance-tax-expert*
 - [ ] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
   the desktop window) — *backend-engineer* + *security-reviewer*
-- [ ] 25j. Only if the owner wants it: a filing status setting that narrows the tax summary to one status —
+- [ ] 25j. In 0.1.0 (owner, 2026-10-20): a filing status setting that narrows the tax summary to one status —
   *finance-tax-expert*
 - [ ] 25k. Version 0.1.0 everywhere (the mobile app says 1.0.0, `desktop/pyproject.toml` says 0), version info in the
   `.exe`, `CHANGELOG.md`'s long Unreleased list condensed for 0.1.0, and a dry run on a clean Windows user —
   *release-manager* + *backend-engineer*
+- [ ] 25l. Whole-database encryption with SQLCipher ([ADR-0014](adr/0014-whole-database-encryption.md)), built
+  to the ADR's requirements list, in PR-sized steps — *backend-engineer* + *security-reviewer*
 
 ## Phase 7: Bank data (ADR-0006: free and open source first)
 - [x] 26b. Brokerage activity CSV: every row a transaction, buys and sells linked as stock trades, dividends filed — *backend-engineer* + *finance-tax-expert*
