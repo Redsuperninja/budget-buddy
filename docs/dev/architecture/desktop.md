@@ -35,6 +35,11 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 - **No financial data on disk:** every `/api/*` reply has `Cache-Control: no-store` (`server/app/network.py`), so
   neither a browser nor the window's storage (`%LOCALAPPDATA%\BudgetBuddy-Window`) keeps a copy.
 
+- **Outside links** (Settings, About): the window gives the page one function, `open_link(url)`
+  (`budget_buddy_desktop/links.py`, pywebview `js_api`). It opens the default browser only for
+  `https://github.com/Redsuperninja/budget-buddy` and pages under it (no other host, port, user info, `..`
+  or scheme). The page's links come from `GET /api/local/about`. `navigation.py` attaches to WebView2 (`window.native.browser.webview`): `NavigationStarting` cancels any off-origin navigation before it loads, and `NewWindowRequested` (target=_blank, window.open) is handled there through `open_link`, everything else dropped; pywebview's own `OPEN_EXTERNAL_LINKS_IN_BROWSER` is off because it would pass any address to Windows. After a page loads, a backstop returns the window to the dashboard if it is elsewhere.
+
 ## Building
 
 `scripts/release/build_desktop.py` (or `launch\Build desktop app.bat`) makes a new, empty venv per part in `build\desktop\`

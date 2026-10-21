@@ -86,6 +86,10 @@ details.settings summary::-webkit-details-marker { display: none; }
   display: grid; gap: 0.6rem; padding: 0.9rem; background: var(--card); color: var(--text); border: 1px solid var(--line);
   border-radius: 10px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); }
 .settings-panel p { margin: 0; }
+.settings-panel details.about summary { cursor: pointer; padding: 0.2rem 0; border: 0; font-weight: 600; }
+.about-body { display: grid; gap: 0.5rem; margin-top: 0.4rem; }
+.about-links { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; }
+.about-links a { display: inline-block; padding: 0.15rem 0; }
 /* Simple view (the default) hides power-user tools; Settings, View, All tools shows them (js/view.js). The page
    you are on keeps its tab even when it is a power-user page, so a link to it still makes sense. */
 :root:not([data-view="all"]) .advanced:not([aria-current]) { display: none !important; }
