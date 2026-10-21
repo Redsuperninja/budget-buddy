@@ -16,8 +16,11 @@ Code: `services/budget/categories.py`, `services/budget/summary.py` and their ro
   Used by the charts.
 - `GET /api/local/summary/pace?month=YYYY-MM`: `{month, days_in_month, budget_cents, days: [{date, spent_cents}],
   complete}` (`complete`: the month's last day is before today),
-  needs + wants spent from the 1st through each day up to today (`monthly_summary(through=)` per day, so the same
-  rules), and the month's needs + wants budget (`services/budget/spending_pace.py`). For the Home "Spending pace" chart.
+  needs + wants spent from the 1st through each day up to today, and the month's needs + wants budget
+  (`services/budget/spending_pace.py`). For the Home "Spending pace" chart. One query sums each day's needs + wants
+  over the summary's own `counted()` transactions and a running total gives each day, so it equals
+  `monthly_summary(through=day).spending_cents` (checked against that, one summary per day, on random data in
+  `tests/budget/test_spending_pace_equivalence.py`); the budget comes from one whole-month summary.
 - `GET/PUT /api/local/budget/plan`: `{"planned_income_cents": int | null}`, the planned monthly income that
   percentage budgets are shares of (one row in `budget_plan`).
 
