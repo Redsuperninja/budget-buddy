@@ -141,3 +141,6 @@ export const startRestore = (file, phrase) => api("POST", `${LOCAL}/backup/resto
 export const cancelRestore = () => api("DELETE", `${LOCAL}/backup/restore`);
 // The recovery phrase (24c): a POST, so it carries the page's CSRF token. Shown, never stored.
 export const showRecoveryPhrase = () => api("POST", `${LOCAL}/backup/recovery-phrase`);
+
+// About box: the version and the links to the guide, privacy statement and licences
+export const getAbout = () => api("GET", `${LOCAL}/about`);

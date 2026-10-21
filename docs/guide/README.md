@@ -13,6 +13,7 @@ Set up Budget Buddy on your Windows computer, then use the dashboard (web page) 
 2. [Start Budget Buddy](start-budget-buddy.md) — For everyday use: double-click to start; how to stop it.
 3. [The desktop app](desktop-app.md) — Budget Buddy in its own window, with a tray icon; ready when Windows starts.
 4. [Open the dashboard](open-the-dashboard.md) — What you'll see; the tabs along the top; folding boxes up; where to type the address.
+5. [Find your version, privacy and licences](about-and-version.md) — Settings, About: the version number and links to the privacy statement and licences.
 
 **Trying it out with made-up data?** The tester guides are in [docs/testing](../testing/README.md).
 

@@ -4,6 +4,8 @@ WebView2), and a plain message window when something goes wrong."""
 import html
 from pathlib import Path
 
+from budget_buddy_desktop import links
+
 TITLE = "Budget Buddy"
 
 
@@ -16,7 +18,16 @@ def show_dashboard(url: str, storage_dir: Path) -> None:
     import webview
 
     webview.settings["ALLOW_DOWNLOADS"] = True  # the tax summary's CSV download
-    webview.create_window(TITLE, url, width=1200, height=820, min_size=(720, 520))
+    window = webview.create_window(
+        TITLE, url, width=1200, height=820, min_size=(720, 520), js_api=links.Api()
+    )
+
+    def stay_on_dashboard() -> None:
+        # Nothing should take the window to another site; if something did, go back.
+        if not links.same_page(window.get_current_url(), url):
+            window.load_url(url)
+
+    window.events.loaded += stay_on_dashboard
     webview.start(private_mode=False, storage_path=str(storage_dir))
 
 

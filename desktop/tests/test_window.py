@@ -94,9 +94,25 @@ def test_too_slow_to_start(monkeypatch, port):
 @pytest.fixture
 def fake_webview(monkeypatch):
     calls = []
+
+    class Loaded(list):
+        def __iadd__(self, handler):
+            self.append(handler)
+            return self
+
+    window = types.SimpleNamespace(events=types.SimpleNamespace(loaded=Loaded()), moved=[])
+    window.get_current_url = lambda: window.current
+    window.load_url = window.moved.append
+    window.current = "http://127.0.0.1:8765/"
+
+    def create_window(*a, **kw):
+        calls.append(("window", a, kw))
+        return window
+
     module = types.SimpleNamespace(
         settings={},
-        create_window=lambda *a, **kw: calls.append(("window", a, kw)),
+        window=window,
+        create_window=create_window,
         start=lambda **kw: calls.append(("start", kw)),
     )
     monkeypatch.setitem(sys.modules, "webview", module)
@@ -111,6 +127,20 @@ def test_window_shows_the_dashboard_and_allows_downloads(fake_webview, tmp_path)
     assert module.settings["ALLOW_DOWNLOADS"] is True
     assert calls[0][1] == ("Budget Buddy", "http://127.0.0.1:8765")
     assert calls[1] == ("start", {"private_mode": False, "storage_path": str(tmp_path)})
+    assert type(calls[0][2]["js_api"]).__name__ == "Api"  # the only thing the page may call
+
+
+def test_window_goes_back_if_it_ever_leaves_the_dashboard(fake_webview, tmp_path):
+    from budget_buddy_desktop.window import show_dashboard
+
+    module, _ = fake_webview
+    show_dashboard("http://127.0.0.1:8765", tmp_path)
+    (check,) = module.window.events.loaded
+    check()
+    assert module.window.moved == []
+    module.window.current = "https://example.org/"
+    check()
+    assert module.window.moved == ["http://127.0.0.1:8765"]
 
 
 def test_problem_window_escapes_the_message(fake_webview):
@@ -225,3 +255,67 @@ def test_windowed_program_gets_somewhere_to_write(monkeypatch):
     assert sys.stdout is not None and sys.stderr is not None
     sys.stdout.close()
     sys.stderr.close()
+
+
+# --- outside links (About) ---
+
+REPO = "https://github.com/Redsuperninja/budget-buddy"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [REPO, f"{REPO}/blob/main/docs/PRIVACY.md", f"{REPO}/blob/main/THIRD-PARTY-NOTICES.txt"],
+)
+def test_budget_buddy_github_links_are_allowed(url):
+    from budget_buddy_desktop.links import is_allowed
+
+    assert is_allowed(url)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://github.com/Redsuperninja/budget-buddy",
+        "https://github.com/Redsuperninja/budget-buddy-evil",
+        "https://github.com/Redsuperninja/other",
+        "https://github.com.evil.example/Redsuperninja/budget-buddy",
+        "https://evil.example/https://github.com/Redsuperninja/budget-buddy",
+        "https://github.com@evil.example/Redsuperninja/budget-buddy",
+        "https://user@github.com/Redsuperninja/budget-buddy",
+        "https://github.com:8443/Redsuperninja/budget-buddy",
+        "https://github.com\@evil.example/Redsuperninja/budget-buddy",
+        "https://github.com/Redsuperninja/budget-buddy/../../evil",
+        "javascript:alert(1)",
+        "file:///C:/Windows/notepad.exe",
+        "//github.com/Redsuperninja/budget-buddy",
+        "https://github.com/Redsuperninja/budget-buddy\nhttps://evil.example",
+        "",
+        None,
+        42,
+    ],
+)
+def test_other_links_are_refused(url, monkeypatch):
+    from budget_buddy_desktop import links
+
+    opened = []
+    monkeypatch.setattr(links.webbrowser, "open", lambda u: opened.append(u) or True)
+    assert not links.is_allowed(url)
+    assert links.open_link(url) is False
+    assert opened == []
+
+
+def test_an_allowed_link_opens_in_the_default_browser(monkeypatch):
+    from budget_buddy_desktop import links
+
+    opened = []
+    monkeypatch.setattr(links.webbrowser, "open", lambda u: opened.append(u) or True)
+    assert links.Api().open_link(f"{REPO}/blob/main/SECURITY.md") is True
+    assert opened == [f"{REPO}/blob/main/SECURITY.md"]
+
+
+def test_window_stays_on_the_dashboard():
+    from budget_buddy_desktop.links import same_page
+
+    assert same_page("http://127.0.0.1:8765/#tax", "http://127.0.0.1:8765")
+    assert not same_page("https://github.com/Redsuperninja/budget-buddy", "http://127.0.0.1:8765")
+    assert not same_page("http://127.0.0.1:9999/", "http://127.0.0.1:8765")

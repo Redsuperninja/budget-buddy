@@ -170,7 +170,7 @@ done.
     ([release.md](dev/release.md)); show only the browser way until it is
 - [ ] 25h. Starter budget step in Setup: untick categories you don't need, optional monthly take-home pay as
   planned income — *backend-engineer* + *finance-tax-expert*
-- [ ] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
+- [x] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
   the desktop window) — *backend-engineer* + *security-reviewer*
 - [ ] 25j. In 0.1.0 (owner, 2026-10-20): a filing status setting that narrows the tax summary to one status —
   *finance-tax-expert*
