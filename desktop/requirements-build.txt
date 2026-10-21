@@ -1,4 +1,4 @@
-# Made by scripts/dev/lock_dependencies.py from pyproject.toml sha256 d0518406864cc9d5ba4d65084b5e8434458c90221b9bfad4e15275e1ce2e5943; don't edit by hand.
+# Made by scripts/dev/lock_dependencies.py from pyproject.toml sha256 7b3b73f34064ba7118c4f24e2d19130f1a907d66b0499db52c95f8843f29ed64; don't edit by hand.
 setuptools==84.0.0 \
     --hash=sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670 \
     --hash=sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73

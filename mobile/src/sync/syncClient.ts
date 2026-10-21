@@ -12,6 +12,8 @@
  * - No retry with the server's clock (contract 4.4). `clock_skew` just shows the clock message.
  * - Nothing secret is logged.
  */
+import { APP_VERSION } from '@/lib/appVersion';
+
 import { b64uDecode } from './base64url';
 import { getNeedsAttention, setNeedsAttention } from './credentials';
 import type { Credentials } from './credentials';
@@ -175,7 +177,7 @@ async function sendAck(
 export async function syncNow(creds: Credentials, deps: SyncDeps): Promise<SyncResult> {
   const f = deps.fetch ?? fetch;
   const now = deps.now ?? (() => Math.floor(Date.now() / 1000));
-  const appVersion = deps.appVersion ?? '1.0.0';
+  const appVersion = deps.appVersion ?? APP_VERSION;
 
   try {
     const key = checkCredentials(creds);

@@ -22,6 +22,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/, for _common
 
+from _version import version_info  # noqa: E402
+
 from _common import (  # noqa: E402
     DESKTOP_DIR,
     LAUNCH_DIR,
@@ -38,6 +40,12 @@ from _common import (  # noqa: E402
 )
 
 WORK = REPO / "build" / "desktop"
+# What Windows shows in each .exe's Properties, Details: {recipe: (exe name, description)}. The
+# recipes read build/desktop/version-<recipe>.txt, written here from the one version (_version.py).
+EXES = {
+    "desktop": ("Budget Buddy", "Budget Buddy"),
+    "home-base": ("Budget Buddy Home Base", "Budget Buddy Home Base"),
+}
 
 
 def running_from(folder: Path) -> bool:
@@ -63,6 +71,12 @@ def fresh_venv(part_dir: Path, label: str) -> Path:
     python = venv / "Scripts" / "python.exe"
     install_locked(python, part_dir, PACKAGE_LOCK, label)
     return python
+
+
+def write_version_info() -> None:
+    for recipe, (exe_name, description) in EXES.items():
+        text = version_info(exe_name, description)
+        (WORK / f"version-{recipe}.txt").write_text(text, encoding="utf-8")
 
 
 def pyinstaller(python: Path, spec: str, dist: Path) -> None:
@@ -95,6 +109,7 @@ def main() -> int:
         clean_env(),
     )
 
+    write_version_info()
     say("Building Budget Buddy.exe and the Home Base (a few minutes)...")
     pyinstaller(desktop, "desktop.spec", dist)
     pyinstaller(server, "home-base.spec", out)

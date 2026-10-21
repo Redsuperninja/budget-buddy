@@ -6,6 +6,8 @@ from pathlib import Path
 DESKTOP = Path(SPECPATH).parents[1] / "desktop"  # this file is in packaging\windows\
 # PyInstaller adds the recipe name to workpath; the build script draws the icon one level up.
 ICON = Path(workpath).parent / "budget-buddy.ico"
+# Version, company and copyright (Properties, Details), written by the build script from the version.
+VERSION_INFO = Path(workpath).parent / "version-desktop.txt"
 
 a = Analysis(
     [str(DESKTOP / "budget_buddy_desktop" / "__main__.py")],
@@ -28,5 +30,6 @@ exe = EXE(
     name="Budget Buddy",
     console=False,
     icon=str(ICON),
+    version=str(VERSION_INFO),
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="Budget Buddy")

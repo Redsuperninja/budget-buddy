@@ -11,6 +11,8 @@ SERVER = REPO / "server"
 DASHBOARD = REPO / "dashboard"
 # PyInstaller adds the recipe name to workpath; the build script draws the icon one level up.
 ICON = Path(workpath).parent / "budget-buddy.ico"
+# Version, company and copyright (Properties, Details), written by the build script from the version.
+VERSION_INFO = Path(workpath).parent / "version-home-base.txt"
 
 datas = [
     # Only what the server serves: index.html, top-level CSS, js/**/*.js (app/dashboard_files.py).
@@ -48,5 +50,6 @@ exe = EXE(
     name="Budget Buddy Home Base",
     console=False,
     icon=str(ICON),
+    version=str(VERSION_INFO),
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="home-base")
