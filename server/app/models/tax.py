@@ -30,7 +30,7 @@ class Donation(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[dt.date] = mapped_column(Date, index=True)
-    organization: Mapped[str] = mapped_column(String(200))
+    organization: Mapped[str] = mapped_column(EncryptedString("donations.organization"))
     amount_cents: Mapped[int]  # for goods: fair market value
     kind: Mapped[DonationKind] = mapped_column(str_enum(DonationKind, "donation_kind"))
     receipt_id: Mapped[int | None] = mapped_column(ForeignKey("receipts.id", ondelete="SET NULL"))

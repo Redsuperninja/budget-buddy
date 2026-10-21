@@ -27,6 +27,10 @@ MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 BUSY_TIMEOUT_MS = 5000
 # Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
 FIRST_ENCRYPTED_REVISION = "0003"
+# Migration that encrypts bank, employer, charity and shop names (#28). Database copies made
+# before it (``budget.db.bak-<older revision>``) hold those names, and the old file pages and
+# write-ahead log may too, as plain text.
+NAMES_ENCRYPTED_REVISION = "0028"
 # Written before that migration runs, removed once the leftover plain text has been cleaned out
 # of the database file. While it exists, every start tries the clean-up again.
 SCRUB_MARKER_FILENAME = "scrub-pending"
@@ -214,7 +218,7 @@ def _upgrade_with_backup(
     if current is not None:
         backup_path = db_path.with_name(f"{db_path.name}.bak-{current}")
         copy_database(engine, backup_path)
-        if current.isdigit() and int(current) < int(FIRST_ENCRYPTED_REVISION):
+        if current.isdigit() and int(current) < int(NAMES_ENCRYPTED_REVISION):
             # Before the migration commits, so a crash right after it still leaves the marker.
             write_private_bytes(scrub_marker_path(db_path), b"")
     try:
@@ -232,7 +236,7 @@ def unencrypted_backups(db_path: Path) -> list[Path]:
     found = []
     for backup in sorted(db_path.parent.glob(f"{db_path.name}.bak-*")):
         revision = backup.name.rsplit("-", 1)[-1]
-        if revision.isdigit() and int(revision) < int(FIRST_ENCRYPTED_REVISION):
+        if revision.isdigit() and int(revision) < int(NAMES_ENCRYPTED_REVISION):
             found.append(backup)
     return found
 
@@ -280,8 +284,9 @@ def _scrub_plaintext(engine: Engine, db_path: Path) -> None:
     backups = unencrypted_backups(db_path)
     if backups:
         logger.warning(
-            "Budget Buddy now encrypts account numbers, notes, and receipt file names. These "
-            "older backup copies were made before that and are NOT encrypted: %s. Once you've "
+            "Budget Buddy now encrypts account numbers, notes, receipt file names, and bank, "
+            "employer, charity and shop names. These older backup copies were made before that "
+            "and are NOT encrypted: %s. Once you've "
             "checked Budget Buddy is working, delete them (or keep them somewhere safe).",
             ", ".join(str(b) for b in backups),
         )
