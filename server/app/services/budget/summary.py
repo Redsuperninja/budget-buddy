@@ -39,7 +39,7 @@ from app.services.ledger.transaction_roles import (
     none_of,
 )
 
-_SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
+SPENDING = (CategoryGroup.NEEDS, CategoryGroup.WANTS)
 _REPORTED = (CategoryGroup.NEEDS, CategoryGroup.WANTS, CategoryGroup.SAVINGS, CategoryGroup.INCOME)
 
 
@@ -48,6 +48,15 @@ def month_range(year: int, month: int) -> tuple[dt.date, dt.date]:
     start = dt.date(year, month, 1)
     end = dt.date(year + 1, 1, 1) if month == 12 else dt.date(year, month + 1, 1)
     return start, end
+
+
+def counted() -> list:
+    """Conditions for the transactions the summary counts: normal and refund only, without the
+    left-out roles above. Shared with the spending pace."""
+    return [
+        Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
+        *none_of(*dividends_kept_inside(), *cash_inside_account(), dividend_sweeps()),
+    ]
 
 
 def monthly_summary(
@@ -68,8 +77,7 @@ def monthly_summary(
         .where(
             Transaction.date >= start,
             Transaction.date < end,
-            Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
-            *none_of(*dividends_kept_inside(), *cash_inside_account(), dividend_sweeps()),
+            *counted(),
         )
         .group_by(Transaction.category_id, Transaction.kind)
     ).all()
@@ -131,10 +139,10 @@ def monthly_summary(
     return MonthlySummary(
         month=f"{year:04d}-{month:02d}",
         income_cents=by_group[CategoryGroup.INCOME].actual_cents,
-        spending_cents=sum(by_group[g].actual_cents for g in _SPENDING),
+        spending_cents=sum(by_group[g].actual_cents for g in SPENDING),
         saved_cents=by_group[CategoryGroup.SAVINGS].actual_cents,
         saved_by_transfer_cents=by_transfer,
-        spending_budget_cents=sum(by_group[g].budget_cents for g in _SPENDING),
+        spending_budget_cents=sum(by_group[g].budget_cents for g in SPENDING),
         budget_income_cents=basis,
         budget_income_source=source,
         groups=groups,

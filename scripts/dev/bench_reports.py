@@ -15,6 +15,7 @@ from app.main import create_app  # noqa: E402
 from app.models import Transaction  # noqa: E402
 from app.models.enums import TransactionKind, TransactionSource  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import event  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
 COUNT = int(sys.argv[1]) if len(sys.argv) > 1 else 20_000
@@ -48,13 +49,18 @@ with Session(app.state.engine) as s:
             )
         )
     s.commit()
+statements = []
+event.listen(app.state.engine, "before_cursor_execute", lambda *a: statements.append(1))
 for name, method, url in [
     ("trend", "get", f"/api/local/summary/trend?end={dt.date.today():%Y-%m}"),
+    ("pace", "get", f"/api/local/summary/pace?month={dt.date.today():%Y-%m}"),
     ("sweeps", "get", "/api/local/stocks/sweeps"),
     ("bank-trades/find", "post", "/api/local/stocks/bank-trades/find"),
     ("match-transfers", "post", "/api/local/transactions/match-transfers"),
     ("transactions", "get", "/api/local/transactions"),
 ]:
+    statements.clear()
     t = time.perf_counter()
     r = getattr(client, method)(url)
-    print(f"{name}: {(time.perf_counter() - t) * 1000:.0f} ms (HTTP {r.status_code})")
+    ms = (time.perf_counter() - t) * 1000
+    print(f"{name}: {ms:.0f} ms, {len(statements)} SQL statements (HTTP {r.status_code})")
