@@ -78,6 +78,27 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
             engine.dispose()
 
 
+def test_head_constant_and_file_name_revisions_match_alembic():
+    script = ScriptDirectory.from_config(alembic_config())
+    assert db.HEAD_REVISION == script.get_current_head()
+    assert db.known_revisions() == {r.revision for r in script.walk_revisions()}
+
+
+def test_up_to_date_database_starts_without_loading_alembic(tmp_path, monkeypatch):
+    engine = create_db_engine(tmp_path)
+    try:
+        run_migrations(engine)
+
+        def no_alembic():
+            raise AssertionError("alembic should not be needed")
+
+        monkeypatch.setattr(db, "alembic_config", no_alembic)
+        run_migrations(engine)
+        assert _revision(engine) == HEAD
+    finally:
+        engine.dispose()
+
+
 def test_fresh_database_is_not_backed_up(tmp_path):
     engine = create_db_engine(tmp_path)
     run_migrations(engine)

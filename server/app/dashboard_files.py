@@ -111,14 +111,20 @@ class DashboardFiles:
             return None
 
 
-def _is_allowed(path: Path, folder: Path) -> bool:
-    """A regular, single-link file that really sits inside the folder (no symlinks or junctions)."""
+def _is_allowed(path: Path, folder: Path, parent_checked: bool = False) -> bool:
+    """A regular, single-link file that really sits inside the folder (no symlinks or junctions).
+
+    ``parent_checked``: the caller already confirmed the file's folder is a plain one (see
+    ``_is_plain_dir``), so only the file itself needs checking, not its whole path.
+    """
     try:
         if path.is_symlink() or not path.is_file():
             return False
         info = path.stat()
         if info.st_size > MAX_FILE_BYTES or info.st_nlink > 1:
             return False
+        if parent_checked:
+            return True
         # A junction (Windows) or link in any parent folder makes the real path differ from
         # the path we built, so the two must match.
         resolved = path.resolve()
@@ -127,8 +133,8 @@ def _is_allowed(path: Path, folder: Path) -> bool:
         return False
 
 
-def _listed(path: Path, folder: Path) -> bool:
-    return not path.name.startswith(".") and _is_allowed(path, folder)
+def _listed(path: Path, folder: Path, parent_checked: bool = False) -> bool:
+    return not path.name.startswith(".") and _is_allowed(path, folder, parent_checked)
 
 
 def _is_plain_dir(path: Path, folder: Path) -> bool:
@@ -145,10 +151,12 @@ def _find_assets(folder: Path) -> dict[str, Path]:
             found[item.name] = item
     js = folder / "js"
     if js.is_dir() and _is_plain_dir(js, folder):
-        for root, _dirs, names in os.walk(js, followlinks=False):
+        for root, dirs, names in os.walk(js, followlinks=False):
+            # One resolve per folder (not per file); skip links and junctions.
+            dirs[:] = [d for d in dirs if _is_plain_dir(Path(root) / d, folder)]
             for name in sorted(names):
                 path = Path(root) / name
-                if path.suffix == ".js" and _listed(path, folder):
+                if path.suffix == ".js" and _listed(path, folder, parent_checked=True):
                     found[path.relative_to(folder).as_posix()] = path
     return found
 

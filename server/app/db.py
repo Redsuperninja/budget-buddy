@@ -7,24 +7,28 @@ import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from alembic import command
-from alembic.config import Config
-from alembic.runtime.migration import MigrationContext
-from alembic.script import ScriptDirectory
 from fastapi import Request
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import URL
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.crypto._fs import write_private_bytes
 from app.crypto.fields import FieldCipher, set_field_cipher
+
+if TYPE_CHECKING:  # Alembic is slow to import, so it is only loaded when a migration runs
+    from alembic.config import Config
 
 logger = logging.getLogger(__name__)
 
 DB_FILENAME = "budget.db"
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 BUSY_TIMEOUT_MS = 5000
+# The newest migration. Lets start-up skip loading Alembic when the database is up to date.
+# tests/test_migrations.py checks it against Alembic's real head: update it with a new migration.
+HEAD_REVISION = "0028"
 # Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
 FIRST_ENCRYPTED_REVISION = "0003"
 # Migration that encrypts bank, employer, charity and shop names (#28). Database copies made
@@ -102,15 +106,20 @@ def create_db_engine(data_dir: Path, field_cipher: FieldCipher | None = None) ->
     return engine
 
 
-def alembic_config() -> Config:
+def alembic_config() -> "Config":
+    from alembic.config import Config
+
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS_DIR))
     return config
 
 
 def known_revisions() -> set[str]:
-    """Every migration this version of Budget Buddy has."""
-    return {r.revision for r in ScriptDirectory.from_config(alembic_config()).walk_revisions()}
+    """Every migration this version of Budget Buddy has, read from the script file names.
+
+    Each script is named ``<revision>_<what it does>.py`` (a test checks this against Alembic).
+    """
+    return {p.name.split("_", 1)[0] for p in (MIGRATIONS_DIR / "versions").glob("[0-9]*_*.py")}
 
 
 @contextmanager
@@ -174,7 +183,9 @@ def copy_database(engine: Engine, destination: Path) -> None:
         target.close()
 
 
-def _upgrade(config: Config, engine: Engine) -> None:
+def _upgrade(config: "Config", engine: Engine) -> None:
+    from alembic import command
+
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
@@ -182,6 +193,15 @@ def _upgrade(config: Config, engine: Engine) -> None:
 
 def scrub_marker_path(db_path: Path) -> Path:
     return db_path.with_name(SCRUB_MARKER_FILENAME)
+
+
+def _current_revision(connection) -> str | None:
+    """The revision stored in ``alembic_version`` (None for a new database)."""
+    try:
+        row = connection.exec_driver_sql("SELECT version_num FROM alembic_version").first()
+    except OperationalError:  # no such table yet
+        return None
+    return row[0] if row else None
 
 
 def run_migrations(engine: Engine) -> None:
@@ -197,22 +217,20 @@ def run_migrations(engine: Engine) -> None:
     """
     db_path = Path(engine.url.database)
     marker = scrub_marker_path(db_path)
-    config = alembic_config()
-    head = ScriptDirectory.from_config(config).get_current_head()
 
     with _exclusive_lock(db_path.with_name(db_path.name + ".lock")):
         with engine.connect() as connection:
-            current = MigrationContext.configure(connection).get_current_revision()
+            current = _current_revision(connection)
         if current is not None and current not in known_revisions():
             raise DatabaseUpgradeError(NEWER_DATABASE_MESSAGE)
-        if current != head:
-            _upgrade_with_backup(engine, db_path, config, current)
+        if current != HEAD_REVISION:
+            _upgrade_with_backup(engine, db_path, alembic_config(), current)
         if marker.exists():
             _scrub_plaintext(engine, db_path)
 
 
 def _upgrade_with_backup(
-    engine: Engine, db_path: Path, config: Config, current: str | None
+    engine: Engine, db_path: Path, config: "Config", current: str | None
 ) -> None:
     backup_path = None
     if current is not None:
