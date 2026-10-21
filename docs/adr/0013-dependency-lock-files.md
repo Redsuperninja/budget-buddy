@@ -16,14 +16,17 @@ so one lock file has to be right on all three.
 | uv projects (`uv.lock`, `uv sync`) | Yes | Yes | On every computer that installs |
 
 ## Decision
-**Each part has three lock files made by uv; installing them needs only pip** (the owner asked for the most reliable).
+**Each part has its lock files made by uv; installing them needs only pip** (the owner asked for the most reliable).
 - `requirements-build.txt`: the build tool (setuptools), installed first. Some packages (the desktop app's
   `proxy-tools`) have no ready-made wheel and are built during the install; pip would otherwise fetch the
   newest setuptools for that, unchecked (found by the security review).
 - `requirements.txt`: what the part needs to run. Start Budget Buddy uses it.
 - `requirements-dev.txt`: plus every extra (tests, linter, PyInstaller), made with `-c requirements.txt` so shared
-  packages have the same version. The tester setup, CI and the release build use it.
-- All three are made for Python 3.12 and newer, on every OS, with a hash for every file a version has on PyPI.
+  packages have the same version. The tester setup and CI use it.
+- `requirements-package.txt` (added later): `requirements.txt` plus only the packaging extra (PyInstaller), made
+  with `-c requirements-dev.txt`. The release build installs it into a new, empty venv, so test tools and
+  left-over packages never end up in the app.
+- All four are made for Python 3.12 and newer, on every OS, with a hash for every file a version has on PyPI.
 - `scripts/dev/lock_dependencies.py` writes them (`--upgrade` to move to newer versions). The first line holds the
   `pyproject.toml` hash; a test fails when a lock file is older than its `pyproject.toml`.
 - Installing is `pip install --require-hashes -r requirements-build.txt`, then

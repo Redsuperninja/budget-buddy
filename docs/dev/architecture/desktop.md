@@ -37,9 +37,12 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 
 ## Building
 
-`scripts/release/build_desktop.py` (or `launch\Build desktop app.bat`) installs the `build` extra in `desktop/.venv` and the
-`package` extra in `server/.venv`, draws the icon, and runs both PyInstaller recipes
+`scripts/release/build_desktop.py` (or `launch\Build desktop app.bat`) makes a new, empty venv per part in `build\desktop\`
+(`venv-server`, `venv-desktop`) from its `requirements-package.txt` (the app's packages and PyInstaller, with hashes;
+[ADR-0013](../../adr/0013-dependency-lock-files.md)), so no test tools or left-over packages from a developer's
+`.venv` get bundled. It then draws the icon and runs both PyInstaller recipes
 (`packaging/windows/desktop.spec`, `packaging/windows/home-base.spec`) into `launch\Budget Buddy\`. The Home Base
 recipe bundles only the files the server serves (`index.html`, top-level CSS, `js/**/*.js`), the migrations and the
-tax data. `scripts/release/install_desktop.py` copies the result (with `packaging/windows/install.ps1`) to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
+tax data. Both recipes leave out modules PyInstaller finds but the apps never run (each `excludes` list says why);
+the desktop app keeps Pillow's font support (the icon's letter) and `ssl` (pywebview imports it on start). `scripts/release/install_desktop.py` copies the result (with `packaging/windows/install.ps1`) to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
 menu and desktop shortcuts. `THIRD-PARTY-NOTICES.txt` (the bundled packages' licenses) goes in the output too.

@@ -33,11 +33,17 @@ def part(tmp_path):
 
 @pytest.fixture
 def commands(monkeypatch):
-    """What install_part would run, instead of running it."""
-    ran = []
+    """What install_part would run, instead of running it (``.envs``: the environment of each)."""
 
-    def run(command, cwd, failure):
+    class Ran(list):
+        envs: list = []
+
+    ran = Ran()
+    ran.envs = []
+
+    def run(command, cwd, failure, env=None):
         ran.append([str(c) for c in command])
+        ran.envs.append(env)
         if "venv" in ran[-1]:
             (cwd / ".venv").mkdir()
 
@@ -88,3 +94,24 @@ def test_a_missing_venv_is_made_first(tmp_path, commands):
     (tmp_path / "pyproject.toml").write_text("")
     _common.install_part(tmp_path, (), "x")
     assert commands[0][1:] == ["-m", "venv", ".venv"]
+
+
+def test_clean_env_drops_pip_settings_and_pythonpath(monkeypatch):
+    monkeypatch.setenv("PIP_INDEX_URL", "https://example.invalid/simple")
+    monkeypatch.setenv("PYTHONPATH", "elsewhere")
+    monkeypatch.setenv("BUDGET_BUDDY_KEPT", "yes")
+    env = _common.clean_env()
+    assert "PIP_INDEX_URL" not in env and "PYTHONPATH" not in env
+    assert env["BUDGET_BUDDY_KEPT"] == "yes"
+
+
+def test_pip_ignores_the_users_pip_settings(tmp_path, commands, monkeypatch):
+    monkeypatch.setenv("PIP_INDEX_URL", "https://example.invalid/simple")
+    monkeypatch.setenv("PYTHONPATH", "elsewhere")
+    (tmp_path / "pyproject.toml").write_text("")
+    _common.install_part(tmp_path, (), "x")
+    pips = [(c, env) for c, env in zip(commands, commands.envs, strict=True) if "pip" in c]
+    assert len(pips) == 3
+    for command, env in pips:
+        assert "--isolated" in command
+        assert env is not None and "PIP_INDEX_URL" not in env and "PYTHONPATH" not in env

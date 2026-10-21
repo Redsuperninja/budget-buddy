@@ -31,7 +31,13 @@ a = Analysis(
     datas=datas,
     # Loaded by name at run time: our routers and uvicorn's loops, protocols and lifespan.
     hiddenimports=[*collect_submodules("app"), *collect_submodules("uvicorn")],
-    excludes=["pytest", "ruff", "tkinter"],
+    # Never used by the server. Alembic's Mako templates can colour error pages with Pygments, whose
+    # image formatter pulls in Pillow (about 16 MB); without them Mako falls back to plain text.
+    # setuptools and numpy are found through other packages' optional imports.
+    excludes=[
+        "pytest", "ruff", "tkinter", "setuptools", "numpy",
+        "PIL", "pygments", "mako.ext.pygmentplugin",
+    ],
 )
 pyz = PYZ(a.pure)
 exe = EXE(

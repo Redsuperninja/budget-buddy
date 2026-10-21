@@ -7,7 +7,8 @@ and with --upgrade to move every package to its newest allowed version. Needs uv
 
 Each part gets requirements-build.txt (setuptools, installed first so a package without a ready-made
 wheel is built with a checked copy), requirements.txt (what Start Budget Buddy installs) and
-requirements-dev.txt (plus every extra: tests, linter, packaging), all with the same versions.
+requirements-dev.txt (plus every extra: tests, linter, packaging) and requirements-package.txt
+(plus only packaging: what the release build installs), all with the same versions.
 """
 
 import argparse
@@ -30,6 +31,12 @@ PYTHON = "3.12"  # the oldest Python the parts support; the files work for newer
 def lock_header(part_dir: Path) -> str:
     digest = hashlib.sha256((part_dir / "pyproject.toml").read_bytes()).hexdigest()
     return f"{HEADER}{digest}; don't edit by hand.\n"
+
+
+def packaging_extras(part_dir: Path) -> list[str]:
+    """The extras that build the app (PyInstaller): every one but "dev" (tests and linter)."""
+    pyproject = tomllib.loads((part_dir / "pyproject.toml").read_text(encoding="utf-8"))
+    return [name for name in pyproject["project"]["optional-dependencies"] if name != "dev"]
 
 
 def compile_lock(uv: str, part_dir: Path, out: str, extra: list[str], upgrade: bool) -> None:
@@ -55,13 +62,16 @@ def main() -> int:
     uv = shutil.which("uv")
     if not uv:
         stop("Needs uv: install it with `pip install uv` (https://docs.astral.sh/uv/).")
-    build, runtime, dev = LOCKS
+    build, runtime, dev, package = LOCKS
     for part_dir in SERVER_DIR, DESKTOP_DIR:
         compile_lock(uv, part_dir, runtime, ["pyproject.toml"], upgrade)
         # The same versions as the runtime file for every package they share.
         compile_lock(uv, part_dir, dev, ["pyproject.toml", "--all-extras", "-c", runtime], upgrade)
+        # What the release build installs: the app and PyInstaller, at the dev file's versions.
+        extras = [f"--extra={name}" for name in packaging_extras(part_dir)]
+        compile_lock(uv, part_dir, package, ["pyproject.toml", *extras, "-c", dev], upgrade)
         compile_lock(uv, part_dir, build, ["-c", runtime], upgrade)
-        say(f"Wrote {part_dir.name}/{build}, {runtime} and {dev}.", "green")
+        say(f"Wrote {part_dir.name}/{build}, {runtime}, {dev} and {package}.", "green")
     return 0
 
 

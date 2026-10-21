@@ -11,7 +11,13 @@ a = Analysis(
     [str(DESKTOP / "budget_buddy_desktop" / "__main__.py")],
     pathex=[str(DESKTOP)],
     hiddenimports=["pystray._win32"],  # pystray picks its Windows backend by name
-    excludes=["pytest", "ruff", "tkinter"],
+    # Never used by the app. Pillow only draws the icon: no AVIF, WebP or colour profiles, and no Tk.
+    # Keep PIL._imagingft (the icon's letter uses ImageFont) and ssl (pywebview imports it on start,
+    # though the app only talks to 127.0.0.1 over plain http).
+    excludes=[
+        "pytest", "ruff", "tkinter", "setuptools", "pydoc_data",
+        "PIL._avif", "PIL._webp", "PIL._imagingcms", "PIL.ImageTk",
+    ],
 )
 pyz = PYZ(a.pure)
 exe = EXE(

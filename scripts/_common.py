@@ -114,15 +114,31 @@ def rerun_with(python: Path) -> None:
         raise SystemExit(130) from None
 
 
-def run(command: list, cwd: Path, failure: str) -> None:
-    """Run a command; if it fails, end the script with the plain-English ``failure``."""
-    if subprocess.run([str(part) for part in command], cwd=cwd).returncode != 0:
+def run(command: list, cwd: Path, failure: str, env: dict[str, str] | None = None) -> None:
+    """Run a command (with ``env`` instead of this environment, if given); if it fails, end the
+    script with the plain-English ``failure``."""
+    if subprocess.run([str(part) for part in command], cwd=cwd, env=env).returncode != 0:
         stop(failure)
 
 
-# Made by scripts/dev/lock_dependencies.py: the build tool (setuptools), what a part runs on, and
-# that plus every extra.
-LOCKS = ("requirements-build.txt", "requirements.txt", "requirements-dev.txt")
+def clean_env() -> dict[str, str]:
+    """This environment without what could change an install or a build from outside: pip's
+    ``PIP_*`` settings (another package index, say) and ``PYTHONPATH`` (other code to bundle)."""
+    return {
+        name: value
+        for name, value in os.environ.items()
+        if name.upper() != "PYTHONPATH" and not name.upper().startswith("PIP_")
+    }
+
+
+# Made by scripts/dev/lock_dependencies.py: the build tool (setuptools), what a part runs on, that
+# plus every extra, and that plus only PyInstaller (what the release build installs).
+LOCKS = BUILD_LOCK, RUNTIME_LOCK, DEV_LOCK, PACKAGE_LOCK = (
+    "requirements-build.txt",
+    "requirements.txt",
+    "requirements-dev.txt",
+    "requirements-package.txt",
+)
 
 
 def install_digest(part_dir: Path) -> str:
@@ -132,6 +148,20 @@ def install_digest(part_dir: Path) -> str:
         if (part_dir / name).exists():
             digest.update((part_dir / name).read_bytes())
     return digest.hexdigest().upper()
+
+
+def install_locked(python: Path, part_dir: Path, lock: str, label: str) -> None:
+    """Install a part and the packages in its lock file ``lock`` with ``python``. Every package is
+    checked against its hash. The build tool comes first, so a package that has to be built here
+    (no ready-made wheel) is built with it, never with an unchecked download. pip ignores the
+    user's pip.ini and PIP_* settings (--isolated, clean_env), so only PyPI and the hashes count."""
+    for command in (
+        ["--require-hashes", "-r", BUILD_LOCK],
+        ["--require-hashes", "--no-build-isolation", "-r", lock],
+        ["--no-deps", "--no-build-isolation", "-e", "."],
+    ):
+        pip = [python, "-m", "pip", "install", "--isolated", "--quiet", *command]
+        run(pip, part_dir, f"Installing {label} failed.", clean_env())
 
 
 def install_part(part_dir: Path, extras: tuple[str, ...], label: str) -> Path:
@@ -157,16 +187,7 @@ def install_part(part_dir: Path, extras: tuple[str, ...], label: str) -> Path:
             else " On Ubuntu or Debian, install python3-venv first (sudo apt install python3-venv)."
         )
         run([sys.executable, "-m", "venv", ".venv"], part_dir, f"Setting up {label} failed.{hint}")
-    build, runtime, dev = LOCKS
-    # Every package is checked against its hash. The build tool comes first, so a package that has
-    # to be built here (no ready-made wheel) is built with it, never with an unchecked download.
-    for command in (
-        ["--require-hashes", "-r", build],
-        ["--require-hashes", "--no-build-isolation", "-r", dev if extras else runtime],
-        ["--no-deps", "--no-build-isolation", "-e", "."],
-    ):
-        pip = [python, "-m", "pip", "install", "--quiet", *command]
-        run(pip, part_dir, f"Installing {label} failed.")
+    install_locked(python, part_dir, DEV_LOCK if extras else RUNTIME_LOCK, label)
     stamp.write_text(f"{digest} {','.join(extras)}", encoding="ascii")
     return python
 
