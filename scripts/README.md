@@ -49,6 +49,7 @@ elsewhere.
 | `build_desktop.py` | Builds the desktop app into `launch\Budget Buddy\` in a new, empty venv per part from its `requirements-package.txt` (`--into <folder>` builds elsewhere; [desktop architecture](../docs/dev/architecture/desktop.md)); `launch\Build desktop app.bat` runs it. |
 | `install_desktop.py` | Installs the built app with `packaging\windows\install.ps1` (the release download's installer): `%LOCALAPPDATA%\Programs\Budget Buddy`, Start menu and desktop shortcuts, an entry in Settings, Apps (`--no-desktop-shortcut`). `launch\Install desktop app.bat` runs it. |
 | `make_release.py` | Builds the release download, `dist\Budget-Buddy-<version>-Windows.zip` and its `.sha256` ([release.md](../docs/dev/release.md)). |
+| `_version.py` | Reads the version from `server/app/__init__.py` and writes each `.exe`'s Windows version info from it ([release.md](../docs/dev/release.md#the-version)). |
 
 ## Developers (`scripts/dev/`)
 

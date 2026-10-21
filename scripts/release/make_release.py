@@ -8,7 +8,6 @@ so nobody needs Python or this repository to use it. The version comes from serv
 
 import argparse
 import hashlib
-import re
 import shutil
 import subprocess
 import sys
@@ -17,7 +16,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/, for _common
 
-from _common import PACKAGING_DIR, REPO, SERVER_DIR, require_windows, say, stop  # noqa: E402
+from _version import version  # noqa: E402
+
+from _common import PACKAGING_DIR, REPO, require_windows, say, stop  # noqa: E402
 
 INSTALLER = (
     "install.ps1",
@@ -25,15 +26,6 @@ INSTALLER = (
     "Uninstall Budget Buddy.bat",
     "READ ME FIRST.txt",
 )
-
-
-def version() -> str:
-    found = re.search(
-        r'__version__ = "([^"]+)"', (SERVER_DIR / "app" / "__init__.py").read_text("utf-8")
-    )
-    if not found:
-        stop("No __version__ in server/app/__init__.py.")
-    return found[1]
 
 
 def zip_folder(folder: Path, zip_path: Path) -> None:

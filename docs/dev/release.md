@@ -16,11 +16,30 @@ Expo phone app isn't published to app stores yet.
 The sources are in `packaging/windows/`, with both PyInstaller recipes; `scripts/release/install_desktop.py` uses the same `install.ps1` for a build
 from source.
 
+## The version
+
+The version (`MAJOR.MINOR.PATCH`, now 0.1.0) is set in one place: `__version__` in `server/app/__init__.py`. Made
+from it at build time: the zip name, the installer's `version.txt`, and the version info in both `.exe` files
+(Properties, Details: file and product version `0.1.0.0`, company and product "Budget Buddy", and the copyright line
+from `LICENSE`), which `build_desktop.py` writes with `scripts/release/_version.py` for the `version=` in each
+PyInstaller recipe. The release workflow checks the tag against it.
+
+Some files need their own copy, and `scripts/tests/test_versions.py` fails if any of them differs:
+
+- `desktop/pyproject.toml` (`version`); setuptools can't read the server's file. After changing it, run
+  `scripts/dev/lock_dependencies.py`: the lock files record the file's fingerprint.
+- `mobile/app.json` (`expo.version`, which the app sends to the Home Base as its version through
+  `mobile/src/lib/appVersion.ts`), `mobile/package.json` and both `version` lines at the top of
+  `mobile/package-lock.json`.
+
+To bump it: change `server/app/__init__.py` and the copies above, run `scripts/dev/lock_dependencies.py`, then
+`server/.venv/Scripts/pytest scripts/tests`.
+
 ## Checklist
 
 1. On `main`, with every part's checks green ([testing.md](testing.md)).
-2. Set the version in `server/app/__init__.py`, the only place it lives (the zip name and the installer's
-   `version.txt` come from it). Move the `## Unreleased` lines in `CHANGELOG.md` under `## <version> - <date>`.
+2. Set the version ([The version](#the-version) lists every file that holds it). Move the `## Unreleased` lines in
+   `CHANGELOG.md` under `## <version> - <date>`.
 3. Build and try it locally: `py scripts/release/make_release.py`, unzip
    `dist\Budget-Buddy-<version>-Windows.zip` somewhere new, run **Install Budget Buddy**, open it from the Start
    menu, check Home's Get started list, then uninstall from Windows Settings, Apps.
