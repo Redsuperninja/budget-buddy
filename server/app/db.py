@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 from fastapi import Request
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import URL
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.crypto._fs import write_private_bytes
@@ -197,10 +196,14 @@ def scrub_marker_path(db_path: Path) -> Path:
 
 def _current_revision(connection) -> str | None:
     """The revision stored in ``alembic_version`` (None for a new database)."""
-    try:
-        row = connection.exec_driver_sql("SELECT version_num FROM alembic_version").first()
-    except OperationalError:  # no such table yet
+    # Ask for the table first, so only "no table" means a new database. Any other error (such as
+    # a locked file) is raised and stops start-up, instead of skipping the backup and clean-up.
+    has_table = connection.exec_driver_sql(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='alembic_version'"
+    ).first()
+    if has_table is None:
         return None
+    row = connection.exec_driver_sql("SELECT version_num FROM alembic_version").first()
     return row[0] if row else None
 
 
