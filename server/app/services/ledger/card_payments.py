@@ -31,7 +31,7 @@ amounts.
 import re
 
 from sqlalchemy import select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer, lazyload
 
 from app.models import Account, AccountKind, Transaction
 from app.services.ledger.transaction_roles import dividends, free_to_move, none_of
@@ -91,6 +91,12 @@ def looks_like_card_payment(t: Transaction, kind: AccountKind, your_cards: set[s
 def _unlinked(session: Session, ids: set[int] | None) -> list[Transaction]:
     query = (
         select(Transaction, Account.kind)
+        .options(  # skip the encrypted notes and the linked rows nobody reads here
+            defer(Transaction.notes),
+            lazyload(Transaction.account),
+            lazyload(Transaction.transfer_partner),
+            lazyload(Transaction.donation),
+        )
         .join(Account, Account.id == Transaction.account_id)
         .where(*free_to_move(), *none_of(dividends()), Transaction.category_id.is_(None))
     )

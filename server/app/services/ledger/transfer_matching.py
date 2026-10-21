@@ -25,7 +25,7 @@ import datetime as dt
 from collections import defaultdict
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer, lazyload
 
 from app.models import (
     Account,
@@ -51,6 +51,12 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
     transfer_categories = select(Category.id).where(Category.group == CategoryGroup.TRANSFER)
     rows = session.execute(
         select(Transaction, Account.kind)
+        .options(  # thousands of rows: skip the encrypted notes and the linked rows nobody reads
+            defer(Transaction.notes),
+            lazyload(Transaction.account),
+            lazyload(Transaction.transfer_partner),
+            lazyload(Transaction.donation),
+        )
         .join(Account, Account.id == Transaction.account_id)
         .where(
             *free_to_move(),

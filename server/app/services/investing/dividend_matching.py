@@ -38,7 +38,7 @@ from app.models import (
     Transaction,
 )
 from app.services.budget.named_categories import find_or_make
-from app.services.investing.sweeps import link_sweeps, regular
+from app.services.investing.sweeps import lean, link_sweeps, regular
 from app.services.ledger.accounts import INVESTMENT_KINDS
 from app.services.ledger.transaction_roles import dividends, none_of
 
@@ -74,7 +74,7 @@ def looks_like_dividend(description: str, account_kind: AccountKind) -> bool:
 
 def _new_dividends(session: Session, ids: set[int] | None) -> list[Transaction]:
     query = (
-        regular(select(Transaction, Account.kind))
+        lean(regular(select(Transaction, Account.kind)))
         .join(Account, Account.id == Transaction.account_id)
         .where(
             Transaction.amount_cents > 0,

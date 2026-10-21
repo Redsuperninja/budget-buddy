@@ -20,14 +20,37 @@ def months_ending(year: int, month: int, count: int) -> list[tuple[int, int]]:
     return [(i // 12, i % 12 + 1) for i in range(last - count + 1, last + 1)]
 
 
-def monthly_trend(session: Session, year: int, month: int, count: int) -> MonthlyTrend:
-    months = []
+def _net_worths(session: Session, spans: list[tuple[int, int]]) -> list[int]:
+    """Net worth at each of these (year, month)s: everything dated before the month's end (capped
+    at tomorrow). One total before the first month plus one grouped query for the months, then a
+    running total, instead of a whole-table sum per month."""
     tomorrow = dt.date.today() + dt.timedelta(days=1)
-    for y, m in months_ending(year, month, count):
+    ends = [min(month_range(y, m)[1], tomorrow) for y, m in spans]
+    first = min(month_range(*spans[0])[0], tomorrow)
+    month_key = func.strftime("%Y-%m", Transaction.date)
+    before = session.scalar(
+        select(func.coalesce(func.sum(Transaction.amount_cents), 0)).where(Transaction.date < first)
+    )
+    per_month = dict(
+        session.execute(
+            select(month_key, func.sum(Transaction.amount_cents))
+            .where(Transaction.date >= first, Transaction.date < ends[-1])
+            .group_by(month_key)
+        ).all()
+    )
+    worths, running = [], before
+    for y, m in spans:
+        running += per_month.get(f"{y:04d}-{m:02d}", 0)
+        worths.append(running)
+    return worths
+
+
+def monthly_trend(session: Session, year: int, month: int, count: int) -> MonthlyTrend:
+    spans = months_ending(year, month, count)
+    worths = _net_worths(session, spans) if spans else []
+    months = []
+    for (y, m), worth in zip(spans, worths, strict=True):
         s = monthly_summary(session, y, m)
-        end = min(month_range(y, m)[1], tomorrow)
-        total = func.coalesce(func.sum(Transaction.amount_cents), 0)
-        worth = session.scalar(select(total).where(Transaction.date < end))
         months.append(
             TrendMonth(
                 month=s.month,

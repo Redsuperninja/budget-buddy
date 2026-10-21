@@ -5,6 +5,7 @@ Code: `services/investing/bank_trades.py` (find trades, link sweeps, remember ti
 `schemas/investing/bank_trades.py`, `routers/investing/bank_trades.py`. Dashboard: `screens/money/bank-trades-card.js` on Investments.
 Checking sweeps by hand: `services/investing/sweep_check.py`, `routers/investing/sweep_check.py`,
 `screens/money/sweep-check-card.js` (words in `sweep-words.js`).
+Speed: the finders read thousands of rows, so they load them with `sweeps.lean()` (only id, account, date, amount, description; no notes, no linked rows) and sweeps are pre-filtered in SQL on "sweep". `scripts/dev/bench_reports.py` times them on made-up data.
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).
 
 Some brokers' bank-style files (J.P. Morgan / Chase) show a trade only as a line naming the company, with no ticker,

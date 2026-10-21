@@ -35,7 +35,14 @@ from sqlalchemy.orm import Session
 from app.models import Account, BankTrade, SecuritySymbol, Transaction
 from app.services.investing.combined_sweeps import free_sweep, link_combined
 from app.services.investing.dividend_matching import looks_like_dividend
-from app.services.investing.sweeps import SWEEP_WORDS, candidates, in_window, link_sweeps, regular
+from app.services.investing.sweeps import (
+    SWEEP_WORDS,
+    candidates,
+    in_window,
+    lean,
+    link_sweeps,
+    regular,
+)
 from app.services.ledger.accounts import INVESTMENT_KINDS
 from app.services.ledger.transaction_roles import bank_trades, dividends, none_of, stock_trades
 
@@ -87,7 +94,7 @@ def looks_like_trade(description: str) -> bool:
 
 def _new_trades(session: Session, ids: set[int] | None) -> list[Transaction]:
     query = (
-        regular(select(Transaction, Account.kind))
+        lean(regular(select(Transaction, Account.kind)))
         .join(Account, Account.id == Transaction.account_id)
         .where(
             Account.kind.in_(INVESTMENT_KINDS),
@@ -110,7 +117,7 @@ def _recorded_without_one(session: Session) -> list[Transaction]:
     sweep is looked for too."""
     recorded = list(
         session.scalars(
-            regular(select(Transaction))
+            lean(regular(select(Transaction)))
             .join(Account, Account.id == Transaction.account_id)
             .where(
                 Account.kind.in_(INVESTMENT_KINDS),
