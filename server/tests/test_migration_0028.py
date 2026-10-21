@@ -126,3 +126,56 @@ def test_api_returns_the_names_and_the_file_holds_only_ciphertext(client, data_d
     for table, column in NAMES.items():
         (value,) = raw_rows(data_dir, f"SELECT {column} FROM {table}")[0]
         assert isinstance(value, bytes) and b"Fake" not in value
+
+
+def test_migration_0028_rerun_does_not_double_encrypt_or_fail(tmp_path):
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        _migrate(engine, "0027")
+        _insert_plaintext_rows(engine)
+        _migrate(engine, "0028")
+        once = _plain(tmp_path)
+        with engine.begin() as conn:  # as if the version stamp had been lost
+            config = alembic_config()
+            config.attributes["connection"] = conn
+            command.stamp(config, "0027")
+        _migrate(engine, "0028")  # must neither fail nor encrypt twice
+        assert _plain(tmp_path) == once
+        _migrate(engine, "0027", "downgrade")
+        assert _plain(tmp_path)["donations"] == ["Fake Food Bank"]
+        with engine.begin() as conn:
+            config = alembic_config()
+            config.attributes["connection"] = conn
+            command.stamp(config, "0028")
+        _migrate(engine, "0027", "downgrade")  # already text: left alone
+        assert _plain(tmp_path)["donations"] == ["Fake Food Bank"]
+    finally:
+        engine.dispose()
+
+
+def test_upgrade_from_0027_writes_scrub_marker_and_flags_the_old_copy(tmp_path, monkeypatch):
+    from app import db as db_module
+
+    engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
+    try:
+        _migrate(engine, "0027")
+        _insert_plaintext_rows(engine)
+        db_path = db_module.database_path(tmp_path)
+        marker = db_module.scrub_marker_path(db_path)
+        marker_seen = []
+        real = db_module._vacuum_and_checkpoint
+
+        def spy(eng):
+            marker_seen.append(marker.is_file())
+            return real(eng)
+
+        monkeypatch.setattr(db_module, "_vacuum_and_checkpoint", spy)
+        db_module.run_migrations(engine)
+        assert marker_seen == [True]  # the clean-up ran because the marker was written
+        assert not marker.exists()  # and finished
+        backup = tmp_path / "budget.db.bak-0027"
+        assert backup.is_file()
+        assert db_module.unencrypted_backups(db_path) == [backup]
+    finally:
+        engine.dispose()
+    assert b"Fake Food Bank" not in db_path.read_bytes()

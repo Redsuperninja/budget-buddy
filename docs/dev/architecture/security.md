@@ -19,8 +19,10 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
 - **Recovery phrase:** `python -m app recovery-phrase show` prints it after the user types `SHOW` (terminal
   only, never a file, after checking it matches the data folder); `restore` puts the key back.
 - The memory key store is for automated tests only and needs a second switch ([../testing.md](../testing.md)).
-- Backup copies `budget.db.bak-0001`/`-0002` predate encryption and are plaintext; the Home Base tells the user
-  so they can delete them.
+- Every backup copy `budget.db.bak-<revision>` made before migration 0028 (`NAMES_ENCRYPTED_REVISION` in
+  `app/db.py`) holds plaintext, at least the bank, employer, charity and shop names; the Home Base lists them
+  after the upgrade so the user can delete them once the app works. An upgrade from before 0028 also writes the
+  `scrub-pending` marker (VACUUM + WAL truncate) so old pages and log don't keep the plain text.
 - **Backups** ([backup.md](backup.md), [ADR-0012](../../adr/0012-encrypted-backups.md)): one file, encrypted as a whole
   with a per-file key from the backup subkey; it holds no key. Restoring checks all of it before changing
   anything, never runs while the Home Base does, and keeps the replaced data in `before-restore-*`.
@@ -57,7 +59,12 @@ These stay readable so Budget Buddy can search, sort and add them up:
 - auto-sort rule text (`category_rules.pattern`), which is copied from transaction descriptions
 - gross and net pay on paychecks
 - account names (`accounts.name`; the account lists are sorted by it in SQL)
+- company names on dividends and bank-made trades (`dividends.payer`, `bank_trades.security`,
+  `security_symbols.security`)
+- category names
 - stock symbols and lots
+
+The encrypted names can also appear in transaction descriptions and account names, which stay plain.
 
 Encrypting more of them, or the whole database, is
 [issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28). Users are told to keep the data folder out

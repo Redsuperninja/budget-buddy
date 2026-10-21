@@ -21,7 +21,11 @@ Encrypted on your computer:
 - Transaction description
 - Pay amounts on paychecks
 - Account names
+- Company names on dividends and bank-made stock trades
+- Category names and auto-sort rule text
 - Stock symbols and lots
+
+The encrypted names can still show up in the unencrypted transaction descriptions and account names (for example a payment described as "FOOD BANK"), so treat the data folder as private anyway.
 
 ## Your recovery phrase
 
@@ -39,7 +43,7 @@ The phrase also unlocks your backups: see [Back up and restore your data](back-u
 
 ## Old backup copies
 
-Before Budget Buddy added encryption, it made backup copies of your data folder: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. These old copies are not encrypted and were made before sensitive data was protected. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
+Each time Budget Buddy updates its database, it first saves a copy of your data folder's database: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. Any copy made before the update that encrypted bank, employer, charity and shop names holds those names (and older ones, account numbers and notes) as plain text. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
 
 To delete them safely:
 1. Make sure Budget Buddy is running, so it makes a fresh backup if needed
