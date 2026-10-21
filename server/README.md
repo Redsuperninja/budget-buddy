@@ -101,4 +101,5 @@ for pairing and joining; common rules are in
 | Other deductions, yearly tax summary, CSV export | [tax-summary.md](../docs/dev/architecture/tax-summary.md) |
 | Pairing, devices, home-network listener | [pairing.md](../docs/dev/architecture/pairing.md) |
 | Phone sync (`/api/sync/*`) | [sync.md](../docs/dev/architecture/sync.md) and the [sync contract](../docs/api/sync-contract.md) |
+| Backups, recovery phrase, first-start setup progress (`/api/local/setup`) | [backup.md](../docs/dev/architecture/backup.md) |
 | Dashboard pages, CSRF token | [dashboard.md](../docs/dev/architecture/dashboard.md) |

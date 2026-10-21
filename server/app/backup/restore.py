@@ -94,7 +94,7 @@ def home_base_running(data_dir: Path) -> bool:
 
 # Tables a new Budget Buddy already fills (default categories, nothing encrypted), so rows there
 # don't count as data of the folder's own.
-_STARTER_TABLES = frozenset({"categories"})  # a new Home Base fills it with defaults
+_STARTER_TABLES = frozenset({"categories", "setup_progress"})  # defaults; setup dates only
 
 
 def has_own_data(data_dir: Path) -> bool:
@@ -165,10 +165,22 @@ def _tables(connection: sqlite3.Connection, kind: str = "table") -> set[str]:
     return {name for (name,) in connection.execute(query, (kind,))}
 
 
+def _clear_setup_progress(new_db: Path) -> None:
+    connection = sqlite3.connect(new_db)
+    try:
+        with connection:
+            if "setup_progress" in _tables(connection):
+                connection.execute("DELETE FROM setup_progress")
+    finally:
+        connection.close()
+
+
 def carry_over_removals(old_db: Path, new_db: Path) -> None:
     """Phones and computers removed in ``old_db`` (the data being replaced) are removed in
-    ``new_db`` too, so restoring an older backup can't let a lost phone sync again."""
+    ``new_db`` too, so restoring an older backup can't let a lost phone sync again. This
+    computer's setup progress (including its last backup date) is kept as well."""
     if not old_db.is_file():
+        _clear_setup_progress(new_db)
         return
     with open_read_only(old_db) as old:
         tables = _tables(old)
@@ -177,6 +189,12 @@ def carry_over_removals(old_db: Path, new_db: Path) -> None:
             phones = old.execute(
                 "SELECT token_hash, revoked_at FROM devices WHERE revoked"
             ).fetchall()
+        progress = None
+        if "setup_progress" in tables:
+            progress = old.execute(
+                "SELECT finished_at, phrase_saved_at, last_backup_at FROM setup_progress "
+                "WHERE id = 1"
+            ).fetchone()
         if "remote_computers" in tables:
             computers = old.execute(
                 "SELECT id, paired_at, revoked_at FROM remote_computers "
@@ -198,6 +216,16 @@ def carry_over_removals(old_db: Path, new_db: Path) -> None:
                     "revoked_at = COALESCE(revoked_at, ?) WHERE id = ? AND paired_at = ?",
                     [(revoked_at, id_, paired_at) for id_, paired_at, revoked_at in computers],
                 )
+            if "setup_progress" in tables:
+                # Setup dates are about this computer, not the backup's: keep this computer's,
+                # or none (never another computer's last-backup date).
+                connection.execute("DELETE FROM setup_progress")
+                if progress is not None:
+                    connection.execute(
+                        "INSERT INTO setup_progress "
+                        "(id, finished_at, phrase_saved_at, last_backup_at) VALUES (1, ?, ?, ?)",
+                        progress,
+                    )
     finally:
         connection.close()
 

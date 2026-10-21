@@ -27,7 +27,7 @@ MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 BUSY_TIMEOUT_MS = 5000
 # The newest migration. Lets start-up skip loading Alembic when the database is up to date.
 # tests/test_migrations.py checks it against Alembic's real head: update it with a new migration.
-HEAD_REVISION = "0028"
+HEAD_REVISION = "0029"
 # Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
 FIRST_ENCRYPTED_REVISION = "0003"
 # Migration that encrypts bank, employer, charity and shop names (#28). Database copies made

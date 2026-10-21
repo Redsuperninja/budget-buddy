@@ -41,6 +41,7 @@
 | 0026 | A deposit sweep can be shared by several dividends and trades (`sweep_transaction_id` no longer unique) |
 | 0027 | `sweep_by_hand` on dividends and bank trades: a sweep you linked yourself, kept by Match everything again |
 | 0028 | Encrypts `accounts.institution`, `paychecks.employer`, `donations.organization`, `receipts.merchant` (like 0003; needs the key) |
+| 0029 | `setup_progress`: one row of first-start setup dates (`finished_at`, `phrase_saved_at`, `last_backup_at`; ADR-0015) |
 
 ## Adding a migration
 

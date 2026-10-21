@@ -157,7 +157,7 @@ done.
   links), short `CONTRIBUTING.md`, bug and idea issue templates with `config.yml`, PR template with reviewers and
   the attribution line, READ ME FIRST with the guide's real address — *docs-writer* + *release-manager*
   - The user-testing template still points at an "API explorer page"
-- [ ] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
+- [x] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
   `GET`/`PUT /api/local/setup` (this computer only), `last_backup_at` set when a backup file is written —
   *backend-engineer* + *security-reviewer*
 - [ ] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,

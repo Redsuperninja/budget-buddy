@@ -27,6 +27,7 @@ from app.crypto.errors import DecryptionError, RecoveryPhraseError
 from app.crypto.keys import fingerprint, read_fingerprint
 from app.db import make_private_file
 from app.errors import ApiError
+from app.services.setup_progress import record_backup
 
 UPLOAD_LIMIT_BYTES = 4 * 1024**3  # far more than years of data and receipt photos
 DOWNLOAD_PREFIX = ".backup-"  # swept at start-up like the other leftovers
@@ -53,12 +54,15 @@ def make_download(data_dir: Path, engine: Engine, keys: DerivedKeys) -> Path:
     return path
 
 
-def send_and_delete(path: Path, chunk_size: int = 1024 * 1024):
-    """The file's bytes for a download; deleted when sent, or when the browser stops early."""
+def send_and_delete(path: Path, chunk_size: int = 1024 * 1024, engine: Engine | None = None):
+    """The file's bytes for a download; deleted when sent, or when the browser stops early.
+    With an ``engine``, the last-backup date is noted only once the last chunk went out."""
     try:
         with open(path, "rb") as source:
             while chunk := source.read(chunk_size):
                 yield chunk
+        if engine is not None:
+            record_backup(engine)
     finally:
         path.unlink(missing_ok=True)
 

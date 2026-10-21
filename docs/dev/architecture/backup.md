@@ -76,6 +76,8 @@ Routes in `server/app/routers/backup.py`, this computer only (not on the other-c
 | `POST /api/local/backup/restore` | Upload (limit 4 GB), checked in full like the command line, then left waiting; `X-Recovery-Phrase` for another key's backup |
 | `DELETE /api/local/backup/restore` | Cancels a waiting restore (and drops its waiting key) |
 | `POST /api/local/backup/recovery-phrase` | The folder's phrase, read from the vault each time (never kept in the running Home Base), `Cache-Control: no-store`; a POST so it needs the CSRF token |
+| `GET /api/local/setup` | First-start setup progress (ADR-0015): `finished_at`, `phrase_saved_at`, `last_backup_at` (dates or null) |
+| `PUT /api/local/setup` | Body `{finished?: bool, phrase_saved?: bool}` (unknown fields refused): true stamps the time once, false clears it. `last_backup_at` can't be sent: the server sets it when a backup file is written (`record_backup` in `services/setup_progress.py`, called by the dashboard download and `backup make`) |
 
 The page reads the fingerprint from the file's first 36 bytes in the browser (`backup-words.js`) and asks for the
 phrase only when it differs from the folder's. `app/backup/pending.py` swaps a waiting restore in at the next

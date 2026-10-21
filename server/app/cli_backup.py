@@ -38,6 +38,7 @@ from app.crypto.keys import (
     read_fingerprint,
 )
 from app.db import create_db_engine, database_path
+from app.services.setup_progress import record_backup
 
 Output = Callable[[str], None]
 Input = Callable[[str], str]
@@ -94,6 +95,7 @@ def make_backup(settings: Settings, folder: Path | None, output: Output = print)
             out.flush()
             os.fsync(out.fileno())
         os.replace(partial, target)
+        record_backup(engine)
     except BackupError as exc:
         partial.unlink(missing_ok=True)
         output(str(exc))
