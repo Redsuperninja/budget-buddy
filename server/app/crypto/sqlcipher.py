@@ -71,7 +71,7 @@ def refuse_plain_file(path: object) -> None:
 
 def is_encrypted_engine(engine: Engine) -> bool:
     """True when ``engine`` talks to SQLCipher."""
-    return getattr(engine.dialect.dbapi, "__name__", "") == dbapi_module().__name__
+    return getattr(engine.dialect.dbapi, "__name__", "") == "sqlcipher3.dbapi2"
 
 
 def open_with_key(dbapi_connection, key: bytes) -> None:
