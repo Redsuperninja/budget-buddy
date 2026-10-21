@@ -2,10 +2,12 @@
 WebView2), and a plain message window when something goes wrong."""
 
 import html
+import logging
 from pathlib import Path
 
-from budget_buddy_desktop import links
+from budget_buddy_desktop import links, navigation
 
+log = logging.getLogger(__name__)
 TITLE = "Budget Buddy"
 
 
@@ -18,6 +20,8 @@ def show_dashboard(url: str, storage_dir: Path) -> None:
     import webview
 
     webview.settings["ALLOW_DOWNLOADS"] = True  # the tax summary's CSV download
+    # Otherwise pywebview hands any new-window address to Windows unchecked; navigation.py handles those.
+    webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
     window = webview.create_window(
         TITLE, url, width=1200, height=820, min_size=(720, 520), js_api=links.Api()
     )
@@ -27,7 +31,16 @@ def show_dashboard(url: str, storage_dir: Path) -> None:
         if not links.same_page(window.get_current_url(), url):
             window.load_url(url)
 
+    # Backstop: navigation.guard cancels off-origin pages before they load; this catches anything else.
     window.events.loaded += stay_on_dashboard
+
+    def guard_native() -> None:
+        try:
+            navigation.guard(window.native, url)
+        except Exception:  # the window stays usable; the loaded check above still applies
+            log.exception("Could not attach the navigation guard")
+
+    window.events.shown += guard_native
     webview.start(private_mode=False, storage_path=str(storage_dir))
 
 

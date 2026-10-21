@@ -100,7 +100,7 @@ def fake_webview(monkeypatch):
             self.append(handler)
             return self
 
-    window = types.SimpleNamespace(events=types.SimpleNamespace(loaded=Loaded()), moved=[])
+    window = types.SimpleNamespace(events=types.SimpleNamespace(loaded=Loaded(), shown=Loaded()), moved=[])
     window.get_current_url = lambda: window.current
     window.load_url = window.moved.append
     window.current = "http://127.0.0.1:8765/"
@@ -319,3 +319,85 @@ def test_window_stays_on_the_dashboard():
     assert same_page("http://127.0.0.1:8765/#tax", "http://127.0.0.1:8765")
     assert not same_page("https://github.com/Redsuperninja/budget-buddy", "http://127.0.0.1:8765")
     assert not same_page("http://127.0.0.1:9999/", "http://127.0.0.1:8765")
+
+
+# --- the navigation guard (navigation.py) ---
+
+
+class FakeEvent:
+    def __init__(self):
+        self.handlers = []
+
+    def __iadd__(self, handler):
+        self.handlers.append(handler)
+        return self
+
+
+def fake_native(core_ready):
+    core = types.SimpleNamespace(NewWindowRequested=FakeEvent())
+    webview = types.SimpleNamespace(
+        NavigationStarting=FakeEvent(),
+        CoreWebView2InitializationCompleted=FakeEvent(),
+        CoreWebView2=core if core_ready else None,
+    )
+    return types.SimpleNamespace(browser=types.SimpleNamespace(webview=webview)), webview, core
+
+
+def test_pywebview_is_told_not_to_hand_addresses_to_windows(fake_webview, tmp_path):
+    from budget_buddy_desktop.window import show_dashboard
+
+    module, _ = fake_webview
+    show_dashboard("http://127.0.0.1:8765", tmp_path)
+    assert module.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] is False
+
+
+def test_off_origin_navigation_is_cancelled_before_it_starts(fake_webview, tmp_path):
+    from budget_buddy_desktop import navigation
+
+    native, webview, _ = fake_native(core_ready=True)
+    assert navigation.guard(native, "http://127.0.0.1:8765")
+    (check,) = webview.NavigationStarting.handlers
+    stay = types.SimpleNamespace(Uri="http://127.0.0.1:8765/#tax", Cancel=False)
+    leave = types.SimpleNamespace(Uri="https://example.org/", Cancel=False)
+    check(None, stay)
+    check(None, leave)
+    assert (stay.Cancel, leave.Cancel) == (False, True)
+
+
+@pytest.mark.parametrize("core_ready", [True, False])
+def test_new_window_requests_open_only_allowed_links(monkeypatch, core_ready):
+    from budget_buddy_desktop import links, navigation
+
+    opened = []
+    monkeypatch.setattr(links.webbrowser, "open", lambda u: opened.append(u) or True)
+    native, webview, core = fake_native(core_ready)
+    navigation.guard(native, "http://127.0.0.1:8765")
+    if not core_ready:  # WebView2 starts later
+        webview.CoreWebView2 = core
+        (late,) = webview.CoreWebView2InitializationCompleted.handlers
+        late(None, None)
+    (handler,) = core.NewWindowRequested.handlers
+    for uri in (f"{REPO}/blob/main/LICENSE", "ms-settings:", "file:///C:/Windows/notepad.exe", "https://example.org/"):
+        args = types.SimpleNamespace(Uri=uri, Handled=False)
+        handler(None, args)
+        assert args.Handled is True
+    assert opened == [f"{REPO}/blob/main/LICENSE"]
+
+
+def test_guard_without_webview2_does_nothing():
+    from budget_buddy_desktop import navigation
+
+    assert navigation.guard(types.SimpleNamespace(browser=None), "http://127.0.0.1:8765") is False
+    assert navigation.guard(None, "http://127.0.0.1:8765") is False
+
+
+def test_window_attaches_the_guard_when_shown(fake_webview, tmp_path):
+    from budget_buddy_desktop.window import show_dashboard
+
+    module, _ = fake_webview
+    native, webview, _ = fake_native(core_ready=True)
+    module.window.native = native
+    show_dashboard("http://127.0.0.1:8765", tmp_path)
+    (shown,) = module.window.events.shown
+    shown()
+    assert len(webview.NavigationStarting.handlers) == 1
