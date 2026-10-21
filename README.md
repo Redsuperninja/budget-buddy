@@ -15,7 +15,7 @@ with no cloud, no account and no bank passwords.
 > It is not tax advice. Check important decisions with a tax professional.
 
 **Showcase:** [What Budget Buddy is (plain English)](docs/showcase/overview.md) ·
-[How it works (technical)](docs/showcase/technical.md)
+[How it works (technical)](docs/showcase/technical.md) · **Privacy:** [what it keeps and where](docs/PRIVACY.md) · **Security:** [report a problem](SECURITY.md)
 
 ## What it does
 
