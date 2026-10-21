@@ -1,7 +1,4 @@
 # Made by scripts/dev/lock_dependencies.py from pyproject.toml sha256 5ed88cdd0323c5b22f3877682f6e89dfd502a2a13565d6e7759b448b4611f8f1; don't edit by hand.
---only-binary sqlcipher3
---only-binary sqlcipher3
-
 setuptools==84.0.0 \
     --hash=sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670 \
     --hash=sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73

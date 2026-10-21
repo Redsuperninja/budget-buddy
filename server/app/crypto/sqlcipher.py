@@ -7,11 +7,12 @@ memory; the field keys are the same.)
 """
 
 import re
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import Engine, event
 
-from app.crypto.errors import CipherProviderError, WrongKeyError
+from app.crypto.errors import CipherProviderError, UnencryptedDatabaseError, WrongKeyError
 
 DATABASE_KEY_BYTES = 32
 # SQLCipher links its own OpenSSL, so a fix reaches us only with a new ``sqlcipher3`` wheel.
@@ -29,6 +30,12 @@ OLD_PROVIDER_MESSAGE = (
     "Install desktop app). Your data is safe and unchanged."
 )
 
+PLAIN_DATABASE_MESSAGE = (
+    "Budget Buddy's database isn't encrypted yet, and this version can't encrypt it while "
+    "database encryption is turned on. Turn off BUDGET_BUDDY_DATABASE_ENCRYPTION to keep using "
+    "your data. Your data is safe and unchanged."
+)
+_SQLITE_HEADER = b"SQLite format 3\x00"
 _NOT_A_DATABASE = "file is not a database"
 _VERSION = re.compile(r"OpenSSL (\d+)\.(\d+)\.(\d+)")
 
@@ -46,6 +53,27 @@ def provider_version(text: str) -> tuple[int, int, int] | None:
     return tuple(int(part) for part in found.groups()) if found else None  # type: ignore[return-value]
 
 
+def refuse_plain_file(path: object) -> None:
+    """Raise ``UnencryptedDatabaseError`` if ``path`` is an ordinary, unencrypted SQLite file.
+
+    Without this a plain file would fail the key check and be reported as a wrong key, which
+    sends people to the recovery phrase. Runs before the key is set (until roadmap 25l-3 moves
+    existing databases; an empty new file is fine).
+    """
+    try:
+        with open(Path(str(path)), "rb") as handle:
+            start = handle.read(len(_SQLITE_HEADER))
+    except OSError:
+        return  # missing or unreadable: the connection reports it
+    if start == _SQLITE_HEADER:
+        raise UnencryptedDatabaseError(PLAIN_DATABASE_MESSAGE)
+
+
+def is_encrypted_engine(engine: Engine) -> bool:
+    """True when ``engine`` talks to SQLCipher."""
+    return getattr(engine.dialect.dbapi, "__name__", "") == dbapi_module().__name__
+
+
 def open_with_key(dbapi_connection, key: bytes) -> None:
     """Key a new SQLCipher connection and prove the key opens the file.
 
@@ -59,6 +87,11 @@ def open_with_key(dbapi_connection, key: bytes) -> None:
     try:
         cursor.execute(f"PRAGMA key = \"x'{key.hex()}'\"")  # raw cursor only; never logged
         cursor.execute("PRAGMA cipher_log_level = NONE")
+        cursor.execute("PRAGMA cipher_provider_version")
+        row = cursor.fetchone()
+        version = provider_version(str(row[0])) if row else None
+        if version is None or version < MIN_PROVIDER_VERSION:
+            raise CipherProviderError(OLD_PROVIDER_MESSAGE)
         try:
             cursor.execute("SELECT count(*) FROM sqlite_master")
             cursor.fetchone()
@@ -66,11 +99,6 @@ def open_with_key(dbapi_connection, key: bytes) -> None:
             if _NOT_A_DATABASE not in str(exc):
                 raise
             raise WrongKeyError(WRONG_KEY_MESSAGE) from None
-        cursor.execute("PRAGMA cipher_provider_version")
-        row = cursor.fetchone()
-        version = provider_version(str(row[0])) if row else None
-        if version is None or version < MIN_PROVIDER_VERSION:
-            raise CipherProviderError(OLD_PROVIDER_MESSAGE)
     finally:
         cursor.close()
 
@@ -84,6 +112,8 @@ def key_on_connect(engine: Engine, key: bytes) -> None:
     """
 
     def connect(dialect, _record, args, kwargs):
+        if args:
+            refuse_plain_file(args[0])
         connection = dialect.loaded_dbapi.connect(*args, **kwargs)
         try:
             open_with_key(connection, key)

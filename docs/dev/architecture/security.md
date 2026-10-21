@@ -21,7 +21,8 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   (SQLAlchemy's own set-up SQL runs before any `connect` listener). The key is never in the URL, in SQL run
   through SQLAlchemy, in a log or in an exception (`from None`; tests check it). A wrong key raises `WrongKeyError`;
   a locked file stays a locked-file error. Start-up refuses an OpenSSL older than `MIN_PROVIDER_VERSION` in
-  `cipher_provider_version`. `sqlcipher3` installs from wheels only (`--only-binary` in the lock files).
+  `cipher_provider_version`, checked before the file is read. A plain database under the setting raises `UnencryptedDatabaseError` (not a wrong key) until the
+  move lands (25l-3), and backups are refused while it is on (25l-4). `sqlcipher3` installs from wheels only (`--only-binary` in the lock files).
 - Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
   names. The plain photo is never written to disk.
 - **Recovery phrase:** `python -m app recovery-phrase show` prints it after the user types `SHOW` (terminal

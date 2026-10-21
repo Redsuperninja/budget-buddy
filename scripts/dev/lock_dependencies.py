@@ -28,7 +28,7 @@ HEADER = "# Made by scripts/dev/lock_dependencies.py from pyproject.toml sha256 
 PYTHON = "3.12"  # the oldest Python the parts support; the files work for newer ones too
 # Packages that are only ever installed from a ready-made wheel, never built from source: a missing
 # wheel must fail the install, not compile against whatever OpenSSL the computer has (ADR-0014).
-# uv writes a matching `--only-binary` line into the lock file, which pip obeys.
+# The script writes a matching `--only-binary` line into each lock file that has the package.
 BINARY_ONLY = ("sqlcipher3",)
 
 
@@ -50,15 +50,18 @@ def compile_lock(uv: str, part_dir: Path, out: str, extra: list[str], upgrade: b
     command = [uv, "pip", "compile", "-", "--universal", "--python-version", PYTHON,
                "--generate-hashes", "--no-header", "--annotation-style", "line", "--quiet",
                "-o", out, *extra, *(["--upgrade"] if upgrade else []),
-               *[f"--only-binary={name}" for name in BINARY_ONLY],
-               "--emit-build-options"]  # fmt: skip
+               *[f"--only-binary={name}" for name in BINARY_ONLY]]  # fmt: skip
     done = subprocess.run(command, cwd=part_dir, input=build_tools, text=True)
     if done.returncode:
         stop(f"Locking {part_dir.name}/{out} failed; the messages above say why.")
     path = part_dir / out
     body = "".join(line for line in path.read_text(encoding="utf-8").splitlines(keepends=True)
-                   if not line.startswith(HEADER))  # fmt: skip
-    path.write_text(lock_header(part_dir) + body, encoding="utf-8", newline="\n")
+                   if not line.startswith((HEADER, "--only-binary")))  # fmt: skip
+    # One line per package that is in this file. pip obeys it, so every installer fails rather
+    # than building the package from source.
+    only_binary = "".join(f"--only-binary {name}\n" for name in BINARY_ONLY
+                          if f"\n{name}==" in "\n" + body)  # fmt: skip
+    path.write_text(lock_header(part_dir) + only_binary + body, encoding="utf-8", newline="\n")
 
 
 def main() -> int:

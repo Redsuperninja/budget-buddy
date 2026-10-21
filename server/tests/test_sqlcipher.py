@@ -9,7 +9,7 @@ from sqlalchemy import text
 
 from app.config import Settings
 from app.crypto import sqlcipher
-from app.crypto.errors import CipherProviderError, WrongKeyError
+from app.crypto.errors import CipherProviderError, UnencryptedDatabaseError, WrongKeyError
 from app.crypto.keys import PURPOSE_DB_FIELDS, PURPOSE_DB_FILE, DerivedKeys, derive_key
 from app.db import create_db_engine, database_path
 from app.main import create_app
@@ -89,14 +89,59 @@ def test_wrong_key_is_reported_as_a_wrong_key(tmp_path):
     wrong.dispose()
 
 
-def test_a_plain_file_under_a_key_is_a_wrong_key_too(tmp_path):
+def test_a_plain_file_under_a_key_says_it_is_not_encrypted_yet(tmp_path):
     plain = create_db_engine(tmp_path)
     put_marker(plain)
     plain.dispose()
+    before = database_path(tmp_path).read_bytes()
     keyed = create_db_engine(tmp_path, database_key=KEY)
-    with pytest.raises(WrongKeyError):
+    with pytest.raises(UnencryptedDatabaseError, match="BUDGET_BUDDY_DATABASE_ENCRYPTION") as err:
         keyed.connect()
+    assert not isinstance(err.value, WrongKeyError)
+    assert "recovery" not in str(err.value)
     keyed.dispose()
+    assert database_path(tmp_path).read_bytes() == before  # untouched
+
+
+def test_an_app_start_on_a_plain_database_with_the_setting_on_is_not_a_wrong_key(
+    data_dir, monkeypatch
+):
+    create_app().state.engine.dispose()  # a plain database, as before this version
+    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
+    with pytest.raises(UnencryptedDatabaseError):
+        create_app()
+
+
+def test_the_openssl_check_runs_before_the_database_is_read(tmp_path, monkeypatch):
+    statements = []
+    real = sqlcipher.dbapi_module()
+
+    class Spy(real.Cursor):
+        def execute(self, sql, *args):
+            statements.append(sql)
+            return super().execute(sql, *args)
+
+    class SpyConnection(real.Connection):
+        def cursor(self, factory=Spy):
+            return super().cursor(factory)
+
+    original = real.connect
+    monkeypatch.setattr(real, "connect", lambda *a, **k: original(*a, factory=SpyConnection, **k))
+    create_db_engine(tmp_path, database_key=KEY).connect().close()
+    assert statements.index("PRAGMA cipher_provider_version") < statements.index(
+        "SELECT count(*) FROM sqlite_master"
+    )
+
+
+def test_an_old_openssl_is_refused_even_with_the_wrong_key(tmp_path, monkeypatch):
+    engine = create_db_engine(tmp_path, database_key=KEY)
+    put_marker(engine)
+    engine.dispose()
+    monkeypatch.setattr(sqlcipher, "MIN_PROVIDER_VERSION", (99, 0, 0))
+    wrong = create_db_engine(tmp_path, database_key=OTHER_KEY)
+    with pytest.raises(CipherProviderError):
+        wrong.connect()
+    wrong.dispose()
 
 
 def test_a_busy_file_is_not_called_a_wrong_key():
@@ -106,7 +151,7 @@ def test_a_busy_file_is_not_called_a_wrong_key():
                 raise sqlcipher.dbapi_module().OperationalError("database is locked")
 
         def fetchone(self):
-            return None
+            return ("OpenSSL 3.6.0 1 Oct 2025",)
 
         def close(self):
             pass
@@ -225,3 +270,35 @@ def test_a_new_data_folder_is_fully_encrypted_when_the_setting_is_on(data_dir, m
     assert not data.startswith(SQLITE_HEADER)
     assert b"CREATE TABLE" not in data
     assert b"transactions" not in data
+
+
+def test_a_backup_is_refused_up_front_while_encryption_is_on(data_dir, monkeypatch, capsys):
+    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
+    app = create_app()
+    app.state.engine.dispose()
+    folder = data_dir.parent / "backups"
+    folder.mkdir()
+    from app.cli_backup import make_backup
+
+    lines = []
+    assert make_backup(Settings(), folder, output=lines.append) == 1
+    assert "database encryption is turned on" in lines[0]
+    assert not list(folder.iterdir()) and not list(data_dir.glob(".backup-*"))
+
+
+def test_the_dashboard_backup_is_refused_with_a_clear_message(data_dir, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
+    app = create_app()
+    client = TestClient(
+        app,
+        base_url="http://127.0.0.1:8765",
+        client=("127.0.0.1", 50000),
+        headers={"Origin": "http://127.0.0.1:8765", "X-CSRF-Token": app.state.csrf_token},
+    )
+    response = client.get("/api/local/backup/file")
+    app.state.engine.dispose()
+    assert response.status_code == 409
+    assert "database encryption is turned on" in response.text
+    assert not list(data_dir.glob(".backup-*"))
