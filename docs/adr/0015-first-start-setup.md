@@ -1,6 +1,7 @@
 # ADR-0015: First-start setup: one skippable page, progress kept by the Home Base
 
-**Status:** Proposed, 2026-10-20 (roadmap 25e to 25h). Needs the owner's decision.
+**Status:** Accepted by the owner, 2026-10-20 (roadmap 25e to 25h): a skippable Setup page, and the recovery
+phrase step is an "I've written it down" tick.
 
 ## Context
 A brand-new user today opens Home and sees the **Get started** checklist (accounts, transactions, budgets, optional

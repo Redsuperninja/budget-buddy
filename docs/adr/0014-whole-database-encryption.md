@@ -1,7 +1,7 @@
 # ADR-0014: Encrypt the whole database with SQLCipher
 
-**Status:** Proposed, 2026-10-20 (issue #28, step 2). Needs the owner's decision and a security review before it
-is built.
+**Status:** Accepted by the owner, 2026-10-20 (issue #28, step 2), for 0.1.0. The security review's requirements
+below are part of the build.
 
 ## Context
 `budget.db` still holds every amount, date, description, shop, employer and charity in plain text
