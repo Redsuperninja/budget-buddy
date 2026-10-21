@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem (report it privately)
+    url: https://github.com/Redsuperninja/budget-buddy/blob/main/SECURITY.md
+    about: Don't open a public issue for a security problem. SECURITY.md explains how to report it privately.
+  - name: Help with using Budget Buddy
+    url: https://github.com/Redsuperninja/budget-buddy/tree/main/docs/guide
+    about: Step-by-step help for everyday use, with pictures.
