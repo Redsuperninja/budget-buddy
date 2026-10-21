@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- For developers: the screenshots in `docs/guide/images` and `docs/showcase/images` are about 0.7 MB instead of about 1.7 MB (256 colours; they look the same). `scripts/dev/shrink_png.py` does it, and `check_pages.py --screenshots` runs it on new screenshots. The phone app's icons stay as they were, because their gradients showed visible steps.
 - Safer key checks (#26): if the `key-fingerprint` file in your data folder is lost, Budget Buddy no longer makes a new key over your existing data, and it tests a key or recovery phrase on the data itself before accepting it, so a phrase from another folder can't be saved by mistake.
 - More of your data is encrypted (#28, step 1): bank names, employer names, charity names and shop names on receipts are now stored encrypted. Existing entries are encrypted the next time Budget Buddy starts (the copy of your old data that Budget Buddy keeps before an update, like `budget.db.bak-0027`, still holds those names as plain text; Budget Buddy lists it so you can delete it once everything works). Amounts, dates, transaction descriptions and account names are still readable in the data folder.
 - Behind the scenes (#21): the phone app no longer pulls in an old `uuid` through the Expo build tools. One advisory stays open as a low risk: `decode-uri-component` in expo-router's link parser (a crafted `budgetbuddy://` link can only make the app hang). The fixed version cannot be loaded by that parser, so it waits for an expo-router update. The rest sit in build and test tools. See issue #21.

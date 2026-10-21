@@ -8,7 +8,8 @@ Edge, Google Chrome or Chromium, and Node 22+.
 On Windows, type py instead of python3.
 
 With --screenshots, it also saves the top of each page as <page>.png in that folder; the user
-guide's pictures (docs/guide/images/) are made this way, from made-up demo data only.
+guide's pictures (docs/guide/images/) are made this way, from made-up demo data only, and made
+smaller afterwards with shrink_png.py.
 
 Your real data and your own test data are never touched: everything lives in a new temporary
 folder (with the encryption key in memory only) that is deleted afterwards. Uses the test port,
@@ -119,7 +120,12 @@ def main() -> int:
             args.screenshots.mkdir(parents=True, exist_ok=True)
             command.append(args.screenshots.resolve())
         checker = start(command, {}, True)
-        return checker.wait()
+        failed = checker.wait()
+        if args.screenshots and not failed:
+            # 256 colours: about a third of the size, and screenshots look the same.
+            shrunk = subprocess.run([python, HERE / "shrink_png.py", args.screenshots.resolve()])
+            failed = shrunk.returncode
+        return failed
     finally:
         # Stop only what this run started (the browser is the checker's), then delete the folder.
         for process in checker, server:
