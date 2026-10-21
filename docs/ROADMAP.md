@@ -160,7 +160,7 @@ done.
 - [x] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
   `GET`/`PUT /api/local/setup` (this computer only), `last_backup_at` set when a backup file is written —
   *backend-engineer* + *security-reviewer*
-- [ ] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
+- [x] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
   phone (optional); "Finish later"; guide `docs/guide/first-start.md` — *backend-engineer* + *security-reviewer*
 - [x] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
   30 days, and two fixes — *backend-engineer* + *security-reviewer*
