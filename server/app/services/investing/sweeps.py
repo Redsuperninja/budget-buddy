@@ -28,7 +28,7 @@ from app.services.ledger.transaction_roles import (
 
 SWEEP_DAYS_BEFORE = 1
 SWEEP_DAYS_AFTER = 3
-SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I)
+SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I | re.A)
 
 
 def regular(query):
@@ -50,6 +50,7 @@ def lean(query):
             Transaction.date,
             Transaction.amount_cents,
             Transaction.description,
+            Transaction.category_source,  # read when a dividend is filed
         ),
         lazyload(Transaction.account),
         lazyload(Transaction.transfer_partner),

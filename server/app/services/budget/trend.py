@@ -27,7 +27,7 @@ def _net_worths(session: Session, spans: list[tuple[int, int]]) -> list[int]:
     tomorrow = dt.date.today() + dt.timedelta(days=1)
     ends = [min(month_range(y, m)[1], tomorrow) for y, m in spans]
     first = min(month_range(*spans[0])[0], tomorrow)
-    month_key = func.strftime("%Y-%m", Transaction.date)
+    month_key = func.substr(Transaction.date, 1, 7)
     before = session.scalar(
         select(func.coalesce(func.sum(Transaction.amount_cents), 0)).where(Transaction.date < first)
     )
