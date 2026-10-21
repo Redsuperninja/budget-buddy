@@ -1,0 +1,71 @@
+name: Bug report
+description: Something is broken, or does the wrong thing
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for telling us what went wrong.
+
+        **Please don't paste real bank data or screenshots with your numbers.** Use made-up examples instead.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What were you doing, and what went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen again
+      description: Number each step, for example "1. Open Money. 2. Click Import files."
+      placeholder: |
+        1.
+        2.
+        3.
+
+  - type: textarea
+    id: message
+    attributes:
+      label: The exact message on screen
+      description: Copy the words exactly. Leave this blank if there wasn't one.
+      render: text
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did it happen?
+      options:
+        - The dashboard, in my web browser
+        - The Budget Buddy window on Windows (desktop app)
+        - The phone app
+        - Opening Budget Buddy in my phone's web browser
+        - Installing or starting Budget Buddy
+        - Something else
+    validations:
+      required: true
+
+  - type: input
+    id: computer
+    attributes:
+      label: Your computer
+      description: For example, "Windows 11" or "Mac" (optional).
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed real bank data, account numbers and names from anything I pasted or attached.
+          required: true

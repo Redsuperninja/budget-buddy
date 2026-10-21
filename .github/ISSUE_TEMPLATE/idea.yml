@@ -1,0 +1,31 @@
+name: Idea
+description: Suggest a feature or a change
+title: "Idea: "
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please use made-up examples, not real bank data or screenshots with your numbers.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Budget Buddy to do?
+      description: Describe it in plain English.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help?
+      description: What are you trying to get done now, and what gets in the way?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything else you tried, or other ideas?
+      description: Optional.

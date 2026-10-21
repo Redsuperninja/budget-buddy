@@ -153,7 +153,7 @@ done.
     bundled OpenSSL (cryptography), libsodium (PyNaCl) and Pillow's image libraries
 - [x] 25c. Privacy statement (`docs/PRIVACY.md`: what's kept, where, encrypted, the one opt-in outside call, no
   analytics, how to delete everything) and `SECURITY.md` (report a problem privately) — *docs-writer* + *security-reviewer*
-- [ ] 25d. Front door for strangers: README (needs, US federal taxes only and no state taxes, privacy and security
+- [x] 25d. Front door for strangers: README (needs, US federal taxes only and no state taxes, privacy and security
   links), short `CONTRIBUTING.md`, bug and idea issue templates with `config.yml`, PR template with reviewers and
   the attribution line, READ ME FIRST with the guide's real address — *docs-writer* + *release-manager*
   - The user-testing template still points at an "API explorer page"

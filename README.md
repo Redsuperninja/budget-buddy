@@ -1,82 +1,92 @@
 # Budget Buddy
 
-A private, local-first budgeting and tax-prep helper. Your money records stay on your own computer, encrypted,
-with no cloud, no account and no bank passwords.
+Budget Buddy is a private budgeting and US federal tax prep helper. It runs on your own Windows computer. Your
+records stay there, encrypted. There is no cloud, no account and no bank password to give anyone. A phone app is
+optional.
 
-![Budget Buddy's Home page: money in, spent, saved and left over (demo data)](docs/showcase/images/home.png)
-
-- **Home Base** (runs on your computer): stores your accounts, transactions, paychecks, receipts, stock sales and
-  donations in an encrypted database that never leaves your house.
-- **Dashboard**: a simple view for everyday use, and **All tools** for people who want full control.
-- **On your phone**: open Budget Buddy in your phone's web browser at home, with nothing to install. (A phone app for
-  receipt photos and offline viewing is in testing.)
+![Budget Buddy's Home page: money in, spent, saved and left over (made-up demo data)](docs/showcase/images/home.png)
 
 > Budget Buddy organizes your records and estimates numbers to help you prepare.
 > It is not tax advice. Check important decisions with a tax professional.
 
-**Showcase:** [What Budget Buddy is (plain English)](docs/showcase/overview.md) ·
-[How it works (technical)](docs/showcase/technical.md) · **Privacy:** [what it keeps and where](docs/PRIVACY.md) · **Security:** [report a problem](SECURITY.md)
+**New here?** Read [What Budget Buddy is (plain English)](docs/showcase/overview.md).
+
+## Who it's for
+
+- People who want to track spending, savings and budgets without handing their money records to a website.
+- People who want their federal tax details (donations, stock sales, paychecks, medical bills and more) gathered in
+  one place before tax time.
+
+## What you need
+
+- A Windows 10 or Windows 11 computer. Installing from the download needs no admin rights and no Python.
+- A Mac or Linux computer can run Budget Buddy too, but only from source. See the
+  [start guide](docs/guide/start-budget-buddy.md) (it needs Python 3.12 or newer).
+- Optional: a phone on your home Wi-Fi, to use Budget Buddy in its web browser.
+
+## What Budget Buddy does not do
+
+- **No state taxes.** It only covers US federal taxes.
+- **No filing.** It doesn't send anything to the IRS or any tax program. You file your own return.
+- **Not tax advice.** It shows your numbers and estimates. It doesn't decide what you owe.
+- **No bank login.** It reads the files your bank lets you download (CSV). It doesn't log in to your bank. Bank
+  connections are not in this version, and would only ever use a key you add yourself.
+- **No cloud.** Your data is not uploaded anywhere. The one outside call is optional live stock prices (see
+  [privacy](docs/PRIVACY.md)).
 
 ## What it does
 
 | Area | Features |
 | --- | --- |
-| Getting started | A **Get started** checklist on Home; a simple view, with **All tools** one switch away in **Settings**; every box folds up, and remembers it |
+| Getting started | A **Get started** checklist on Home; a simple view, with **All tools** one switch away in **Settings** |
 | Money in | Paychecks (gross, taxes withheld, net, 401k/HSA), started for you from pay deposits in your bank file |
-| Accounts | Checking, savings, cards, loans, brokerage, retirement and HSA: import bank CSV exports or enter by hand |
-| Spending | Search and filter by category; auto-sorted transactions (rules, and ones learned from your choices), transfers between your accounts linked for you, receipts from the phone app |
-| Budget | Suggested 50/30/20 budget from your real income and spending, monthly targets vs. actual, charts, this month against last month, categories grouped by kind |
-| Investments | Holdings by account at live prices (optional, Finnhub) or prices you enter; broker activity and positions files; 401(k), IRA and HSA limits |
-| Taxes | Donations, stock gains (oldest shares first, short/long-term, possible wash sales), dividends, other deductions, a yearly summary to download or print |
+| Accounts | Checking, savings, cards, loans, brokerage, retirement and HSA: import bank CSV files or enter by hand |
+| Spending | Search and filter by category; auto-sorted transactions; transfers between your accounts linked for you; receipt photos from your phone |
+| Budget | A suggested 50/30/20 budget from your real income and spending, monthly targets vs. actual, charts |
+| Investments | Holdings by account, at live prices (optional) or prices you enter; broker files; 401(k), IRA and HSA limits |
+| Taxes | Donations, stock gains (short and long-term, possible wash sales), dividends, other deductions, and a yearly summary to download or print |
 | Devices | Phones and other computers at home join with a one-time code |
 
-## Quick start
+## Download and first start
 
-**Windows (easiest):** download `Budget-Buddy-<version>-Windows.zip` from the Releases page, unzip it, and
-double-click **Install Budget Buddy** ([guide](docs/guide/install.md)). No Python needed.
+1. Go to the project's [Releases page](https://github.com/Redsuperninja/budget-buddy/releases) and download
+   `Budget-Buddy-<version>-Windows.zip`.
+2. Right-click the zip, choose **Extract All...**, then double-click **Install Budget Buddy**.
+3. Open **Budget Buddy** from the Start menu.
 
-**From source (Windows, macOS, Linux):** install Python 3.12 or newer, then open the **launch** folder and start
-**Start Budget Buddy** (double-click it on Windows; **Start Budget Buddy.command** on a Mac; run
-`./launch/start-budget-buddy.sh` on Linux). It sets itself up the first time, starts the Home Base and opens the
-dashboard ([guide](docs/guide/start-budget-buddy.md)). On Windows, for the desktop app with a tray icon,
-double-click **Build desktop app**, then **Install desktop app** ([guide](docs/guide/desktop-app.md)).
+Step-by-step help, with pictures: [Download and install Budget Buddy](docs/guide/install.md). After that, Budget
+Buddy opens on Home with a **Get started** list. The [user guide](docs/guide/README.md) covers everything else.
 
-Then follow the **Get started** list on Home. Step-by-step help for everything: [the user guide](docs/guide/README.md).
+Windows may say it protected your PC, because this early version isn't signed yet. The install page shows how to
+continue, and only do this for a copy from the Releases page above.
 
-## How it's organized
+Write down the recovery phrase Budget Buddy shows you, and keep it somewhere safe. Without it, a lost computer
+means lost data. See [keep your data safe](docs/guide/keep-your-data-safe.md).
 
-```
-budget-buddy/
-├── server/        Home Base: Python (FastAPI) + SQLite, runs on your PC
-├── dashboard/     Web page for the computer: plain HTML/CSS/JS, talks to the Home Base over HTTP
-├── mobile/        Phone app: Expo (React Native), iPhone + Android
-├── desktop/       Windows app: the dashboard in its own window, and a light tray icon
-├── launch/        What you double-click: start, build and install the desktop app (and the built app)
-├── docs/          User guides (guide/), showcase, developer docs (dev/), sync contract, decisions (ADRs), roadmap
-├── scripts/       What launch/ runs; testing/, release/ and dev/ tools (see scripts/README.md)
-├── packaging/     The Windows download: both build recipes, the installer and its read-me (windows/)
-└── .claude/agents Specialized AI agents that build & maintain this project
-```
+## Privacy and security
 
-- All the docs at a glance: [docs/README.md](docs/README.md)
-- How it's built (for developers): [docs/dev/README.md](docs/dev/README.md)
-- Roadmap and what's next: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Try it out with made-up demo data: [docs/testing/](docs/testing/README.md)
-- Make a release (the Windows download): [docs/dev/release.md](docs/dev/release.md)
-- How the project is built and managed (agents, PRs): [docs/dev/workflow.md](docs/dev/workflow.md)
+- Your records are stored on your computer, encrypted. Nothing is sent to us or to a cloud service.
+- Read [docs/PRIVACY.md](docs/PRIVACY.md) for what is kept, where, and how to delete everything.
+- Read [SECURITY.md](SECURITY.md) for how to report a problem privately.
 
 ## Status
 
-Early release (0.1). Windows download available; phones use the browser for now. See the roadmap for what's
-next.
-
-## Built with Claude
-
-The code in Budget Buddy is built by [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant.
-The design and every review are done by the project's owner, a human who decides what gets built and approves
-each change before it's merged. See [docs/dev/workflow.md](docs/dev/workflow.md) for how Claude's specialized agents
-split the work.
+Early release (0.1). The Windows download is ready to try. Phones use their web browser for now. A phone app is
+being tested. See the [roadmap](docs/ROADMAP.md) for what's next.
 
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+## For developers
+
+- [Contributing](CONTRIBUTING.md): how to set up, run the tests and send a change.
+- [All the docs](docs/README.md) and [how it's built](docs/dev/README.md).
+- [Making a release](docs/dev/release.md).
+- [Trying it out with made-up data](docs/testing/README.md).
+
+## Built with Claude
+
+The code in Budget Buddy is written with [Claude Code](https://claude.com/claude-code), Anthropic's AI coding
+assistant. The owner decides what gets built and reviews and approves each change before it's merged. See
+[how the project is managed](docs/dev/workflow.md).
