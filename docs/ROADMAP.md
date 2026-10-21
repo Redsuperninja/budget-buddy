@@ -162,7 +162,7 @@ done.
   *backend-engineer* + *security-reviewer*
 - [ ] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
   phone (optional); "Finish later"; guide `docs/guide/first-start.md` — *backend-engineer* + *security-reviewer*
-- [ ] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
+- [x] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
   30 days, and two fixes — *backend-engineer* + *security-reviewer*
   - Bug: on a joined phone or computer, Get started's phone step links to `#phone` and `#computers`, which don't
     exist there (`main.js` drops Devices)

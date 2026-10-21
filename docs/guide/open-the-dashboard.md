@@ -15,8 +15,11 @@ If you installed the [desktop app](desktop-app.md), it shows the same pages in i
    **Devices**, and **Settings** at the top right
 
 The first time, **Home** shows a **Get started** list: add your accounts, bring in what you spent, set monthly
-budgets, and (if you like) use it on your phone. Each step links to the page that does it, and the list goes away
-once the first three are done.
+budgets, then (on the Budget Buddy computer) save your recovery phrase and make a backup, and (if you like) use it on
+your phone. Each step links to the page that does it, and the list goes away once those are done. If your last backup
+is over 30 days old, Home also shows a reminder with a link to **Devices, Backups**; **Remind me later** hides it for a
+week. A phone or computer connected through its browser doesn't see these steps, because they happen on the Budget
+Buddy computer.
 
 **Your data stays on this computer.** The dashboard works on this computer, and on other computers at home only
 after you connect them with a one-time code ([use Budget Buddy on another computer](use-on-another-computer.md)).

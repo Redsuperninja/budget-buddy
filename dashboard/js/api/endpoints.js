@@ -5,6 +5,11 @@ import { api } from "./client.js";
 
 const LOCAL = "/api/local";
 
+// First-start setup progress (this computer only): { finished_at, phrase_saved_at, last_backup_at }.
+// saveSetup takes { phrase_saved: true } (or finished); the backup time is set by the server, never the browser.
+export const getSetup = () => api("GET", `${LOCAL}/setup`);
+export const saveSetup = (json) => api("PUT", `${LOCAL}/setup`, { json });
+
 // Accounts
 export const setAccountBalance = (id, json) => api("POST", `${LOCAL}/accounts/${id}/balance`, { json });
 export const listAccounts = () => api("GET", `${LOCAL}/accounts`);
