@@ -50,7 +50,11 @@ def locked_packages(lock: Path) -> dict[str, str]:
         match = re.match(
             r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s;\\]+)\s*(?:;\s*([^\\]+?))?\s*\\?$", line
         )
-        if match and (not match[3] or Marker(match[3]).evaluate(WINDOWS)):
+        if not match:
+            if line.strip() and not line.lstrip().startswith(("#", "--hash=")):
+                raise ValueError(f"{lock.name}: can't read the line {line!r}")
+            continue
+        if not match[3] or Marker(match[3]).evaluate(WINDOWS):
             found[norm(match[1])] = match[2]
     return found
 
@@ -162,6 +166,8 @@ def render(results: list[dict], extras: list[dict]) -> str:
 
 def extra_text(extra: dict, packages: dict) -> str:
     """The licence text an extra notice points at, or '!reason' if it can't be found."""
+    if "text_file" in extra:
+        return (PACKAGING / extra["text_file"]).read_text("utf-8")
     source = extra.get("text_from")
     if not source:
         return ""
@@ -170,8 +176,28 @@ def extra_text(extra: dict, packages: dict) -> str:
     return text or f"!{source['file']} not found in {source['package']}"
 
 
+# Files in the built app that carry code from outside the Python packages, and the "id" of the
+# extra notice that covers them. A build that has one without the notice stops.
+BUNDLED = {
+    "*WebView2*.dll": "webview2",
+    "libcrypto*.dll": "python-runtime",
+    "sqlite3.dll": "python-runtime",
+    "_sodium*.pyd": "libsodium",
+}
+
+
+def uncovered(app_dir: Path, extras: list[dict]) -> list[str]:
+    """What is bundled in ``app_dir`` that no extra notice (by "id") covers."""
+    have = {extra.get("id") for extra in extras}
+    return [
+        f"{pattern} is in the app but there is no extra notice with id '{id_}'"
+        for pattern, id_ in BUNDLED.items()
+        if id_ not in have and next(app_dir.rglob(pattern), None)
+    ]
+
+
 def write(out: Path, builds: list[tuple[Path, Path]]) -> None:
-    """Write ``out`` from [(python of a build venv, its requirements-package.txt), ...]."""
+    """Write ``out`` (in the app folder) from [(python of a build venv, its lock), ...]."""
     results = []
     for python, lock in builds:
         run = subprocess.run(
@@ -182,6 +208,8 @@ def write(out: Path, builds: list[tuple[Path, Path]]) -> None:
             raise RuntimeError(f"Reading the licences from {python} failed:\n{run.stderr}")
         results.append(json.loads(run.stdout))
     extras = json.loads((PACKAGING / "extra-notices.json").read_text("utf-8"))
+    if missing := uncovered(out.parent, extras):
+        raise ValueError("Bundled code without a notice:\n  " + "\n  ".join(missing))
     out.write_text(render(results, extras), encoding="utf-8")
 
 

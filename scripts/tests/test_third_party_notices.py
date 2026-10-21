@@ -135,12 +135,32 @@ def test_every_locked_package_has_a_licence_text_or_a_checked_in_one():
 
 def test_checked_in_licence_files_and_extras_point_at_real_packages():
     locked = {name for lock in LOCKS for name in tpn.locked_packages(lock)}
+    extras = json.loads((tpn.PACKAGING / "extra-notices.json").read_text("utf-8"))
+    used = {Path(extra["text_file"]).name for extra in extras if "text_file" in extra}
     for file in (tpn.PACKAGING / "licences").glob("*.txt"):
-        assert file.stem in locked, f"{file.name} is for a package that isn't packaged"
-    for extra in json.loads((tpn.PACKAGING / "extra-notices.json").read_text("utf-8")):
-        assert {"name", "licence", "source", "note"} <= extra.keys()
+        assert file.name in used or file.stem in locked, f"{file.name} isn't used"
+    for extra in extras:
+        assert {"id", "name", "licence", "source", "note"} <= extra.keys()
         if "text_from" in extra:
             assert tpn.norm(extra["text_from"]["package"]) in locked, extra["name"]
+        if "text_file" in extra:
+            assert (tpn.PACKAGING / extra["text_file"]).is_file()
+    assert {id_ for id_ in tpn.BUNDLED.values()} <= {extra["id"] for extra in extras}
+
+
+def test_bundled_code_without_a_notice_stops_the_build(tmp_path):
+    (tmp_path / "webview" / "lib").mkdir(parents=True)
+    (tmp_path / "webview" / "lib" / "Microsoft.Web.WebView2.Core.dll").write_bytes(b"x")
+    assert "WebView2" in tpn.uncovered(tmp_path, [{"id": "libsodium"}])[0]
+    assert tpn.uncovered(tmp_path, [{"id": "webview2"}]) == []
+
+
+def test_a_lock_line_that_cannot_be_read_is_an_error(tmp_path):
+    lock = lock_of(
+        tmp_path, "alpha==1.0 \\", "    --hash=sha256:aa", "    # via x", "alpha @ https://x"
+    )
+    with pytest.raises(ValueError, match="alpha @"):
+        tpn.locked_packages(lock)
 
 
 def test_the_packages_the_old_list_missed_are_all_locked():

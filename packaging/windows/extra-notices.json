@@ -1,5 +1,6 @@
 [
   {
+    "id": "openssl",
     "name": "OpenSSL (inside the cryptography package)",
     "licence": "Apache-2.0",
     "source": "cryptography's wheel statically links OpenSSL (version in the wheel's sboms/sbom.json); OpenSSL 3 and later are Apache-2.0. Text: cryptography's LICENSE.APACHE. https://github.com/openssl/openssl",
@@ -7,6 +8,7 @@
     "text_from": {"package": "cryptography", "file": "LICENSE.APACHE"}
   },
   {
+    "id": "libsodium",
     "name": "libsodium (inside the PyNaCl package)",
     "licence": "ISC",
     "source": "PyNaCl's wheel carries libsodium; its licence is the file LICENSE.libsodium.txt in the wheel. https://github.com/jedisct1/libsodium",
@@ -14,12 +16,22 @@
     "text_from": {"package": "pynacl", "file": "licenses/LICENSE.libsodium.txt"}
   },
   {
+    "id": "pillow-libraries",
     "name": "Image libraries inside Pillow (libjpeg-turbo, zlib, libpng, FreeType, HarfBuzz, Brotli, LittleCMS, libavif and others)",
     "licence": "various permissive licences",
     "source": "Pillow's wheel; its LICENSE file, printed in full under Pillow above, ends with the licence of every library built into it. https://github.com/python-pillow/Pillow",
     "note": "The Windows app uses Pillow only to draw its icon (the app leaves out WebP, AVIF and colour profile support), but the full list is kept because it is what the wheel ships. FreeType is used under its FreeType Licence, which asks that the credit in Pillow's LICENSE is kept."
   },
   {
+    "id": "webview2",
+    "name": "Microsoft Edge WebView2 SDK (bundled by pywebview)",
+    "licence": "BSD-3-Clause",
+    "source": "pywebview bundles Microsoft.Web.WebView2.Core.dll, Microsoft.Web.WebView2.WinForms.dll and WebView2Loader.dll (webview/lib). Text: LICENSE.txt of the Microsoft.Web.WebView2 NuGet package, https://www.nuget.org/packages/Microsoft.Web.WebView2",
+    "note": "Copyright (C) Microsoft Corporation. The WebView2 Runtime itself (the browser engine that draws the window) is part of Windows and is not in this download.",
+    "text_file": "licences/webview2-sdk.txt"
+  },
+  {
+    "id": "python-runtime",
     "name": "Libraries inside the Python runtime",
     "licence": "various permissive licences",
     "source": "https://docs.python.org/3/license.html#licenses-and-acknowledgements-for-incorporated-software",

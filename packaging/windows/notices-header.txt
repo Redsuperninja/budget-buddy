@@ -5,8 +5,8 @@ open-source software below, each under its own licence, whose text follows. This
 the download is built, from the licence files the libraries ship with.
 
 Things worth knowing:
-- pystray (LGPL-3.0) is used unchanged, as a separate package in the app's _internal folder. You may
-  replace it with your own build of pystray. Its source is at https://github.com/moses-palmer/pystray
+- pystray (LGPL-3.0) is used unchanged, as plain .py files in the app's _internal\pystray folder (not packed
+  into the program). You may replace them with your own build of pystray. Its source is at https://github.com/moses-palmer/pystray
 - PyInstaller (GPL-2.0-or-later with a special exception) packages the apps. Its exception allows the
   apps it builds to be distributed under any licence. Its source is at https://pyinstaller.org
 - Some packages are only used while building the download (for example PyInstaller, setuptools,
