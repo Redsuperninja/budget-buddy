@@ -100,7 +100,7 @@ def fake_webview(monkeypatch):
             self.append(handler)
             return self
 
-    window = types.SimpleNamespace(events=types.SimpleNamespace(loaded=Loaded(), shown=Loaded()), moved=[])
+    window = types.SimpleNamespace(events=types.SimpleNamespace(loaded=Loaded(), before_show=Loaded()), moved=[])
     window.get_current_url = lambda: window.current
     window.load_url = window.moved.append
     window.current = "http://127.0.0.1:8765/"
@@ -374,8 +374,8 @@ def test_new_window_requests_open_only_allowed_links(monkeypatch, core_ready):
     navigation.guard(native, "http://127.0.0.1:8765")
     if not core_ready:  # WebView2 starts later
         webview.CoreWebView2 = core
-        (late,) = webview.CoreWebView2InitializationCompleted.handlers
-        late(None, None)
+        for late in webview.CoreWebView2InitializationCompleted.handlers:
+            late(None, None)
     (handler,) = core.NewWindowRequested.handlers
     for uri in (f"{REPO}/blob/main/LICENSE", "ms-settings:", "file:///C:/Windows/notepad.exe", "https://example.org/"):
         args = types.SimpleNamespace(Uri=uri, Handled=False)
@@ -391,13 +391,25 @@ def test_guard_without_webview2_does_nothing():
     assert navigation.guard(None, "http://127.0.0.1:8765") is False
 
 
-def test_window_attaches_the_guard_when_shown(fake_webview, tmp_path):
+def test_window_attaches_the_guard_before_the_window_shows(fake_webview, tmp_path):
     from budget_buddy_desktop.window import show_dashboard
 
     module, _ = fake_webview
     native, webview, _ = fake_native(core_ready=True)
     module.window.native = native
     show_dashboard("http://127.0.0.1:8765", tmp_path)
-    (shown,) = module.window.events.shown
-    shown()
+    (before_show,) = module.window.events.before_show
+    before_show()
     assert len(webview.NavigationStarting.handlers) == 1
+
+
+def test_a_missing_webview2_control_is_logged(fake_webview, tmp_path, caplog):
+    from budget_buddy_desktop.window import show_dashboard
+
+    module, _ = fake_webview
+    module.window.native = types.SimpleNamespace(browser=None)
+    show_dashboard("http://127.0.0.1:8765", tmp_path)
+    (before_show,) = module.window.events.before_show
+    with caplog.at_level("WARNING"):
+        before_show()
+    assert "No WebView2 control" in caplog.text

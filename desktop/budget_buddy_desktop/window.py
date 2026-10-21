@@ -35,12 +35,16 @@ def show_dashboard(url: str, storage_dir: Path) -> None:
     window.events.loaded += stay_on_dashboard
 
     def guard_native() -> None:
+        ok: list[bool] = []
         try:
-            navigation.guard(window.native, url)
+            native = window.native
+            navigation.on_ui_thread(native, lambda: ok.append(navigation.guard(native, url)))
+            if not ok or not ok[0]:
+                log.warning("No WebView2 control found; only the after-load check keeps the window on the dashboard")
         except Exception:  # the window stays usable; the loaded check above still applies
             log.exception("Could not attach the navigation guard")
 
-    window.events.shown += guard_native
+    window.events.before_show += guard_native  # runs before the first page is requested
     webview.start(private_mode=False, storage_path=str(storage_dir))
 
 
