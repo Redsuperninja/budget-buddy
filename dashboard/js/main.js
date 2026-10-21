@@ -3,11 +3,10 @@
 // advanced only get a tab in the All tools view (Settings, View). Another computer
 // or phone that hasn't joined yet (no CSRF token in the page) sees only the join page (ADR-0009).
 
+import { devicePages, onThisComputer } from "./features.js";
 import { start } from "./router.js";
 import { addSettingsMenu } from "./settings-menu.js";
 
-// Connecting phones and computers only works on the Budget Buddy computer itself.
-const onThisComputer = ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname);
 const joinedOrLocal = document.querySelector('meta[name="csrf-token"]').content !== "";
 
 const sections = [
@@ -31,13 +30,13 @@ const sections = [
     { id: "paychecks", label: "Paychecks", load: () => import("./screens/tax/paychecks.js") },
     { id: "stocks", label: "Stocks", load: () => import("./screens/tax/stocks.js") },
   ] },
-  { id: "devices", label: "Devices", pages: [
-    { id: "phone", label: "Connect phone", load: () => import("./screens/devices/connect-phone.js") },
-    { id: "computers", label: "Other devices", load: () => import("./screens/devices/other-computers.js") },
-    { id: "backups", label: "Backups", load: () => import("./screens/devices/backups.js") },
-  ] },
+  { id: "devices", label: "Devices", pages: devicePages({
+    phone: () => import("./screens/devices/connect-phone.js"),
+    computers: () => import("./screens/devices/other-computers.js"),
+    backups: () => import("./screens/devices/backups.js"),
+  }) },
 ];
 
 addSettingsMenu();
-if (joinedOrLocal) start(onThisComputer ? sections : sections.filter((s) => s.id !== "devices"));
+if (joinedOrLocal) start(onThisComputer() ? sections : sections.filter((s) => s.id !== "devices"));
 else import("./screens/devices/join.js").then((join) => join.render(document.getElementById("view")));

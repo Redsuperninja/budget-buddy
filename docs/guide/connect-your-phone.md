@@ -1,5 +1,7 @@
 # Connect your phone
 
+> **The Budget Buddy phone app is coming later.** It isn't in the app stores yet, so for now the way to use Budget Buddy on your phone is its web browser: see [Use Budget Buddy on another computer or your phone's browser](use-on-another-computer.md). The steps below are for when the app is out. Until then, the **Connect phone** tab appears only under **Settings**, then **View**, then **All tools**.
+
 Pairing connects your phone to Budget Buddy on this computer. You do it once per phone. Your computer and phone need to be on the same home Wi-Fi.
 
 ![Devices, Connect phone: the Show pairing code button and connected phones](images/phone.png)

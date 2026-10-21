@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Get started no longer shows the phone step on a phone or computer you connected through its web browser (its links went nowhere), and the simple view and Get started no longer offer "Connect the phone app" because that app isn't published yet; they point to opening Budget Buddy in the phone's web browser. The Connect phone tab is still under All tools. One setting, `PHONE_APP_PUBLISHED` in `dashboard/js/features.js`, turns it back on.
 - For developers: the screenshots in `docs/guide/images` and `docs/showcase/images` are about 0.7 MB instead of about 1.7 MB (256 colours; they look the same). `scripts/dev/shrink_png.py` does it, and `check_pages.py --screenshots` runs it on new screenshots. The phone app's icons stay as they were, because their gradients showed visible steps.
 - Lighter, quicker phone app: the app bundle is about 340 KB smaller on Android (it no longer carries a 966 KB icon font and two code libraries it never used; iPhone was not affected), the Home screen redraws less, and the sync-reminder and leftover-photo start-up work now runs after the first screen is shown and reads the waiting receipts once instead of twice. Nothing looks different.
 - Safer key checks (#26): if the `key-fingerprint` file in your data folder is lost, Budget Buddy no longer makes a new key over your existing data, and it tests a key or recovery phrase on the data itself before accepting it, so a phrase from another folder can't be saved by mistake.
