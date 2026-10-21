@@ -1,7 +1,7 @@
 """Stock trades in a bank-style file, and the deposit sweep that paid for them (or took the money).
 
 Some brokers' files (J.P. Morgan / Chase, for one) show a trade only as a line naming the company,
-with no ticker, share count or price, like "ABBOTT LABORATORIES UNSOLICITED WE ARE ACTING AS
+with no ticker, share count or price, like "FAKECO UNSOLICITED WE ARE ACTING AS
 PRINCIPAL COMMISSION FIELD IS A COMMISSION EQUIVALENT ...". Money out is a buy, money in a sale.
 Next to it the sweep moves the same cash: "CHASE DEPOSIT SWEEP ... INTRA-DAY WITHDRWAL" (money in)
 pays for a buy, "... INTRA-DAY DEPOSIT" (money out) parks a sale's proceeds. (A dividend's sweep is
@@ -59,7 +59,7 @@ NOT_STOCK_WORDS = re.compile(
 # A cancelled or corrected trade reverses money: it mustn't look like the opposite trade.
 REVERSAL_WORDS = re.compile(r"cancel|(?<![a-z])cxl(?![a-z])|correct|revers|rebill|adjust", re.I)
 _LEADING_ACTION = re.compile(r"^\s*(you\s+)?(bought|sold|buy|sell)\s+", re.I)
-# Where the company's name ends: "ABBOTT LABORATORIES UNSOLICITED ..." -> "ABBOTT LABORATORIES".
+# Where the company's name ends: "FAKECO UNSOLICITED ..." -> "FAKECO".
 _NAME_END = re.compile(
     r"\s+((un)?solicited|we are acting|common stock|commission|@|\(|\d).*$", re.I
 )

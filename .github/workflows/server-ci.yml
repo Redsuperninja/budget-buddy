@@ -47,6 +47,9 @@ jobs:
           allow-prereleases: true
           cache: pip
           cache-dependency-path: server/requirements-dev.txt
+      - name: Nothing private in tracked files (emails, user paths, public IPs, databases, keys)
+        working-directory: .
+        run: python scripts/dev/check_public.py
       - name: Install
         # Exact versions with hashes (ADR-0013), then this part with nothing more downloaded.
         run: |

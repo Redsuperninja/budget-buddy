@@ -1,0 +1,10 @@
+# Justified exceptions to scripts/dev/check_public.py. One per line: `<rule> <path glob>  # why`.
+# Rules: email, home-path, ip, env-file, database, backup, key-file, image.
+# Every entry needs a reason; keep this list short.
+
+email mobile/package-lock.json  # npm's own deprecation text for glob names its author (i@izs.me); third-party and already public on npm
+ip docs/adr/0014-*.md  # package version numbers in a table (3.54.0.0), not an address
+ip mobile/src/sync/__tests__/pairing.test.ts  # 8.8.8.8 is the example "public address" the phone must refuse to pair with
+ip mobile/src/sync/__tests__/transportHardening.test.ts  # same: a public address the phone must refuse to talk to
+ip server/tests/devices/test_pairing_listener.py  # same: a public address the Home Base must refuse to listen on
+ip server/tests/test_network.py  # same: public addresses the LAN-only check must reject

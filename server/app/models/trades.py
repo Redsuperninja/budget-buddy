@@ -9,7 +9,7 @@ from app.models.base import Base, TimestampMixin
 
 class BankTrade(TimestampMixin, Base):
     """A buy (money out) or sale (money in) of shares in an investment account, read from
-    a description like "ABBOTT LABORATORIES UNSOLICITED WE ARE ACTING AS PRINCIPAL ...", and the
+    a description like "FAKECO UNSOLICITED WE ARE ACTING AS PRINCIPAL ...", and the
     deposit sweep that moved the same cash (if found). The date, amount and account are the
     transaction's, never copied. The shares, ticker and price live on the stock purchase or sale
     recorded from the transaction (``StockLot`` / ``StockSaleOrder.transaction_id``)."""
@@ -24,7 +24,7 @@ class BankTrade(TimestampMixin, Base):
     sweep_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id", ondelete="SET NULL"), index=True
     )
-    security: Mapped[str] = mapped_column(String(100))  # "ABBOTT LABORATORIES"
+    security: Mapped[str] = mapped_column(String(100))  # "FAKECO"
     # Linked by hand ("Deposit sweeps to check"): Match everything again keeps it.
     sweep_by_hand: Mapped[bool] = mapped_column(default=False, server_default="0")
     # "Not a trade": kept so it isn't found again, but left out of lists.
@@ -32,7 +32,7 @@ class BankTrade(TimestampMixin, Base):
 
 
 class SecuritySymbol(TimestampMixin, Base):
-    """The ticker you gave a company's trades once ("ABBOTT LABORATORIES" -> "ABT"), offered again
+    """The ticker you gave a company's trades once ("FAKECO" -> "FKCO"), offered again
     for its next trade."""
 
     __tablename__ = "security_symbols"
