@@ -18,6 +18,13 @@ bank CSV import, paychecks, donations, stocks and connecting a phone. Its code l
   to load never leaves a blank page.
 - `GET /` serves `index.html`; `GET /static/{path}` serves the other allowlisted files. The page loads
   `/static/js/main.js`.
+- **Caching.** `/static/*` replies carry `Cache-Control: no-cache` and a strong `ETag` (SHA-256 of the file's
+  bytes). The server keeps each file's text and tag in memory, keyed by modified time and size, so a changed file is
+  read and hashed again. `If-None-Match` (also `W/` forms and `*`) that matches answers `304` with the same ETag and
+  security headers and no body. The browser still asks every time, so an update is never shown stale. `GET /`
+  (carries the CSRF token) stays `no-store` with no ETag, as does every `/api/*` reply.
+- **Screens load on demand.** `main.js` lists each page with `load: () => import(...)`; the router imports a page's
+  module the first time it opens. `scripts/dev/check-pages.mjs` reads the page list from those `load:` lines.
 - **API-only mode.** If the folder is missing, isn't a folder, or has no `index.html`, the server logs one
   plain-English warning, `/` returns a small 404 page ("the dashboard files weren't found") with the same
   headers, `/static/*` returns 404, and every `/api/...` route works. A non-editable `pip install` doesn't

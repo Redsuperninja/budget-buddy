@@ -296,3 +296,77 @@ def test_pairing_qr_needs_this_computer(make_client):
     lan = make_client("192.168.1.50", base_url="http://192.168.1.20:8765")
     response = lan.post("/api/local/pairing", headers={"Origin": "http://192.168.1.20:8765"})
     assert response.status_code == 403
+
+
+def test_static_files_have_a_strong_etag_and_still_revalidate(client):
+    response = client.get("/static/js/main.js")
+    etag = response.headers["etag"]
+    assert etag.startswith('"') and not etag.startswith("W/")
+    assert response.headers["cache-control"] == "no-cache"
+    assert client.get("/static/js/main.js").headers["etag"] == etag
+
+
+def test_unchanged_file_answers_304_with_headers_and_no_body(client):
+    etag = client.get("/static/js/main.js").headers["etag"]
+    for sent in (etag, f'"other", {etag}', f"W/{etag}", "*"):
+        response = client.get("/static/js/main.js", headers={"If-None-Match": sent})
+        assert response.status_code == 304
+        assert response.content == b""
+        assert response.headers["etag"] == etag
+        assert response.headers["cache-control"] == "no-cache"
+        assert "default-src 'self'" in response.headers["content-security-policy"]
+        assert response.headers["x-content-type-options"] == "nosniff"
+    assert client.get("/static/js/main.js", headers={"If-None-Match": '"stale"'}).status_code == 200
+
+
+def test_changed_file_gets_a_new_etag_and_new_body(make_client, fake_dashboard):
+    client = make_client()
+    first = client.get("/static/js/main.js")
+    _write(fake_dashboard / "js" / "main.js", "// a much longer, different file" * 5)
+    second = client.get("/static/js/main.js", headers={"If-None-Match": first.headers["etag"]})
+    assert second.status_code == 200
+    assert second.headers["etag"] != first.headers["etag"]
+    assert "different file" in second.text
+
+
+def test_html_page_and_api_get_no_etag_and_are_never_304(client):
+    page = client.get("/", headers={"If-None-Match": "*"})
+    assert page.status_code == 200
+    assert "etag" not in page.headers
+    assert page.headers["cache-control"] == "no-store"
+    api = client.get("/api/local/csrf-token", headers={"If-None-Match": "*"})
+    assert api.status_code == 200
+    assert "etag" not in api.headers
+    assert api.headers["cache-control"] == "no-store"
+
+
+def test_missing_file_is_still_404_with_if_none_match(client):
+    assert client.get("/static/js/nothing.js", headers={"If-None-Match": "*"}).status_code == 404
+
+
+def test_cache_is_dropped_for_files_an_update_removed(make_client, fake_dashboard):
+    client = make_client()
+    dashboard = client.app.state.dashboard
+    assert client.get("/static/js/main.js").status_code == 200
+    _write(fake_dashboard / "js" / "extra.js", "// extra")
+    assert client.get("/static/js/extra.js").status_code == 200
+    assert len(dashboard._cache) == 2
+    (fake_dashboard / "js" / "extra.js").unlink()
+    dashboard._rescanned_at = 0.0
+    assert client.get("/static/js/gone.js").status_code == 404  # triggers the rescan
+    assert [p.name for p in dashboard._cache] == ["main.js"]
+
+
+def test_same_size_replacement_with_the_old_mtime_is_not_served_stale(make_client, fake_dashboard):
+    client = make_client()
+    path = fake_dashboard / "js" / "main.js"
+    path.write_text("// aaaa", encoding="utf-8")
+    old = path.stat()
+    first = client.get("/static/js/main.js")
+    replacement = path.with_name("main.js.new")
+    replacement.write_text("// bbbb", encoding="utf-8")
+    os.utime(replacement, ns=(old.st_atime_ns, old.st_mtime_ns))
+    os.replace(replacement, path)  # new file: same size, same mtime, different inode
+    second = client.get("/static/js/main.js")
+    assert second.text == "// bbbb"
+    assert second.headers["etag"] != first.headers["etag"]

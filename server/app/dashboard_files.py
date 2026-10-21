@@ -7,6 +7,7 @@ outside the folder). Symlinks are never followed. If the folder is missing, the 
 API-only.
 """
 
+import hashlib
 import logging
 import os
 import stat
@@ -40,16 +41,26 @@ class DashboardFiles:
     folder: Path  # resolved
     assets: dict[str, Path]  # URL path such as "js/main.js" -> file
     _rescanned_at: float = 0.0
+    # path -> (mtime_ns, size, inode, ctime_ns, text, etag); a changed file is re-read.
+    _cache: dict[Path, tuple[int, int, int, int, str, str]] = field(default_factory=dict)
     _rescan_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def read_index(self) -> str | None:
-        return self._read(self.folder / "index.html")
+        return self._read(self.folder / "index.html")  # type: ignore[no-any-return]
 
     def read_asset(self, name: str) -> str | None:
+        found = self.read_asset_tagged(name)
+        return found[0] if found else None
+
+    def read_asset_tagged(self, name: str) -> tuple[str, str] | None:
+        """The file's text and its strong ETag (a hash of the bytes), or ``None``."""
         path = self.assets.get(name)
         if path is None and self._rescan():
             path = self.assets.get(name)
-        return self._read(path) if path else None
+        if path is None:
+            return None
+        found = self._read(path, tagged=True)
+        return (found[0], found[1]) if found else None
 
     def _rescan(self) -> bool:
         """Build the list again (same rules), at most every few seconds. An update can add files
@@ -68,11 +79,13 @@ class DashboardFiles:
             if len(assets) > MAX_FILES:
                 return False
             self.assets = assets
+            listed = set(assets.values())  # drop files an update removed or renamed
+            self._cache = {p: v for p, v in self._cache.items() if p in listed}
             return True
         finally:
             self._rescan_lock.release()
 
-    def _read(self, path: Path) -> str | None:
+    def _read(self, path: Path, tagged: bool = False):
         # Checked again at request time, in case a file was swapped for a link since startup.
         if not _is_allowed(path, self.folder):
             return None
@@ -81,10 +94,19 @@ class DashboardFiles:
                 info = os.fstat(handle.fileno())
                 if not stat.S_ISREG(info.st_mode) or info.st_nlink > 1:
                     return None
+                key = (info.st_mtime_ns, info.st_size, info.st_ino, info.st_ctime_ns)
+                cached = self._cache.get(path) if tagged else None
+                if cached and cached[:4] == key:
+                    return cached[4], cached[5]
                 data = handle.read(MAX_FILE_BYTES + 1)
             if len(data) > MAX_FILE_BYTES:
                 return None
-            return data.decode("utf-8")
+            text = data.decode("utf-8")
+            if not tagged:
+                return text
+            etag = '"' + hashlib.sha256(data).hexdigest()[:32] + '"'
+            self._cache[path] = (*key, text, etag)
+            return text, etag
         except (OSError, UnicodeDecodeError):
             return None
 

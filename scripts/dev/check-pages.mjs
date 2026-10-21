@@ -12,7 +12,7 @@ import { join } from "node:path";
 
 const [browserPath, base, profile, shots] = process.argv.slice(2);
 const MAIN = new URL("../../dashboard/js/main.js", import.meta.url);
-const PAGES = [...readFileSync(MAIN, "utf8").matchAll(/\{ id: "([\w-]+)", label: "[^"]+", render:/g)].map((m) => m[1]);
+const PAGES = [...readFileSync(MAIN, "utf8").matchAll(/\{ id: "([\w-]+)", label: "[^"]+", load:/g)].map((m) => m[1]);
 const PORT = 9333;
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
