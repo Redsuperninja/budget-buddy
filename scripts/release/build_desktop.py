@@ -29,6 +29,7 @@ from _common import (  # noqa: E402
     PACKAGING_DIR,
     REPO,
     SERVER_DIR,
+    clean_env,
     install_locked,
     require_windows,
     run,
@@ -58,7 +59,7 @@ def fresh_venv(part_dir: Path, label: str) -> Path:
     if venv.exists():  # a left-over package would end up in the app
         stop(f"Couldn't clear {venv}. Close anything using it, then try again.")
     say(f"Installing {label} into a new, empty folder (a minute or two)...")
-    run([sys.executable, "-m", "venv", venv], REPO, f"Setting up {label} failed.")
+    run([sys.executable, "-m", "venv", venv], REPO, f"Setting up {label} failed.", clean_env())
     python = venv / "Scripts" / "python.exe"
     install_locked(python, part_dir, PACKAGE_LOCK, label)
     return python
@@ -67,7 +68,7 @@ def fresh_venv(part_dir: Path, label: str) -> Path:
 def pyinstaller(python: Path, spec: str, dist: Path) -> None:
     command = [python, "-m", "PyInstaller", "--noconfirm", "--clean", "--log-level", "WARN"]
     command += ["--workpath", WORK, "--distpath", dist, PACKAGING_DIR / spec]
-    run(command, REPO, f"Building {spec} failed.")
+    run(command, REPO, f"Building {spec} failed.", clean_env())  # no PYTHONPATH code bundled
 
 
 def main() -> int:
@@ -87,7 +88,12 @@ def main() -> int:
     server = fresh_venv(SERVER_DIR, "the Home Base packaging tools")
     desktop = fresh_venv(DESKTOP_DIR, "the desktop app tools")
     icon = WORK / "budget-buddy.ico"
-    run([desktop, "-m", "budget_buddy_desktop.icon", icon], REPO, "Drawing the icon failed.")
+    run(
+        [desktop, "-m", "budget_buddy_desktop.icon", icon],
+        REPO,
+        "Drawing the icon failed.",
+        clean_env(),
+    )
 
     say("Building Budget Buddy.exe and the Home Base (a few minutes)...")
     pyinstaller(desktop, "desktop.spec", dist)
