@@ -132,10 +132,20 @@ export function markRejected(messages: Map<string, string>): Promise<void> {
  */
 export function cleanUpPhotos(): Promise<number> {
   return inTurn(async () => {
-    const list = await loadList();
-    const listed = new Set(list.map((r) => r.client_id));
-    for (const id of listPhotoIds()) if (!listed.has(id)) deletePhoto(id);
-    return list.filter((r) => r.state === 'waiting').length;
+    let list: QueuedReceipt[];
+    try {
+      list = await loadList();
+    } catch {
+      return 0; // unreadable: delete nothing
+    }
+    const waiting = list.filter((r) => r.state === 'waiting').length;
+    try {
+      const listed = new Set(list.map((r) => r.client_id));
+      for (const id of listPhotoIds()) if (!listed.has(id)) deletePhoto(id);
+    } catch {
+      // A file that can't be deleted now is tried again at the next start.
+    }
+    return waiting;
   }).catch(() => 0);
 }
 

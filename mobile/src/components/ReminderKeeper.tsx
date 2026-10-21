@@ -14,9 +14,10 @@ export function ReminderKeeper() {
   const { loading, lastSyncedAt, snapshot, isSample } = useSnapshot();
   useEffect(() => {
     if (loading) return;
+    // Right away (cheap): a photo taken in Add Receipt must not be swept later while it is being read.
+    sweepPhotoCaches();
     const task = requestIdleCallback(() => {
       void (async () => {
-        sweepPhotoCaches();
         const waitingReceipts = await cleanUpPhotos(); // reads the queue once for both jobs
         await rescheduleReminders({
           lastSyncedAt,
