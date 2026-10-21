@@ -1,10 +1,18 @@
-# Justified exceptions to scripts/dev/check_public.py. One per line: `<rule> <path glob>  # why`.
-# Rules: email, home-path, ip, env-file, database, backup, key-file, image.
-# Every entry needs a reason; keep this list short.
+# Justified exceptions to scripts/dev/check_public.py. One per line:
+#   <rule> <path glob> <exact value>  # reason (two spaces, then #)
+# Rules: secret, email, home-path, ip, env-file, database, backup, key-file, statement, image, too-big.
+# The value is the exact text found (a file-kind rule has no value). Only that text is excused, not the
+# whole file. Every entry needs a reason; keep this list short. This file's values and reasons are not
+# scanned; its rule and path columns are.
 
-email mobile/package-lock.json  # npm's own deprecation text for glob names its author (i@izs.me); third-party and already public on npm
-ip docs/adr/0014-*.md  # package version numbers in a table (3.54.0.0), not an address
-ip mobile/src/sync/__tests__/pairing.test.ts  # 8.8.8.8 is the example "public address" the phone must refuse to pair with
-ip mobile/src/sync/__tests__/transportHardening.test.ts  # same: a public address the phone must refuse to talk to
-ip server/tests/devices/test_pairing_listener.py  # same: a public address the Home Base must refuse to listen on
-ip server/tests/test_network.py  # same: public addresses the LAN-only check must reject
+email mobile/package-lock.json i@izs.me  # npm's own deprecation text for glob names its author; third-party, already public on npm
+ip docs/adr/0014-*.md 3.54.0.0  # a package version in a table, not an address
+ip mobile/src/sync/__tests__/pairing.test.ts 8.8.8.8  # the example "public address" the phone must refuse to pair with
+ip mobile/src/sync/__tests__/transportHardening.test.ts 8.8.8.8  # a public address the phone must refuse to talk to
+ip server/tests/devices/test_pairing_listener.py 8.8.8.8  # a public address the Home Base must refuse to listen on
+ip server/tests/test_network.py 8.8.8.8  # a public address the LAN-only check must reject
+statement scripts/testing/sample-bank-statement.csv  # made-up DEMO rows for trying the importer
+ip mobile/src/sync/__tests__/pairing.test.ts 172.32.0.1  # just outside the private 172.16-31 range: the phone must refuse it
+ip mobile/src/sync/__tests__/pairing.test.ts 11.0.0.1  # a public address next to the private 10.x range, must be refused
+ip server/tests/test_network.py 172.32.0.1  # just outside the private range, must be rejected
+ip server/tests/test_network.py 2001:4860:4860::8888  # a public IPv6 address the LAN-only check must reject
