@@ -58,7 +58,7 @@ a passphrase (PBKDF2, 256,000 rounds). Fine for a one-person budget.
    from the marker on the next start. Every older `budget.db.bak-*` is flagged as unencrypted, with deletion offered.
 6. **Install wheels only** for `sqlcipher3` (`--only-binary`), so a missing wheel never builds from source against
    the system's OpenSSL. Add SQLCipher's BSD and OpenSSL's Apache-2.0 notices to
-   `packaging/windows/THIRD-PARTY-NOTICES.txt` (the wheel carries only the wrapper's licence).
+   `packaging/windows/extra-notices.json` (the wheel carries only the wrapper's licence).
 7. **OpenSSL age:** at start, refuse a `PRAGMA cipher_provider_version` below a minimum we set.
 
 ## Consequences

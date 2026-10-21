@@ -45,4 +45,4 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 recipe bundles only the files the server serves (`index.html`, top-level CSS, `js/**/*.js`), the migrations and the
 tax data. Both recipes leave out modules PyInstaller finds but the apps never run (each `excludes` list says why);
 the desktop app keeps Pillow's font support (the icon's letter) and `ssl` (pywebview imports it on start). `scripts/release/install_desktop.py` copies the result (with `packaging/windows/install.ps1`) to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
-menu and desktop shortcuts. `THIRD-PARTY-NOTICES.txt` (the bundled packages' licenses) goes in the output too.
+menu and desktop shortcuts. `LICENSE` and `THIRD-PARTY-NOTICES.txt` (generated from the bundled packages' own licence files, see [release.md](../release.md)) go in the output too.

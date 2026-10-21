@@ -1,0 +1,28 @@
+[
+  {
+    "name": "OpenSSL (inside the cryptography package)",
+    "licence": "Apache-2.0",
+    "source": "cryptography's wheel statically links OpenSSL (version in the wheel's sboms/sbom.json); OpenSSL 3 and later are Apache-2.0. Text: cryptography's LICENSE.APACHE. https://github.com/openssl/openssl",
+    "note": "Copyright (c) The OpenSSL Project Authors. The Apache-2.0 text below is the one cryptography ships.",
+    "text_from": {"package": "cryptography", "file": "LICENSE.APACHE"}
+  },
+  {
+    "name": "libsodium (inside the PyNaCl package)",
+    "licence": "ISC",
+    "source": "PyNaCl's wheel carries libsodium; its licence is the file LICENSE.libsodium.txt in the wheel. https://github.com/jedisct1/libsodium",
+    "note": "Copyright (c) Frank Denis.",
+    "text_from": {"package": "pynacl", "file": "licenses/LICENSE.libsodium.txt"}
+  },
+  {
+    "name": "Image libraries inside Pillow (libjpeg-turbo, zlib, libpng, FreeType, HarfBuzz, Brotli, LittleCMS, libavif and others)",
+    "licence": "various permissive licences",
+    "source": "Pillow's wheel; its LICENSE file, printed in full under Pillow above, ends with the licence of every library built into it. https://github.com/python-pillow/Pillow",
+    "note": "The Windows app uses Pillow only to draw its icon (the app leaves out WebP, AVIF and colour profile support), but the full list is kept because it is what the wheel ships. FreeType is used under its FreeType Licence, which asks that the credit in Pillow's LICENSE is kept."
+  },
+  {
+    "name": "Libraries inside the Python runtime",
+    "licence": "various permissive licences",
+    "source": "https://docs.python.org/3/license.html#licenses-and-acknowledgements-for-incorporated-software",
+    "note": "The Python runtime (python314.dll and its extension modules) bundles OpenSSL (Apache-2.0), SQLite (public domain), zlib, libffi (MIT), expat (MIT), mpdecimal (BSD-2-Clause), bzip2, liblzma and zstd (BSD). Their licences are listed at the address above, with the text of each. The app folders also hold Microsoft's Visual C++ runtime and Universal C Runtime (VCRUNTIME140.dll, ucrtbase.dll), which Microsoft allows programs to redistribute."
+  }
+]
