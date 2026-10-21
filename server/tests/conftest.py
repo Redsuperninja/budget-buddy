@@ -8,6 +8,14 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    # Registered here, not in pyproject.toml, so the dependency lock files stay current.
+    config.addinivalue_line(
+        "markers",
+        "real_migrations: run every database migration instead of copying the session template",
+    )
+
+
 @pytest.fixture(autouse=True)
 def memory_key_store(monkeypatch: pytest.MonkeyPatch) -> None:
     """Keep encryption keys in memory: tests must never touch the real OS password vault."""

@@ -45,7 +45,6 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["real_migrations: run every database migration instead of copying the session template"]
 
 [tool.ruff]
 line-length = 100
