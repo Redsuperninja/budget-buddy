@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AccountsList } from '@/components/AccountsList';
@@ -82,7 +83,7 @@ function Headline({ snapshot }: { snapshot: Snapshot }) {
   );
 }
 
-function TransactionRow({
+const TransactionRow = memo(function TransactionRow({
   tx,
   categoryName,
   currency,
@@ -124,11 +125,11 @@ function TransactionRow({
       </Text>
     </View>
   );
-}
+});
 
 function RecentActivity({ snapshot }: { snapshot: Snapshot }) {
   const t = useTheme();
-  const recent = recentTransactions(snapshot, 10);
+  const recent = useMemo(() => recentTransactions(snapshot, 10), [snapshot]);
   return (
     <View style={{ gap: t.spacing.sm }}>
       <SectionTitle>Recent activity</SectionTitle>
@@ -162,6 +163,7 @@ function RecentActivity({ snapshot }: { snapshot: Snapshot }) {
 export default function HomeScreen() {
   const t = useTheme();
   const { snapshot } = useSnapshot();
+  const groups = useMemo(() => orderedGroups(snapshot), [snapshot]);
   return (
     <Screen title="Your budget" intro={formatMonth(snapshot.period.month)}>
       <SnapshotNotices />
@@ -173,7 +175,7 @@ export default function HomeScreen() {
         <Text style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted }}>
           Tap a group to see its categories.
         </Text>
-        {orderedGroups(snapshot).map((g) => (
+        {groups.map((g) => (
           <GroupCard key={g.group} group={g} currency={snapshot.currency} />
         ))}
       </View>

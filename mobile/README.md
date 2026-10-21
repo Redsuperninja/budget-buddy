@@ -46,6 +46,7 @@ More in [docs/dev/testing.md](../docs/dev/testing.md).
 | --- | --- |
 | `src/app/` | Screens. Each file is a route; `_layout.tsx` sets up the bottom tabs: `index.tsx` (Home), `add-receipt.tsx`, `taxes.tsx`, `settings.tsx`; `pair.tsx` is the pair screen. |
 | `src/components/` | Shared building blocks: `Screen.tsx` (screen wrapper, big button, card), `SyncPanel.tsx` with **Sync now**, `AccountsList.tsx` (Your accounts), `BudgetBreakdown.tsx` (Needs / Wants / Savings cards and bars), `SnapshotNotices.tsx` (sample banner, earlier-month notice, last synced). |
+| `metro.config.js`, `metro/unusedNativeUi.js` | Keeps the parts of expo-router this app never uses (`Stack.Toolbar` and native tabs on Android, which need `@expo/ui` and `expo-symbols`) out of the bundle: about 970 KB of Material Symbols font and `react-native-worklets`. Only expo-router's own imports of those two are pointed at a do-nothing stand-in. If you ever use `Stack.Toolbar` or `expo-router/unstable-native-tabs`, delete this rule. `src/__tests__/layout.test.tsx` renders the tabs with the stand-in. |
 | `src/theme.ts` | Colors (light + dark), spacing, font sizes. |
 | `src/lib/money.ts` | `formatCents()`: turns integer cents into text like `$1,234.56`. |
 | `src/lib/budget.ts` | Budget math for Home: percent used, left to spend, savings rate, on track / close / over. |

@@ -80,6 +80,12 @@ jest.mock('expo-file-system', () => {
   return { __files: files, Directory, File, Paths: { document: new Directory('doc'), cache: new Directory('cache') } };
 });
 
+// The phone has requestIdleCallback (used after the first screen is drawn); the test runtime doesn't.
+Object.assign(globalThis, {
+  requestIdleCallback: (cb: () => void) => setTimeout(cb, 0),
+  cancelIdleCallback: (id: ReturnType<typeof setTimeout>) => clearTimeout(id),
+});
+
 // Deterministic-enough random bytes for tests (real app uses the phone's secure random).
 jest.mock('expo-crypto', () => ({
   getRandomBytes: (n: number) => require('crypto').randomBytes(n),

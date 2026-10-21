@@ -126,13 +126,17 @@ export function markRejected(messages: Map<string, string>): Promise<void> {
 
 /**
  * Delete photo files no receipt lists (left by an app that stopped between saving a photo and the list,
- * or the other way round). Run once at app start, after any change under way. Never throws.
+ * or the other way round). Run once at app start, after any change under way. Never throws. Returns how
+ * many receipts are waiting (0 if the list can't be read; then no photo is deleted), so start-up reads and
+ * decrypts the list once.
  */
-export function cleanUpPhotos(): Promise<void> {
+export function cleanUpPhotos(): Promise<number> {
   return inTurn(async () => {
-    const listed = new Set((await loadList()).map((r) => r.client_id));
+    const list = await loadList();
+    const listed = new Set(list.map((r) => r.client_id));
     for (const id of listPhotoIds()) if (!listed.has(id)) deletePhoto(id);
-  }).catch(() => undefined);
+    return list.filter((r) => r.state === 'waiting').length;
+  }).catch(() => 0);
 }
 
 /** How many receipts are waiting to go home (for the reminder's text). Never throws. */
