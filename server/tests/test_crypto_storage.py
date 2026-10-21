@@ -19,6 +19,8 @@ from app.crypto import (
 )
 from app.crypto.keys import generate_master_key
 
+pytestmark = pytest.mark.real_migrations
+
 # --- field cipher -----------------------------------------------------------------------------
 
 

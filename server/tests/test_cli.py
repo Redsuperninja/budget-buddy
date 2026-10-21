@@ -9,6 +9,8 @@ from app.crypto import keystore as keystore_module
 from app.crypto.keys import fingerprint_path, load_or_create_master_key, read_fingerprint
 from app.main import create_app
 
+pytestmark = pytest.mark.real_migrations
+
 
 @pytest.fixture
 def store(monkeypatch):

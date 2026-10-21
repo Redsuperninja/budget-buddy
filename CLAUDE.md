@@ -25,7 +25,7 @@ with exactly: "Built with Claude Code; designed and reviewed by @Redsuperninja."
 ## Commands
 - Server: `cd server && .venv/Scripts/pytest` (setup: `docs/dev/testing.md`; after editing a `pyproject.toml`, run
   `scripts/dev/lock_dependencies.py`).
-  The full suite takes ~14 min: run tests for what you touched, and the full suite once, in the background, before committing.
+  The full suite takes ~5 min: run tests for what you touched, and the full suite once, in the background, before committing.
 - Dashboard: `cd dashboard && node --test`
 - Mobile: `cd mobile && npx tsc --noEmit && npm test`
 - Desktop: `cd desktop && .venv/Scripts/pytest`

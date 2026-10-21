@@ -73,6 +73,14 @@ A new logic module in the dashboard joins the `--test-coverage-include` list in 
   `BUDGET_BUDDY_KEY_STORE=memory` **plus** `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1`. The key is lost when the
   process stops, so this works only on a new, empty data folder and is refused on any folder that already has
   data or a `key-fingerprint` file. `tests/conftest.py` and `server-ci.yml` set both. Never use it for real data.
+- **Migrated database made once.** Running all the migrations costs ~0.4 s (the suite went from ~10 to ~5 min) and nearly every test makes an
+  app, so `tests/fast_database.py` migrates one database per test session and the autouse fixture
+  `fast_migrations` (`tests/conftest.py`) gives each new app a copy (SQLite backup API). It only fills a
+  brand-new, empty database file; the fresh database holds no encrypted values, so it needs no key, and the key
+  store, its guard and the fingerprint run the real code. A test file or test that exercises migrations, first
+  run, key creation, the memory-store guard, fingerprints or backups opts out with
+  `pytestmark = pytest.mark.real_migrations` (or `@pytest.mark.real_migrations`) and runs every migration.
+  Windows can't rename an open database: dispose engines before moving files.
 - **Fake dashboard.** An autouse fixture, `fake_dashboard` in `tests/conftest.py`, writes a tiny dashboard into
   the temp folder and points `BUDGET_BUDDY_DASHBOARD_DIR` at it, so server tests don't read the real `dashboard/`
   (except the size check above).

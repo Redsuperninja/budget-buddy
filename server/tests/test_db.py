@@ -33,6 +33,8 @@ from app.models import (
     TransactionSource,
 )
 
+pytestmark = pytest.mark.real_migrations
+
 EXPECTED_TABLES = {
     "accounts",
     "budget_plan",

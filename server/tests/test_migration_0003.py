@@ -29,6 +29,8 @@ from app.models import (
     Transaction,
 )
 
+pytestmark = pytest.mark.real_migrations
+
 
 def _migrate(engine, target, direction="upgrade"):
     config = alembic_config()

@@ -32,6 +32,8 @@ from app.crypto import (
 )
 from app.crypto.keys import fingerprint, generate_master_key, read_fingerprint
 
+pytestmark = pytest.mark.real_migrations
+
 # --- key derivation ---------------------------------------------------------------------------
 
 

@@ -2,9 +2,18 @@ from pathlib import Path
 
 import pytest
 from fake_phone import NOW, Phone, lan_client, pair_phone
+from fast_database import build_template, migrations_from_template
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    # Registered here, not in pyproject.toml, so the dependency lock files stay current.
+    config.addinivalue_line(
+        "markers",
+        "real_migrations: run every database migration instead of copying the session template",
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -53,6 +62,22 @@ def fake_dashboard(tmp_path_factory, monkeypatch: pytest.MonkeyPatch) -> Path:
     (folder / "js" / "screens" / "home.js").write_text("export const home = 1;", encoding="utf-8")
     monkeypatch.setenv("BUDGET_BUDDY_DASHBOARD_DIR", str(folder))
     return folder
+
+
+@pytest.fixture(scope="session")
+def migrated_template(tmp_path_factory) -> Path:
+    """The fully migrated empty database, built once (see tests/fast_database.py)."""
+    return build_template(tmp_path_factory.mktemp("migrated-template"))
+
+
+@pytest.fixture(autouse=True)
+def fast_migrations(request, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Apps start from a copy of the migrated database, unless the test is marked
+    ``real_migrations`` (migrations, first run, backups: those run every migration)."""
+    if request.node.get_closest_marker("real_migrations"):
+        return
+    template = request.getfixturevalue("migrated_template")
+    monkeypatch.setattr("app.main.run_migrations", migrations_from_template(template))
 
 
 @pytest.fixture
