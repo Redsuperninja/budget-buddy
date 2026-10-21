@@ -151,7 +151,7 @@ done.
   - Today's list has no licence texts and misses bottle, proxy-tools, Mako, MarkupSafe, jaraco.*, more-itertools,
     click, h11, anyio, idna, cffi, pycparser, pywin32-ctypes, python-dotenv, opentelemetry-api, and the
     bundled OpenSSL (cryptography), libsodium (PyNaCl) and Pillow's image libraries
-- [ ] 25c. Privacy statement (`docs/PRIVACY.md`: what's kept, where, encrypted, the one opt-in outside call, no
+- [x] 25c. Privacy statement (`docs/PRIVACY.md`: what's kept, where, encrypted, the one opt-in outside call, no
   analytics, how to delete everything) and `SECURITY.md` (report a problem privately) — *docs-writer* + *security-reviewer*
 - [ ] 25d. Front door for strangers: README (needs, US federal taxes only and no state taxes, privacy and security
   links), short `CONTRIBUTING.md`, bug and idea issue templates with `config.yml`, PR template with reviewers and
