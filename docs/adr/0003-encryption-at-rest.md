@@ -29,7 +29,9 @@ How this was built, where it differs from or adds to the decision above:
   DB fields, files and backups. The vault entry name is a hash of the folder path.
 - **Key fingerprint file.** A one-way fingerprint of the master key (`key-fingerprint`) sits in
   the data folder, so the app refuses to start rather than quietly making a new key when the
-  vault entry is missing or doesn't match.
+  vault entry is missing or doesn't match. The file is only the quick check (#26): without it,
+  any row in `budget.db` still blocks making a new key, and a key or recovery phrase must
+  decrypt one stored value before it is accepted (`app/crypto/key_check.py`).
 - **Recovery phrase** = the master key as 64 Crockford Base32 characters (16 groups of 4) with
   a version byte and a 56-bit checksum. No word list to bundle. Shown and restored with
   `python -m app recovery-phrase show|restore`.

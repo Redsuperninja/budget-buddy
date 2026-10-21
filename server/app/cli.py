@@ -16,6 +16,7 @@ from app.crypto import (
     master_key_to_phrase,
     phrase_to_master_key,
 )
+from app.crypto.key_check import key_opens_database
 from app.crypto.keys import (
     WRONG_KEY_MESSAGE,
     fingerprint,
@@ -86,7 +87,10 @@ def show_phrase(
             "(python -m app) and then run this again."
         )
         return 1
-    if matches_fingerprint(settings.data_dir, key) is False:
+    matches = matches_fingerprint(settings.data_dir, key)
+    if matches is False or (
+        matches is None and key_opens_database(settings.data_dir, key) is False
+    ):
         # Don't let anyone write down a phrase that won't open their data.
         output(WRONG_KEY_MESSAGE.format(data_dir=settings.data_dir))
         return 1
@@ -121,7 +125,10 @@ def restore_phrase(
         return 1
 
     saved = read_fingerprint(data_dir)
-    if saved is not None and saved != fingerprint(key):
+    # Without the fingerprint file, test the phrase on the database itself (issue #26).
+    if (saved is not None and saved != fingerprint(key)) or (
+        saved is None and key_opens_database(data_dir, key) is False
+    ):
         output(
             "That recovery phrase is valid, but it isn't the one for this data folder, so "
             "nothing was changed. If your data is in a different folder, set "

@@ -130,9 +130,9 @@ def load_master_key(store: KeyStore, data_dir: Path) -> bytes | None:
 def load_or_create_master_key(store: KeyStore, data_dir: Path) -> bytes:
     """Load the folder's master key, creating one on first run.
 
-    Refuses to create a new key if the folder already has encrypted data (a fingerprint), and
-    refuses to use a key whose fingerprint doesn't match. Either way the message says how to
-    restore from the recovery phrase.
+    Refuses to create a new key if the folder already has data (a fingerprint or any database
+    row), and refuses to use a key that doesn't match the fingerprint or, without one, can't
+    decrypt the database. Either way the message says how to restore from the recovery phrase.
 
     Runs under a lock file, so two copies of Budget Buddy starting at once on first run can't
     each make a different key (one would overwrite the other and its data would be lost).
@@ -144,10 +144,15 @@ def load_or_create_master_key(store: KeyStore, data_dir: Path) -> bytes:
 
 
 def _load_or_create_locked(store: KeyStore, data_dir: Path) -> bytes:
+    # Imported here: both import this module.
+    from app.crypto import database_has_rows
+    from app.crypto.key_check import key_opens_database
+
     key = load_master_key(store, data_dir)
     saved = read_fingerprint(data_dir)
     if key is None:
-        if saved is not None:
+        # The fingerprint file can go missing; existing data is the real sign of a lost key.
+        if saved is not None or database_has_rows(data_dir):
             raise MissingKeyError(MISSING_KEY_MESSAGE.format(data_dir=data_dir))
         key = generate_master_key()
         store.set(key_name_for(data_dir), key)
@@ -160,6 +165,8 @@ def _load_or_create_locked(store: KeyStore, data_dir: Path) -> bytes:
         )
         return key
     if saved is None:
+        if key_opens_database(data_dir, key) is False:
+            raise WrongKeyError(WRONG_KEY_MESSAGE.format(data_dir=data_dir))
         write_fingerprint(data_dir, key)
     elif not hmac.compare_digest(saved, fingerprint(key)):
         raise WrongKeyError(WRONG_KEY_MESSAGE.format(data_dir=data_dir))

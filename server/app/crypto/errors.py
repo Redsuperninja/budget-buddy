@@ -17,6 +17,10 @@ class WrongKeyError(EncryptionError):
     """The key on this computer doesn't match the data in the folder."""
 
 
+class KeyCheckError(EncryptionError):
+    """The database couldn't be read to check that a key belongs to it."""
+
+
 class DecryptionError(EncryptionError):
     """Data couldn't be decrypted: wrong key, wrong place, or it was changed or damaged."""
 
