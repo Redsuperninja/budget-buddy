@@ -206,3 +206,32 @@ def test_a_new_computer_that_ticked_setup_can_still_restore_another_keys_backup(
     )
     assert response.status_code == 200, response.text
     new.app.state.engine.dispose()
+
+
+@pytest.mark.real_migrations
+def test_a_restore_never_brings_another_computers_backup_date(
+    store, data_dir, tmp_path, monkeypatch, make_client
+):
+    from app.crypto import key_name_for, master_key_to_phrase
+
+    client = make_client()
+    client.app.state.engine.dispose()
+    out = tmp_path / "out"
+    out.mkdir()
+    assert cli.main(["backup", "make", "--to", str(out)], output=lambda _m: None) == 0
+    client = make_client()
+    backup = client.get("/api/local/backup/file").content  # holds the date stamped just before
+    phrase = master_key_to_phrase(store.get(key_name_for(data_dir)))
+    client.app.state.engine.dispose()
+
+    monkeypatch.setattr(keystore_module, "_MEMORY_STORE", MemoryKeyStore())
+    monkeypatch.setenv("BUDGET_BUDDY_DATA_DIR", str(tmp_path / "other"))
+    new = make_client()  # no setup_progress row here
+    response = new.post(
+        "/api/local/backup/restore", content=backup, headers={"X-Recovery-Phrase": phrase}
+    )
+    assert response.status_code == 200, response.text
+    new.app.state.engine.dispose()
+    restarted = make_client()
+    assert restarted.get(SETUP).json() == EMPTY
+    restarted.app.state.engine.dispose()
