@@ -51,5 +51,7 @@
    .venv\Scripts\alembic revision --autogenerate -m "describe the change"
    ```
 
-3. Number it after the last one and add a test. Never edit a migration that has shipped: migrations are history.
+3. Number it after the last one, set `HEAD_REVISION` in `server/app/db.py` to its number (start-up uses it to skip
+   loading Alembic when the database is already up to date; a test checks it against Alembic), and add a test.
+   Script files must be named `<revision>_<description>.py`. Never edit a migration that has shipped: migrations are history.
 4. Update [data-model.md](data-model.md) and this table.
