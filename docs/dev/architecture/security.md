@@ -9,7 +9,8 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   Service or KWallet, via `keyring`), never in files. `keystore.is_os_vault` accepts only those backends (a
   chainer only when everything it chains is one), so a file-based keyring such as `keyrings.alt` is refused
   (#27). The data folder holds only a `key-fingerprint` to check the key
-  belongs to it. Only derived keys (fields, files, backup) are kept in memory.
+  belongs to it; if that file is gone, `crypto/key_check.py` test-decrypts a stored value instead, and existing
+  rows block a new key (#26). Only derived keys (fields, files, backup) are kept in memory.
 - Sensitive columns (account numbers, notes, device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.
 - Receipt photos are encrypted (AES-256-GCM, `EncryptedFileStore`) before they're written, under random file
