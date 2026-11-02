@@ -69,12 +69,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # A restore started in the dashboard, finished before anything is opened (ADR-0012).
     restored_from = pending.finish(settings.data_dir, get_key_store(settings.key_store))
     keys = load_keys(settings)
+    database_key = keys.db_file if settings.database_encryption else None
     engine = create_db_engine(
-        settings.data_dir,
-        field_cipher=FieldCipher(keys.db_fields),
-        database_key=keys.db_file if settings.database_encryption else None,
+        settings.data_dir, field_cipher=FieldCipher(keys.db_fields), database_key=database_key
     )
-    run_migrations(engine)
+    run_migrations(engine, database_key)
     receipt_store = EncryptedFileStore.for_receipts(settings.data_dir, keys.files)
     # Leftovers from a crash; see services/devices/receipts.
     remove_orphan_files(engine, receipt_store)

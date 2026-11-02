@@ -31,7 +31,7 @@ def build_template(folder: Path) -> Path:
 def migrations_from_template(template: Path):
     """A stand-in for ``app.main.run_migrations`` that starts empty databases from the template."""
 
-    def run(engine: Engine) -> None:
+    def run(engine: Engine, database_key: bytes | None = None) -> None:
         with engine.connect() as connection:
             empty = connection.exec_driver_sql("SELECT count(*) FROM sqlite_master").scalar() == 0
             if empty:
@@ -41,6 +41,6 @@ def migrations_from_template(template: Path):
                 finally:
                     source.close()
                 return  # at head already; reading the migration files again would cost 0.1 s
-        run_migrations(engine)
+        run_migrations(engine, database_key)
 
     return run

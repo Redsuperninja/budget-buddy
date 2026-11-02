@@ -184,7 +184,7 @@ done.
     that keys the raw connection first and never puts the key in SQL text, URLs, logs or errors (M1), a wrong key
     raised as `WrongKeyError`, the `cipher_provider_version` minimum (L6), all behind
     `BUDGET_BUDDY_DATABASE_ENCRYPTION` (off)
-  - [ ] 25l-2. Every plain-`sqlite3` opener takes the key (M2): `db.open_read_only`, `db.database_revision`,
+  - [x] 25l-2. Every plain-`sqlite3` opener takes the key (M2): `db.open_read_only`, `db.database_revision`,
     `crypto.database_has_rows`, `crypto/key_check.py`, `db.copy_database` (encrypted target), each with an
     encrypted-database test, and none may swallow `DatabaseError` into "has data", "no revision" or "corrupt"; opening
     with the database key becomes the key check, reported as wrong key, busy or corrupt separately (M3)

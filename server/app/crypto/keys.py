@@ -130,7 +130,9 @@ def load_master_key(store: KeyStore, data_dir: Path) -> bytes | None:
     return key
 
 
-def load_or_create_master_key(store: KeyStore, data_dir: Path) -> bytes:
+def load_or_create_master_key(
+    store: KeyStore, data_dir: Path, database_encryption: bool = False
+) -> bytes:
     """Load the folder's master key, creating one on first run.
 
     Refuses to create a new key if the folder already has data (a fingerprint or any database
@@ -143,10 +145,12 @@ def load_or_create_master_key(store: KeyStore, data_dir: Path) -> bytes:
     from app.db import _exclusive_lock  # imported here: app.db imports this package
 
     with _exclusive_lock(data_dir / KEY_LOCK_FILENAME):
-        return _load_or_create_locked(store, data_dir)
+        return _load_or_create_locked(store, data_dir, database_encryption)
 
 
-def _load_or_create_locked(store: KeyStore, data_dir: Path) -> bytes:
+def _load_or_create_locked(
+    store: KeyStore, data_dir: Path, database_encryption: bool = False
+) -> bytes:
     # Imported here: both import this module.
     from app.crypto import database_has_rows
     from app.crypto.key_check import key_opens_database
@@ -168,7 +172,7 @@ def _load_or_create_locked(store: KeyStore, data_dir: Path) -> bytes:
         )
         return key
     if saved is None:
-        if key_opens_database(data_dir, key) is False:
+        if key_opens_database(data_dir, key, database_encryption) is False:
             raise WrongKeyError(WRONG_KEY_MESSAGE.format(data_dir=data_dir))
         write_fingerprint(data_dir, key)
     elif not hmac.compare_digest(saved, fingerprint(key)):

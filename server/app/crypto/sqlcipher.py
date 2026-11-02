@@ -12,7 +12,15 @@ from typing import Any
 
 from sqlalchemy import Engine, event
 
-from app.crypto.errors import CipherProviderError, UnencryptedDatabaseError, WrongKeyError
+from app.crypto.errors import (
+    BUSY_MESSAGE,
+    CORRUPT_MESSAGE,
+    CipherProviderError,
+    DatabaseBusyError,
+    DatabaseCorruptError,
+    UnencryptedDatabaseError,
+    WrongKeyError,
+)
 
 DATABASE_KEY_BYTES = 32
 # SQLCipher links its own OpenSSL, so a fix reaches us only with a new ``sqlcipher3`` wheel.
@@ -123,3 +131,46 @@ def key_on_connect(engine: Engine, key: bytes) -> None:
         return connection
 
     event.listen(engine, "do_connect", connect)
+
+
+def classify_error(exc: BaseException) -> BaseException:
+    """The plain-English error for a failed read of a keyed database: busy or corrupt.
+
+    Returns ``exc`` itself when it is neither, so nothing is ever reported as "no data" or
+    "wrong key" by mistake. (A wrong key is found when the file is opened, in ``open_with_key``.)
+    """
+    text = str(exc).lower()
+    if "locked" in text or "busy" in text:
+        return DatabaseBusyError(BUSY_MESSAGE)
+    if "malformed" in text or _NOT_A_DATABASE in text or "corrupt" in text:
+        return DatabaseCorruptError(CORRUPT_MESSAGE)
+    return exc
+
+
+def connect(path: Path, key: bytes, *, read_only: bool = False):
+    """A raw SQLCipher connection to ``path`` that has proved ``key`` opens it.
+
+    For the code that opens the file without an engine (key checks, revision checks, copies).
+    A plain SQLite file raises ``UnencryptedDatabaseError``, a wrong key ``WrongKeyError``, and a
+    locked or damaged file ``DatabaseBusyError`` or ``DatabaseCorruptError``. The key is set the
+    same way as for the engine and never appears in a message.
+    """
+    refuse_plain_file(path)
+    module = dbapi_module()
+    if read_only:
+        target, uri = f"{Path(path).resolve().as_uri()}?mode=ro", True
+    else:
+        target, uri = str(path), False
+    try:
+        connection = module.connect(target, uri=uri)
+    except module.DatabaseError as exc:
+        raise classify_error(exc) from None
+    try:
+        open_with_key(connection, key)
+    except module.DatabaseError as exc:
+        connection.close()
+        raise classify_error(exc) from None
+    except BaseException:
+        connection.close()
+        raise
+    return connection

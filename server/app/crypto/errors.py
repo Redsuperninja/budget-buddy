@@ -39,3 +39,21 @@ class CipherProviderError(EncryptionError):
 
 class UnencryptedDatabaseError(EncryptionError):
     """The database file is plain SQLite but encryption is on (until it is moved, 25l-3)."""
+
+
+BUSY_MESSAGE = (
+    "Budget Buddy's database is in use by another copy of Budget Buddy. Close it and try again. "
+    "Your data is safe and unchanged."
+)
+CORRUPT_MESSAGE = (
+    "Budget Buddy's database looks damaged, so it stopped before changing anything. Restore "
+    "your latest backup, or ask for help."
+)
+
+
+class DatabaseBusyError(EncryptionError):
+    """The encrypted database is locked by another process (not a wrong key)."""
+
+
+class DatabaseCorruptError(EncryptionError):
+    """The encrypted database opened with the right key but is damaged (not a wrong key)."""

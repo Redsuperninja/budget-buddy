@@ -5,6 +5,7 @@ import sqlite3
 from pathlib import Path
 
 from app.config import Settings
+from app.crypto import sqlcipher
 from app.crypto.errors import (
     DecryptionError,
     EncryptionError,
@@ -42,17 +43,25 @@ MEMORY_STORE_IN_USE_MESSAGE = (
 )
 
 
-def database_has_rows(data_dir: Path, ignore: frozenset[str] = frozenset()) -> bool:
+def database_has_rows(
+    data_dir: Path,
+    ignore: frozenset[str] = frozenset(),
+    database_key: bytes | None = None,
+) -> bool:
     """True if ``budget.db`` exists and any of its tables (other than Alembic's and ``ignore``)
-    holds a row. A database that can't be read counts as having rows, so nothing treats it as
-    empty."""
+    holds a row.
+
+    A plain database that can't be read counts as having rows, so nothing treats it as empty.
+    With ``database_key`` (an encrypted database) nothing is guessed: a wrong key, a busy file
+    or a damaged one raises its own error instead of answering "has rows" (ADR-0014).
+    """
     from app.db import open_read_only  # imported here: app.db imports this package
 
     path = data_dir / "budget.db"
     if not path.is_file() or path.stat().st_size == 0:
         return False
     try:
-        with open_read_only(path) as connection:
+        with open_read_only(path, database_key) as connection:
             tables = [
                 name
                 for (name,) in connection.execute(
@@ -63,8 +72,12 @@ def database_has_rows(data_dir: Path, ignore: frozenset[str] = frozenset()) -> b
             ]
             quoted = ('"' + name.replace('"', '""') + '"' for name in tables)
             return any(connection.execute(f"SELECT 1 FROM {q} LIMIT 1").fetchone() for q in quoted)
-    except sqlite3.DatabaseError:
-        return True
+    except Exception as exc:
+        if database_key is not None:
+            raise sqlcipher.classify_error(exc) from None
+        if isinstance(exc, sqlite3.DatabaseError):
+            return True
+        raise
 
 
 def _check_memory_store_folder(store: KeyStore, data_dir: Path) -> None:
@@ -92,7 +105,8 @@ def load_keys(settings: Settings) -> DerivedKeys:
             "Encryption key is kept in memory only (BUDGET_BUDDY_KEY_STORE=memory). This is for "
             "automated tests: data saved now can't be read after Budget Buddy restarts."
         )
-    return DerivedKeys.from_master(load_or_create_master_key(store, settings.data_dir))
+    master_key = load_or_create_master_key(store, settings.data_dir, settings.database_encryption)
+    return DerivedKeys.from_master(master_key)
 
 
 __all__ = [

@@ -134,21 +134,42 @@ def known_revisions() -> set[str]:
 
 
 @contextmanager
-def open_read_only(db_path: Path) -> Iterator[sqlite3.Connection]:
-    """A plain read-only connection to a database file (no engine, never creates it)."""
-    connection = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+def open_read_only(
+    db_path: Path, database_key: bytes | None = None
+) -> Iterator[sqlite3.Connection]:
+    """A read-only connection to a database file (no engine, never creates it).
+
+    With ``database_key`` the file is opened with SQLCipher and the key is proved first (ADR-0014):
+    a wrong key, a plain file, a busy file or a damaged one each raise their own error, so a
+    caller can't mistake any of them for "no data". Without it the file is plain SQLite.
+    """
+    if database_key is None:
+        connection = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+    else:
+        connection = sqlcipher.connect(db_path, database_key, read_only=True)
     try:
         yield connection
     finally:
         connection.close()
 
 
-def database_revision(db_path: Path) -> str | None:
-    """The migration a database file is at, or None if it has none."""
-    with open_read_only(db_path) as connection:
+def is_missing_table(exc: Exception) -> bool:
+    """True for "no such table" from either SQLite or SQLCipher; every other error is real."""
+    return str(exc).startswith("no such table")
+
+
+def database_revision(db_path: Path, database_key: bytes | None = None) -> str | None:
+    """The migration a database file is at, or None if it has no ``alembic_version`` table.
+
+    Any other failure (wrong key, busy, damaged, not a database) is raised, not turned into
+    "no revision".
+    """
+    with open_read_only(db_path, database_key) as connection:
         try:
             row = connection.execute("SELECT version_num FROM alembic_version").fetchone()
-        except sqlite3.DatabaseError:
+        except Exception as exc:
+            if not is_missing_table(exc):
+                raise (sqlcipher.classify_error(exc) if database_key else exc) from None
             return None
     return row[0] if row else None
 
@@ -183,10 +204,17 @@ def _exclusive_lock(lock_path: Path) -> Iterator[None]:
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
-def copy_database(engine: Engine, destination: Path) -> None:
-    """Consistent copy of the database (including anything still in the WAL file)."""
+def copy_database(engine: Engine, destination: Path, database_key: bytes | None = None) -> None:
+    """Consistent copy of the database (including anything still in the WAL file).
+
+    With ``database_key`` (the key the engine was made with) the copy is encrypted with the same
+    key, so no plain copy of encrypted data is ever written.
+    """
     make_private_file(destination)
-    target = sqlite3.connect(destination)
+    if database_key is None:
+        target = sqlite3.connect(destination)
+    else:
+        target = sqlcipher.connect(destination, database_key)
     try:
         with engine.connect() as connection:
             connection.connection.driver_connection.backup(target)
@@ -219,7 +247,7 @@ def _current_revision(connection) -> str | None:
     return row[0] if row else None
 
 
-def run_migrations(engine: Engine) -> None:
+def run_migrations(engine: Engine, database_key: bytes | None = None) -> None:
     """Bring the database up to date (``alembic upgrade head``). Safe to run on every start.
 
     Runs under a lock file so two copies starting at once can't both migrate. Before changing a
@@ -239,18 +267,22 @@ def run_migrations(engine: Engine) -> None:
         if current is not None and current not in known_revisions():
             raise DatabaseUpgradeError(NEWER_DATABASE_MESSAGE)
         if current != HEAD_REVISION:
-            _upgrade_with_backup(engine, db_path, alembic_config(), current)
+            _upgrade_with_backup(engine, db_path, alembic_config(), current, database_key)
         if marker.exists():
             _scrub_plaintext(engine, db_path)
 
 
 def _upgrade_with_backup(
-    engine: Engine, db_path: Path, config: "Config", current: str | None
+    engine: Engine,
+    db_path: Path,
+    config: "Config",
+    current: str | None,
+    database_key: bytes | None = None,
 ) -> None:
     backup_path = None
     if current is not None:
         backup_path = db_path.with_name(f"{db_path.name}.bak-{current}")
-        copy_database(engine, backup_path)
+        copy_database(engine, backup_path, database_key)
         if current.isdigit() and int(current) < int(NAMES_ENCRYPTED_REVISION):
             # Before the migration commits, so a crash right after it still leaves the marker.
             write_private_bytes(scrub_marker_path(db_path), b"")
