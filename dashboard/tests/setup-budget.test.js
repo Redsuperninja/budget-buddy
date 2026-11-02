@@ -37,5 +37,6 @@ test("a blank box leaves planned income alone; bad or non-positive input is an e
 test("the summary is plain English", () => {
   assert.equal(savedSummary({ removed: 0, kept: 0, income: null }), "Nothing to change.");
   assert.equal(savedSummary({ removed: 2, kept: 1, income: 100 }),
-    "Removed 2 categories. Kept 1 because it already has transactions. Saved your monthly take-home pay.");
+    "Removed 2 categories. Kept 1 because it's already used by transactions, receipts or transfers. "
+    + "Saved your monthly take-home pay.");
 });

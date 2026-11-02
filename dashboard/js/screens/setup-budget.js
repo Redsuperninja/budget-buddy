@@ -60,10 +60,11 @@ export async function starterBudgetCard(title) {
 
   return card(title, h("p", { class: "muted" }, "Optional"),
     h("p", {}, "Budget Buddy starts you off with these categories. Untick the ones you won't use, and ",
-      "Save starter budget removes them. A category that already has transactions is always kept. ",
+      "Save starter budget removes them. ",
+      "A category already used by transactions, receipts or transfers is always kept. ",
       "You can add a category back later in Budget."),
     groups,
-    h("label", {}, "Your take-home pay each month, after tax (optional)", pay),
+    h("label", {}, "Your take-home pay each month, after tax and deductions: what lands in your bank (optional)", pay),
     h("p", { class: "muted" }, "Used to turn percentage budgets into dollar amounts. Leave it blank to skip."),
     h("div", { class: "toolbar" }, save), result);
 }

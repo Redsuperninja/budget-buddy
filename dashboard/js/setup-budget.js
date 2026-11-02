@@ -31,7 +31,8 @@ export const toRemove = (categories, unticked) =>
 export function savedSummary({ removed, kept, income }) {
   const parts = [];
   if (removed) parts.push(`Removed ${removed} ${removed === 1 ? "category" : "categories"}.`);
-  if (kept) parts.push(`Kept ${kept} because ${kept === 1 ? "it already has" : "they already have"} transactions.`);
+  const used = kept === 1 ? "it's" : "they're";
+  if (kept) parts.push(`Kept ${kept} because ${used} already used by transactions, receipts or transfers.`);
   if (income !== null) parts.push("Saved your monthly take-home pay.");
   return parts.length ? parts.join(" ") : "Nothing to change.";
 }
