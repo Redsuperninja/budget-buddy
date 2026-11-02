@@ -14,7 +14,15 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Account, AccountKind, Paycheck, Transaction, TransactionKind
+from app.models import (
+    Account,
+    AccountKind,
+    Paycheck,
+    PaycheckLine,
+    PaycheckLineKind,
+    Transaction,
+    TransactionKind,
+)
 from app.money import cents_to_display
 from app.schemas.tax.paychecks import (
     PaycheckCreate,
@@ -25,6 +33,7 @@ from app.schemas.tax.paychecks import (
 )
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transactions import get_transaction
+from app.services.tax.paycheck_lines import LINE_RULES, net_effect_cents
 from app.tax_data import UnsupportedTaxYearError, load_tax_year
 
 TAX_FIELDS = ("federal_tax_cents", "state_tax_cents", "social_security_cents", "medicare_cents")
@@ -35,9 +44,11 @@ AMOUNT_FIELDS = ("gross_cents", *TAKEN_OUT_FIELDS, "net_cents")
 DEPOSIT_ACCOUNT_KINDS = (AccountKind.CHECKING, AccountKind.SAVINGS)
 
 
-def check_adds_up(values: dict) -> None:
-    """Raise a 422 naming the difference if gross - taxes - deductions != net."""
-    expected = values["gross_cents"] - sum(values[f] for f in TAKEN_OUT_FIELDS)
+def check_adds_up(values: dict, lines: list[tuple[PaycheckLineKind, int]] = ()) -> None:
+    """Raise a 422 naming the difference if gross - taxes - deductions (+ extra lines) != net."""
+    expected = (
+        values["gross_cents"] - sum(values[f] for f in TAKEN_OUT_FIELDS) + net_effect_cents(lines)
+    )
     difference = values["net_cents"] - expected
     if difference:
         more_or_less = "more" if difference > 0 else "less"
@@ -50,6 +61,53 @@ def check_adds_up(values: dict) -> None:
             expected_net_cents=expected,
             difference_cents=difference,
         )
+
+
+# Year-to-date figure -> the amount on this paycheck it must be at least as big as.
+YTD_PAIRS = {
+    "ytd_gross_cents": "gross_cents",
+    "ytd_federal_tax_cents": "federal_tax_cents",
+    "ytd_social_security_cents": "social_security_cents",
+    "ytd_medicare_cents": "medicare_cents",
+}
+
+
+def check_stub_details(values: dict) -> None:
+    """The pay period must end by the pay date, and year-to-date can't be below this check."""
+    start, end, paid = values.get("period_start"), values.get("period_end"), values["pay_date"]
+    if start and end and start > end:
+        raise ApiError(
+            422, "bad_pay_period", "The pay period can't start after it ends."
+        )
+    if (end or start) and (end or start) > paid:
+        raise ApiError(
+            422, "bad_pay_period", "The pay period can't end after the date you were paid."
+        )
+    for ytd, amount in YTD_PAIRS.items():
+        if values.get(ytd) is not None and values[ytd] < values[amount]:
+            raise ApiError(
+                422,
+                "ytd_below_paycheck",
+                "A year-to-date figure can't be less than this paycheck's own amount. "
+                "Check the year-to-date column on your pay stub.",
+                field=ytd,
+            )
+
+
+def _line_pairs(lines) -> list[tuple[PaycheckLineKind, int]]:
+    return [(PaycheckLineKind(line["kind"]), line["amount_cents"]) for line in lines]
+
+
+def _make_lines(pairs: list[tuple[PaycheckLineKind, int]]) -> list[PaycheckLine]:
+    return [
+        PaycheckLine(
+            kind=kind,
+            amount_cents=amount,
+            pre_tax_federal=LINE_RULES[kind].pre_tax_federal,
+            pre_tax_fica=LINE_RULES[kind].pre_tax_fica,
+        )
+        for kind, amount in pairs
+    ]
 
 
 def get_paycheck(session: Session, paycheck_id: int) -> Paycheck:
@@ -78,10 +136,12 @@ def create_paycheck(session: Session, data: PaycheckCreate) -> Paycheck:
     given (from a pay deposit waiting on the Paychecks page). All or nothing."""
     values = data.model_dump()
     deposit_id = values.pop("deposit_transaction_id")
-    check_adds_up(values)
+    pairs = _line_pairs(values.pop("lines"))
+    check_adds_up(values, pairs)
+    check_stub_details(values)
     if values["account_id"] is not None:
         get_account(session, values["account_id"])
-    paycheck = Paycheck(**values)
+    paycheck = Paycheck(**values, lines=_make_lines(pairs))
     session.add(paycheck)
     if deposit_id is not None:
         session.flush()
@@ -93,8 +153,20 @@ def create_paycheck(session: Session, data: PaycheckCreate) -> Paycheck:
 def update_paycheck(session: Session, paycheck_id: int, data: PaycheckUpdate) -> Paycheck:
     paycheck = get_paycheck(session, paycheck_id)
     changes = data.changes()
+    new_lines = changes.pop("lines", None)
+    pairs = (
+        _line_pairs(new_lines)
+        if new_lines is not None
+        else [(line.kind, line.amount_cents) for line in paycheck.lines]
+    )
     final = {f: changes.get(f, getattr(paycheck, f)) for f in AMOUNT_FIELDS}
-    check_adds_up(final)
+    check_adds_up(final, pairs)
+    check_stub_details(
+        {
+            f: changes.get(f, getattr(paycheck, f))
+            for f in ("pay_date", "period_start", "period_end", *YTD_PAIRS, *YTD_PAIRS.values())
+        }
+    )
     if paycheck.deposit_transaction_id is not None:
         deposit = session.get(Transaction, paycheck.deposit_transaction_id)
         account_id = changes.get("account_id", paycheck.account_id)
@@ -109,6 +181,8 @@ def update_paycheck(session: Session, paycheck_id: int, data: PaycheckUpdate) ->
         get_account(session, changes["account_id"])
     for field, value in changes.items():
         setattr(paycheck, field, value)
+    if new_lines is not None:
+        paycheck.lines = _make_lines(pairs)
     session.commit()
     return paycheck
 
