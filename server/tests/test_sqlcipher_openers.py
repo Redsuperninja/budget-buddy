@@ -208,3 +208,61 @@ def test_a_failing_open_never_shows_the_key(tmp_path):
         database_revision(database_path(tmp_path), OTHER_KEY)
     assert OTHER_KEY.hex() not in str(err.value)
     assert OTHER_KEY.hex() not in repr(err.value.__cause__)
+
+
+@pytest.fixture
+def vault(monkeypatch):
+    from app.crypto import keystore as keystore_module
+    from app.crypto.keystore import MemoryKeyStore
+
+    fresh = MemoryKeyStore()
+    monkeypatch.setattr(keystore_module, "_MEMORY_STORE", fresh)
+    return fresh
+
+
+def _encrypted_settings(folder):
+    from app.config import Settings
+
+    return Settings(data_dir=folder, key_store="memory", database_encryption=True)
+
+
+def _restore(folder, master):
+    from app import cli
+    from app.crypto.recovery import master_key_to_phrase
+
+    output: list[str] = []
+    code = cli.restore_phrase(
+        _encrypted_settings(folder),
+        output.append,
+        ask=lambda _: "",
+        ask_secret=lambda _: master_key_to_phrase(master),
+    )
+    return code, "\n".join(output)
+
+
+def test_restore_phrase_checks_an_encrypted_database_with_the_database_key(tmp_path, vault):
+    from app.crypto.keys import key_name_for
+
+    make_database(tmp_path).dispose()
+    code, out = _restore(tmp_path, OTHER_MASTER)
+    assert code == 1
+    assert "isn't the one for this data folder" in out
+    assert vault.get(key_name_for(tmp_path)) is None
+    code, out = _restore(tmp_path, MASTER)
+    assert code == 0, out
+    assert vault.get(key_name_for(tmp_path)) == MASTER
+
+
+def test_show_phrase_refuses_a_key_that_cannot_open_the_encrypted_database(tmp_path, vault):
+    from app import cli
+    from app.crypto.keys import key_name_for
+    from app.crypto.recovery import master_key_to_phrase
+
+    make_database(tmp_path).dispose()
+    vault.set(key_name_for(tmp_path), OTHER_MASTER)
+    output: list[str] = []
+    code = cli.show_phrase(
+        _encrypted_settings(tmp_path), output.append, ask=lambda _: "SHOW", force=True
+    )
+    assert code == 1
+    assert master_key_to_phrase(OTHER_MASTER) not in "\n".join(output)

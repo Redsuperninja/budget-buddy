@@ -89,7 +89,8 @@ def show_phrase(
         return 1
     matches = matches_fingerprint(settings.data_dir, key)
     if matches is False or (
-        matches is None and key_opens_database(settings.data_dir, key) is False
+        matches is None
+        and key_opens_database(settings.data_dir, key, settings.database_encryption) is False
     ):
         # Don't let anyone write down a phrase that won't open their data.
         output(WRONG_KEY_MESSAGE.format(data_dir=settings.data_dir))
@@ -127,7 +128,7 @@ def restore_phrase(
     saved = read_fingerprint(data_dir)
     # Without the fingerprint file, test the phrase on the database itself (issue #26).
     if (saved is not None and saved != fingerprint(key)) or (
-        saved is None and key_opens_database(data_dir, key) is False
+        saved is None and key_opens_database(data_dir, key, settings.database_encryption) is False
     ):
         output(
             "That recovery phrase is valid, but it isn't the one for this data folder, so "
