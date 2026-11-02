@@ -30,6 +30,31 @@ Amounts are whole cents, all ≥ 0.
 difference (e.g. "net pay is $1.00 more than gross pay minus all taxes and deductions"). Worked example:
 2,500.00 gross − 250.00 − 100.00 − 155.00 − 36.25 − 150.00 − 50.00 − 80.00 − 50.00 − 10.00 = 1,618.75 net.
 
+## Extra lines, pay period and year-to-date (issue #13)
+
+`lines` is a list of `{kind, amount_cents}` for stub items that have **no column of their own**
+(`services/tax/paycheck_lines.py`, table `paycheck_lines`). Up to 20 per paycheck. On `PATCH`, sending `lines`
+replaces them all (so send `net_cents` too if take-home changes); leaving it out keeps them.
+
+| Kind | Take-home | Before income tax | Before FICA |
+| --- | --- | --- | --- |
+| `local_tax`, `state_disability`, `paid_family_leave` | subtracts | no | no |
+| `health_fsa` (Section 125), `dependent_care_fsa` (Section 129) | subtracts | yes | yes |
+| `reimbursement` | adds | no | no |
+| `employer_hsa`, `imputed_income` | none (shown only) | no | no |
+
+The adds-up rule becomes `gross - (the columns above) - subtracting lines + reimbursements = net`; with no
+lines it is exactly the rule above. The two "before tax" flags follow from the kind (the caller can't set
+them) and are stored for the tax summary to use later: **the tax summary, year totals and retirement/HSA limit
+checks do not read lines yet.** Deductions that already have a column (traditional and Roth retirement, HSA,
+health insurance, other after-tax) stay in that column; don't also enter them as a line. Qualified tips and
+overtime are not modelled yet.
+
+Optional `period_start` / `period_end` (must be in order and not after `pay_date`; `pay_date` still decides the
+tax year) and `ytd_gross_cents`, `ytd_federal_tax_cents`, `ytd_social_security_cents`, `ytd_medicare_cents`
+(each at least this paycheck's own amount, else 422 `ytd_below_paycheck`). Year-to-date figures are never part of
+the adds-up rule. Bad periods answer 422 `bad_pay_period`.
+
 ## Income is counted once
 
 **Income in budget totals comes only from bank transactions. A paycheck is never counted as income by itself.**

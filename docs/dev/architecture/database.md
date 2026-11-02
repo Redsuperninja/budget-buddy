@@ -47,6 +47,7 @@
 | 0028 | Encrypts `accounts.institution`, `paychecks.employer`, `donations.organization`, `receipts.merchant` (like 0003; needs the key) |
 | 0029 | `setup_progress`: one row of first-start setup dates (`finished_at`, `phrase_saved_at`, `last_backup_at`; ADR-0015) |
 | 0030 | `tax_preferences`: one row with the `filing_status` that narrows the tax summary (null = show all; not encrypted; roadmap 25j) |
+| 0031 | `paycheck_lines` (extra pay-stub lines: kind, amount, pre-tax flags; deleted with the paycheck) and optional `period_start`/`period_end` and `ytd_*` columns on `paychecks` (issue #13) |
 
 ## Adding a migration
 

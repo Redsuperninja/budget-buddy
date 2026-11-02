@@ -7,7 +7,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.crypto.fields import EncryptedString
 from app.models.base import Base, TimestampMixin, str_enum
-from app.models.enums import AccountKind, CategoryGroup, TransactionKind, TransactionSource
+from app.models.enums import (
+    AccountKind,
+    CategoryGroup,
+    PaycheckLineKind,
+    TransactionKind,
+    TransactionSource,
+)
 from app.transfer_types import classify
 
 
@@ -177,6 +183,14 @@ class Paycheck(TimestampMixin, Base):
             "other_deductions_cents",
             "net_cents",
         )
+    ) + tuple(
+        CheckConstraint(f"{column} IS NULL OR {column} >= 0", name=f"{column}_not_negative")
+        for column in (
+            "ytd_gross_cents",
+            "ytd_federal_tax_cents",
+            "ytd_social_security_cents",
+            "ytd_medicare_cents",
+        )
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -206,6 +220,45 @@ class Paycheck(TimestampMixin, Base):
     other_deductions_cents: Mapped[int] = mapped_column(default=0, server_default="0")
     net_cents: Mapped[int]
     notes: Mapped[str | None] = mapped_column(EncryptedString("paychecks.notes"))
+    # The pay period the stub covers (the tax year still comes from ``pay_date``).
+    period_start: Mapped[dt.date | None] = mapped_column(Date)
+    period_end: Mapped[dt.date | None] = mapped_column(Date)
+    # "Year to date" figures printed on the stub. Only for checking against what was entered;
+    # never part of the adds-up rule.
+    ytd_gross_cents: Mapped[int | None]
+    ytd_federal_tax_cents: Mapped[int | None]
+    ytd_social_security_cents: Mapped[int | None]
+    ytd_medicare_cents: Mapped[int | None]
+    lines: Mapped[list["PaycheckLine"]] = relationship(
+        back_populates="paycheck",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="PaycheckLine.id",
+        lazy="selectin",
+    )
+
+
+class PaycheckLine(TimestampMixin, Base):
+    """One extra line on a pay stub (local tax, SDI, FSA, reimbursement...).
+
+    ``pre_tax_federal`` and ``pre_tax_fica`` say whether the amount was taken out before income
+    tax / Social Security and Medicare tax. They follow from ``kind`` (see
+    ``services/tax/paycheck_lines.py``) and are stored for the tax summary to use later.
+    """
+
+    __tablename__ = "paycheck_lines"
+    __table_args__ = (CheckConstraint("amount_cents >= 0", name="amount_cents_not_negative"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    paycheck_id: Mapped[int] = mapped_column(
+        ForeignKey("paychecks.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[PaycheckLineKind] = mapped_column(str_enum(PaycheckLineKind, "paycheck_line_kind"))
+    amount_cents: Mapped[int]
+    pre_tax_federal: Mapped[bool] = mapped_column(default=False, server_default="0")
+    pre_tax_fica: Mapped[bool] = mapped_column(default=False, server_default="0")
+
+    paycheck: Mapped[Paycheck] = relationship(back_populates="lines")
 
 
 class Receipt(TimestampMixin, Base):

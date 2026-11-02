@@ -69,3 +69,16 @@ class CategorySource(StrEnum):
 
     RULE = "rule"  # an auto-sort rule
     YOU = "you"  # picked by hand
+
+
+class PaycheckLineKind(StrEnum):
+    """Extra pay-stub lines that have no column of their own (issue #13)."""
+
+    LOCAL_TAX = "local_tax"
+    STATE_DISABILITY = "state_disability"
+    PAID_FAMILY_LEAVE = "paid_family_leave"
+    HEALTH_FSA = "health_fsa"
+    DEPENDENT_CARE_FSA = "dependent_care_fsa"
+    EMPLOYER_HSA = "employer_hsa"
+    IMPUTED_INCOME = "imputed_income"
+    REIMBURSEMENT = "reimbursement"

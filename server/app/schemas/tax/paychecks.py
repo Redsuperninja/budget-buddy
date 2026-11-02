@@ -3,11 +3,13 @@ from typing import Annotated
 
 from pydantic import Field, StringConstraints
 
+from app.models import PaycheckLineKind
 from app.money import MAX_ABS_CENTS
 from app.schemas.common import Id, Notes, Schema, UpdateSchema
 
 # Every paycheck amount is whole cents and never negative.
 PayCents = Annotated[int, Field(strict=True, ge=0, lt=MAX_ABS_CENTS)]
+MAX_LINES = 20
 Employer = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 
 
@@ -34,7 +36,33 @@ class PaycheckFields(Schema):
     net_cents: PayCents
 
 
-class PaycheckCreate(PaycheckFields):
+class PaycheckLineIn(Schema):
+    """One extra stub line. Whether it was taken out before tax follows from its kind."""
+
+    kind: PaycheckLineKind
+    amount_cents: PayCents
+
+
+class PaycheckLineOut(PaycheckLineIn):
+    id: int
+    pre_tax_federal: bool
+    pre_tax_fica: bool
+
+
+class PaycheckExtras(Schema):
+    """Optional stub details that never change the adds-up rule."""
+
+    period_start: dt.date | None = None
+    period_end: dt.date | None = None
+    # "Year to date" figures printed on the stub (must be at least this check's own amount).
+    ytd_gross_cents: PayCents | None = None
+    ytd_federal_tax_cents: PayCents | None = None
+    ytd_social_security_cents: PayCents | None = None
+    ytd_medicare_cents: PayCents | None = None
+
+
+class PaycheckCreate(PaycheckFields, PaycheckExtras):
+    lines: list[PaycheckLineIn] = Field(default_factory=list, max_length=MAX_LINES)
     pay_date: dt.date
     employer: Employer
     account_id: Id | None = None
@@ -43,10 +71,11 @@ class PaycheckCreate(PaycheckFields):
     deposit_transaction_id: Id | None = None
 
 
-class PaycheckUpdate(UpdateSchema):
+class PaycheckUpdate(UpdateSchema, PaycheckExtras):
     not_null = (
         "pay_date",
         "employer",
+        "lines",
         *(name for name in PaycheckFields.model_fields),
     )
 
@@ -65,14 +94,17 @@ class PaycheckUpdate(UpdateSchema):
     roth_retirement_cents: PayCents | None = None
     other_deductions_cents: PayCents | None = None
     net_cents: PayCents | None = None
+    # Sending lines replaces all of them; leave it out to keep the current ones.
+    lines: list[PaycheckLineIn] | None = Field(None, max_length=MAX_LINES)
 
 
 class DepositLink(Schema):
     transaction_id: Id = Field(description="The deposit of this paycheck's net pay.")
 
 
-class PaycheckOut(PaycheckFields):
+class PaycheckOut(PaycheckFields, PaycheckExtras):
     id: int
+    lines: list[PaycheckLineOut]
     pay_date: dt.date
     employer: str
     account_id: int | None
