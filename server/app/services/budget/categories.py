@@ -1,11 +1,11 @@
-"""Budget categories: list, add, rename, and set the monthly budget (an amount or a percentage)."""
+"""Budget categories: list, add, rename, remove (when unused), and set the monthly budget (an amount or a percentage)."""
 
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.errors import ApiError, not_found
-from app.models import Category, CategoryGroup
+from app.models import Category, CategoryGroup, Receipt, Transaction
 from app.schemas.budget.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
 
 
@@ -65,3 +65,26 @@ def update_category(session: Session, category_id: int, data: CategoryUpdate) ->
         setattr(category, field, value)
     _commit(session)
     return category
+
+
+def delete_category(session: Session, category_id: int) -> None:
+    """Delete a category nothing uses. One with transactions or receipts is kept: deleting it would
+    leave them uncategorized. So is one a linked transfer goes back to when unlinked
+    (pre_transfer_category_id has no foreign key). Its auto-sort rules go with it (cascade)."""
+    category = get_category(session, category_id)
+    used = session.scalar(
+        select(
+            exists().where(Transaction.category_id == category_id)
+            | exists().where(Transaction.pre_transfer_category_id == category_id)
+            | exists().where(Receipt.category_id == category_id)
+        )
+    )
+    if used:
+        raise ApiError(
+            409,
+            "category_in_use",
+            "This category has transactions or receipts, so it can't be deleted. "
+            "Move them to another category first.",
+        )
+    session.delete(category)
+    session.commit()

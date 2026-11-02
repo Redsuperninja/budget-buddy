@@ -1,4 +1,4 @@
-// The Setup page (roadmap 25f, ADR-0015): shown instead of Home on the first start on this computer. Every step is
+// The Setup page (roadmap 25f and 25h, ADR-0015): shown instead of Home on the first start on this computer. Every step is
 // optional. "Finish later" goes Home (Get started carries what's left); "Done" remembers on the Home Base that
 // setup is finished. The steps reuse the Backups restore, the recovery phrase card and the account/import pages.
 
@@ -8,6 +8,7 @@ import { onThisComputer, phoneStepLinks } from "../features.js";
 import { SKIPPED_KEY, stepsDone } from "../setup-steps.js";
 import { card, note } from "../widgets.js";
 import { phraseCard } from "./devices/recovery-phrase.js";
+import { starterBudgetCard } from "./setup-budget.js";
 
 const mark = (done) => h("p", { class: done ? "ok" : "muted" }, done ? "Done" : "Optional");
 const links = (pairs) => pairs.map(([href, text], i) => [i ? " or " : "", h("a", { href }, text)]);
@@ -35,8 +36,9 @@ export async function render(root) {
     fill(root, h("p", {}, "Setup is done on the Budget Buddy computer itself."), h("a", { href: "#home" }, "Go to Home"));
     return;
   }
-  const [progress, accounts, transactions] = await Promise.all([
+  const [progress, accounts, transactions, starter] = await Promise.all([
     getSetup(), listAccounts(), listTransactions(new URLSearchParams({ limit: "1" })),
+    starterBudgetCard("4. Your starter budget"),
   ]);
   const done = stepsDone(progress, { accounts: accounts.length, transactions: transactions.total });
   const result = h("div", {});
@@ -72,7 +74,8 @@ export async function render(root) {
       h("p", {}, links([["#accounts", "Add a checking, savings or card account"],
         ["#import", "import a file from your bank"]])),
       h("p", { class: "muted" }, "Add an account first; then a bank file can be imported into it.")),
-    phone && card("4. Your phone", mark(false),
+    starter,
+    phone && card("5. Your phone", mark(false),
       h("p", {}, "To use Budget Buddy on your phone, ", links(phone), ".")),
     h("div", { class: "toolbar" }, finish, later),
     result);

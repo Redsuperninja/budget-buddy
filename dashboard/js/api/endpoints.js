@@ -20,6 +20,8 @@ export const updateAccount = (id, json) => api("PATCH", `${LOCAL}/accounts/${id}
 export const listCategories = () => api("GET", `${LOCAL}/categories`);
 export const createCategory = (json) => api("POST", `${LOCAL}/categories`, { json });
 export const updateCategory = (id, json) => api("PATCH", `${LOCAL}/categories/${id}`, { json });
+// Only a category nothing uses (409 otherwise).
+export const deleteCategory = (id) => api("DELETE", `${LOCAL}/categories/${id}`);
 // through: a day in that month ("YYYY-MM-DD") to count only up to it, or nothing for the whole month.
 export const monthlySummary = (month, through) =>
   api("GET", `${LOCAL}/summary/monthly?month=${month}${through ? `&through=${through}` : ""}`);
