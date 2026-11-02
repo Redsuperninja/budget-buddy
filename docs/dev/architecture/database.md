@@ -5,6 +5,10 @@
   starts**, under a lock file so only one copy migrates at a time. Nobody runs migrations by hand.
   A database already at a revision this copy doesn't know (a newer Budget Buddy opened it) is left alone, with a
   plain message to update this copy (for example an older built desktop app).
+- `create_db_engine(..., database_key=...)` opens the file with SQLCipher instead of plain SQLite
+  ([security.md](security.md), ADR-0014). Off by default (`BUDGET_BUDDY_DATABASE_ENCRYPTION`); while it is
+  rolled out in steps, code that opens the file with plain `sqlite3` (`open_read_only`, `copy_database`,
+  backup and restore, key checks) still only works on a plain file.
 - Before upgrading an existing database, a copy `budget.db.bak-<revision>` is saved next to it. Users may delete
   old copies once Budget Buddy works (the ones from before migration 0003 are not encrypted;
   [security.md](security.md)).

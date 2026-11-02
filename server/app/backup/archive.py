@@ -18,6 +18,7 @@ from sqlalchemy import Engine
 
 from app.crypto._fs import ensure_private_dir
 from app.crypto.files import DEFAULT_MAX_BYTES, OVERHEAD, RECEIPTS_DIRNAME
+from app.crypto.sqlcipher import is_encrypted_engine
 from app.crypto.stream import (
     DAMAGED,
     DecryptingReader,
@@ -59,6 +60,14 @@ def _receipt_files(data_dir: Path) -> list[Path]:
     return sorted(p for p in folder.iterdir() if _RECEIPT.fullmatch(f"{RECEIPTS_DIRNAME}/{p.name}"))
 
 
+# Until roadmap 25l-4 makes backups from an encrypted database, refuse instead of failing oddly.
+ENCRYPTED_DATABASE_BACKUP_MESSAGE = (
+    "Backups don't work yet while database encryption is turned on "
+    "(BUDGET_BUDDY_DATABASE_ENCRYPTION). Turn that setting off to make a backup. "
+    "Your data is safe and unchanged."
+)
+
+
 def write_backup(
     target: BinaryIO,
     data_dir: Path,
@@ -68,6 +77,8 @@ def write_backup(
     version: str,
 ) -> dict:
     """Write an encrypted backup of ``data_dir`` to ``target``. Returns its manifest."""
+    if is_encrypted_engine(engine):
+        raise BackupError(ENCRYPTED_DATABASE_BACKUP_MESSAGE)
     copy = data_dir / f".backup-{uuid.uuid4().hex}.db"
     try:
         make_private_file(copy)  # empty and owner-only before anything is written into it

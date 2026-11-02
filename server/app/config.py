@@ -23,7 +23,8 @@ class Settings(BaseSettings):
 
     Override with env vars: ``BUDGET_BUDDY_DATA_DIR``, ``BUDGET_BUDDY_HOST``, ``BUDGET_BUDDY_PORT``,
     ``BUDGET_BUDDY_DEV_MODE``, ``BUDGET_BUDDY_KEY_STORE``, ``BUDGET_BUDDY_INSECURE_TEST_KEYSTORE``,
-    ``BUDGET_BUDDY_DASHBOARD_DIR``, ``BUDGET_BUDDY_STOP_WITH_PID``.
+    ``BUDGET_BUDDY_DASHBOARD_DIR``, ``BUDGET_BUDDY_STOP_WITH_PID``,
+    ``BUDGET_BUDDY_DATABASE_ENCRYPTION``.
     """
 
     model_config = SettingsConfigDict(env_prefix="BUDGET_BUDDY_")
@@ -49,6 +50,10 @@ class Settings(BaseSettings):
     # Second, separate switch that must also be on before "memory" is allowed, so the memory key
     # store can't be turned on by accident in normal use (security review H1, PR #22).
     insecure_test_keystore: bool = False
+    # Encrypt the whole database file with SQLCipher (ADR-0014, roadmap 25l). Off, and not for real
+    # data yet: until the migration step (25l-3) it only works on a new, empty data folder, and
+    # backup, restore and key checks still read the file as plain SQLite.
+    database_encryption: bool = False
 
     @field_validator("lan_ip", mode="before")
     @classmethod

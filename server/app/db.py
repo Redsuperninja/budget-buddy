@@ -14,6 +14,7 @@ from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.crypto import sqlcipher
 from app.crypto._fs import write_private_bytes
 from app.crypto.fields import FieldCipher, set_field_cipher
 
@@ -87,18 +88,29 @@ def _set_sqlite_pragmas(dbapi_connection, _connection_record) -> None:
     cursor.close()
 
 
-def create_db_engine(data_dir: Path, field_cipher: FieldCipher | None = None) -> Engine:
+def create_db_engine(
+    data_dir: Path,
+    field_cipher: FieldCipher | None = None,
+    database_key: bytes | None = None,
+) -> Engine:
     """Engine for ``<data_dir>/budget.db`` with foreign keys enforced and WAL journaling.
 
     ``field_cipher`` encrypts and decrypts the sensitive columns (ADR-0003). Without it, reading
-    or writing those columns raises an error.
+    or writing those columns raises an error. ``database_key`` (the ``db-file`` subkey) opens the
+    file with SQLCipher so the whole file is encrypted (ADR-0014); without it the file is plain
+    SQLite. The key is set only on the raw connection, never in the URL or in SQL run through
+    SQLAlchemy.
     """
     path = database_path(data_dir)
     _create_private_file(path)
     # URL.create, not an f-string: a "?" or "%" in the folder name must not be parsed as URL syntax.
     url = URL.create("sqlite", database=str(path))
     # hide_parameters: never put amounts or descriptions into error messages or logs.
-    engine = create_engine(url, hide_parameters=True)
+    if database_key is None:
+        engine = create_engine(url, hide_parameters=True)
+    else:
+        engine = create_engine(url, hide_parameters=True, module=sqlcipher.dbapi_module())
+        sqlcipher.key_on_connect(engine, database_key)  # before any other SQL
     event.listen(engine, "connect", _set_sqlite_pragmas)
     if field_cipher is not None:
         set_field_cipher(engine, field_cipher)

@@ -51,7 +51,7 @@ def locked_packages(lock: Path) -> dict[str, str]:
             r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s;\\]+)\s*(?:;\s*([^\\]+?))?\s*\\?$", line
         )
         if not match:
-            if line.strip() and not line.lstrip().startswith(("#", "--hash=")):
+            if line.strip() and not line.lstrip().startswith(("#", "--hash=", "--only-binary")):
                 raise ValueError(f"{lock.name}: can't read the line {line!r}")
             continue
         if not match[3] or Marker(match[3]).evaluate(WINDOWS):

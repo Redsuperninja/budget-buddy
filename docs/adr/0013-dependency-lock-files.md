@@ -32,6 +32,9 @@ so one lock file has to be right on all three.
 - Installing is `pip install --require-hashes -r requirements-build.txt`, then
   `pip install --require-hashes --no-build-isolation -r <file>`, then `pip install --no-deps --no-build-isolation -e .`,
   so nothing is downloaded or run unchecked. `scripts/_common.py:install_part` and CI do exactly this.
+- A package that must never be built from source (`sqlcipher3`, ADR-0014) is listed in `BINARY_ONLY` in the script,
+  which asks uv to resolve it from wheels only and writes `--only-binary <name>` at the top of each lock file; pip
+  obeys that line, so every installer fails instead of compiling it against the system's OpenSSL.
 - Dependabot updates the lock files only (`versioning-strategy: lockfile-only`), at least a week after a release.
 
 ## Consequences

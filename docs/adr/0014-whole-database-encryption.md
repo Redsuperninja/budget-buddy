@@ -32,7 +32,7 @@ a passphrase (PBKDF2, 256,000 rounds). Fine for a one-person budget.
 **Adopt SQLCipher through `sqlcipher3` (coleifer), and keep field-level encryption.** Not the `-wheels` fork
 (older SQLCipher, one-person "Beta"); not sqlite3mc (no DB-API, so we'd own a SQLAlchemy dialect). sqlite3mc's
 `sqlcipher` mode opens our files, so it stays the way out if `sqlcipher3` stops shipping wheels.
-- **Key:** a new HKDF-SHA256 subkey of the master key (info `budget-buddy/v1/database`), used as a raw key (no PBKDF2).
+- **Key:** a new HKDF-SHA256 subkey of the master key (purpose `db-file`, info `budget-buddy/v1/db-file`), used as a raw key (no PBKDF2).
 - **Backups (ADR-0012):** `VACUUM INTO` stays encrypted with the same key, so the staging folder no longer holds a
   plain database; restore opens the staged copy with the key derived from that backup's master key.
 

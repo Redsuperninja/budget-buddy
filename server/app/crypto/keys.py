@@ -1,8 +1,8 @@
 """The master key and the purpose-specific keys derived from it (ADR-0003).
 
 One random 32-byte master key per data folder lives in the key store. It is never used directly:
-HKDF-SHA256 turns it into separate subkeys for database fields, receipt files, and backups, so a
-mistake in one area can't weaken another.
+HKDF-SHA256 turns it into separate subkeys for database fields, the database file, receipt files,
+and backups, so a mistake in one area can't weaken another.
 
 A short *fingerprint* of the master key (not the key itself) is saved in the data folder as
 ``key-fingerprint``. It lets the Home Base notice, before touching any data, when the key on this
@@ -33,6 +33,7 @@ KEY_LOCK_FILENAME = "key.lock"
 PURPOSE_DB_FIELDS = "db-fields"
 PURPOSE_FILES = "files"
 PURPOSE_BACKUP = "backup"
+PURPOSE_DB_FILE = "db-file"  # the whole-database key (SQLCipher, ADR-0014); not "db-fields"
 _PURPOSE_FINGERPRINT = "fingerprint"
 _INFO_PREFIX = b"budget-buddy/v1/"
 
@@ -65,6 +66,7 @@ class DerivedKeys:
     db_fields: bytes = field(repr=False)
     files: bytes = field(repr=False)
     backup: bytes = field(repr=False)
+    db_file: bytes = field(repr=False)
 
     @classmethod
     def from_master(cls, master_key: bytes) -> "DerivedKeys":
@@ -72,6 +74,7 @@ class DerivedKeys:
             db_fields=derive_key(master_key, PURPOSE_DB_FIELDS),
             files=derive_key(master_key, PURPOSE_FILES),
             backup=derive_key(master_key, PURPOSE_BACKUP),
+            db_file=derive_key(master_key, PURPOSE_DB_FILE),
         )
 
 

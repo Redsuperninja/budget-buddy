@@ -20,6 +20,7 @@ dependencies = [
     "keyring>=25",
     "pynacl>=1.5,<2",
     "segno>=1.6,<2",  # draws the pairing QR code
+    "sqlcipher3>=0.6.4,<0.7",  # encrypts the whole database (ADR-0014); wheels only, see lock_dependencies.py
 ]
 
 [project.optional-dependencies]
