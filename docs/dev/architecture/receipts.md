@@ -25,11 +25,16 @@ sandbox CSP), a link to open it, a download link when the browser can't decode i
 
 ## What happens to a photo
 
-- **Metadata is stripped first.** For JPEG and PNG only the picture (and its colour profile) is kept; location,
-  device and the rest are thrown away before saving. Side effect: the rotation tag goes too, so a sideways
-  photo may show sideways.
-- **HEIC is saved as is**, so it may still hold a location. It's encrypted and never leaves the computer.
-  Fixing this is [issue #34](https://github.com/Redsuperninja/budget-buddy/issues/34).
+- **Metadata is stripped first.** JPEG and PNG keep only the picture (and its colour profile); location, device
+  and the rest are thrown away before saving. A JPEG that was rotated by its Exif tag keeps a rebuilt Exif block
+  holding **only the rotation** (values 2-8), so a sideways photo still shows upright.
+- **HEIC** is walked box by box (`meta` > `iinf` + `iloc`): the bytes of every Exif and XMP item are overwritten
+  with zeros and the item type is renamed to `free`. The file keeps its size, so no offset needs fixing. HEIC
+  rotation lives in the `irot` property, which is untouched. A HEIC whose item index can't be read is rejected
+  (`image_invalid`), because it could not be cleaned. So are HEICs with boxes other than `ftyp`, `meta`, `mdat` and
+  `free` (video or `uuid` boxes can hold a location), a second `meta`/`iinf`/`iloc`/`idat`, duplicate item ids, "whole item"
+  (zero-length) extents and more than 64 extents. `xml `/`bxml` boxes are zeroed too. JPEG keeps only a 14-byte
+  JFIF header (its embedded thumbnail is dropped) and drops the `JPGn` (F0-FD) segments. Closed [issue #34](https://github.com/Redsuperninja/budget-buddy/issues/34).
 - **Encrypted** (AES-256-GCM) before it's written to `receipts/` in the data folder, under a random file name
   with no shop, date or amount in it. The plain photo is never written to disk.
 - **Deleting a receipt deletes its file.** If the Home Base stops part-way (say a power cut), the worst case is an
