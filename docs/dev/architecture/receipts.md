@@ -31,7 +31,10 @@ sandbox CSP), a link to open it, a download link when the browser can't decode i
 - **HEIC** is walked box by box (`meta` > `iinf` + `iloc`): the bytes of every Exif and XMP item are overwritten
   with zeros and the item type is renamed to `free`. The file keeps its size, so no offset needs fixing. HEIC
   rotation lives in the `irot` property, which is untouched. A HEIC whose item index can't be read is rejected
-  (`image_invalid`), because it could not be cleaned. Closed [issue #34](https://github.com/Redsuperninja/budget-buddy/issues/34).
+  (`image_invalid`), because it could not be cleaned. So are HEICs with boxes other than `ftyp`, `meta`, `mdat` and
+  `free` (video or `uuid` boxes can hold a location), a second `meta`/`iinf`/`iloc`/`idat`, duplicate item ids, "whole item"
+  (zero-length) extents and more than 64 extents. `xml `/`bxml` boxes are zeroed too. JPEG keeps only a 14-byte
+  JFIF header (its embedded thumbnail is dropped) and drops the `JPGn` (F0-FD) segments. Closed [issue #34](https://github.com/Redsuperninja/budget-buddy/issues/34).
 - **Encrypted** (AES-256-GCM) before it's written to `receipts/` in the data folder, under a random file name
   with no shop, date or amount in it. The plain photo is never written to disk.
 - **Deleting a receipt deletes its file.** If the Home Base stops part-way (say a power cut), the worst case is an

@@ -63,25 +63,43 @@ HEIC_EXIF = b"\x00\x00\x00\x00Exif\x00\x00GPSLatitude 51.5 FAKE-LOCATION"
 HEIC_XMP = b"<x:xmpmeta>FAKE-XMP-LOCATION</x:xmpmeta>"
 
 
-def heic(*, with_metadata: bool = True) -> bytes:
-    """A tiny HEIC-shaped file: picture, Exif and XMP items located by iinf/iloc, data in mdat."""
+def heic(
+    *,
+    with_metadata: bool = True,
+    exif_extents: int = 1,
+    exif_extent_length: int | None = None,
+    extra_top: bytes = b"",
+    second_meta: bool = False,
+    xml_box: bool = False,
+    duplicate_id: bool = False,
+) -> bytes:
+    """A tiny HEIC-shaped file: picture, Exif and XMP items located by iinf/iloc, data in mdat.
+
+    The keyword arguments build the crafted variants the importer must refuse or clean.
+    """
     ftyp = _box(b"ftyp", b"heic\x00\x00\x00\x00mif1heic")
     items = [(1, b"hvc1", b"", PICTURE)]
     if with_metadata:
         items += [(2, b"Exif", b"", HEIC_EXIF), (3, b"mime", b"application/rdf+xml\x00", HEIC_XMP)]
-    infe = b"".join(_infe(i, t, x) for i, t, x, _ in items)
-    iinf = _box(b"iinf", b"\x00\x00\x00\x00" + struct.pack(">H", len(items)) + infe)
+    infe_items = items + ([(2, b"hvc1", b"", b"")] if duplicate_id else [])
+    infe = b"".join(_infe(i, t, x) for i, t, x, _ in infe_items)
+    iinf = _box(b"iinf", b"\x00\x00\x00\x00" + struct.pack(">H", len(infe_items)) + infe)
+    xml = _box(b"xml ", b"\x00\x00\x00\x00<x>FAKE-XML-LOCATION</x>") if xml_box else b""
 
     def meta(first_offset: int) -> bytes:
         loc, at = b"", first_offset
         for i, _, _, payload in items:
-            loc += struct.pack(">HHHII", i, 0, 1, at, len(payload))  # id, data ref, extents, offset, length
+            n = exif_extents if i == 2 else 1
+            length = len(payload) if exif_extent_length is None or i != 2 else exif_extent_length
+            loc += struct.pack(">HHH", i, 0, n) + struct.pack(">II", at, length) * n
             at += len(payload)
         iloc = _box(b"iloc", b"\x00\x00\x00\x00\x44" + b"\x00" + struct.pack(">H", len(items)) + loc)
-        return _box(b"meta", b"\x00\x00\x00\x00" + iinf + iloc)
+        inner = iinf + iloc + xml
+        return _box(b"meta", b"\x00\x00\x00\x00" + inner)
 
     start = len(ftyp) + len(meta(0)) + 8  # the first byte inside mdat
-    return ftyp + meta(start) + _box(b"mdat", b"".join(payload for *_, payload in items))
+    metas = meta(start) * (2 if second_meta else 1)
+    return ftyp + metas + extra_top + _box(b"mdat", b"".join(payload for *_, payload in items))
 
 
 def exif_orientation(value: int, *, little: bool = False) -> bytes:

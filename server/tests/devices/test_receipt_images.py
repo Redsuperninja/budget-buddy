@@ -114,6 +114,39 @@ def test_broken_heic_is_rejected(cut):
     assert caught.value.reason == "image_invalid"
 
 
+@pytest.mark.parametrize(
+    "crafted",
+    [
+        img.heic(second_meta=True),  # readers use the first meta; a scanner would use the last
+        img.heic(extra_top=img._box(b"moov", b"\x00" * 8)),  # video box that can hold a location
+        img.heic(extra_top=img._box(b"uuid", b"\x00" * 24)),
+        img.heic(exif_extents=500),  # many tiny writes: a slow upload
+        img.heic(exif_extent_length=0),  # "the whole item": we couldn't tell what to blank
+        img.heic(duplicate_id=True),  # two items with one id: which one is the Exif?
+    ],
+    ids=["second-meta", "moov", "uuid", "many-extents", "zero-length-extent", "duplicate-id"],
+)
+def test_crafted_heic_is_rejected(crafted):
+    with pytest.raises(ImageRejected) as caught:
+        clean_image(crafted)
+    assert caught.value.reason == "image_invalid"
+
+
+def test_heic_xml_box_is_blanked():
+    cleaned, _ = clean_image(img.heic(xml_box=True))
+    assert b"FAKE-XML-LOCATION" not in cleaned
+
+
+def test_jpeg_extras_are_dropped():
+    thumb = img.segment(0xE0, b"JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x01\x01" + b"FAKE-THUMB-LOCATION")
+    extra = img.segment(0xF5, b"FAKE-JPGN-LOCATION")
+    data = b"\xff\xd8" + thumb + extra + img.DQT + img.SOF0 + img.DHT + img.SOS + img.SCAN + b"\xff\xd9"
+    cleaned, _ = clean_image(data)
+    assert b"FAKE-THUMB-LOCATION" not in cleaned and b"FAKE-JPGN-LOCATION" not in cleaned
+    assert cleaned.startswith(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00")
+    assert cleaned[6 + 12 : 6 + 14] == b"\x00\x00"  # thumbnail size reset to none
+
+
 def test_heic_without_item_index_is_rejected():
     ftyp = img.heic()[:24]
     with pytest.raises(ImageRejected):

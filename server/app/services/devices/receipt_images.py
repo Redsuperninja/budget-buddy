@@ -127,7 +127,7 @@ def _keep_jpeg_segment(marker: int, payload: bytes) -> bool:
             or (marker == 0xE2 and payload.startswith(b"ICC_PROFILE\x00"))
             or (marker == 0xEE and payload.startswith(b"Adobe"))  # needed for CMYK colours
         )
-    return marker != 0xFE  # FE = free-text comment
+    return marker != 0xFE and not 0xF0 <= marker <= 0xFD  # FE = comment, F0-FD = "JPGn" extras
 
 
 def _end_of_scan(data: bytes, i: int) -> int:
@@ -192,9 +192,16 @@ def _strip_jpeg(data: bytes) -> bytes:
         if marker == 0xE1 and orientation is None:
             orientation = _jpeg_orientation(payload)
         if _keep_jpeg_segment(marker, payload):
-            out += data[i:end]
-            if marker == 0xE0 and len(out) == 2 + (end - i):  # JFIF must stay first
-                insert_at = len(out)
+            if marker == 0xE0 and payload.startswith(b"JFIF\x00"):
+                if len(payload) < 14:
+                    raise _invalid()
+                # Keep the fixed header only; the embedded thumbnail picture is dropped.
+                header = b"\xff\xe0\x00\x10" + payload[:12] + b"\x00\x00"
+                out += header
+                if len(out) == 2 + len(header):  # JFIF must stay first
+                    insert_at = len(out)
+            else:
+                out += data[i:end]
         seen_frame |= marker in _JPEG_SOF
         i = end
         if marker == _JPEG_SOS:
@@ -234,8 +241,11 @@ def _strip_png(data: bytes) -> bytes:
 
 # --- HEIC (ISO base media file format) ---------------------------------------------------------
 
+_HEIC_TOP_LEVEL = {b"ftyp", b"meta", b"mdat", b"free", b"skip"}  # anything else may hold metadata
+_HEIC_MAX_EXTENTS = 64  # per file: a crafted index can't make us do millions of tiny writes
 
-def _boxes(data: bytes | memoryview, start: int, end: int):
+
+def _boxes(data: bytes, start: int, end: int):
     """Yield ``(type, payload_start, box_end)`` for the boxes between ``start`` and ``end``."""
     i = start
     while i < end:
@@ -255,39 +265,54 @@ def _boxes(data: bytes | memoryview, start: int, end: int):
         i += size
 
 
-def _heic_secret_items(data: bytes, iinf: tuple[int, int]) -> tuple[dict[int, int], list[int]]:
-    """Item ids holding Exif or XMP, and where each one's 4-byte type sits in the file."""
+def _heic_secret_items(data: bytes, iinf: tuple[int, int]) -> tuple[set[int], list[int]]:
+    """Ids of the Exif and XMP items, and where each one's 4-byte type sits in the file."""
     start, end = iinf
-    version = data[start]
-    pos = start + 4 + (2 if version == 0 else 4)  # skip version/flags and the entry count
-    ids: dict[int, int] = {}
+    if end - start < 6:
+        raise _invalid()
+    pos = start + 4 + (2 if data[start] == 0 else 4)  # skip version/flags and the entry count
+    ids: set[int] = set()
+    seen: set[int] = set()
+    type_positions: list[int] = []
     for kind, p, e in _boxes(data, pos, end):
-        if kind != b"infe" or e - p < 12 or data[p] < 2:
+        if kind != b"infe":
             continue
-        v = data[p]
-        width = 2 if v == 2 else 4
+        version = data[p] if e > p else 0
+        if version < 2:
+            continue  # no item type in these versions: no Exif/XMP item
+        width = 2 if version == 2 else 4
+        if e - p < 4 + width + 6:
+            raise _invalid()
         item_id = int.from_bytes(data[p + 4 : p + 4 + width], "big")
+        if item_id in seen:
+            raise _invalid()  # two items with one id: we couldn't tell which is which
+        seen.add(item_id)
         type_at = p + 4 + width + 2
         item_type = data[type_at : type_at + 4]
         rest = data[type_at + 4 : e].lower()
-        if item_type == b"Exif" or (
-            item_type == b"mime" and (b"xmp" in rest or b"rdf+xml" in rest or b"xml" in rest)
-        ):
-            ids[item_id] = type_at
-    return ids, list(ids.values())
+        if item_type == b"Exif" or (item_type == b"mime" and b"xml" in rest):
+            ids.add(item_id)
+            type_positions.append(type_at)
+    return ids, type_positions
 
 
-def _heic_extents(data: bytes, iloc: tuple[int, int], idat: int | None, wanted: dict[int, int]):
+def _heic_extents(data: bytes, iloc: tuple[int, int], idat: tuple[int, int] | None, wanted: set[int]):
     """File ranges ``(start, end)`` holding the data of the ``wanted`` items."""
     p, end = iloc
+    if end - p < 8:
+        raise _invalid()
     version = data[p]
+    if version > 2:
+        raise _invalid()
     p += 4
     offset_size, length_size = data[p] >> 4, data[p] & 15
-    base_size, index_size = data[p + 1] >> 4, (data[p + 1] & 15) if version in (1, 2) else 0
+    base_size = data[p + 1] >> 4
+    index_size = (data[p + 1] & 15) if version in (1, 2) else 0
     p += 2
-    count = int.from_bytes(data[p : p + (4 if version == 2 else 2)], "big")
-    p += 4 if version == 2 else 2
-    if length_size == 0 or version > 2:
+    count_size = 4 if version == 2 else 2
+    count = int.from_bytes(data[p : p + count_size], "big")
+    p += count_size
+    if length_size == 0:
         raise _invalid()
 
     def take(n: int) -> int:
@@ -298,11 +323,17 @@ def _heic_extents(data: bytes, iloc: tuple[int, int], idat: int | None, wanted: 
         p += n
         return value
 
-    ranges = []
+    ranges: list[tuple[int, int]] = []
+    items_seen: set[int] = set()
     for _ in range(count):
         item_id = take(4 if version == 2 else 2)
+        if item_id in items_seen:
+            raise _invalid()
+        items_seen.add(item_id)
         method = take(2) & 15 if version in (1, 2) else 0
-        take(2)  # data reference index
+        if take(2) != 0:  # data reference index: 0 = in this file
+            if item_id in wanted:
+                raise _invalid()
         base = take(base_size)
         for _ in range(take(2)):
             if index_size:
@@ -310,42 +341,55 @@ def _heic_extents(data: bytes, iloc: tuple[int, int], idat: int | None, wanted: 
             offset, length = take(offset_size), take(length_size)
             if item_id not in wanted:
                 continue
+            if length == 0 or len(ranges) >= _HEIC_MAX_EXTENTS:
+                raise _invalid()  # "whole item" extents and huge indexes aren't worth supporting
             if method == 0:
-                a = base + offset
+                a, limit = base + offset, len(data)
             elif method == 1 and idat is not None:
-                a = idat + base + offset
+                a, limit = idat[0] + base + offset, idat[1]
             else:
                 raise _invalid()
-            if a + length > len(data):
+            if a + length > limit:
                 raise _invalid()
             ranges.append((a, a + length))
     return ranges
 
 
 def _strip_heic(data: bytes) -> bytes:
-    """Blank the Exif and XMP items in place (same size, so every offset in the file stays valid)."""
-    meta = iinf = iloc = idat = None
+    """Blank the Exif and XMP items in place (same size, so every offset in the file stays valid).
+
+    Anything that could hold other metadata and that we don't understand is refused: unknown
+    top-level boxes (``moov``, ``udta``, ``uuid``...), a second ``meta``/``iinf``/``iloc``/``idat``
+    (readers use the first, a scanner here would use the last).
+    """
+    meta = None
     for kind, p, e in _boxes(data, 0, len(data)):
+        if kind not in _HEIC_TOP_LEVEL or (kind == b"meta" and meta is not None):
+            raise _invalid()
         if kind == b"meta":
+            if e - p < 4:
+                raise _invalid()
             meta = (p + 4, e)  # a "full box": 4 bytes of version/flags first
-    if meta is None or meta[0] > meta[1]:
+    if meta is None:
         raise _invalid()
+    found: dict[bytes, tuple[int, int]] = {}
+    xml_boxes: list[tuple[int, int]] = []
     for kind, p, e in _boxes(data, *meta):
-        if kind == b"iinf":
-            iinf = (p, e)
-        elif kind == b"iloc":
-            iloc = (p, e)
-        elif kind == b"idat":
-            idat = p
-    if iinf is None or iloc is None:
+        if kind in (b"iinf", b"iloc", b"idat"):
+            if kind in found:
+                raise _invalid()
+            found[kind] = (p, e)
+        elif kind in (b"xml ", b"bxml"):
+            xml_boxes.append((p, e))
+    if b"iinf" not in found or b"iloc" not in found:
         raise _invalid()
     try:
-        ids, type_positions = _heic_secret_items(data, iinf)
-        ranges = _heic_extents(data, iloc, idat, ids) if ids else []
+        ids, type_positions = _heic_secret_items(data, found[b"iinf"])
+        ranges = _heic_extents(data, found[b"iloc"], found.get(b"idat"), ids) if ids else []
     except IndexError:
         raise _invalid() from None
     out = bytearray(data)
-    for a, b in ranges:
+    for a, b in ranges + xml_boxes:
         out[a:b] = bytes(b - a)
     for at in type_positions:
         out[at : at + 4] = b"free"  # readers skip item types they don't know
