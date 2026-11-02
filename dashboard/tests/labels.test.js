@@ -40,3 +40,11 @@ test("byFilingStatus lists every status when not set, or only the chosen one, in
   assert.deepEqual(byFilingStatus({}), []);
   assert.equal(filingStatusLabel("head_of_household"), "Head of household");
 });
+
+test("the married-filing-separately $0 note shows only when that status is listed", async () => {
+  const { separateFilingNote } = await import("../js/labels.js");
+  assert.match(separateFilingNote({ single: 1, married_filing_separately: 1 }), /spouse itemizes.*\$0/);
+  assert.match(separateFilingNote({ married_filing_separately: 1 }), /\$0/);
+  assert.equal(separateFilingNote({ married_filing_jointly: 1 }), null);
+  assert.equal(separateFilingNote({}), null);
+});

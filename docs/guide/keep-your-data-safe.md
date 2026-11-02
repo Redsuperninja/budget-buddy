@@ -27,6 +27,7 @@ Encrypted on your computer:
 - Company names on dividends and bank-made stock trades
 - Category names and auto-sort rule text
 - Stock symbols and lots
+- Your filing status (if you choose one on the Tax summary)
 
 The encrypted names can still show up in the unencrypted transaction descriptions and account names (for example a payment described as "FOOD BANK"), so treat the data folder as private anyway.
 

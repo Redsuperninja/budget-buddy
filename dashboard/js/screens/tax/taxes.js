@@ -6,7 +6,7 @@ import { thisYear } from "../../dates.js";
 import { fill, h } from "../../dom.js";
 import { optionalText, taxYearHeader } from "../../fields.js";
 import { form, saveWithNote } from "../../form.js";
-import { DEDUCTION_KINDS, byFilingStatus, deductionKindLabel, filingStatusLabel } from "../../labels.js";
+import { DEDUCTION_KINDS, byFilingStatus, deductionKindLabel, filingStatusLabel, separateFilingNote } from "../../labels.js";
 import { centsOrThrow, formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, note, table } from "../../widgets.js";
@@ -18,9 +18,11 @@ const lineTable = (lines) => table(["", "Amount"], lines.map((l) => [l.label, fo
 function standardDeduction(amounts, status) {
   if (!amounts) return empty("Budget Buddy doesn't have this year's standard deduction yet.");
   const whose = status ? ` for ${filingStatusLabel(status)}` : "";
+  const separately = separateFilingNote(amounts);
   return h("div", {},
     empty(`For comparison, the basic standard deduction this year${whose} (more if you're 65 or older, or blind):`),
-    table(["Filing status", "Standard deduction"], byFilingStatus(amounts).map(([text, cents]) => [text, formatCents(cents)]), [1]));
+    table(["Filing status", "Standard deduction"], byFilingStatus(amounts).map(([text, cents]) => [text, formatCents(cents)]), [1]),
+    separately && empty(separately));
 }
 
 function actions(year) {

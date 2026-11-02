@@ -39,6 +39,10 @@ export const filingStatusLabel = (status) => lookup(FILING_STATUSES, status);
 // [label, amount] for each status in amounts ({ code: cents }), in the order above.
 export const byFilingStatus = (amounts) =>
   FILING_STATUSES.filter(([code]) => code in amounts).map(([code, text]) => [text, amounts[code]]);
+// Shown when Married filing separately is listed: its standard deduction is $0 if the spouse itemizes.
+export const separateFilingNote = (amounts) => ("married_filing_separately" in amounts
+  ? "Married filing separately: if your spouse itemizes, your standard deduction is $0, so you'd itemize too."
+  : null);
 
 // What kind of transfer a linked pair is (server app/transfer_types.py).
 export const TRANSFER_TYPES = [

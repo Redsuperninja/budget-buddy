@@ -71,7 +71,7 @@
   ],
   "standard_deduction": {
     "source_ids": ["rp-2025-32", "rp-2024-40"],
-    "note": "Basic amounts are the OBBBA-amended figures (Rev. Proc. 2025-32 sec. 3.01), replacing Rev. Proc. 2024-40 sec. 2.15(1). The age-65+/blind additions are unchanged from Rev. Proc. 2024-40 sec. 2.15(3).",
+    "note": "Basic amounts are the OBBBA-amended figures (Rev. Proc. 2025-32 sec. 3.01), replacing Rev. Proc. 2024-40 sec. 2.15(1). The age-65+/blind additions are unchanged from Rev. Proc. 2024-40 sec. 2.15(3). A qualifying surviving spouse uses the married_filing_jointly amount (IRC sec. 63(c)(2)(A): a joint return or a surviving spouse gets 200% of the single amount).",
     "basic_cents": {
       "single": 1575000,
       "married_filing_jointly": 3150000,
