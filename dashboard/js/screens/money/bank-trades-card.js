@@ -1,4 +1,4 @@
-// Part of the Investments screen: stock trades named in a bank file (like "ABBOTT LABORATORIES UNSOLICITED WE ARE
+// Part of the Investments screen: stock trades named in a bank file (like "FAKECO UNSOLICITED WE ARE
 // ACTING AS PRINCIPAL ..."), each linked with the deposit sweep that moved its cash. Shows when, which company,
 // bought or sold, and the amount; once you add the ticker and shares, the price per share. The ticker is offered
 // again for the company's next trade. Recording uses the Stocks API, linked to the transaction.
@@ -18,7 +18,7 @@ export function sharesText(micro) {
 }
 
 function recordForm(t) {
-  const symbol = h("input", { maxlength: 16, size: 6, value: t.suggested_symbol || "", placeholder: "ABT",
+  const symbol = h("input", { maxlength: 16, size: 6, value: t.suggested_symbol || "", placeholder: "FKCO",
     "aria-label": `Ticker for ${t.security}` });
   const shares = h("input", { inputmode: "decimal", size: 6, placeholder: "10", "aria-label": "Shares" });
   const message = h("span", { class: "error", role: "alert" });

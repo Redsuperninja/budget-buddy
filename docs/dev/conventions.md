@@ -35,6 +35,16 @@ reviewers check them.
 - **Refactor as you go, in scope.** Tidy the code you touch. Large clean-ups of unrelated code go in their
   own `chore/` branch.
 
+## Nothing private in the repo
+
+- **`scripts/dev/check_public.py` must pass** (`check_all.py` and CI run it). It fails on a real-looking email
+  address, a home-folder path with a user name, a public IP address, a key or token in text, and a tracked `.env`, database,
+  `.bbbackup`, key, bank file (`.csv`, `.ofx`) or picture outside the known image folders. Use placeholders instead
+  (`you@example.com`, `C:\Users\<you>`, `192.168.1.20`, `203.0.113.7`).
+- **Made-up payers and companies in examples**: write "FAKECO" in comments and docs, not a real company. Real
+  bank line formats may stay in tests.
+- **A justified exception** goes in `scripts/dev/public_allowlist.txt` as `rule path exact-value  # reason`; it excuses only that text. Keep it short.
+
 ## Dependencies
 
 - **Add as few as possible.** The dashboard and scripts have none; prefer the standard library. A new package

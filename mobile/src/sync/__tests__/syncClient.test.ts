@@ -1,5 +1,7 @@
 import nacl from 'tweetnacl';
 
+import { APP_VERSION } from '@/lib/appVersion';
+
 import { b64uDecode, b64uEncode } from '../base64url';
 import { CREDENTIALS_KEY, getNeedsAttention, loadCredentials, saveCredentials } from '../credentials';
 import { PAIR_MESSAGES } from '../pairErrors';
@@ -156,7 +158,7 @@ describe('syncNow', () => {
     expect(server.calls[2].inner.data).toEqual({
       snapshot_generated_at: SNAPSHOT.generated_at,
       receipts_uploaded: 0,
-      app_version: '1.0.0',
+      app_version: APP_VERSION, // the default: app.json's version
     });
     expect(save).toHaveBeenCalledTimes(1);
     expect(result.snapshot.server_id).toBe(SERVER_ID);

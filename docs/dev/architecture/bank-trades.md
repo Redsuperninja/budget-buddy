@@ -9,7 +9,7 @@ Speed: the finders read thousands of rows, so they load them with `sweeps.lean()
 User guide: [investments.md](../../guide/investments.md#stock-trades-from-your-bank-file).
 
 Some brokers' bank-style files (J.P. Morgan / Chase) show a trade only as a line naming the company, with no ticker,
-shares or price: `ABBOTT LABORATORIES UNSOLICITED WE ARE ACTING AS PRINCIPAL COMMISSION FIELD IS A COMMISSION
+shares or price: `FAKECO UNSOLICITED WE ARE ACTING AS PRINCIPAL COMMISSION FIELD IS A COMMISSION
 EQUIVALENT - DETAILS ON REQUEST ROM`. Next to it a deposit sweep moves the same cash: `CHASE DEPOSIT SWEEP ...
 INTRA-DAY WITHDRWAL` (money in) pays for a buy, `... INTRA-DAY DEPOSIT` (money out) parks a sale or a dividend.
 

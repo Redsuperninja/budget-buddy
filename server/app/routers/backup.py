@@ -42,7 +42,7 @@ def download_backup(
     path = uploads.make_download(state.settings.data_dir, state.engine, state.keys)
     name = uploads.download_name(dt.date.today())  # noqa: DTZ011 (this computer's own date)
     return StreamingResponse(
-        uploads.send_and_delete(path),
+        uploads.send_and_delete(path, engine=state.engine),
         media_type="application/octet-stream",
         headers={"Content-Disposition": f'attachment; filename="{name}"'},
     )

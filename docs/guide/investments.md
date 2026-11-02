@@ -57,7 +57,7 @@ date, then click **Save price**. The new price replaces the old one, including a
 ## Stock trades from your bank file
 
 Some brokers' files (Chase / J.P. Morgan, for example) show a stock purchase only as the company's name and a lot
-of fine print, like `ABBOTT LABORATORIES UNSOLICITED WE ARE ACTING AS PRINCIPAL ...`, with a **deposit sweep** next
+of fine print, like `FAKECO UNSOLICITED WE ARE ACTING AS PRINCIPAL ...`, with a **deposit sweep** next
 to it for the same amount (`CHASE DEPOSIT SWEEP ... INTRA-DAY WITHDRWAL`). The sweep is just the cash moving to pay
 for the shares.
 
@@ -65,7 +65,7 @@ Budget Buddy finds these when you import the file, links each trade with its swe
 **Investments** page under **Stock trades from your bank file**: the date, the company, **Bought** or **Sold**, and
 the amount. Neither the trade nor the sweep counts as spending or income, and neither needs a category.
 
-1. For each trade, type the **ticker** (like `ABT`) and the **number of shares** from your broker's trade
+1. For each trade, type the **ticker** (like `FKCO`) and the **number of shares** from your broker's trade
    confirmation, then click **Save**.
 2. The row then shows the **price per share (with fees)**: the amount divided by the shares. The amount already
    includes any commission, so it's what each share cost you (or brought in after fees), which is what counts for

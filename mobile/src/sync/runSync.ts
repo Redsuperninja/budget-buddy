@@ -2,7 +2,6 @@
  * "Do one sync" for screens: loads the saved credentials, runs the sync client, and turns every outcome
  * into plain English. Only one sync runs at a time; a second tap while one is running joins it.
  */
-import Constants from 'expo-constants';
 
 import { waitingCount } from '@/receipts/receiptQueue';
 import { uploadReceipts } from '@/receipts/receiptUpload';
@@ -29,7 +28,7 @@ export function runSync(save: (snapshot: Snapshot) => Promise<string | null>): P
     try {
       const creds = await loadCredentials();
       if (!creds) return { ok: false, message: NOT_CONNECTED_MESSAGE, code: 'not_connected', needsAttention: false };
-      const { snapshot } = await syncNow(creds, { save, uploadReceipts, appVersion: Constants.expoConfig?.version ?? '1.0.0' });
+      const { snapshot } = await syncNow(creds, { save, uploadReceipts });
       // Contract §9: fresh reminders, counted from this sync.
       await rescheduleReminders({
         lastSyncedAt: new Date().toISOString(),

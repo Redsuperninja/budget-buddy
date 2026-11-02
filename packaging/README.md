@@ -11,6 +11,6 @@ runs where Python isn't installed ([ADR-0011](../docs/adr/0011-cross-platform-sc
 | `home-base.spec` | PyInstaller recipe for the packaged Home Base (`server/`), with the dashboard files it serves bundled in |
 | `install.ps1`, `Install Budget Buddy.bat`, `Uninstall Budget Buddy.bat` | The installer in the download; `scripts/release/install_desktop.py` uses the same `install.ps1` for a build from source |
 | `READ ME FIRST.txt` | Plain-English install, first steps, phone, update and remove, for the download |
-| `THIRD-PARTY-NOTICES.txt` | Licenses of what the built app includes |
+| `notices-header.txt`, `extra-notices.json`, `licences/` | The hand-written parts of the generated `THIRD-PARTY-NOTICES.txt` (`scripts/release/third_party_notices.py`): the intro, C libraries inside wheels (OpenSSL, libsodium, Pillow's), and licence texts for a package whose wheel has none |
 
 The recipes find `server/`, `dashboard/` and `desktop/` from their own place (two folders up), so move them together.

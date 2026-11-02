@@ -1,10 +1,10 @@
-import Constants from 'expo-constants';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Device from 'expo-device';
 import { useCallback, useRef, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BigButton, BodyText, Card, Screen } from '@/components/Screen';
+import { APP_VERSION } from '@/lib/appVersion';
 import { loadCredentials, saveCredentials } from '@/sync/credentials';
 import { PairError, PAIR_MESSAGES } from '@/sync/pairErrors';
 import { pairWithComputer } from '@/sync/pairClient';
@@ -53,7 +53,7 @@ export default function PairScreen() {
         const creds = await pairWithComputer(qr, {
           deviceName: phoneName.trim().slice(0, 50) || 'My phone',
           platform: Platform.OS === 'ios' ? 'ios' : 'android',
-          appVersion: Constants.expoConfig?.version ?? '1.0.0',
+          appVersion: APP_VERSION,
         });
         await saveCredentials(creds); // only now, after the whole pairing worked
         setStep({ name: 'done', computer: creds.server_name, sync: 'running' });

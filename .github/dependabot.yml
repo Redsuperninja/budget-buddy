@@ -32,6 +32,20 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: [version-update:semver-major]
+      # React Native and React move only with the Expo SDK (`npx expo install --fix`): RN 0.87 / React 19.3
+      # broke Expo 57 (#172). Patch updates are still fine.
+      - dependency-name: "react-native"
+        update-types: [version-update:semver-minor]
+      - dependency-name: "react"
+        update-types: [version-update:semver-minor]
+      - dependency-name: "react-dom"
+        update-types: [version-update:semver-minor]
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-minor]
+      - dependency-name: "react-native-screens"
+        update-types: [version-update:semver-minor]
+      - dependency-name: "react-native-safe-area-context"
+        update-types: [version-update:semver-minor]
     groups:
       npm-minor-and-patch:
         update-types: [minor, patch]

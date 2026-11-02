@@ -4,7 +4,7 @@
 // charts sit two to a row on wide screens; every chart can also be read as a table.
 
 import {
-  listAccounts, listImports, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, spendingPace, stockHoldings,
+  getSetup, listAccounts, listImports, listPositions, listTransactions, monthlySummary, monthlyTrend, payDeposits, spendingPace, stockHoldings,
 } from "../../api/endpoints.js";
 import { overBadge, overBudget } from "../../category-groups.js";
 import { comparedWith, fromFirstActivity } from "../../charts/months.js";
@@ -19,6 +19,7 @@ import { categoriesChart, changesChart, groupsChart, trendChart } from "./home-c
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
 import { paceCard } from "./home-pace.js";
 import { onThisComputer } from "../../features.js";
+import { backupReminder } from "./home-backup.js";
 import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
 import { leftOverChart, netWorthChart } from "./home-trends.js";
@@ -78,6 +79,8 @@ export async function render(root, options) {
     monthlySummary(days.previous, days.previousThrough),
     listImports(),
   ]);
+  // Recovery phrase and backup progress exist only on this computer; if it can't be read, those steps stay hidden.
+  const setup = onThisComputer() ? await getSetup().catch(() => null) : null;
   const months = fromFirstActivity(trend.months);
   // Mid-month, a percentage of the income received so far isn't the month's budget yet.
   const provisional = Boolean(days.through) && summary.budget_income_source === "actual";
@@ -90,7 +93,8 @@ export async function render(root, options) {
   fill(root,
     startCard({ accounts: accounts.length > 0, transactions: hasTransactions,
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) },
-      { onThisComputer: onThisComputer() }),
+      { onThisComputer: onThisComputer() }, setup),
+    backupReminder(setup, hasTransactions || accounts.length > 0),
     h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker), freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
     monthTiles(summary, days.through ? months.slice(0, -1) : months, provisional),

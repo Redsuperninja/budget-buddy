@@ -142,10 +142,10 @@ done.
     fake, test addresses are private examples, and the only outside call is the opt-in Finnhub price feed.
   - Found for #28, not part of 25: `dividends.payer` is stored in plain text, but it names what you own. Add it to
     the encrypted columns, or let ADR-0014 cover it.
-- [ ] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
+- [x] 25a. Public-repo guard: a `scripts/dev/check_public.py` check in CI (emails, user paths, public IPs, `.env`,
   databases, `.bbbackup`, images outside `docs/` and `assets/`), and example payers in comments made up
   ("FAKECO", not "JOHNSON & JOHNSON"); real bank line formats stay in tests — *backend-engineer* + *security-reviewer*
-- [ ] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged
+- [x] 25b. Licences in the download: put `LICENSE` in the zip; build `THIRD-PARTY-NOTICES.txt` from the packaged
   libraries' own licence files, with a test that every package in both `requirements-package.txt` has one —
   *backend-engineer* + *security-reviewer*
   - Today's list has no licence texts and misses bottle, proxy-tools, Mako, MarkupSafe, jaraco.*, more-itertools,
@@ -157,12 +157,12 @@ done.
   links), short `CONTRIBUTING.md`, bug and idea issue templates with `config.yml`, PR template with reviewers and
   the attribution line, READ ME FIRST with the guide's real address — *docs-writer* + *release-manager*
   - The user-testing template still points at an "API explorer page"
-- [ ] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
+- [x] 25e. Setup progress on the Home Base ([ADR-0015](adr/0015-first-start-setup.md)): `setup_progress` row,
   `GET`/`PUT /api/local/setup` (this computer only), `last_backup_at` set when a backup file is written —
   *backend-engineer* + *security-reviewer*
-- [ ] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
+- [x] 25f. Setup page on first start: start fresh or restore, save your recovery phrase, first account or import,
   phone (optional); "Finish later"; guide `docs/guide/first-start.md` — *backend-engineer* + *security-reviewer*
-- [ ] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
+- [x] 25g. Get started and Home: "Save your recovery phrase" and "Make a backup" steps, a backup reminder after
   30 days, and two fixes — *backend-engineer* + *security-reviewer*
   - Bug: on a joined phone or computer, Get started's phone step links to `#phone` and `#computers`, which don't
     exist there (`main.js` drops Devices)
@@ -170,7 +170,7 @@ done.
     ([release.md](dev/release.md)); show only the browser way until it is
 - [ ] 25h. Starter budget step in Setup: untick categories you don't need, optional monthly take-home pay as
   planned income — *backend-engineer* + *finance-tax-expert*
-- [ ] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
+- [x] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
   the desktop window) — *backend-engineer* + *security-reviewer*
 - [ ] 25j. In 0.1.0 (owner, 2026-10-20): a filing status setting that narrows the tax summary to one status —
   *finance-tax-expert*

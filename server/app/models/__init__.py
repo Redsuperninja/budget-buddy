@@ -23,6 +23,7 @@ from app.models.ledger import (
     Receipt,
     Transaction,
 )
+from app.models.setup import SetupProgress
 from app.models.tax import (
     Deduction,
     Dividend,
@@ -37,6 +38,7 @@ from app.models.tax import (
 from app.models.trades import BankTrade, SecuritySymbol
 
 __all__ = [
+    "SetupProgress",
     "Account",
     "AccountKind",
     "Base",

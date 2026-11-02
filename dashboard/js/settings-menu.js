@@ -1,6 +1,7 @@
-// The "Settings" menu in the page header: Colors (Match my computer, Light, Dark) and View (Simple or All
-// tools). Applies the saved choices as soon as the page starts.
+// The "Settings" menu in the page header: Colors (Match my computer, Light, Dark), View (Simple or All
+// tools) and About (the version and links). Applies the saved choices as soon as the page starts.
 
+import { aboutSection } from "./about.js";
 import { browserStorage, h } from "./dom.js";
 import { THEMES, applyTheme, loadTheme, saveTheme } from "./theme.js";
 import { VIEWS, applyView, loadView, saveView } from "./view.js";
@@ -27,7 +28,7 @@ export function addSettingsMenu() {
     h("div", { class: "settings-panel" }, view,
       h("p", { class: "muted" }, "Simple shows what most people need. All tools adds import history, auto-sort " +
         "rules, broker files, live prices and more."),
-      colors));
+      colors, aboutSection()));
   // Clicking anywhere else closes the menu.
   document.addEventListener("click", (event) => { if (!menu.contains(event.target)) menu.open = false; });
   document.querySelector("header").append(menu);

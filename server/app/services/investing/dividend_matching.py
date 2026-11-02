@@ -3,7 +3,7 @@ deposit sweep that moved the same cash on.
 
 A transaction is a dividend when it's money in, a regular transaction (not a transfer, paycheck
 deposit or donation), and its description has the word "dividend", or "div" in an investment,
-retirement or HSA account (``looks_like_dividend``), like "JOHNSON & JOHNSON COMMON STOCK CASH DIV
+retirement or HSA account (``looks_like_dividend``), like "FAKECO COMMON STOCK CASH DIV
 ON 1 SHS REC 08/25/26 PAY 09/08/26". Return of capital ("non-dividend distribution"), tax-exempt
 dividends, payroll and "DIV OF ..." (a government division) are left alone. It's put in the
 income category "Dividends" (made the first time), unless you or an auto-sort rule already gave it
@@ -48,7 +48,7 @@ SHORT_WORDS = re.compile(r"(?<![a-z])divs?(?![a-z])", re.I)  # only in investmen
 NOT_DIVIDEND_WORDS = re.compile(
     r"non-?\s?dividend|return of capital|exempt|(?<![a-z])div of(?![a-z])|division|payroll", re.I
 )
-# Where the payer's name ends: "JOHNSON & JOHNSON COMMON STOCK CASH DIV ..." -> "JOHNSON & JOHNSON".
+# Where the payer's name ends: "FAKECO COMMON STOCK CASH DIV ..." -> "FAKECO".
 _PAYER_END = re.compile(
     r"\s+(common stock|((cash|qualified|ordinary) )?(dividends?|divs?))(?![a-z]).*$", re.I
 )

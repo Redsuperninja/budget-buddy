@@ -27,6 +27,7 @@ _PAGE_PREFIXES = ("/static/",)
 # devices, other computers, the scripts' CSRF token, and anything added later.
 JOINED_AREAS = frozenset(
     {
+        "about",
         "accounts",
         "budget",
         "categories",

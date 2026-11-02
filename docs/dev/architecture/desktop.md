@@ -35,6 +35,11 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 - **No financial data on disk:** every `/api/*` reply has `Cache-Control: no-store` (`server/app/network.py`), so
   neither a browser nor the window's storage (`%LOCALAPPDATA%\BudgetBuddy-Window`) keeps a copy.
 
+- **Outside links** (Settings, About): the window gives the page one function, `open_link(url)`
+  (`budget_buddy_desktop/links.py`, pywebview `js_api`). It opens the default browser only for
+  `https://github.com/Redsuperninja/budget-buddy` and pages under it (no other host, port, user info, `..`
+  or scheme). The page's links come from `GET /api/local/about`. `navigation.py` attaches to WebView2 (`window.native.browser.webview`): `NavigationStarting` cancels any off-origin navigation before it loads, and `NewWindowRequested` (target=_blank, window.open) is handled there through `open_link`, everything else dropped; pywebview's own `OPEN_EXTERNAL_LINKS_IN_BROWSER` is off because it would pass any address to Windows. After a page loads, a backstop returns the window to the dashboard if it is elsewhere.
+
 ## Building
 
 `scripts/release/build_desktop.py` (or `launch\Build desktop app.bat`) makes a new, empty venv per part in `build\desktop\`
@@ -45,4 +50,4 @@ Decision: [ADR-0008](../../adr/0008-desktop-app.md). Roadmap 22, 22b.
 recipe bundles only the files the server serves (`index.html`, top-level CSS, `js/**/*.js`), the migrations and the
 tax data. Both recipes leave out modules PyInstaller finds but the apps never run (each `excludes` list says why);
 the desktop app keeps Pillow's font support (the icon's letter) and `ssl` (pywebview imports it on start). `scripts/release/install_desktop.py` copies the result (with `packaging/windows/install.ps1`) to `%LOCALAPPDATA%\Programs\Budget Buddy` and adds Start
-menu and desktop shortcuts. `THIRD-PARTY-NOTICES.txt` (the bundled packages' licenses) goes in the output too.
+menu and desktop shortcuts. `LICENSE` and `THIRD-PARTY-NOTICES.txt` (generated from the bundled packages' own licence files, see [release.md](../release.md)) go in the output too.

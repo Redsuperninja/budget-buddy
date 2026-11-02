@@ -52,5 +52,5 @@ HELP
 The user guide is online, with pictures, at:
 https://github.com/Redsuperninja/budget-buddy/tree/main/docs/guide
 
-Licensed under MIT; see
+Licensed under MIT (the LICENSE file); see
 "Budget Buddy\THIRD-PARTY-NOTICES.txt" for the parts it is built from.

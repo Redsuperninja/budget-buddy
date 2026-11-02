@@ -20,7 +20,7 @@ To try Budget Buddy without installing, open the **Budget Buddy** folder inside 
 ## First steps
 
 Budget Buddy opens on **Home** with a **Get started** list: add your accounts, bring in what you spent, and set
-monthly budgets. Each step links to the page that does it. It starts in the simple view; for every tool, open
+monthly budgets, then save your recovery phrase and make a backup. Each step links to the page that does it. It starts in the simple view; for every tool, open
 **Settings** at the top right and set **View** to **All tools** ([more](open-the-dashboard.md#simple-view-or-all-tools)).
 
 Write down your recovery phrase and keep it safe ([keep your data safe](keep-your-data-safe.md)).

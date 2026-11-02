@@ -23,7 +23,7 @@ from app.listeners import LanListener
 from app.network import LocalAccessMiddleware, PrivateNetworkOnlyMiddleware
 from app.ratelimit import RateLimiter
 from app.remote_access import RemoteAccess
-from app.routers import backup, dashboard, health, instance
+from app.routers import about, backup, dashboard, health, instance, setup
 from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.devices import pair, pairing, receipts, remote_computers, sync
 from app.routers.imports import activity_import, csv_import, history, stock_import
@@ -125,6 +125,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(PrivateNetworkOnlyMiddleware)
     install_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(about.router)
     app.include_router(pair.router)
     app.include_router(sync.router)
     app.include_router(pairing.router)
@@ -153,5 +154,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(remote_computers.router)
     app.include_router(instance.router)
     app.include_router(backup.router)
+    app.include_router(setup.router)
     app.include_router(dashboard.router)
     return app

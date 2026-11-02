@@ -1,6 +1,8 @@
 """Make the Windows download for a release: dist/Budget-Buddy-<version>-Windows.zip and its .sha256.
 The zip holds the built app (build_desktop.py), the installer and a plain-English READ ME FIRST.txt,
-so nobody needs Python or this repository to use it. The version comes from server/app/__init__.py.
+so nobody needs Python or this repository to use it. LICENSE and THIRD-PARTY-NOTICES.txt (made from
+the packaged libraries' own licence files) travel with it. The version comes from
+server/app/__init__.py.
 (docs/dev/release.md has the full checklist; .github/workflows/release.yml runs this for a v* tag.)
 
     py scripts/release/make_release.py
@@ -8,7 +10,6 @@ so nobody needs Python or this repository to use it. The version comes from serv
 
 import argparse
 import hashlib
-import re
 import shutil
 import subprocess
 import sys
@@ -17,7 +18,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/, for _common
 
-from _common import PACKAGING_DIR, REPO, SERVER_DIR, require_windows, say, stop  # noqa: E402
+from _version import version  # noqa: E402
+
+from _common import PACKAGING_DIR, REPO, require_windows, say, stop  # noqa: E402
 
 INSTALLER = (
     "install.ps1",
@@ -25,15 +28,6 @@ INSTALLER = (
     "Uninstall Budget Buddy.bat",
     "READ ME FIRST.txt",
 )
-
-
-def version() -> str:
-    found = re.search(
-        r'__version__ = "([^"]+)"', (SERVER_DIR / "app" / "__init__.py").read_text("utf-8")
-    )
-    if not found:
-        stop("No __version__ in server/app/__init__.py.")
-    return found[1]
 
 
 def zip_folder(folder: Path, zip_path: Path) -> None:
@@ -63,6 +57,10 @@ def main() -> int:
     (stage / "Budget Buddy" / "version.txt").write_text(number + "\n", encoding="ascii")
     for file in INSTALLER:
         shutil.copy(PACKAGING_DIR / file, stage)
+    shutil.copy(REPO / "LICENSE", stage)  # the app folder has one too; this one is easy to find
+    for needed in ("LICENSE", "THIRD-PARTY-NOTICES.txt"):
+        if not (stage / "Budget Buddy" / needed).is_file():
+            stop(f"The build has no {needed} in the app folder.")
 
     zip_path.unlink(missing_ok=True)
     zip_folder(stage, zip_path)
