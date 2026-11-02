@@ -35,10 +35,12 @@ from app.models.tax import (
     StockSale,
     StockSaleOrder,
 )
+from app.models.tax_preferences import TaxPreferences
 from app.models.trades import BankTrade, SecuritySymbol
 
 __all__ = [
     "SetupProgress",
+    "TaxPreferences",
     "Account",
     "AccountKind",
     "Base",

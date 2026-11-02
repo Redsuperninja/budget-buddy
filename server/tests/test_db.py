@@ -62,6 +62,7 @@ EXPECTED_TABLES = {
     "pairing_nonces",
     "seen_nonces",
     "setup_progress",
+    "tax_preferences",
 }
 
 

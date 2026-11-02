@@ -38,6 +38,26 @@ Because the kinds follow different rules, Budget Buddy doesn't add them into one
 **standard deduction** next to them for comparison: if your itemized deductions add up to less, you'd usually
 take the standard deduction.
 
+## Choose your filing status
+
+The standard deduction depends on your filing status. At first the page lists all of them. To see only yours:
+
+1. Under **Standard deduction**, pick your status next to **Your filing status**: Single, Married filing
+   jointly, Married filing separately, or Head of household.
+2. The page shows only that status's standard deduction, for every tax year you look at.
+
+To list all of them again, pick **Not set: show all**. Choosing a status only changes what's shown; none of
+the totals change. Budget Buddy doesn't check which status you qualify for: the IRS instructions for Form 1040
+explain each one. Qualifying surviving spouse isn't on the list yet; it uses the same standard deduction as
+Married filing jointly.
+
+Your filing status can change from one year to the next: it generally depends on whether you were married on December 31
+of that tax year. Budget Buddy keeps one choice for every year, so if you got married or divorced, change it
+when you look at a different year.
+
+If you're married filing separately and your spouse itemizes their deductions, your standard deduction is $0,
+so you'd itemize too. The page says this next to the standard deduction.
+
 ## Download or print
 
 - **Download as a spreadsheet (CSV):** opens in Excel, Google Sheets or Numbers, with one row per item. Keep

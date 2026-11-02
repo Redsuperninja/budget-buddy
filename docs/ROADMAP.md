@@ -172,7 +172,7 @@ done.
   planned income — *backend-engineer* + *finance-tax-expert*
 - [x] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
   the desktop window) — *backend-engineer* + *security-reviewer*
-- [ ] 25j. In 0.1.0 (owner, 2026-10-20): a filing status setting that narrows the tax summary to one status —
+- [x] 25j. In 0.1.0 (owner, 2026-10-20): a filing status setting that narrows the tax summary to one status —
   *finance-tax-expert*
 - [ ] 25k. Version 0.1.0 everywhere (the mobile app says 1.0.0, `desktop/pyproject.toml` says 0), version info in the
   `.exe`, `CHANGELOG.md`'s long Unreleased list condensed for 0.1.0, and a dry run on a clean Windows user —

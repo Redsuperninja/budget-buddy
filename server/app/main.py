@@ -37,7 +37,7 @@ from app.routers.investing import (
     sweep_check,
 )
 from app.routers.ledger import accounts, transactions
-from app.routers.tax import deductions, donations, paychecks, tax_summary
+from app.routers.tax import deductions, donations, paychecks, tax_preferences, tax_summary
 from app.services.devices.pairing_sessions import load_server_id, purge_ended_sessions
 from app.services.devices.receipts import remove_orphan_files
 from app.services.devices.remote_computers import JoinCodes, authenticate
@@ -146,6 +146,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(sweep_check.router)
     app.include_router(deductions.router)
     app.include_router(tax_summary.router)
+    app.include_router(tax_preferences.router)
     app.include_router(stock_import.router)
     app.include_router(positions.router)
     app.include_router(stocks.router)

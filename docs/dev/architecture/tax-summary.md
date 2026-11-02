@@ -3,7 +3,7 @@
 Code: `services/tax/deductions.py`, `services/tax/tax_summary.py`, `services/tax/tax_export.py` and their routers.
 Roadmap item 13. An estimate to gather records, not tax advice.
 
-## Routes (this computer only)
+## Routes (this computer and joined computers, ADR-0009; never phones)
 
 - `GET /api/local/deductions?tax_year=YYYY` (required), `POST /api/local/deductions`,
   `GET/PATCH/DELETE /api/local/deductions/{id}`. A deduction has `tax_year`, `kind` (see `DeductionKind`),
@@ -11,10 +11,31 @@ Roadmap item 13. An estimate to gather records, not tax advice.
   migration 0011), optional `date` (must be in `tax_year`), `amount_cents` or
   `amount` (dollars text, not negative), optional `receipt_id`. Listed by date, undated last.
 - `GET /api/local/tax-summary/{year}`: pay-stub totals for the year, donation totals (cash, goods, all),
-  realized stock gains (short, long, total, possible wash sales), other deductions by kind, and the basic
-  standard deduction for each filing status from that year's tax data (`null` without a data file). Works for
-  any year from 2000 to 2100; only the standard deduction needs tax data.
-- `GET /api/local/tax-summary/{year}/export.csv`: the same year as a CSV download (see below).
+  realized stock gains (short, long, total, possible wash sales), other deductions by kind, the chosen
+  `filing_status` (or `null`), and the basic standard deduction from that year's tax data (`null` without a data
+  file): for every filing status, or only for `filing_status` when one is chosen. Works for any year from 2000
+  to 2100; only the standard deduction needs tax data.
+- `GET /api/local/tax-summary/{year}/export.csv`: the same year as a CSV download (see below). It has no
+  standard deduction, so the filing status doesn't change it.
+- `GET/PUT /api/local/tax-preferences` (roadmap 25j): `{"filing_status": "single" | "married_filing_jointly" |
+  "married_filing_separately" | "head_of_household" | null}`; `null` (the default) is "Not set: show all".
+  The allowed values are `FILING_STATUSES` in `app/tax_data`; qualifying surviving spouse isn't one because
+  the data files don't list it. Unknown values or fields get 422. PUT needs the page's `Origin` and CSRF
+  token like every write.
+
+## Filing status (roadmap 25j)
+
+- Stored in `tax_preferences` (migration 0030): one row (id 1, made when first saved), `filing_status`
+  nullable with a CHECK on the four values. A typed single-row table, like `price_feed` and `setup_progress`,
+  rather than a key/value settings table: the database checks the value, and there is only one setting.
+- One status for every year shown (not one per year).
+- **Display only**: it picks which status's numbers the summary returns; no amount is worked out differently.
+- Not encrypted (one of four fixed words). Backups carry it and a restore brings back the backup's value,
+  like other data. Because a key change can't make it unreadable, a row there doesn't count as the folder's
+  own data (`_STARTER_TABLES` in `backup/restore.py`), so choosing a status on a new computer doesn't block
+  restoring another key's backup.
+- Joined computers may read and change it (`tax-preferences` is in `JOINED_AREAS`): they already see and edit
+  the summary it narrows, and it opens no connection and lets nothing in. Phones never reach `/api/local`.
 
 ## Rules
 

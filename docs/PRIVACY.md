@@ -39,6 +39,7 @@ These are **not** encrypted yet, because Budget Buddy needs to read them to sear
 - Company names on dividends and on stock trades from your bank file
 - Category names and auto-sort rule text
 - Stock symbols and lots
+- Your filing status (if you choose one on the Tax summary)
 
 Encrypted names can still show up in descriptions and account names, so keep your data folder private. Encrypting more is planned, not built yet ([issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28)). For the full picture, see [Keep your data safe](guide/keep-your-data-safe.md).
 
