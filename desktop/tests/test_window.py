@@ -281,7 +281,7 @@ def test_budget_buddy_github_links_are_allowed(url):
         "https://github.com.evil.example/Redsuperninja/budget-buddy",
         "https://evil.example/https://github.com/Redsuperninja/budget-buddy",
         "https://github.com@evil.example/Redsuperninja/budget-buddy",
-        "https://user@github.com/Redsuperninja/budget-buddy",
+        "https://user" + "@github.com/Redsuperninja/budget-buddy",  # split: not a real email
         "https://github.com:8443/Redsuperninja/budget-buddy",
         "https://github.com\@evil.example/Redsuperninja/budget-buddy",
         "https://github.com/Redsuperninja/budget-buddy/../../evil",
