@@ -26,7 +26,7 @@ export async function api(method, path, { json, body, contentType, headers: extr
   } catch {
     /* not JSON */
   }
-  if (!response.ok) throw new Error(plainError(data, response.status));
+  if (!response.ok) throw Object.assign(new Error(plainError(data, response.status)), { status: response.status });
   return data;
 }
 

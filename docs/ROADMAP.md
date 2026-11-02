@@ -168,7 +168,7 @@ done.
     exist there (`main.js` drops Devices)
   - Bug: the simple view and Get started offer "Connect the phone app", which isn't published
     ([release.md](dev/release.md)); show only the browser way until it is
-- [ ] 25h. Starter budget step in Setup: untick categories you don't need, optional monthly take-home pay as
+- [x] 25h. Starter budget step in Setup: untick categories you don't need, optional monthly take-home pay as
   planned income — *backend-engineer* + *finance-tax-expert*
 - [x] 25i. About in the Settings menu: version, user guide, privacy, licences (opened in the system browser from
   the desktop window) — *backend-engineer* + *security-reviewer*

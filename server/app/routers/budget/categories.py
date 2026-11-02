@@ -25,3 +25,8 @@ def get_category(category_id: PathId, session: SessionDep) -> CategoryOut:
 @router.patch("/{category_id}")
 def update_category(category_id: PathId, data: CategoryUpdate, session: SessionDep) -> CategoryOut:
     return service.update_category(session, category_id, data)
+
+
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_category(category_id: PathId, session: SessionDep) -> None:
+    service.delete_category(session, category_id)

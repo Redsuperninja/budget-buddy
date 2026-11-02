@@ -16,7 +16,13 @@ pressed **Done**. It never appears on a phone or on another computer you connect
    that you did; the tick only lets it stop reminding you. Don't save a photo or a file of the phrase on this computer.
 3. **Your first account.** Add a checking, savings or card account, or import a file from your bank. See
    [Accounts and transactions](accounts-and-transactions.md) and [Import a bank file](import-a-bank-file.md).
-4. **Your phone.** Open Budget Buddy in your phone's web browser (see [Connect your phone](connect-your-phone.md)).
+4. **Your starter budget.** Budget Buddy starts you off with a list of spending and saving categories. Untick the
+   ones you won't use, and optionally type your take-home pay each month (after tax and deductions: what lands in your bank), then click **Save starter
+   budget**. Unticked categories are removed; one already used by transactions, receipts or transfers is always kept. Your take-home pay
+   is what percentage budgets are worked out from (see [Budget by percentage](budget-by-percentage.md)). Pay and
+   transfer categories can't be unticked, because Budget Buddy needs them. You can add a category back later in
+   **Budget** (see [Budget categories](budget-categories.md)).
+5. **Your phone.** Open Budget Buddy in your phone's web browser (see [Connect your phone](connect-your-phone.md)).
    The phone app isn't in the app stores yet, so this is the only way for now.
 
 ## Leaving Setup

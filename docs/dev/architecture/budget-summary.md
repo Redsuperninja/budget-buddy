@@ -6,6 +6,10 @@ Code: `services/budget/categories.py`, `services/budget/summary.py` and their ro
 ## Routes (this computer only)
 
 - `GET/POST /api/local/categories`, `GET/PATCH /api/local/categories/{id}`.
+- `DELETE /api/local/categories/{id}` (204): only a category nothing uses. One with transactions, receipts, or a
+  linked transfer that goes back to it when unlinked (`pre_transfer_category_id`, which has no foreign key) is
+  refused with 409 `category_in_use`. Its auto-sort rules are deleted with it (foreign-key cascade). Used by the
+  Setup page's Starter budget step (25h, ADR-0015); no other screen deletes categories yet.
 - `GET /api/local/summary/monthly?month=YYYY-MM`: income, spending and savings for that month. Optional
   `&through=YYYY-MM-DD` (a day in that month, else 422) counts only transactions up to and including it; Home uses
   it to compare this month so far with the same days of last month.

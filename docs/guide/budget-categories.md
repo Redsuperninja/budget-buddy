@@ -21,6 +21,9 @@ You can add a category, rename it, and set a monthly budget for it (the amount y
 Income categories have no budget: your income is what the rest of the budget is measured against. Names can't repeat, and upper or lower case doesn't make a name different. You
 can't move a category to a different kind. If you picked the wrong kind, make a new category instead.
 
+Removing categories you don't use is done once, on the Setup page's **Starter budget** step (see
+[The first time you open it](first-start.md)). A category already used by transactions, receipts or transfers is always kept.
+
 On the **Categories** page (under **Budget**) your categories are listed by kind: **Needs**, **Wants**,
 **Savings**, **Income**, then **Transfer**. Each kind's title line says how many categories it has and what their
 monthly budgets add up to (amounts and percentages of income are added separately). Click a kind's title to fold

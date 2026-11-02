@@ -305,3 +305,41 @@ def test_summary_through_must_be_a_day_in_that_month(client, through):
     response = client.get(SUMMARY, params={"month": "2026-01", "through": through})
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "validation_error"
+
+
+def test_unused_category_can_be_deleted_but_one_with_transactions_cannot(client, add_txn, accounts):
+    used, unused = cid(client, "Groceries"), cid(client, "Dining Out")
+    add_txn(accounts[0], -500, category_id=used)
+    kept = client.delete(f"{CATS}/{used}")
+    assert (kept.status_code, kept.json()["error"]["code"]) == (409, "category_in_use")
+    assert client.get(f"{CATS}/{used}").status_code == 200
+    assert client.delete(f"{CATS}/{unused}").status_code == 204
+    assert client.get(f"{CATS}/{unused}").status_code == 404
+    assert client.delete(f"{CATS}/{unused}").status_code == 404
+
+
+@pytest.mark.parametrize("peer", ["192.168.1.50", "10.0.0.7"])
+def test_category_delete_is_this_computer_only(make_client, peer):
+    assert make_client(peer=peer).delete(f"{CATS}/1").status_code == 403
+    c = make_client(headers={"Origin": "http://evil.example"})
+    assert c.delete(f"{CATS}/1").status_code == 403
+
+
+def test_category_a_linked_transfer_goes_back_to_is_kept(client, add_txn, accounts):
+    dining = cid(client, "Dining Out")
+    out = add_txn(accounts[0], -1_000, category_id=dining)
+    into = add_txn(accounts[1], 1_000)
+    base = f"/api/local/transactions/{out['id']}"
+    assert client.post(f"{base}/transfer", json={"other_id": into["id"]}).is_success
+    assert client.get(base).json()["category_id"] != dining  # now filed under Transfer
+    assert client.delete(f"{CATS}/{dining}").status_code == 409
+    assert client.delete(f"{base}/transfer").is_success
+    assert client.get(base).json()["category_id"] == dining
+
+
+def test_deleting_a_category_removes_its_auto_sort_rules(client):
+    unused = cid(client, "Dining Out")
+    rule = client.post("/api/local/category-rules", json={"pattern": "pizza", "category_id": unused})
+    assert rule.status_code == 201, rule.text
+    assert client.delete(f"{CATS}/{unused}").status_code == 204
+    assert client.get(f"/api/local/category-rules/{rule.json()['id']}").status_code == 404
