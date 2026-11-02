@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Receipt photos: location and camera details are now also removed from **HEIC** photos (iPhone format), and a sideways JPEG photo keeps its rotation instead of showing rotated (issue #34). A HEIC file that can't be read well enough to clean is refused. For developers: `receipt_images.py` blanks the Exif/XMP items in place, no image library.
 - Starter budget step on the Setup page (25h): untick the starter categories you won't use and, if you like, enter your monthly take-home pay so percentage budgets turn into dollar amounts. A category already used by transactions, receipts or transfers is always kept. For developers: `DELETE /api/local/categories/{id}` deletes only an unused category (409 `category_in_use` otherwise). Guide: `docs/guide/first-start.md`.
 - Behind the scenes: the public-repo check passes again. A desktop test held a web address that looked like a real email address (from #202); it is now built from two pieces, and the test checks the same thing.
 - Get started on the Budget Buddy computer now also asks you to **save your recovery phrase** (with an "I've written it down" button) and **make a backup**, and stays on Home until both are done. Home shows a gentle **backup reminder** when your last backup is over 30 days old, or you have data and never made one; "Remind me later" hides it for a week (remembered in that browser, since the Home Base has no place for it). A phone or computer connected through its browser sees neither, because it can't do them (roadmap 25g).

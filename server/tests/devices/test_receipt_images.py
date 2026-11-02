@@ -92,8 +92,50 @@ def test_broken_png_is_rejected(data):
     assert caught.value.reason == "image_invalid"
 
 
-def test_heic_is_accepted_unchanged():
-    assert clean_image(img.heic()) == (img.heic(), HEIC)
+def test_heic_exif_and_xmp_are_blanked_in_place():
+    original = img.heic()
+    cleaned, kind = clean_image(original)
+    assert kind is HEIC
+    assert len(cleaned) == len(original)  # same size, so every offset in the file stays valid
+    assert img.PICTURE in cleaned
+    for secret in (b"FAKE-LOCATION", b"GPSLatitude", b"FAKE-XMP-LOCATION", b"Exif"):
+        assert secret not in cleaned
+
+
+def test_heic_without_metadata_is_unchanged():
+    plain = img.heic(with_metadata=False)
+    assert clean_image(plain) == (plain, HEIC)
+
+
+@pytest.mark.parametrize("cut", [20, 40, 70, 100])
+def test_broken_heic_is_rejected(cut):
+    with pytest.raises(ImageRejected) as caught:
+        clean_image(img.heic()[:cut])
+    assert caught.value.reason == "image_invalid"
+
+
+def test_heic_without_item_index_is_rejected():
+    ftyp = img.heic()[:24]
+    with pytest.raises(ImageRejected):
+        clean_image(ftyp + img._box(b"mdat", b"x"))
+
+
+@pytest.mark.parametrize("little", [False, True])
+@pytest.mark.parametrize("value", [2, 3, 6, 8])
+def test_jpeg_keeps_only_the_rotation(value, little):
+    cleaned, _ = clean_image(img.rotated_jpeg(value, little=little))
+    assert b"FAKE-LOCATION" not in cleaned and b"FakePhone" not in cleaned
+    assert cleaned.startswith(b"\xff\xd8" + img.JFIF)  # JFIF stays first
+    assert b"Exif\x00\x00MM\x00*" in cleaned
+    assert cleaned.count(b"Exif") == 1
+    tag = cleaned.index(b"\x01\x12\x00\x03\x00\x00\x00\x01")
+    assert int.from_bytes(cleaned[tag + 8 : tag + 10], "big") == value
+
+
+def test_upright_jpeg_gets_no_exif_block():
+    cleaned, _ = clean_image(img.rotated_jpeg(1))
+    assert b"Exif" not in cleaned
+    assert cleaned == img.clean_jpeg().replace(img.ICC, b"")
 
 
 def test_size_cap():

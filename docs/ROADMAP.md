@@ -27,7 +27,7 @@ screen and the phone shows real data.
 2. ~~**9. Auto-categorization rules.**~~
 3. ~~**13. Other deductions + yearly tax summary export.**~~ (PDF through the browser's print dialog)
 4. Follow-ups: #13 (paycheck detail lines), #14 (stock acquisition kinds and basis adjustments),
-   #15 (donation detail fields), #30 (loan principal vs. interest), #33 (receipt OCR), #34 (HEIC metadata).
+   #15 (donation detail fields), #30 (loan principal vs. interest) and #33 (receipt OCR).
 
 **D. Easy start (done).** Starting Budget Buddy should be a double-click, not three PowerShell windows.
 1. ~~**22a. One start script:**~~ sets itself up on first run, starts the Home Base, opens the dashboard, and stops
@@ -81,7 +81,7 @@ done.
 - [x] 7b. Pay deposits from bank files start a paycheck on the Paychecks page, linked to the deposit — *backend-engineer*
 - [x] 8. Receipts API: encrypted photo upload, details — *backend-engineer*
 - [x] 8b. Receipts page on the dashboard: photos, details, delete outdated ones — *backend-engineer*
-  - OCR split out to issue #33; HEIC photos keep their metadata for now (issue #34).
+  - OCR split out to issue #33; HEIC metadata and JPEG rotation fixed in issue #34.
 - [x] 9. Auto-categorization rules — *backend-engineer* + *finance-tax-expert*
 - [x] 9b. Auto-sort learns from your picks; see what was auto-sorted — *backend-engineer*
 - [x] 9d. Hide balance adjustments on the Transactions page (on by default) — *backend-engineer*

@@ -50,6 +50,54 @@ def png(*, with_metadata: bool = True, trailer: bytes = b"") -> bytes:
     return PNG_SIGNATURE + IHDR + meta + IDAT + IEND + trailer
 
 
-def heic() -> bytes:
-    ftyp = b"ftyp" + b"heic" + b"\x00\x00\x00\x00" + b"mif1heic"
-    return struct.pack(">I", len(ftyp) + 4) + ftyp + b"\x00\x00\x00\x08free" + b"fake-heic"
+def _box(kind: bytes, payload: bytes) -> bytes:
+    return struct.pack(">I", len(payload) + 8) + kind + payload
+
+
+def _infe(item_id: int, item_type: bytes, extra: bytes = b"") -> bytes:
+    return _box(b"infe", b"\x02\x00\x00\x00" + struct.pack(">HH", item_id, 0) + item_type + b"\x00" + extra)
+
+
+PICTURE = b"FAKE-HEIC-PICTURE"
+HEIC_EXIF = b"\x00\x00\x00\x00Exif\x00\x00GPSLatitude 51.5 FAKE-LOCATION"
+HEIC_XMP = b"<x:xmpmeta>FAKE-XMP-LOCATION</x:xmpmeta>"
+
+
+def heic(*, with_metadata: bool = True) -> bytes:
+    """A tiny HEIC-shaped file: picture, Exif and XMP items located by iinf/iloc, data in mdat."""
+    ftyp = _box(b"ftyp", b"heic\x00\x00\x00\x00mif1heic")
+    items = [(1, b"hvc1", b"", PICTURE)]
+    if with_metadata:
+        items += [(2, b"Exif", b"", HEIC_EXIF), (3, b"mime", b"application/rdf+xml\x00", HEIC_XMP)]
+    infe = b"".join(_infe(i, t, x) for i, t, x, _ in items)
+    iinf = _box(b"iinf", b"\x00\x00\x00\x00" + struct.pack(">H", len(items)) + infe)
+
+    def meta(first_offset: int) -> bytes:
+        loc, at = b"", first_offset
+        for i, _, _, payload in items:
+            loc += struct.pack(">HHHII", i, 0, 1, at, len(payload))  # id, data ref, extents, offset, length
+            at += len(payload)
+        iloc = _box(b"iloc", b"\x00\x00\x00\x00\x44" + b"\x00" + struct.pack(">H", len(items)) + loc)
+        return _box(b"meta", b"\x00\x00\x00\x00" + iinf + iloc)
+
+    start = len(ftyp) + len(meta(0)) + 8  # the first byte inside mdat
+    return ftyp + meta(start) + _box(b"mdat", b"".join(payload for *_, payload in items))
+
+
+def exif_orientation(value: int, *, little: bool = False) -> bytes:
+    """An Exif block with a rotation plus a fake location, as a phone would write it."""
+    order = "little" if little else "big"
+    head = b"II*\x00" + (8).to_bytes(4, "little") if little else b"MM\x00*" + (8).to_bytes(4, "big")
+    entries = [(0x010F, 2, b"FakePhone\x00"), (0x0112, 3, None)]
+    body = len(entries).to_bytes(2, order)
+    for tag, typ, text in entries:
+        if text is None:
+            body += tag.to_bytes(2, order) + typ.to_bytes(2, order) + (1).to_bytes(4, order)
+            body += value.to_bytes(2, order) + b"\x00\x00"
+        else:  # a value too long for the entry: kept elsewhere; here just a fake pointer
+            body += tag.to_bytes(2, order) + typ.to_bytes(2, order) + len(text).to_bytes(4, order) + b"\x00\x00\x00\x00"
+    return b"Exif\x00\x00" + head + body + b"\x00\x00\x00\x00" + b"FAKE-LOCATION"
+
+
+def rotated_jpeg(value: int, *, little: bool = False) -> bytes:
+    return b"\xff\xd8" + JFIF + segment(0xE1, exif_orientation(value, little=little)) + DQT + SOF0 + DHT + SOS + SCAN + b"\xff\xd9"
