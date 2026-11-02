@@ -41,8 +41,11 @@ have a category called Payments for something else, card payments stay in **Tran
 
 Both sides need to be in Budget Buddy, so add both accounts and import (or enter) both sides.
 
-- **Loan payments:** if your lender's file shows the whole payment, the interest part is linked too, so it isn't
-  counted as spending. To count the interest, undo the link and give the payment a category.
+- **Loan and mortgage payments:** a transfer has to be the same amount on both sides, so a $1,500.00 payment can't
+  be linked to $1,200.00 of principal on the loan. If you link the whole payment, the interest disappears from your
+  spending (and mortgage interest is something you may deduct). Instead, enter two transactions on the checking
+  account: -$1,200.00 for the principal, linked as a transfer to the loan, and -$300.00 for the interest, with an
+  interest category. Splitting one payment automatically is planned (issue #30).
 - **Money out of retirement or an HSA** may have tax rules (taxes, penalties, or medical receipts to keep).
   Budget Buddy only tracks the move. Estimate only, not tax advice.
 
