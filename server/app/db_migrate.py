@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 # The newest migration. Lets start-up skip loading Alembic when the database is up to date.
 # tests/test_migrations.py checks it against Alembic's real head: update it with a new migration.
-HEAD_REVISION = "0031"
+HEAD_REVISION = "0032"
 # Migration that encrypts sensitive columns (roadmap #4). Backups made before it hold plaintext.
 FIRST_ENCRYPTED_REVISION = "0003"
 # Migration that encrypts bank, employer, charity and shop names (#28). Database copies made

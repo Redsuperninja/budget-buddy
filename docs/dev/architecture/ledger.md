@@ -82,6 +82,15 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   newest first), `GET/PATCH/DELETE /api/local/transactions/{id}`.
   - Send `amount_cents`, or `amount` as dollar text (`"-12.34"`).
   - Adjustments can't have a category. A `refund` must be a positive amount.
+- **Splits** ([ADR-0017](../adr/0017-transaction-splits.md); `services/ledger/splits.py`, `models/splits.py`):
+  `PUT /api/local/transactions/{id}/splits` with `{"splits": [{category_id, amount_cents, note}]}` replaces the
+  whole list; an empty list undoes it. 2 to 20 parts, each nonzero with the transaction's sign, adding up exactly
+  to its amount (422 `invalid_split`); only `normal` and `refund` transactions that aren't a transfer, pay deposit,
+  donation, stock trade, dividend or bank trade (409 `cannot_split`). The transaction's own `category_id`,
+  `category_source` and `sorted_by_rule_id` are cleared, and its JSON lists the parts as `splits`. While split,
+  setting a category, or changing the amount or kind, is a 409 `split_transaction` (re-sending the current values
+  is fine). A category a part uses can't be deleted, and deleting the transaction deletes its parts. The budget
+  summary and rules don't use the parts yet (roadmap 10f-2 to 10f-4).
 
 ## Transfers and lock rules
 

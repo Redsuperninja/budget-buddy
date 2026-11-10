@@ -26,6 +26,7 @@ from app.models.ledger import (
     Transaction,
 )
 from app.models.setup import SetupProgress
+from app.models.splits import TransactionSplit
 from app.models.tax import (
     Deduction,
     Dividend,
@@ -65,6 +66,7 @@ __all__ = [
     "PairingSession",
     "Paycheck",
     "PaycheckLine",
+    "TransactionSplit",
     "Receipt",
     "RemoteComputer",
     "RetirementType",

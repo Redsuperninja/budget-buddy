@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db_commit import commit_or
 from app.errors import ApiError, not_found
-from app.models import Category, CategoryGroup, Receipt, Transaction
+from app.models import Category, CategoryGroup, Receipt, Transaction, TransactionSplit
 from app.schemas.budget.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
 
 
@@ -69,13 +69,14 @@ def delete_category(session: Session, category_id: int) -> None:
             exists().where(Transaction.category_id == category_id)
             | exists().where(Transaction.pre_transfer_category_id == category_id)
             | exists().where(Receipt.category_id == category_id)
+            | exists().where(TransactionSplit.category_id == category_id)
         )
     )
     if used:
         raise ApiError(
             409,
             "category_in_use",
-            "This category has transactions or receipts, so it can't be deleted. "
+            "This category has transactions, split parts or receipts, so it can't be deleted. "
             "Move them to another category first.",
         )
     session.delete(category)

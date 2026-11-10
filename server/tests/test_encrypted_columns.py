@@ -34,6 +34,7 @@ ENCRYPTED = {
     ("receipts", "image_path"),
     ("receipts", "notes"),
     ("donations", "notes"),
+    ("transaction_splits", "note"),
     ("deductions", "description"),
     ("devices", "sync_key"),
     ("pairing_sessions", "pair_sk"),

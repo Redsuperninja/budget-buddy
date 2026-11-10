@@ -7,6 +7,7 @@ from app.deps import Offset, PathId, QueryId, SessionDep
 from app.models import CategorySource, TransactionKind
 from app.schemas.ledger.transactions import (
     MatchedAgain,
+    SplitsReplace,
     TransactionCreate,
     TransactionOut,
     TransactionPage,
@@ -16,8 +17,8 @@ from app.schemas.ledger.transactions import (
 )
 from app.services.investing.bank_trades import find_trades
 from app.services.investing.dividend_matching import find_dividends
+from app.services.ledger import splits, transfers
 from app.services.ledger import transactions as service
-from app.services.ledger import transfers
 from app.services.ledger.match_again import match_again
 from app.services.ledger.transfer_matching import match_transfers
 from app.services.tax import gift_categories
@@ -111,6 +112,14 @@ def update_transaction(
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(transaction_id: PathId, session: SessionDep) -> None:
     service.delete_transaction(session, transaction_id)
+
+
+@router.put("/{transaction_id}/splits")
+def replace_splits(
+    transaction_id: PathId, data: SplitsReplace, session: SessionDep
+) -> TransactionOut:
+    """Replace the parts of a split (2 to 20 that add up to the amount); an empty list undoes it."""
+    return splits.replace_splits(session, transaction_id, data.splits)
 
 
 @router.post("/{transaction_id}/transfer")
