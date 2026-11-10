@@ -65,9 +65,9 @@ tries to reach the network.
 Every `/api/*` reply carries `Cache-Control: no-store` (`app/network.py`), so neither a browser nor the desktop
 app's window keeps financial data in its disk cache.
 
-## What stays plain text in `budget.db`
+## What is readable inside `budget.db`
 
-These stay readable so Budget Buddy can search, sort and add them up:
+The whole file is encrypted (SQLCipher, [ADR-0014](../../adr/0014-whole-database-encryption.md)), so none of this can be read from the data folder without the key. These are stored as ordinary columns inside it, so Budget Buddy can search, sort and add them up while it runs:
 
 - every amount and date, and each transaction's description
 - auto-sort rule text (`category_rules.pattern`), which is copied from transaction descriptions
@@ -78,11 +78,9 @@ These stay readable so Budget Buddy can search, sort and add them up:
 - category names
 - stock symbols and lots
 
-The encrypted names can also appear in transaction descriptions and account names, which stay plain.
+The encrypted names can also appear in transaction descriptions and account names, which are ordinary columns.
 
-Encrypting more of them, or the whole database, is
-[issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28); whole-database encryption with SQLCipher is
-proposed in [ADR-0014](../../adr/0014-whole-database-encryption.md). Users are told to keep the data folder out
+Older `budget.db.bak-*` copies made before encryption are not encrypted (the app lists them). Users are told to keep the data folder out
 of cloud-synced folders and to protect their Windows account with a password.
 
 ## On the network
