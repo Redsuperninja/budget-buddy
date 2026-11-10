@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Home: "Your month" and its month box now sit on the same middle line, and the "Last file imported ... Import a newer one" sentence is a small pill (date and how long ago, yellow after a month) with an **Import a file** button.
 - Home: the extra "Month" label above the month box is gone. "Fold all" and "Open all" are now one small rounded two-part control with a chevron on each side, instead of two underlined links.
 - Dashboard layout and wording: counts read properly ("1 paycheck", "5 paychecks", not "paycheck(s)"), in the dashboard and in the budget and import messages; Home no longer shows a row with a single "Home" tab; short forms keep their button beside the fields (Tax year [2026] Show year); a card inside another card is a tinted panel with a green edge; Fold all / Open all count only the page's own cards and grey out the one that would do nothing; the two charts side by side on Home are the same height and fold together.
 - Dashboard look: every button now has the app's own style (two on Home and several elsewhere were the browser's grey ones), file pickers match, a checkbox sits beside its words, notice boxes have even spacing, and short pages no longer sit a few pixels to the side of long ones. The README now says the whole database is encrypted.

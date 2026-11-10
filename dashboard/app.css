@@ -128,6 +128,9 @@ button.plain { background: none; color: var(--text); border: 1px solid var(--lin
 button:disabled { opacity: 0.5; cursor: default; }
 .inline-form { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: end; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem; }
+/* A row of heading, picker and status with nothing labelled above it: everything on the middle line (Home). */
+.toolbar.centered { align-items: center; }
+.toolbar.centered h2 { margin: 0; }
 .qr { background: #fff; padding: 0.5rem; border-radius: 8px; width: 18rem; max-width: 100%; height: auto; display: block; }
 textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
@@ -157,7 +160,12 @@ textarea.code { width: 100%; min-height: 6rem; font-family: ui-monospace, Consol
 .chart .row:hover .hit { fill: var(--line); opacity: 0.35; }
 .chart .linked { cursor: pointer; }
 .chart .linked:hover text.label { text-decoration: underline; }
-.toolbar .fresh { margin: 0 0 0.5rem auto; }
+.toolbar .fresh { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; padding: 0.25rem 0.3rem 0.25rem 0.85rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted); font-size: 0.85rem; }
+.toolbar .fresh.stale { background: var(--warn-bg); color: var(--text); border-color: transparent; }
+.toolbar .fresh-action { padding: 0.2rem 0.75rem; border-radius: 999px; background: var(--accent); color: var(--accent-text);
+  text-decoration: none; font-weight: 600; }
+.toolbar .fresh-action:hover { filter: brightness(1.1); }
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }
 .chart .tip-box { fill: var(--card); stroke: var(--line); }
 .chart .tip text { fill: var(--text); }
