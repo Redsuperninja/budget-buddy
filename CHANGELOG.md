@@ -4,6 +4,7 @@ One line per change, newest first. Add yours under **Unreleased**; it moves into
 The day-by-day list from before 0.1.0 is in this file's git history (`git log -p CHANGELOG.md`).
 
 ## Unreleased
+- For developers (roadmap 26-1, bank-file import): `services/imports/ofx_parsing.py` reads a bank's OFX/QFX download (the SGML and XML kinds): the bank's own transaction IDs, exact cents, dates, the statement balance and the last four digits of the account. It's our own small tag reader, so nothing in the file is expanded or followed. No page or route uses it yet (26-2 adds them). See [ADR-0016](docs/adr/0016-ofx-import.md).
 
 ## 0.1.0 (first public version)
 What Budget Buddy does, in plain English. The roadmap numbers are in [docs/ROADMAP.md](docs/ROADMAP.md).
