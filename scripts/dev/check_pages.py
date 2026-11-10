@@ -11,6 +11,8 @@ With --screenshots, it also saves the top of each page as <page>.png in that fol
 guide's pictures (docs/guide/images/) are made this way, from made-up demo data only, and made
 smaller afterwards with shrink_png.py. Set BB_SHOTS_FULL=1 to save the whole page with every card opened,
 to review layout and styling (what the UI review of 2026-11 used).
+BB_SHOTS_EXTRA="phone,computers,backups" adds the Devices pages; BB_SHOTS_HEIGHT sets the window height (900).
+BB_SHOTS_FOLD="Get started" shows the named cards folded.
 
 Your real data and your own test data are never touched: everything lives in a new temporary
 folder (with the encryption key in memory only) that is deleted afterwards. Uses the test port,
