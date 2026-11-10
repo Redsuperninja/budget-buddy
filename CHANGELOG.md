@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The phone app now asks "Delete this receipt?" (or "Delete every waiting receipt?", with how many) before throwing away a waiting receipt photo, because that photo exists only on the phone.
 - For developers (refactor): the activity, stock and positions CSV importers share one header search (`find_header`, `date_format_below` in `csv_headers.py`), one cell reader (`optional_cell`) and one dollar-cell reader (`abs_amount`), instead of three copies each. Import behaviour and messages are unchanged.
 - For developers (refactor): `app/clock.py` is the one place that reads the date and time (`clock.today()`, `clock.utcnow_naive()`; tests freeze it with `monkeypatch.setattr(clock, "today", ...)`), and `app/db_commit.py`'s `commit_or` replaces two copies of the "commit, or say the name is taken" wrapper. No change for users.
 - For developers (roadmap 25l-3, whole-database encryption): with `BUDGET_BUDDY_DATABASE_ENCRYPTION` on, a start on an existing plain `budget.db` now moves it into a SQLCipher file once (`app/db_encrypt.py`): an `encrypt-pending` marker, the write-ahead log emptied, `sqlcipher_export` (with `user_version`) to `budget.db.encrypting`, a check that it opens and every table has the same row count, the plain `-wal`/`-shm` deleted, an atomic swap, then the marker cleared. A crash at any step resumes on the next start; if any step fails the plain file is left as it was and the start stops with a plain-English message. Older plain `budget.db.bak-*` copies are listed in a warning. The setting is still off by default.
