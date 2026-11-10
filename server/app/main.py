@@ -69,7 +69,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     warn_if_risky_data_dir(settings.data_dir)
     sweep_leftovers(settings.data_dir)  # from a backup or restore that was cut short
     # A restore started in the dashboard, finished before anything is opened (ADR-0012).
-    restored_from = pending.finish(settings.data_dir, get_key_store(settings.key_store))
+    restored_from = pending.finish(
+        settings.data_dir, get_key_store(settings.key_store), settings.database_encryption
+    )
     keys = load_keys(settings)
     database_key = keys.db_file if settings.database_encryption else None
     if database_key is not None:  # a database from before encryption moves over once (25l-3)

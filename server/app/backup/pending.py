@@ -20,10 +20,11 @@ from app.backup.restore import (
     RestoreError,
     RestoreStuckError,
     apply_restore,
+    database_key_for,
     has_own_data,
 )
 from app.crypto._fs import write_private_bytes
-from app.crypto.keys import fingerprint, read_fingerprint, save_fingerprint
+from app.crypto.keys import fingerprint, load_master_key, read_fingerprint, save_fingerprint
 from app.crypto.keystore import KeyStore, key_name_for
 from app.schemas.backup import PendingRestore
 
@@ -115,7 +116,7 @@ def _resume(data_dir: Path, store: KeyStore) -> None:
     logger.warning("Budget Buddy finished restoring your backup after being stopped part-way.")
 
 
-def finish(data_dir: Path, store: KeyStore) -> Path | None:
+def finish(data_dir: Path, store: KeyStore, database_encryption: bool = False) -> Path | None:
     """At start-up, before the database is opened: swap in a waiting restore. Returns the folder
     the replaced data was moved to, or None if nothing was waiting (or it couldn't be used, in
     which case it's cancelled and logged). A swap that fails or was cut short half-way stops the
@@ -129,6 +130,8 @@ def finish(data_dir: Path, store: KeyStore) -> Path | None:
             cancel(data_dir, store)  # half of one: never usable
         return None
     made_by = info["fingerprint"]
+    old_master = load_master_key(store, data_dir)  # this computer's key, for its own database
+    new_master = old_master
     if made_by != read_fingerprint(data_dir):
         new_key = store.get(_pending_key_name(data_dir))
         if new_key is None or fingerprint(new_key) != made_by or has_own_data(data_dir):
@@ -139,9 +142,16 @@ def finish(data_dir: Path, store: KeyStore) -> Path | None:
             )
             cancel(data_dir, store)
             return None
+        new_master = new_key
     (data_dir / PENDING_INFO).replace(data_dir / SWAPPING_INFO)
     try:
-        before = apply_restore(data_dir, data_dir / PENDING_DIR, made_by)
+        before = apply_restore(
+            data_dir,
+            data_dir / PENDING_DIR,
+            made_by,
+            database_key_for(old_master, database_encryption),
+            database_key_for(new_master, database_encryption),
+        )
     except RestoreStuckError:
         raise  # stuck half-way: keep everything as it is (the message says what to do)
     except RestoreError as exc:

@@ -56,14 +56,6 @@ def _receipt_files(data_dir: Path) -> list[Path]:
     return sorted(p for p in folder.iterdir() if _RECEIPT.fullmatch(f"{RECEIPTS_DIRNAME}/{p.name}"))
 
 
-# Until roadmap 25l-4 makes backups from an encrypted database, refuse instead of failing oddly.
-ENCRYPTED_DATABASE_BACKUP_MESSAGE = (
-    "Backups don't work yet while database encryption is turned on "
-    "(BUDGET_BUDDY_DATABASE_ENCRYPTION). Turn that setting off to make a backup. "
-    "Your data is safe and unchanged."
-)
-
-
 def write_backup(
     target: BinaryIO,
     data_dir: Path,
@@ -71,15 +63,20 @@ def write_backup(
     backup_key: bytes,
     fingerprint: str,
     version: str,
+    database_key: bytes | None = None,
 ) -> dict:
-    """Write an encrypted backup of ``data_dir`` to ``target``. Returns its manifest."""
-    if is_encrypted_engine(engine):
-        raise BackupError(ENCRYPTED_DATABASE_BACKUP_MESSAGE)
+    """Write an encrypted backup of ``data_dir`` to ``target``. Returns its manifest.
+
+    ``database_key`` is the key ``engine`` was made with (None for a plain database). The staged
+    copy of the database stays encrypted with it, so no plain copy is ever written (ADR-0014).
+    """
+    if is_encrypted_engine(engine) != (database_key is not None):
+        raise ValueError("database_key must be given exactly when the engine is encrypted")
     copy = data_dir / f".backup-{uuid.uuid4().hex}.db"
     try:
         make_private_file(copy)  # empty and owner-only before anything is written into it
         _clean_copy(engine, copy)  # consistent, including what's still in the WAL file
-        revision = database_revision(copy)
+        revision = database_revision(copy, database_key)
         if revision is None or (revision.isdigit() and revision < FIRST_ENCRYPTED_REVISION):
             raise BackupError(
                 "Your data hasn't been updated to the encrypted format yet. Start Budget Buddy "

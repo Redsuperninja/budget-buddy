@@ -15,13 +15,14 @@ from pathlib import Path
 
 from app import run_lock
 from app.backup.archive import BackupContentsError, extract_backup
-from app.crypto import database_has_rows
+from app.crypto import database_has_rows, sqlcipher
 from app.crypto._fs import ensure_private_dir
-from app.crypto.errors import DecryptionError
+from app.crypto.errors import DecryptionError, EncryptionError, WrongKeyError
 from app.crypto.files import RECEIPTS_DIRNAME
 from app.crypto.keys import (
     FINGERPRINT_FILENAME,
     PURPOSE_BACKUP,
+    PURPOSE_DB_FILE,
     derive_key,
     fingerprint,
     save_fingerprint,
@@ -45,6 +46,20 @@ REPLACED = (
     SERVER_ID_FILENAME,
     RECEIPTS_DIRNAME,
 )
+ENCRYPTED_BACKUP_MESSAGE = (
+    "That backup's database is encrypted, but database encryption is turned off here "
+    "(BUDGET_BUDDY_DATABASE_ENCRYPTION). Turn it on to restore this backup."
+)
+PLAIN_BACKUP_MESSAGE = (
+    "That backup was made before database encryption existed, and this version can't restore "
+    "it while database encryption is turned on yet."
+)
+WRONG_BACKUP_KEY_MESSAGE = "The key for that backup can't open the database inside it."
+CARRY_OVER_FAILED_MESSAGE = (
+    "Budget Buddy couldn't open the data on this computer, or the backup's data, with its "
+    "key, so it stopped before replacing anything."
+)
+_SQLITE_HEADER = b"SQLite format 3" + bytes(1)
 CLOSE_FIRST = "Budget Buddy is running. Close it first, then restore."
 
 
@@ -55,10 +70,25 @@ class BackupKey:
 
     fingerprint: str
     backup: bytes = field(repr=False)
+    # The ``db-file`` key the backup's database is encrypted with, or None when database
+    # encryption is off (the staged database is then plain SQLite).
+    database: bytes | None = field(default=None, repr=False)
 
     @classmethod
-    def from_master(cls, master_key: bytes) -> "BackupKey":
-        return cls(fingerprint(master_key), derive_key(master_key, PURPOSE_BACKUP))
+    def from_master(cls, master_key: bytes, database_encryption: bool = False) -> "BackupKey":
+        return cls(
+            fingerprint(master_key),
+            derive_key(master_key, PURPOSE_BACKUP),
+            database_key_for(master_key, database_encryption),
+        )
+
+
+def database_key_for(master_key: bytes | None, database_encryption: bool) -> bytes | None:
+    """The ``db-file`` key a database under ``master_key`` is encrypted with, or None if the
+    setting is off. With the setting on and no key, there is nothing to open the file with."""
+    if not database_encryption or master_key is None:
+        return None
+    return derive_key(master_key, PURPOSE_DB_FILE)
 
 
 class RestoreError(RuntimeError):
@@ -118,15 +148,28 @@ def sweep_leftovers(data_dir: Path) -> None:
             pass  # tried again next start
 
 
-def _check_database(db_path: Path) -> None:
+def _is_plain_file(path: Path) -> bool:
+    with open(path, "rb") as handle:
+        return handle.read(len(_SQLITE_HEADER)) == _SQLITE_HEADER
+
+
+def _check_database(db_path: Path, database_key: bytes | None) -> None:
+    """The backup's database opens with ``database_key`` (None: plain) and is a sound, known one."""
+    encrypted = not _is_plain_file(db_path)
+    if encrypted and database_key is None:
+        raise RestoreError(ENCRYPTED_BACKUP_MESSAGE)
+    if not encrypted and database_key is not None:
+        raise RestoreError(PLAIN_BACKUP_MESSAGE)
     try:
-        with open_read_only(db_path) as connection:
+        with open_read_only(db_path, database_key) as connection:
             ok = connection.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
-    except sqlite3.DatabaseError:
+    except WrongKeyError:
+        raise RestoreError(WRONG_BACKUP_KEY_MESSAGE) from None
+    except (sqlite3.DatabaseError, EncryptionError):
         ok = False
     if not ok:
         raise RestoreError("The database inside that backup is damaged.")
-    revision = database_revision(db_path)
+    revision = database_revision(db_path, database_key)
     if revision is None:
         raise RestoreError("That backup's database isn't from Budget Buddy.")
     if revision not in known_revisions():
@@ -146,7 +189,7 @@ def check_backup(path: Path, data_dir: Path, key: BackupKey) -> tuple[Path, dict
             if made_by != key.fingerprint:
                 raise RestoreError("That backup was made with a different key.")
             manifest = extract_backup(source, key.backup, salt, header, staging)
-        _check_database(staging / DB_FILENAME)
+        _check_database(staging / DB_FILENAME, key.database)
         return staging, manifest
     except (DecryptionError, BackupContentsError) as exc:
         shutil.rmtree(staging, ignore_errors=True)
@@ -161,8 +204,12 @@ def _tables(connection: sqlite3.Connection, kind: str = "table") -> set[str]:
     return {name for (name,) in connection.execute(query, (kind,))}
 
 
-def _clear_setup_progress(new_db: Path) -> None:
-    connection = sqlite3.connect(new_db)
+def _open_for_write(path: Path, database_key: bytes | None):
+    return sqlite3.connect(path) if database_key is None else sqlcipher.connect(path, database_key)
+
+
+def _clear_setup_progress(new_db: Path, database_key: bytes | None = None) -> None:
+    connection = _open_for_write(new_db, database_key)
     try:
         with connection:
             if "setup_progress" in _tables(connection):
@@ -171,14 +218,32 @@ def _clear_setup_progress(new_db: Path) -> None:
         connection.close()
 
 
-def carry_over_removals(old_db: Path, new_db: Path) -> None:
+def carry_over_removals(
+    old_db: Path,
+    new_db: Path,
+    old_key: bytes | None = None,
+    new_key: bytes | None = None,
+) -> None:
     """Phones and computers removed in ``old_db`` (the data being replaced) are removed in
     ``new_db`` too, so restoring an older backup can't let a lost phone sync again. This
-    computer's setup progress (including its last backup date) is kept as well."""
+    computer's setup progress (including its last backup date) is kept as well.
+
+    ``old_key`` opens this computer's database and ``new_key`` the backup's (each None for a plain
+    file). If either won't open, the restore stops with nothing changed, so a removed phone can
+    never be left able to sync again."""
+    try:
+        _carry_over(old_db, new_db, old_key, new_key)
+    except RestoreError:
+        raise
+    except (EncryptionError, sqlite3.DatabaseError) as exc:
+        raise RestoreError(CARRY_OVER_FAILED_MESSAGE) from exc
+
+
+def _carry_over(old_db: Path, new_db: Path, old_key: bytes | None, new_key: bytes | None) -> None:
     if not old_db.is_file():
-        _clear_setup_progress(new_db)
+        _clear_setup_progress(new_db, new_key)
         return
-    with open_read_only(old_db) as old:
+    with open_read_only(old_db, old_key) as old:
         tables = _tables(old)
         phones, computers = [], []
         if "devices" in tables:
@@ -196,7 +261,7 @@ def carry_over_removals(old_db: Path, new_db: Path) -> None:
                 "SELECT id, paired_at, revoked_at FROM remote_computers "
                 "WHERE revoked_at IS NOT NULL"
             ).fetchall()
-    connection = sqlite3.connect(new_db)
+    connection = _open_for_write(new_db, new_key)
     try:
         tables = _tables(connection)
         with connection:
@@ -268,7 +333,13 @@ def _swap(data_dir: Path, staging: Path, before: Path) -> None:
         ) from exc
 
 
-def apply_restore(data_dir: Path, staging: Path, fingerprint_hex: str) -> Path:
+def apply_restore(
+    data_dir: Path,
+    staging: Path,
+    fingerprint_hex: str,
+    old_database_key: bytes | None = None,
+    new_database_key: bytes | None = None,
+) -> Path:
     """Move the current data aside and the checked backup in. Returns the folder the old data
     is in. Deletes ``staging`` unless a failed swap couldn't be undone (RestoreStuckError). The
     key goes into the password vault afterwards (the caller's job)."""
@@ -280,7 +351,9 @@ def apply_restore(data_dir: Path, staging: Path, fingerprint_hex: str) -> Path:
     try:
         # Also wait out a Home Base that is still starting (it migrates under this lock).
         with _exclusive_lock(data_dir / f"{DB_FILENAME}.lock"):
-            carry_over_removals(data_dir / DB_FILENAME, staging / DB_FILENAME)
+            carry_over_removals(
+                data_dir / DB_FILENAME, staging / DB_FILENAME, old_database_key, new_database_key
+            )
             before = _new_before_folder(data_dir)
             old_fingerprint = data_dir / FINGERPRINT_FILENAME
             if old_fingerprint.is_file():  # says which recovery phrase opens the old data
