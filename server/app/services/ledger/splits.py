@@ -92,6 +92,8 @@ def replace_splits(
     """Make ``parts`` the transaction's split. An empty list undoes the split (it then has no
     category)."""
     transaction = get_transaction(session, transaction_id)
+    if not parts and not transaction.splits:
+        return transaction  # nothing to undo: leave its category and kind alone
     if parts:
         _check_can_split(session, transaction)
         _check_parts(session, transaction, parts)

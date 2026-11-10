@@ -75,6 +75,14 @@ def test_replace_swaps_the_whole_list_and_undo_clears_it(client, add_txn, checki
     assert put(client, txn_id, []).status_code == 200  # undoing an unsplit one is harmless
 
 
+def test_undoing_an_unsplit_transaction_keeps_its_category(client, add_txn, checking, cats):
+    txn = add_txn(checking, -10_000, category_id=cats["Dining Out"])
+    response = put(client, txn["id"], [])
+    assert response.status_code == 200
+    assert response.json()["category_id"] == cats["Dining Out"]
+    assert client.get(f"{URL}/{txn['id']}").json()["category_id"] == cats["Dining Out"]
+
+
 def test_refund_and_income_can_be_split_with_positive_parts(client, add_txn, checking, cats):
     refund = add_txn(checking, 5_000, kind="refund")
     parts = [part(cats["Groceries"], 3_000), part(cats["Shopping"], 2_000)]
