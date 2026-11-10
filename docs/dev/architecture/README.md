@@ -67,6 +67,7 @@ formatting), each keeps its own copy with its own tests, so one part can change 
 | [budget-engine.md](budget-engine.md) | Suggested budget (50/30/20 from recent months) |
 | [category-rules.md](category-rules.md) | Auto-categorization rules |
 | [csv-import.md](csv-import.md) | Bank CSV import |
+| [ofx-import.md](ofx-import.md) | Bank OFX/QFX import (reader built; routes next) |
 | [imports.md](imports.md) | Import history and undoing an import |
 | [activity-import.md](activity-import.md) | Brokerage activity files: transactions, trades and dividends sorted |
 | [receipts.md](receipts.md) | Receipts and receipt photos |
