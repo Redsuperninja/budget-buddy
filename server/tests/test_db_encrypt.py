@@ -171,3 +171,16 @@ def test_a_copy_that_still_has_the_database_open_stops_the_move(tmp_path):
     with sqlite3.connect(path) as check:
         assert check.execute("SELECT count(*) FROM note").fetchone()[0] == 1
     check.close()
+
+
+def test_old_plain_backups_are_flagged_even_if_the_first_start_stopped_before_listing_them(
+    tmp_path, caplog
+):
+    path = make_plain(tmp_path)
+    (tmp_path / "budget.db.bak-0030").write_bytes(path.read_bytes())
+    encrypt_existing_database(path, KEY)
+    (tmp_path / PENDING_MARKER).write_bytes(b"")  # the start was cut off before clearing it
+    caplog.clear()
+    with caplog.at_level(logging.WARNING):
+        assert encrypt_existing_database(path, KEY) is True
+    assert "budget.db.bak-0030" in caplog.text

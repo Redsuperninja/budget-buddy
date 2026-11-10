@@ -136,10 +136,17 @@ def encrypt_existing_database(db_path: Path, key: bytes) -> bool:
             leftover = marker.exists()
             _remove_new(new)  # an unfinished export is never trusted
             marker.unlink(missing_ok=True)  # the swap had happened; only the marker was left
+            if leftover:
+                _warn_about_plain_backups(db_path)  # the start that swapped may not have got to it
             return leftover
         write_private_bytes(marker, b"")
         convert_plain_file(db_path, key)
         marker.unlink(missing_ok=True)
+    _warn_about_plain_backups(db_path)
+    return True
+
+
+def _warn_about_plain_backups(db_path: Path) -> None:
     old = plain_backups(db_path)
     if old:
         logger.warning(
@@ -149,4 +156,3 @@ def encrypt_existing_database(db_path: Path, key: bytes) -> bool:
             "database file may also survive in free disk space or in OneDrive versions.",
             ", ".join(str(b) for b in old),
         )
-    return True

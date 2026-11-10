@@ -6,9 +6,9 @@ Your Budget Buddy data stays on your computer only. Nothing goes to the cloud. L
 
 Your whole database file is encrypted, so your amounts, dates, descriptions, account names and categories can't be read without your key. The most private details (account numbers, bank, employer, charity and shop names, notes) are also scrambled inside it, and receipt photos are scrambled as separate files. The encryption key is kept in your computer's password vault (Windows Credential Manager, macOS Keychain, or Linux Secret Service), never in the data folder.
 
-When you update from an older version, Budget Buddy moves your existing data into the encrypted file the first time it starts. If anything goes wrong it stops and leaves your data as it was.
+When you update from an older version, Budget Buddy moves your existing data into the encrypted file the first time it starts. If anything goes wrong it stops and leaves your data as it was. **Save your recovery phrase before you update, or right after** (see [Your recovery phrase](#your-recovery-phrase)): from now on the whole database can only be read with your key, so if the password vault loses it, the phrase is the only way back in.
 
-Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password: old copies, and anything a sync service already saved, are not covered.
+Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password: old copies, the old unencrypted file that may survive in free disk space or in File History, and anything a sync service already saved, are not covered.
 
 ## Your recovery phrase
 

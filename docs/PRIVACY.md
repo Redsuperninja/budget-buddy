@@ -63,7 +63,7 @@ For steps, see [Back up and restore your data](guide/back-up-and-restore.md).
 
 ## Old copies
 
-When Budget Buddy updates its database, it first saves a copy named `budget.db.bak-` and a number, in the data folder. A copy made by this version is encrypted like the main database. Copies made by older versions are not encrypted: they hold your amounts and descriptions in readable form, and copies made before the names were encrypted also hold those names in plain text. Budget Buddy lists the old ones when it first encrypts your database. See [Old backup copies](guide/keep-your-data-safe.md#old-backup-copies).
+When Budget Buddy updates its database, it first saves a copy named `budget.db.bak-` and a number, in the data folder. A copy made by this version is encrypted like the main database. Copies made by older versions are not encrypted: they hold your amounts and descriptions in readable form, and copies made before the names were encrypted also hold those names in plain text. Budget Buddy lists the old ones in its log when it first encrypts your database. See [Old backup copies](guide/keep-your-data-safe.md#old-backup-copies).
 
 ## Deleting everything
 
