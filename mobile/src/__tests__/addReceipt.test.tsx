@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as FileSystem from 'expo-file-system';
 import type { ReactNode } from 'react';
+import { Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AddReceiptScreen, { SAVED_TEXT } from '@/app/add-receipt';
@@ -106,7 +107,12 @@ describe('Add a receipt', () => {
     await fireEvent.press(await screen.findByText('Take photo'));
     await fireEvent.press(await screen.findByText('Take photo'));
     await fireEvent.press(await screen.findByText('Save receipt'));
+    const ask = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await fireEvent.press(await screen.findByText('Delete Receipt'));
+    expect(await listReceipts()).toHaveLength(1); // nothing is deleted until the person agrees
+    const buttons = ask.mock.calls[0][2] as { text: string; onPress?: () => void }[];
+    buttons.find((b) => b.text === 'Delete')?.onPress?.();
+    ask.mockRestore();
     await waitFor(async () => expect(await listReceipts()).toEqual([]));
     expect(files.size).toBe(0);
   });
