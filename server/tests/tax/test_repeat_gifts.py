@@ -6,14 +6,14 @@ import datetime as dt
 import pytest
 from csv_helpers import ok, send
 
-from app.schemas.tax import donations as donation_schemas
+from app import clock
 
 URL = "/api/local/donations"
 
 
 @pytest.fixture(autouse=True)
 def frozen_today(monkeypatch):
-    monkeypatch.setattr(donation_schemas, "_today", lambda: dt.date(2030, 1, 1))
+    monkeypatch.setattr(clock, "today", lambda: dt.date(2030, 1, 1))
 
 
 @pytest.fixture

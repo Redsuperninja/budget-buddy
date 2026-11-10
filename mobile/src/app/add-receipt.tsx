@@ -7,6 +7,7 @@ import { ReceiptDetailsForm } from '@/components/receipts/ReceiptDetailsForm';
 import { WaitingReceipts } from '@/components/receipts/WaitingReceipts';
 import { BigButton, BodyText, Screen } from '@/components/Screen';
 import type { PreparedPhoto } from '@/receipts/photo';
+import { confirmDelete } from '@/receipts/confirmDelete';
 import { addReceipt, clearQueue, listReceipts, queueReadable, removeReceipts } from '@/receipts/receiptQueue';
 import type { QueuedReceipt, ReceiptDetails } from '@/receipts/receiptQueue';
 import { useSnapshot } from '@/sync/store';
@@ -107,13 +108,13 @@ export default function AddReceiptScreen() {
         receipts={receipts}
         readable={readable}
         currency={snapshot.currency}
-        onDelete={(r) => void removeReceipts([r.client_id]).then(refresh)}
+        onDelete={(r) => confirmDelete(1, () => void removeReceipts([r.client_id]).then(refresh))}
         onRetake={(r) => {
           setNote(null);
           setRetaking(r.client_id);
           setStep({ name: 'camera' });
         }}
-        onClear={() => void clearQueue().then(refresh)}
+        onClear={() => confirmDelete(readable ? receipts.length : null, () => void clearQueue().then(refresh))}
       />
     </Screen>
   );

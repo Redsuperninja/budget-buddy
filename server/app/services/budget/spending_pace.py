@@ -12,13 +12,10 @@ import datetime as dt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.models import Category, Transaction
 from app.schemas.budget.summary import PaceDay, SpendingPace
 from app.services.budget.summary import SPENDING, counted, month_range, monthly_summary
-
-
-def _today() -> dt.date:
-    return dt.date.today()
 
 
 def _net_by_day(session: Session, start: dt.date, end: dt.date) -> dict[dt.date, int]:
@@ -40,7 +37,7 @@ def _net_by_day(session: Session, start: dt.date, end: dt.date) -> dict[dt.date,
 
 
 def spending_pace(session: Session, year: int, month: int) -> SpendingPace:
-    today = _today()
+    today = clock.today()
     start, end = month_range(year, month)
     last = min(end - dt.timedelta(days=1), today)
     days = []

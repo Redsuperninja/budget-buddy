@@ -1,7 +1,6 @@
-import datetime as dt
-
 from fastapi import APIRouter
 
+from app import clock
 from app.deps import SessionDep, parse_month
 from app.schemas.budget.budget_engine import ApplyChoice, ApplyResult, BudgetSuggestion
 from app.schemas.budget.budget_plan import BudgetPlanIn, BudgetPlanOut
@@ -24,7 +23,7 @@ def save_plan(data: BudgetPlanIn, session: SessionDep) -> BudgetPlanOut:
 @router.get("/suggestion")
 def suggestion(session: SessionDep, month: str = "") -> BudgetSuggestion:
     """A 50/30/20 plan from the 3 full months before ``month`` (this month if left out)."""
-    year_month = parse_month(month) if month else (dt.date.today().year, dt.date.today().month)
+    year_month = parse_month(month) if month else (clock.today().year, clock.today().month)
     return budget_engine.suggest(session, *year_month)
 
 

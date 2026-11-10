@@ -188,7 +188,8 @@ done.
     `crypto.database_has_rows`, `crypto/key_check.py`, `db.copy_database` (encrypted target), each with an
     encrypted-database test, and none may swallow `DatabaseError` into "has data", "no revision" or "corrupt"; opening
     with the database key becomes the key check, reported as wrong key, busy or corrupt separately (M3)
-  - [ ] 25l-3. One-time move of an existing database (M4/M5): `scrub-pending` marker, checkpoint, `sqlcipher_export`
+  - [x] 25l-3. One-time move of an existing database (M4/M5): `encrypt-pending` marker (not `scrub-pending`, which
+    already means the field-encryption clean-up), checkpoint, `sqlcipher_export`
     with `user_version` to a new file, check it opens and the counts match, atomic swap, delete the plain
     `budget.db`, `-wal` and `-shm`, clear the marker; every step resumable after a crash; no plain fallback; flag
     every older `budget.db.bak-*` as unencrypted; the `.bak` copy made before an upgrade is written encrypted; a test checks that a `.bak` copy has no SQLite header and

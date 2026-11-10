@@ -30,7 +30,7 @@ The receipt now shows in the list of receipts waiting, marked "Waiting to sync".
 
 | What you see | What to do |
 | --- | --- |
-| A receipt shows a message instead of "Waiting to sync" | Your computer couldn't use that photo. Tap **Retake photo**, or delete it. |
+| A receipt shows a message instead of "Waiting to sync" | Your computer couldn't use that photo. Tap **Retake photo**, or delete it (the app asks you to confirm first, because a deleted photo can't be brought back). |
 | "Your waiting receipts can't be read on this phone any more" | This can happen after restoring your phone from a backup. Tap **Clear waiting receipts**, then take the photos again. |
 | "This photo can't be saved" | Take the photo again. If it keeps happening, check your phone has free space. |
 | The camera doesn't open | Allow the camera for Budget Buddy in your phone's settings. |

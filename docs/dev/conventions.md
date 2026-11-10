@@ -72,3 +72,5 @@ reviewers check them.
 - User guides in `docs/guide/` stay one task per page and are for people only: no environment variables, API
   paths, file or module names, error codes, or code. Tester guides in `docs/testing/` follow the same rules, but may
   have copy-paste commands (both `python3` and `py` where they differ).
+
+- **Dates and times:** call `clock.today()` and `clock.utcnow_naive()` (`app/clock.py`), never `dt.date.today()` or `dt.datetime.now()` directly, so tests can freeze the clock.

@@ -3,6 +3,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, Field, StringConstraints, model_validator
 
+from app import clock
 from app.models import DonationKind
 from app.schemas.common import (
     Cents,
@@ -38,13 +39,8 @@ _PAYMENT_HELP = (
 _FUTURE_GRACE = dt.timedelta(days=1)
 
 
-def _today() -> dt.date:
-    """The Home Base's local date. A function so tests can freeze the clock."""
-    return dt.date.today()
-
-
 def _not_future(date: dt.date | None) -> dt.date | None:
-    if date is not None and date > _today() + _FUTURE_GRACE:
+    if date is not None and date > clock.today() + _FUTURE_GRACE:
         raise ValueError(
             "Enter a gift on the day you actually gave it. A pledge counts once you pay it."
         )
