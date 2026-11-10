@@ -136,6 +136,17 @@ def cell(row: list[str], column: int) -> str:
     return row[column].strip()
 
 
+def optional_cell(row: list[str], column: int | None) -> str:
+    """The trimmed cell, or "" when the role has no column or the row is short."""
+    return row[column].strip() if column is not None and column < len(row) else ""
+
+
+def abs_amount(text: str) -> int | None:
+    """A dollar cell as positive cents, None when empty. Raises ValueError if not a number."""
+    cents = parse_amount(text)
+    return None if cents is None else abs(cents)
+
+
 def _amount(row: list[str], column: int | None, what: str) -> int | None:
     if column is None:
         return None
