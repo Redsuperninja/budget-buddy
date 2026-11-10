@@ -53,6 +53,26 @@ _TRADE_LOCKED_MESSAGE = (
 )
 
 
+_SPLIT_LOCKED_MESSAGE = (
+    "This transaction is split into several categories. Change or undo the split first to set "
+    "its category, amount or type."
+)
+
+
+def _check_not_split(transaction: Transaction, changes: dict) -> None:
+    """A split's parts add up to its amount and its own category is unused (ADR-0017), so setting
+    a category or changing the amount or kind needs the split changed first. Sending the values
+    it already has (no category, the same amount and kind) is fine."""
+    if not transaction.splits:
+        return
+    if (
+        changes.get("category_id") is not None
+        or changes.get("amount_cents", transaction.amount_cents) != transaction.amount_cents
+        or changes.get("kind", transaction.kind) != transaction.kind
+    ):
+        raise ApiError(409, "split_transaction", _SPLIT_LOCKED_MESSAGE)
+
+
 def is_stock_trade(session: Session, transaction: Transaction) -> bool:
     return any(
         session.scalar(select(model.id).where(model.transaction_id == transaction.id)) is not None
@@ -185,6 +205,7 @@ def update_transaction(
     transaction = get_transaction(session, transaction_id)
     changes = data.changes()
     changes.pop("amount", None)
+    _check_not_split(transaction, changes)
     if transaction.transfer_pair_id is not None and (
         _TRANSFER_LOCKED_FIELDS & changes.keys()
         or ("category_id" in changes and not _is_transfer_category(session, changes["category_id"]))

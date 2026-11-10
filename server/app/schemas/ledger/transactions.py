@@ -65,6 +65,27 @@ class TransactionUpdate(UpdateSchema):
         return self
 
 
+class SplitPart(Schema):
+    """One part of a split. The service checks the rules (sign, sum, count)."""
+
+    category_id: Id
+    amount_cents: Cents
+    note: Notes = None
+
+
+class SplitsReplace(Schema):
+    """The whole new list of parts; an empty list undoes the split."""
+
+    # A sanity cap only: the real limit (2 to 20, with a plain-English message) is in the service.
+    splits: Annotated[list[SplitPart], Field(max_length=100)]
+
+
+class SplitPartOut(Schema):
+    category_id: int
+    amount_cents: int
+    note: str | None
+
+
 class TransferLink(Schema):
     other_id: Id = Field(description="The matching transaction on your other account.")
 
@@ -89,6 +110,8 @@ class TransactionOut(Schema):
     sorted_by_rule_id: int | None = None
     # Only right after a pick by hand: the text of an auto-sort rule Budget Buddy just learned.
     learned_rule: str | None = None
+    # The parts when this transaction is split (its own category_id is then null); else empty.
+    splits: list[SplitPartOut] = []
     notes: str | None
     created_at: dt.datetime
     updated_at: dt.datetime

@@ -140,6 +140,16 @@ class Transaction(TimestampMixin, Base):
         lazy="selectin",
     )
 
+    # The parts of a split transaction (models/splits.py); empty when it isn't split.
+    splits = relationship(
+        "TransactionSplit",
+        back_populates="transaction",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="TransactionSplit.id",
+        lazy="selectin",
+    )
+
     @property
     def donation_id(self) -> int | None:
         return self.donation.id if self.donation is not None else None

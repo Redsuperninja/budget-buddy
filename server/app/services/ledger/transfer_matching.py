@@ -56,6 +56,7 @@ def _eligible(session: Session) -> list[tuple[Transaction, AccountKind]]:
             lazyload(Transaction.account),
             lazyload(Transaction.transfer_partner),
             lazyload(Transaction.donation),
+            lazyload(Transaction.splits),
         )
         .join(Account, Account.id == Transaction.account_id)
         .where(

@@ -101,6 +101,7 @@ done.
   - [ ] 10f-1. Storage and rules: `transaction_splits` table and migration, encrypted note, `services/ledger/splits.py`
     (sum, sign, kinds, 2 to 20 parts), `PUT /api/local/transactions/{id}/splits`, 409s for category or amount
     changes and for deleting a category a part uses — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
+    - Built on branch `feat/transaction-splits-storage`, review pending (security-reviewer, finance-tax-expert).
   - [ ] 10f-2. Budget math: `services/budget/category_lines.py` used by the monthly summary, spending pace and the
     Transactions category filter; equivalence tests — *backend-engineer* + *finance-tax-expert*
   - [ ] 10f-3. Leave split transactions alone: auto-sort rules, learning, "no category yet", transfer, card-payment
