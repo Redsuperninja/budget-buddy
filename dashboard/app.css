@@ -245,6 +245,7 @@ ol.steps .step-actions { display: flex; flex-wrap: wrap; align-items: center; ga
 ol.steps .step-actions a { padding: 0.15rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none;
   font-size: 0.9rem; }
 ol.steps .step-actions a:hover { background: var(--accent-soft); border-color: transparent; }
+ol.steps .step-actions button { padding: 0.15rem 0.8rem; border-radius: 999px; font-size: 0.9rem; border-color: var(--accent); }
 ol.steps .step-actions .or { color: var(--muted); font-size: 0.85rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* Home: charts two to a row on wide screens (js/screens/home/home.js), and a plain sentence leading a chart card. */
