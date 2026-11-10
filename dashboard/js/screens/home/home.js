@@ -94,7 +94,7 @@ export async function render(root, options) {
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) },
       { onThisComputer: onThisComputer() }, setup),
     backupReminder(setup, hasTransactions || accounts.length > 0),
-    h("div", { class: "toolbar" }, h("h2", {}, "Your month"), h("label", {}, "Month", picker), freshness(imports)),
+    h("div", { class: "toolbar" }, h("h2", {}, "Your month"), picker, freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
     monthTiles(summary, days.through ? months.slice(0, -1) : months, provisional),
     hasTransactions && attentionCard([

@@ -19,8 +19,8 @@ const cards = (root) => [...root.querySelectorAll("details.fold.card")]
 // pages redraw parts of themselves.
 export function foldAllBar(root) {
   if (cards(root).length < 3) return null;
-  const foldButton = h("button", { class: "link", type: "button" }, "Fold all");
-  const openButton = h("button", { class: "link", type: "button" }, "Open all");
+  const foldButton = h("button", { class: "fold-up", type: "button" }, "Fold all");
+  const openButton = h("button", { class: "fold-down", type: "button" }, "Open all");
   const update = () => {
     const { canFold, canOpen } = foldAvailability(cards(root).map((el) => el.open));
     foldButton.disabled = !canFold;
@@ -34,5 +34,6 @@ export function foldAllBar(root) {
   openButton.onclick = () => setAll(true);
   root.addEventListener("toggle", update, true); // a card opened or folded by hand (toggle doesn't bubble)
   update();
-  return h("div", { class: "fold-all no-print" }, foldButton, openButton);
+  return h("div", { class: "fold-all no-print" },
+    h("div", { class: "seg", role: "group", "aria-label": "Fold or open every card" }, foldButton, openButton));
 }
