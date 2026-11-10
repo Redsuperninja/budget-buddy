@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.models import Category, Transaction
 from app.models.enums import TransactionKind, TransactionSource
 from app.schemas.budget.summary import PaceDay, SpendingPace
@@ -79,7 +80,7 @@ def test_same_as_one_summary_per_day(client, make_account, add_txn, monkeypatch,
     spent = {}
     with Session(client.app.state.engine) as session:
         for today in TODAYS:
-            monkeypatch.setattr(spending_pace, "_today", lambda today=today: today)
+            monkeypatch.setattr(clock, "today", lambda today=today: today)
             for year, month in MONTHS:
                 new = spending_pace.spending_pace(session, year, month)
                 assert new == old_pace(session, year, month, today), (today, year, month)

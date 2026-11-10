@@ -1,9 +1,9 @@
 """Budget categories: list, add, rename, remove (when unused), and set the monthly budget (an amount or a percentage)."""
 
 from sqlalchemy import exists, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.db_commit import commit_or
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryGroup, Receipt, Transaction
 from app.schemas.budget.categories import INCOME_NO_BUDGET, CategoryCreate, CategoryUpdate
@@ -21,14 +21,6 @@ def _check_name_free(session: Session, name: str, own_id: int | None = None) -> 
             raise _name_taken()
 
 
-def _commit(session: Session) -> None:
-    try:
-        session.commit()
-    except IntegrityError:  # two requests added the same name at once
-        session.rollback()
-        raise _name_taken() from None
-
-
 def get_category(session: Session, category_id: int) -> Category:
     category = session.get(Category, category_id)
     if category is None:
@@ -44,7 +36,7 @@ def create_category(session: Session, data: CategoryCreate) -> Category:
     _check_name_free(session, data.name)
     category = Category(**data.model_dump())
     session.add(category)
-    _commit(session)
+    commit_or(session, _name_taken)
     return category
 
 
@@ -63,7 +55,7 @@ def update_category(session: Session, category_id: int, data: CategoryUpdate) ->
         changes["budget_cents"] = 0
     for field, value in changes.items():
         setattr(category, field, value)
-    _commit(session)
+    commit_or(session, _name_taken)
     return category
 
 

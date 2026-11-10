@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import Field, field_validator
 
+from app import clock
 from app.schemas.common import Id, Schema
 
 NOTE = (
@@ -25,7 +26,7 @@ class PositionsChoices(Schema):
     @field_validator("as_of")
     @classmethod
     def _not_future(cls, value: dt.date) -> dt.date:
-        if value > dt.date.today():
+        if value > clock.today():
             raise ValueError("The file's date can't be in the future.")
         return value
 

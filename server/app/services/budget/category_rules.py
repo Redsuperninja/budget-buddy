@@ -16,9 +16,9 @@ from collections.abc import Callable
 from typing import NamedTuple
 
 from sqlalchemy import func, select, update
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.db_commit import commit_or
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryRule, CategorySource, Transaction, TransactionKind
 from app.schemas.budget.category_rules import ApplyResult, RuleCreate, RuleUpdate
@@ -59,14 +59,6 @@ def _check_category(session: Session, category_id: int | None) -> None:
         raise not_found("category")
 
 
-def _commit(session: Session) -> None:
-    try:
-        session.commit()
-    except IntegrityError:  # two requests added the same text at once
-        session.rollback()
-        raise _pattern_taken() from None
-
-
 def get_rule(session: Session, rule_id: int) -> CategoryRule:
     rule = session.get(CategoryRule, rule_id)
     if rule is None:
@@ -93,7 +85,7 @@ def create_rule(session: Session, data: RuleCreate) -> CategoryRule:
     _check_category(session, data.category_id)
     rule = CategoryRule(**data.model_dump())
     session.add(rule)
-    _commit(session)
+    commit_or(session, _pattern_taken)
     return rule
 
 
@@ -105,7 +97,7 @@ def update_rule(session: Session, rule_id: int, data: RuleUpdate) -> CategoryRul
     _check_category(session, changes.get("category_id"))
     for field, value in changes.items():
         setattr(rule, field, value)
-    _commit(session)
+    commit_or(session, _pattern_taken)
     return rule
 
 

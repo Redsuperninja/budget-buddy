@@ -1,22 +1,18 @@
 """First-start setup progress, kept by the Home Base (roadmap 25e, ADR-0015)."""
 
-import datetime as dt
 import logging
 
 from sqlalchemy import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.db import SessionLocal
 from app.models.setup import SetupProgress
 from app.schemas.setup import SetupProgressIn, SetupProgressOut
 
 ROW_ID = 1
 log = logging.getLogger(__name__)
-
-
-def _now() -> dt.datetime:
-    return dt.datetime.now(dt.UTC).replace(tzinfo=None)  # naive UTC, like the other timestamps
 
 
 def _row(session: Session) -> SetupProgress:
@@ -37,7 +33,7 @@ def save_progress(session: Session, data: SetupProgressIn) -> SetupProgressOut:
         if not wanted:
             setattr(row, column, None)
         elif getattr(row, column) is None:
-            setattr(row, column, _now())
+            setattr(row, column, clock.utcnow_naive())
     session.add(row)
     session.commit()
     return SetupProgressOut.model_validate(row)
@@ -49,7 +45,7 @@ def record_backup(engine: Engine) -> None:
     try:
         with SessionLocal(bind=engine) as session:
             row = _row(session)
-            row.last_backup_at = _now()
+            row.last_backup_at = clock.utcnow_naive()
             session.add(row)
             session.commit()
     except SQLAlchemyError:

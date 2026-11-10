@@ -1,11 +1,11 @@
 """Paired phones: look up by token, list, and remove (sync contract §3.10)."""
 
-import datetime as dt
 import hmac
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.crypto.b64url import b64u_decode
 from app.crypto.hashing import hash_secret
 from app.errors import ApiError, not_found
@@ -73,7 +73,7 @@ def revoke_device(session: Session, device_id: int) -> Device:
         raise not_found("phone")
     if not device.revoked:
         device.revoked = True
-        device.revoked_at = dt.datetime.now(dt.UTC).replace(tzinfo=None)
+        device.revoked_at = clock.utcnow_naive()
     device.sync_key = None
     session.execute(delete(SeenNonce).where(SeenNonce.device_id == device_id))
     session.commit()

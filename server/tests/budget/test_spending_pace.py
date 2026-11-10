@@ -5,7 +5,7 @@ import datetime as dt
 
 from test_categories_summary_api import cid
 
-from app.services.budget import spending_pace
+from app import clock
 
 PACE = "/api/local/summary/pace"
 
@@ -27,7 +27,7 @@ def test_each_day_adds_up_like_the_summary(client, make_account, add_txn):
 
 
 def test_days_stop_at_today(client, monkeypatch):
-    monkeypatch.setattr(spending_pace, "_today", lambda: dt.date(2026, 10, 9))
+    monkeypatch.setattr(clock, "today", lambda: dt.date(2026, 10, 9))
     days = client.get(PACE, params={"month": "2026-10"}).json()["days"]
     assert (len(days), days[-1]["date"]) == (9, "2026-10-09")
     assert client.get(PACE, params={"month": "2026-10"}).json()["complete"] is False
@@ -92,7 +92,7 @@ def runs(steps: dict[int, int], days: int) -> list[int]:
 
 
 def pace_on(client, monkeypatch, today, month):
-    monkeypatch.setattr(spending_pace, "_today", lambda: today)
+    monkeypatch.setattr(clock, "today", lambda: today)
     pace = client.get(PACE, params={"month": month}).json()
     return pace, [d["spent_cents"] for d in pace["days"]]
 

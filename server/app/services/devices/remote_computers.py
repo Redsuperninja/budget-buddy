@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.crypto.hashing import hash_secret
 from app.errors import ApiError, not_found
 from app.models import RemoteComputer
@@ -98,7 +99,7 @@ def authenticate(session: Session, token: str | None, address: str | None) -> bo
     computer = session.scalar(
         select(RemoteComputer).where(RemoteComputer.token_hash == hash_secret(token))
     )
-    now = dt.datetime.now(dt.UTC).replace(tzinfo=None)
+    now = clock.utcnow_naive()
     if (
         computer is None
         or computer.joined_from != address
@@ -133,7 +134,7 @@ def remove(session: Session, computer_id: int) -> None:
     if computer is None or computer.token_hash is None:
         raise not_found("computer")
     computer.token_hash = None
-    computer.revoked_at = dt.datetime.now(dt.UTC).replace(tzinfo=None)
+    computer.revoked_at = clock.utcnow_naive()
     session.commit()
 
 
