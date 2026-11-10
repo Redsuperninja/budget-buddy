@@ -5,7 +5,29 @@
     "licence": "Apache-2.0",
     "source": "cryptography's wheel statically links OpenSSL (version in the wheel's sboms/sbom.json); OpenSSL 3 and later are Apache-2.0. Text: cryptography's LICENSE.APACHE. https://github.com/openssl/openssl",
     "note": "Copyright (c) The OpenSSL Project Authors. The Apache-2.0 text below is the one cryptography ships.",
-    "text_from": {"package": "cryptography", "file": "LICENSE.APACHE"}
+    "text_from": {
+      "package": "cryptography",
+      "file": "LICENSE.APACHE"
+    }
+  },
+  {
+    "id": "sqlcipher",
+    "name": "SQLCipher (inside the sqlcipher3 package)",
+    "licence": "BSD-3-Clause",
+    "source": "sqlcipher3's wheel builds SQLCipher into its _sqlite3 extension. https://github.com/sqlcipher/sqlcipher",
+    "note": "Copyright (c) Zetetic LLC. Its OpenSSL is covered by the OpenSSL notice (Apache-2.0).",
+    "text_file": "licences/sqlcipher.txt"
+  },
+  {
+    "id": "openssl-sqlcipher",
+    "name": "OpenSSL (inside the sqlcipher3 package)",
+    "licence": "Apache-2.0",
+    "source": "sqlcipher3's wheel statically links OpenSSL 3 (the version is shown by PRAGMA cipher_provider_version and checked at start-up); OpenSSL 3 and later are Apache-2.0. Text: cryptography's LICENSE.APACHE. https://github.com/openssl/openssl",
+    "note": "Copyright (c) The OpenSSL Project Authors. The Apache-2.0 text below is the one cryptography ships.",
+    "text_from": {
+      "package": "cryptography",
+      "file": "LICENSE.APACHE"
+    }
   },
   {
     "id": "libsodium",
@@ -13,7 +35,10 @@
     "licence": "ISC",
     "source": "PyNaCl's wheel carries libsodium; its licence is the file LICENSE.libsodium.txt in the wheel. https://github.com/jedisct1/libsodium",
     "note": "Copyright (c) Frank Denis.",
-    "text_from": {"package": "pynacl", "file": "licenses/LICENSE.libsodium.txt"}
+    "text_from": {
+      "package": "pynacl",
+      "file": "licenses/LICENSE.libsodium.txt"
+    }
   },
   {
     "id": "pillow-libraries",

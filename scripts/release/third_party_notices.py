@@ -183,6 +183,7 @@ BUNDLED = {
     "libcrypto*.dll": "python-runtime",
     "sqlite3.dll": "python-runtime",
     "_sodium*.pyd": "libsodium",
+    "_sqlite3*.pyd": "sqlcipher",  # sqlcipher3's extension: SQLCipher and its OpenSSL
 }
 
 

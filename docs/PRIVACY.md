@@ -20,28 +20,15 @@ Budget Buddy keeps your money records on your own devices. We don't run a server
   - **iPhone:** the scrambled copy and the receipt photos can be included in an iPhone backup, but the key isn't, so the backup can't be opened without it.
 - **Backup files:** wherever you save them. See Backups below.
 
-## What's encrypted, and what isn't yet
+## What's encrypted
 
-These are scrambled with strong encryption (AES-256). The key is kept in your computer's password vault:
+Your whole database file is scrambled with strong encryption (SQLCipher, AES-256), so the amounts, dates, descriptions, account names, categories and everything else in it can't be read without your key. On top of that, the most private details (account numbers, notes, employer, charity and shop names, your Finnhub key and the keys for your connected phones) are scrambled a second time inside the database, and receipt photos are scrambled as separate files. The key is kept in your computer's password vault.
 
-- Account numbers (last four digits), bank names and account notes
-- Notes on transactions, paychecks, receipts and donations
-- Employer names, charity names and shop names on receipts
-- Deduction descriptions and the names of imported files
-- Receipt photos
-- Your Finnhub key, and the keys for your connected phones
+Two things to know:
+- Some of what Budget Buddy needs to read (to search, sort and add up) is readable while the app is running on your computer, as with any app.
+- Old copies and other files outside the database are covered under "Old copies" below.
 
-These are **not** encrypted yet, because Budget Buddy needs to read them to search, sort and add up:
-
-- Every amount and date
-- Transaction descriptions and account names
-- Gross and net pay on paychecks
-- Company names on dividends and on stock trades from your bank file
-- Category names and auto-sort rule text
-- Stock symbols and lots
-- Your filing status (if you choose one on the Tax summary)
-
-Encrypted names can still show up in descriptions and account names, so keep your data folder private. Encrypting more is planned, not built yet ([issue #28](https://github.com/Redsuperninja/budget-buddy/issues/28)). For the full picture, see [Keep your data safe](guide/keep-your-data-safe.md).
+For the full picture, see [Keep your data safe](guide/keep-your-data-safe.md).
 
 ## The one optional outside connection: live stock prices
 
@@ -76,7 +63,7 @@ For steps, see [Back up and restore your data](guide/back-up-and-restore.md).
 
 ## Old copies
 
-When Budget Buddy updates its database, it first saves a copy named `budget.db.bak-` and a number, in the data folder. Every copy holds your amounts and descriptions in readable form, like the main database. Copies made before the names were encrypted also hold those names in plain text. See [Old backup copies](guide/keep-your-data-safe.md#old-backup-copies).
+When Budget Buddy updates its database, it first saves a copy named `budget.db.bak-` and a number, in the data folder. A copy made by this version is encrypted like the main database. Copies made by older versions are not encrypted: they hold your amounts and descriptions in readable form, and copies made before the names were encrypted also hold those names in plain text. Budget Buddy lists the old ones when it first encrypts your database. See [Old backup copies](guide/keep-your-data-safe.md#old-backup-copies).
 
 ## Deleting everything
 

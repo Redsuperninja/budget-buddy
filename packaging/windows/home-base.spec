@@ -32,7 +32,8 @@ a = Analysis(
     pathex=[str(SERVER)],
     datas=datas,
     # Loaded by name at run time: our routers and uvicorn's loops, protocols and lifespan.
-    hiddenimports=[*collect_submodules("app"), *collect_submodules("uvicorn")],
+    # sqlcipher3 is imported inside a function (so plain-SQLite runs never load it); name it so it is always packed.
+    hiddenimports=[*collect_submodules("app"), *collect_submodules("uvicorn"), "sqlcipher3.dbapi2"],
     # Never used by the server. Alembic's Mako templates can colour error pages with Pygments, whose
     # image formatter pulls in Pillow (about 16 MB); without them Mako falls back to plain text.
     # setuptools and numpy are found through other packages' optional imports.

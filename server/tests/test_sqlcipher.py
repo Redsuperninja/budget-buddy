@@ -249,8 +249,16 @@ def test_the_database_key_is_its_own_subkey():
     assert keys.db_file.hex() not in repr(keys)
 
 
-def test_the_setting_is_off_by_default(data_dir):
-    assert Settings().database_encryption is False
+def test_the_setting_is_on_by_default(data_dir, monkeypatch):
+    monkeypatch.delenv("BUDGET_BUDDY_DATABASE_ENCRYPTION")  # the tests' own plain default
+    assert Settings().database_encryption is True
+    app = create_app()
+    app.state.engine.dispose()
+    assert not database_path(data_dir).read_bytes().startswith(SQLITE_HEADER)
+
+
+def test_the_setting_can_still_be_turned_off(data_dir):
+    assert Settings().database_encryption is False  # the tests' default, set by the environment
     app = create_app()
     app.state.engine.dispose()
     assert database_path(data_dir).read_bytes().startswith(SQLITE_HEADER)

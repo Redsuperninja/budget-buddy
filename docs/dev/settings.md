@@ -15,7 +15,7 @@ User guides never name them; they say "ask whoever set up Budget Buddy" and link
 | `BUDGET_BUDDY_DEV_MODE` | `false` | `true` turns on the API explorer at `/docs`. |
 | `BUDGET_BUDDY_KEY_STORE` | `keyring` | Where the encryption key is kept. `memory` is for automated tests only and also needs `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE=1` ([testing.md](testing.md)). |
 | `BUDGET_BUDDY_INSECURE_TEST_KEYSTORE` | unset | Test-only switch that allows the memory key store. Never use it for real data. |
-| `BUDGET_BUDDY_DATABASE_ENCRYPTION` | `false` | Encrypts the whole `budget.db` with SQLCipher ([ADR-0014](../adr/0014-whole-database-encryption.md), roadmap 25l). Developers only until step 25l-3: it works on a new, empty data folder, but backup, restore and the key checks still read the file as plain SQLite. Becomes the only mode (and this setting goes away) when 25l is done. |
+| `BUDGET_BUDDY_DATABASE_ENCRYPTION` | `true` | Encrypts the whole `budget.db` with SQLCipher ([ADR-0014](../adr/0014-whole-database-encryption.md), roadmap 25l); an existing plain database is moved over at start. `0` keeps a plain database (the test suite uses it for speed). Planned to go away once 0.1.0 ships and the plain path is removed. |
 
 Read by the tester scripts only (`scripts/testing/`), not the Home Base:
 

@@ -80,6 +80,13 @@ def fast_migrations(request, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.main.run_migrations", migrations_from_template(template))
 
 
+@pytest.fixture(autouse=True)
+def plain_database_unless_asked(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Most tests run on a plain database (faster, and many read it directly). Tests of whole-database
+    encryption turn it on with ``monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")``."""
+    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "0")
+
+
 @pytest.fixture
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A throwaway data folder so tests never touch real user data."""

@@ -200,7 +200,7 @@ done.
     the dashboard backup refuse up front while the setting is on; remove that refusal here
   - [x] 25l-5. Old plain backups: a backup made before SQLCipher is detected on restore, exported to an encrypted file,
     and its plain staging copy deleted
-  - [ ] 25l-6. Switch on and clean up: the setting becomes the only mode, a Windows build check with PyInstaller,
+  - [x] 25l-6. Switch on and clean up (2026-11-10): encryption is on by default; the `=0` opt-out stays until after 0.1.0 (the tests use it). The Windows build check is done: the packaged Home Base starts and writes an encrypted `budget.db`. Still to do by hand: Python 3.12/3.13 and macOS/Linux wheel checks run in CI once CI is back on. Original item: the setting becomes the only mode, a Windows build check with PyInstaller,
     BSD and OpenSSL notices in `packaging/windows/THIRD-PARTY-NOTICES.txt` (L7), Python 3.12/3.13 and macOS/Linux
     wheel checks in CI, privacy statement, user guide, `security.md` and ADR-0003 updated
 

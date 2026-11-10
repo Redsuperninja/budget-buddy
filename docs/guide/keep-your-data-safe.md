@@ -4,32 +4,11 @@ Your Budget Buddy data stays on your computer only. Nothing goes to the cloud. L
 
 ## What's encrypted
 
-Account numbers, bank names, notes, employer names, charity names, shop names on receipts, and receipt photos are encrypted. The encryption key is kept in your computer's password vault (Windows Credential Manager, macOS Keychain, or Linux Secret Service), never in the data folder.
+Your whole database file is encrypted, so your amounts, dates, descriptions, account names and categories can't be read without your key. The most private details (account numbers, bank, employer, charity and shop names, notes) are also scrambled inside it, and receipt photos are scrambled as separate files. The encryption key is kept in your computer's password vault (Windows Credential Manager, macOS Keychain, or Linux Secret Service), never in the data folder.
 
-**Not everything is encrypted yet.** Amounts, dates, transaction descriptions, and account names are not encrypted, so anyone with a copy of the data folder can still read your spending, pay, and giving history. Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password.
+When you update from an older version, Budget Buddy moves your existing data into the encrypted file the first time it starts. If anything goes wrong it stops and leaves your data as it was.
 
-Encrypted on your computer:
-- Account numbers and bank names
-- Transaction notes
-- Receipt photos and text
-- Donation notes and charity names
-- Employer names on paychecks
-- Shop names on receipts
-- Account notes and paycheck notes
-- Deduction descriptions and the names of imported files
-- Your Finnhub key, and the keys for your connected phones
-
-**Not encrypted (but you need them for Budget Buddy to work):**
-- Every amount and date
-- Transaction description
-- Pay amounts on paychecks
-- Account names
-- Company names on dividends and bank-made stock trades
-- Category names and auto-sort rule text
-- Stock symbols and lots
-- Your filing status (if you choose one on the Tax summary)
-
-The encrypted names can still show up in the unencrypted transaction descriptions and account names (for example a payment described as "FOOD BANK"), so treat the data folder as private anyway.
+Keep the data folder out of cloud-synced folders (OneDrive, Dropbox, iCloud) and protect your Windows account with a password: old copies, and anything a sync service already saved, are not covered.
 
 ## Your recovery phrase
 
@@ -47,7 +26,7 @@ The phrase also unlocks your backups: see [Back up and restore your data](back-u
 
 ## Old backup copies
 
-Each time Budget Buddy updates its database, it first saves a copy of your data folder's database: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. Every copy holds your amounts and transaction descriptions as plain text, just like the main database. Any copy made before the update that encrypted bank, employer, charity and shop names (copies numbered 0027 or lower) also holds those names as plain text, and older copies also hold account numbers and notes that way. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
+Each time Budget Buddy updates its database, it first saves a copy of your data folder's database: `budget.db.bak-0001`, `budget.db.bak-0002`, and so on. Copies made by this version are encrypted like the main database. Copies made by older versions are not: they hold your amounts and transaction descriptions as plain text, and the oldest also hold names, account numbers and notes that way. When Budget Buddy first encrypts your database it lists the old copies in its log. You can delete them once Budget Buddy is working well and you've saved your recovery phrase.
 
 To delete them safely:
 1. Make sure Budget Buddy is running, so it makes a fresh backup if needed

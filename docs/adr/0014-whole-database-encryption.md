@@ -1,7 +1,7 @@
 # ADR-0014: Encrypt the whole database with SQLCipher
 
 **Status:** Accepted by the owner, 2026-10-20 (issue #28, step 2), for 0.1.0. The security review's requirements
-below are part of the build.
+below are part of the build. **Built** in roadmap 25l (2026-11).
 
 ## Context
 `budget.db` still holds every amount, date, description, shop, employer and charity in plain text
@@ -28,7 +28,7 @@ Rough speed (single runs): inserting 20,000 rows took 61 ms plain, 103 ms with `
 sqlite3mc; a full-table `LIKE` scan 2.6 → 3.8 ms; opening a connection 3.4 → 5.3 ms with a raw key, ~280 ms with
 a passphrase (PBKDF2, 256,000 rounds). Fine for a one-person budget.
 
-## Decision (proposed)
+## Decision
 **Adopt SQLCipher through `sqlcipher3` (coleifer), and keep field-level encryption.** Not the `-wheels` fork
 (older SQLCipher, one-person "Beta"); not sqlite3mc (no DB-API, so we'd own a SQLAlchemy dialect). sqlite3mc's
 `sqlcipher` mode opens our files, so it stays the way out if `sqlcipher3` stops shipping wheels.
