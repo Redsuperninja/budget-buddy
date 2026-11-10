@@ -25,7 +25,7 @@ from app.crypto.keys import (
     read_fingerprint,
     write_fingerprint,
 )
-from app.db import DatabaseUpgradeError
+from app.db_migrate import DatabaseUpgradeError
 
 Output = Callable[[str], None]
 Input = Callable[[str], str]

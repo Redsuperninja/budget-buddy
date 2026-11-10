@@ -12,14 +12,8 @@ from sqlalchemy import select, text
 
 from app.crypto import EncryptionError, FieldCipher
 from app.crypto.fields import alembic_compare_type
-from app.db import (
-    SessionLocal,
-    alembic_config,
-    create_db_engine,
-    database_path,
-    run_migrations,
-    unencrypted_backups,
-)
+from app.db import SessionLocal, create_db_engine, database_path
+from app.db_migrate import alembic_config, run_migrations, unencrypted_backups
 from app.models import (
     Account,
     Base,
@@ -201,7 +195,7 @@ def _plaintext_notes_on_disk(data_dir):
 
 
 def test_interrupted_cleanup_is_retried_on_next_start(tmp_path, monkeypatch):
-    from app import db as db_module
+    from app import db_migrate as db_module
 
     engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
     try:
@@ -229,7 +223,7 @@ def test_interrupted_cleanup_is_retried_on_next_start(tmp_path, monkeypatch):
 
 
 def test_cleanup_keeps_marker_when_checkpoint_is_busy(tmp_path, monkeypatch, caplog):
-    from app import db as db_module
+    from app import db_migrate as db_module
 
     engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
     try:
@@ -258,9 +252,9 @@ def test_cleanup_keeps_marker_when_checkpoint_is_busy(tmp_path, monkeypatch, cap
 
 def test_cleanup_reports_failure_while_another_reader_holds_the_log(tmp_path, monkeypatch):
     """A reader on an old snapshot stops the TRUNCATE checkpoint; that must not count as done."""
-    from app import db as db_module
+    from app import db_migrate as db_module
 
-    monkeypatch.setattr(db_module, "BUSY_TIMEOUT_MS", 0)  # don't wait 5 seconds for the reader
+    monkeypatch.setattr("app.db.BUSY_TIMEOUT_MS", 0)  # don't wait 5 seconds for the reader
     engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
     try:
         run_migrations(engine)
@@ -278,7 +272,7 @@ def test_cleanup_reports_failure_while_another_reader_holds_the_log(tmp_path, mo
 
 
 def test_new_database_needs_no_cleanup(tmp_path):
-    from app import db as db_module
+    from app import db_migrate as db_module
 
     engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
     try:

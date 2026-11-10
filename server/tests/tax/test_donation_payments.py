@@ -7,7 +7,8 @@ from alembic import command
 from sqlalchemy import text
 
 from app import clock
-from app.db import alembic_config, create_db_engine
+from app.db import create_db_engine
+from app.db_migrate import alembic_config
 from app.services.tax import donations as donation_service
 from app.services.tax.donation_payments import part_gift_proof
 

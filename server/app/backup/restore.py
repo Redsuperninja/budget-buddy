@@ -27,14 +27,8 @@ from app.crypto.keys import (
     save_fingerprint,
 )
 from app.crypto.stream import read_header
-from app.db import (
-    DB_FILENAME,
-    NEWER_DATABASE_MESSAGE,
-    _exclusive_lock,
-    database_revision,
-    known_revisions,
-    open_read_only,
-)
+from app.db import DB_FILENAME, _exclusive_lock, database_revision, open_read_only
+from app.db_migrate import NEWER_DATABASE_MESSAGE, known_revisions
 from app.instance_proof import FILE_NAME as RUNNING_FILE
 from app.parent_watch import process_alive
 from app.services.devices.pairing_sessions import SERVER_ID_FILENAME

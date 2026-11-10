@@ -141,7 +141,7 @@ def test_the_app_moves_a_plain_database_at_start_and_its_upgrade_backup_is_encry
 ):
     from alembic import command
 
-    from app.db import alembic_config
+    from app.db_migrate import alembic_config
 
     engine = create_app().state.engine  # plain, then taken one revision back
     with engine.begin() as connection:

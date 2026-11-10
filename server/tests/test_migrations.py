@@ -13,15 +13,9 @@ from alembic import command
 from alembic.script import ScriptDirectory
 from sqlalchemy import func, select, text
 
-from app import db
-from app.db import (
-    DatabaseUpgradeError,
-    SessionLocal,
-    alembic_config,
-    create_db_engine,
-    database_path,
-    run_migrations,
-)
+from app import db, db_migrate
+from app.db import SessionLocal, create_db_engine, database_path
+from app.db_migrate import DatabaseUpgradeError, alembic_config, run_migrations
 from app.models import Category
 
 pytestmark = pytest.mark.real_migrations
@@ -42,7 +36,7 @@ def _revision(engine) -> str:
 
 
 def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
-    real_upgrade = db._upgrade
+    real_upgrade = db_migrate._upgrade
     calls = []
 
     def slow_upgrade(config, engine):
@@ -50,7 +44,7 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
         time.sleep(0.3)  # make sure the other thread is waiting on the lock meanwhile
         real_upgrade(config, engine)
 
-    monkeypatch.setattr(db, "_upgrade", slow_upgrade)
+    monkeypatch.setattr(db_migrate, "_upgrade", slow_upgrade)
     engines = [create_db_engine(tmp_path) for _ in range(2)]
     barrier = threading.Barrier(2)
     errors = []
@@ -80,8 +74,8 @@ def test_concurrent_startups_migrate_once(tmp_path, monkeypatch):
 
 def test_head_constant_and_file_name_revisions_match_alembic():
     script = ScriptDirectory.from_config(alembic_config())
-    assert db.HEAD_REVISION == script.get_current_head()
-    assert db.known_revisions() == {r.revision for r in script.walk_revisions()}
+    assert db_migrate.HEAD_REVISION == script.get_current_head()
+    assert db_migrate.known_revisions() == {r.revision for r in script.walk_revisions()}
 
 
 def test_up_to_date_database_starts_without_loading_alembic(tmp_path, monkeypatch):
@@ -92,7 +86,7 @@ def test_up_to_date_database_starts_without_loading_alembic(tmp_path, monkeypatc
         def no_alembic():
             raise AssertionError("alembic should not be needed")
 
-        monkeypatch.setattr(db, "alembic_config", no_alembic)
+        monkeypatch.setattr(db_migrate, "alembic_config", no_alembic)
         run_migrations(engine)
         assert _revision(engine) == HEAD
     finally:
@@ -165,7 +159,7 @@ def test_failed_upgrade_gives_plain_english_error(tmp_path, monkeypatch):
         def broken_upgrade(config, engine):
             raise RuntimeError("boom")
 
-        monkeypatch.setattr(db, "_upgrade", broken_upgrade)
+        monkeypatch.setattr(db_migrate, "_upgrade", broken_upgrade)
         with pytest.raises(DatabaseUpgradeError, match="couldn't update its database") as info:
             run_migrations(engine)
         assert str(database_path(tmp_path)) + ".bak-0001" in str(info.value)
@@ -179,7 +173,7 @@ def test_migrations_have_one_head_and_no_duplicate_revision_ids():
     from alembic.script import ScriptDirectory
 
     assert len(ScriptDirectory.from_config(alembic_config()).get_heads()) == 1
-    versions = db.MIGRATIONS_DIR / "versions"
+    versions = db_migrate.MIGRATIONS_DIR / "versions"
     matches = [
         re.search(r'^revision(?::\s*str)?\s*=\s*"([^"]+)"', p.read_text(encoding="utf-8"), re.M)
         for p in sorted(versions.glob("*.py"))

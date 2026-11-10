@@ -16,8 +16,9 @@ from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, get_key_store, load_keys
 from app.dashboard_files import default_dashboard_dir, load_dashboard
 from app.data_folder import warn_if_risky_data_dir
-from app.db import create_db_engine, database_path, run_migrations
+from app.db import create_db_engine, database_path
 from app.db_encrypt import encrypt_existing_database
+from app.db_migrate import run_migrations
 from app.errors import install_error_handlers
 from app.lan import LanAddress, detect_lan_ip, host_header
 from app.listeners import LanListener
