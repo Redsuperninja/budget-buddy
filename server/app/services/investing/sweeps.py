@@ -55,6 +55,7 @@ def lean(query):
         lazyload(Transaction.account),
         lazyload(Transaction.transfer_partner),
         lazyload(Transaction.donation),
+        lazyload(Transaction.splits),
     )
 
 

@@ -96,6 +96,7 @@ def _unlinked(session: Session, ids: set[int] | None) -> list[Transaction]:
             lazyload(Transaction.account),
             lazyload(Transaction.transfer_partner),
             lazyload(Transaction.donation),
+            lazyload(Transaction.splits),
         )
         .join(Account, Account.id == Transaction.account_id)
         .where(*free_to_move(), *none_of(dividends()), Transaction.category_id.is_(None))
