@@ -12,7 +12,8 @@ from pathlib import Path
 
 from sqlalchemy import Engine
 
-from app.db import create_db_engine, run_migrations
+from app.db import create_db_engine
+from app.db_migrate import run_migrations
 
 
 def build_template(folder: Path) -> Path:

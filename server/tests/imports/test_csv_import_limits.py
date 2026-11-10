@@ -5,7 +5,8 @@ from alembic import command
 from csv_helpers import CHECKING_CSV, ok, send, txns
 from sqlalchemy import inspect
 
-from app.db import alembic_config, create_db_engine, run_migrations
+from app.db import create_db_engine
+from app.db_migrate import alembic_config, run_migrations
 from app.services.imports import csv_import, csv_parsing
 
 

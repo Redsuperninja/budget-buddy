@@ -33,7 +33,7 @@ recovery-phrase show|restore` is the recovery-phrase command line (`app/cli.py`)
 | --- | --- |
 | `main.py`, `__main__.py`, `cli.py` | Build the app; run it; command line |
 | `config.py` | Settings from environment variables ([settings](../settings.md)) |
-| `db.py`, `migrations/` | Engine and Alembic migrations |
+| `db.py`, `db_migrate.py`, `migrations/` | Engine and openers; Alembic upgrade, pre-upgrade copy and clean-up; the migrations |
 | `models/` | Tables: `ledger.py` (accounts, categories, budget plan, category rules, transactions, CSV mappings, paychecks, receipts), `tax.py` (donations, dividends, stocks, positions, prices, deductions), `devices.py` (devices, other computers, pairing, nonces), `imports.py` (import history), `trades.py` (bank-file stock trades, tickers), `enums.py` (shared choices) |
 | `services/`, `routers/`, `schemas/` | Business logic; thin routes with no business logic; request and response shapes. All three, and `tests/`, are grouped the same way by area ([below](#areas)) |
 | `crypto/` | Keys, key stores, encrypted columns and files, recovery phrase, base64url |

@@ -10,7 +10,8 @@ from sqlalchemy import func, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db import SessionLocal, create_db_engine, database_path, get_session, run_migrations
+from app.db import SessionLocal, create_db_engine, database_path, get_session
+from app.db_migrate import run_migrations
 from app.main import create_app
 from app.models import (
     Account,

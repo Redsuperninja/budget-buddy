@@ -6,7 +6,8 @@ from crypto_helpers import KEY, raw_rows
 from sqlalchemy import text
 
 from app.crypto import EncryptionError, FieldCipher
-from app.db import alembic_config, create_db_engine
+from app.db import create_db_engine, database_path
+from app.db_migrate import alembic_config
 
 NAMES = {
     "donations": "organization",
@@ -154,13 +155,13 @@ def test_migration_0028_rerun_does_not_double_encrypt_or_fail(tmp_path):
 
 
 def test_upgrade_from_0027_writes_scrub_marker_and_flags_the_old_copy(tmp_path, monkeypatch):
-    from app import db as db_module
+    from app import db_migrate as db_module
 
     engine = create_db_engine(tmp_path, field_cipher=FieldCipher(KEY))
     try:
         _migrate(engine, "0027")
         _insert_plaintext_rows(engine)
-        db_path = db_module.database_path(tmp_path)
+        db_path = database_path(tmp_path)
         marker = db_module.scrub_marker_path(db_path)
         marker_seen = []
         real = db_module._vacuum_and_checkpoint

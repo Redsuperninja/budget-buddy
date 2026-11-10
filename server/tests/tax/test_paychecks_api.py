@@ -8,7 +8,8 @@ from alembic import command
 from sqlalchemy import text
 
 from app.crypto import FieldCipher
-from app.db import alembic_config, create_db_engine
+from app.db import create_db_engine
+from app.db_migrate import alembic_config
 from app.services.tax.paychecks import max_social_security_tax
 
 URL = "/api/local/paychecks"

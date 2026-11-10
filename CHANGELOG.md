@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- For developers (refactor): the migration code (`run_migrations`, the copy saved before an upgrade, the plain-text clean-up, `HEAD_REVISION`) moved from `app/db.py` to `app/db_migrate.py`, leaving `db.py` with the engine and the file openers. No change for users.
 - Dashboard forms are easier to use with a screen reader or keyboard: after a failed save the cursor moves to the first blank required field and the field is marked, each category's Save button says which category it saves, "Saved" and error notes are announced, and the shares boxes stop at 20 characters.
 - The phone app now asks "Delete this receipt?" (or "Delete every waiting receipt?", with how many) before throwing away a waiting receipt photo, because that photo exists only on the phone.
 - For developers (refactor): the activity, stock and positions CSV importers share one header search (`find_header`, `date_format_below` in `csv_headers.py`), one cell reader (`optional_cell`) and one dollar-cell reader (`abs_amount`), instead of three copies each. Import behaviour and messages are unchanged.

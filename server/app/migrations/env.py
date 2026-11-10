@@ -35,7 +35,7 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     connection = config.attributes.get("connection")
-    if connection is not None:  # passed in by app.db.run_migrations
+    if connection is not None:  # passed in by app.db_migrate.run_migrations
         _run(connection)
         return
 

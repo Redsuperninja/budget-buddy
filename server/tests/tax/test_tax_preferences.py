@@ -9,7 +9,8 @@ from sqlalchemy import text
 from app import cli
 from app.crypto import MemoryKeyStore
 from app.crypto import keystore as keystore_module
-from app.db import alembic_config, create_db_engine
+from app.db import create_db_engine
+from app.db_migrate import alembic_config
 from app.tax_data import FILING_STATUSES
 
 PREFS = "/api/local/tax-preferences"

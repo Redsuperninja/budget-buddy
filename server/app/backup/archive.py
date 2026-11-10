@@ -25,12 +25,8 @@ from app.crypto.stream import (
     EncryptingWriter,
     decrypted_chunks,
 )
-from app.db import (
-    DB_FILENAME,
-    FIRST_ENCRYPTED_REVISION,
-    database_revision,
-    make_private_file,
-)
+from app.db import DB_FILENAME, database_revision, make_private_file
+from app.db_migrate import FIRST_ENCRYPTED_REVISION
 from app.services.devices.pairing_sessions import SERVER_ID_FILENAME
 
 FORMAT = 1
