@@ -39,9 +39,9 @@ OLD_PROVIDER_MESSAGE = (
 )
 
 PLAIN_DATABASE_MESSAGE = (
-    "Budget Buddy's database isn't encrypted yet, and this version can't encrypt it while "
-    "database encryption is turned on. Turn off BUDGET_BUDDY_DATABASE_ENCRYPTION to keep using "
-    "your data. Your data is safe and unchanged."
+    "Budget Buddy's database isn't encrypted, and it wasn't moved into the encrypted form. "
+    "Start Budget Buddy again so it can do that, or turn off BUDGET_BUDDY_DATABASE_ENCRYPTION "
+    "to keep using your data as it is. Your data is safe and unchanged."
 )
 _SQLITE_HEADER = b"SQLite format 3\x00"
 _NOT_A_DATABASE = "file is not a database"
@@ -65,8 +65,8 @@ def refuse_plain_file(path: object) -> None:
     """Raise ``UnencryptedDatabaseError`` if ``path`` is an ordinary, unencrypted SQLite file.
 
     Without this a plain file would fail the key check and be reported as a wrong key, which
-    sends people to the recovery phrase. Runs before the key is set (until roadmap 25l-3 moves
-    existing databases; an empty new file is fine).
+    sends people to the recovery phrase. Runs before the key is set. The start-up move
+    (``app.db_encrypt``) normally encrypts a plain file first; an empty new file is fine.
     """
     try:
         with open(Path(str(path)), "rb") as handle:

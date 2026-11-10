@@ -6,8 +6,8 @@ import pytest
 from alembic import command
 from sqlalchemy import text
 
+from app import clock
 from app.db import alembic_config, create_db_engine
-from app.schemas.tax import donations as donation_schemas
 from app.services.tax import donations as donation_service
 from app.services.tax.donation_payments import part_gift_proof
 
@@ -17,7 +17,7 @@ TXN_URL = "/api/local/transactions"
 
 @pytest.fixture(autouse=True)
 def frozen_today(monkeypatch):
-    monkeypatch.setattr(donation_schemas, "_today", lambda: dt.date(2030, 1, 1))
+    monkeypatch.setattr(clock, "today", lambda: dt.date(2030, 1, 1))
 
 
 @pytest.fixture

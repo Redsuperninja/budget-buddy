@@ -1,8 +1,8 @@
-import datetime as dt
 from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
+from app import clock
 from app.deps import Offset, PathId, SessionDep
 from app.schemas.tax.paychecks import (
     DepositLink,
@@ -34,14 +34,14 @@ def list_paychecks(
 @router.get("/summary")
 def year_summary(session: SessionDep, year: Year | None = None) -> PaycheckSummary:
     """Year-to-date totals (this calendar year unless ``year`` is given)."""
-    return service.year_summary(session, year or dt.date.today().year)
+    return service.year_summary(session, year or clock.today().year)
 
 
 # Declared before "/{paycheck_id}" so the path isn't read as an ID.
 @router.get("/deposits")
 def pay_deposits(session: SessionDep, year: Year | None = None) -> list[PayDeposit]:
     """Pay deposits not linked to a paycheck yet (this calendar year unless ``year`` is given)."""
-    return waiting_deposits(session, year or dt.date.today().year)
+    return waiting_deposits(session, year or clock.today().year)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)

@@ -7,11 +7,10 @@ dated today or earlier (this computer's calendar), so a bill entered ahead of ti
 doesn't lower today's balance yet; ``balance_cents`` counts them all.
 """
 
-import datetime as dt
-
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.errors import ApiError, not_found
 from app.models import Account, AccountKind, StockLot, StockSaleOrder, Transaction
 from app.schemas.ledger.accounts import RETIREMENT_ONLY, AccountCreate, AccountOut, AccountUpdate
@@ -24,7 +23,7 @@ INVESTMENT_KINDS = {AccountKind.BROKERAGE, AccountKind.RETIREMENT, AccountKind.H
 
 def _totals(session: Session, account_ids: list[int]) -> dict[int, tuple[int, int, int]]:
     """``{account_id: (balance_cents, current_balance_cents, transaction_count)}`` in one query."""
-    today = dt.date.today()
+    today = clock.today()
     rows = session.execute(
         select(
             Transaction.account_id,

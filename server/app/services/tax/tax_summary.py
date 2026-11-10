@@ -12,7 +12,7 @@ import datetime as dt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import tax_data
+from app import clock, tax_data
 from app.models import Deduction, Donation, DonationKind
 from app.schemas.tax.tax_summary import DeductionTotal, Line, TaxSummary
 from app.services.investing import stock_sales
@@ -87,7 +87,7 @@ def build(session: Session, year: int) -> TaxSummary:
     gains = stock_sales.gains_summary(session, year)
     return TaxSummary(
         tax_year=year,
-        generated_on=dt.date.today(),
+        generated_on=clock.today(),
         disclaimer=DISCLAIMER,
         paycheck_count=pay.paycheck_count,
         pay=[Line(label=text, amount_cents=pay.totals.get(f, 0)) for f, text in PAY_LABELS.items()],

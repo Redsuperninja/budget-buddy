@@ -9,6 +9,7 @@ import datetime as dt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.models import Transaction
 from app.schemas.budget.summary import MonthlyTrend, TrendMonth
 from app.services.budget.summary import month_range, monthly_summary
@@ -24,7 +25,7 @@ def _net_worths(session: Session, spans: list[tuple[int, int]]) -> list[int]:
     """Net worth at each of these (year, month)s: everything dated before the month's end (capped
     at tomorrow). One total before the first month plus one grouped query for the months, then a
     running total, instead of a whole-table sum per month."""
-    tomorrow = dt.date.today() + dt.timedelta(days=1)
+    tomorrow = clock.today() + dt.timedelta(days=1)
     ends = [min(month_range(y, m)[1], tomorrow) for y, m in spans]
     first = min(month_range(*spans[0])[0], tomorrow)
     month_key = func.substr(Transaction.date, 1, 7)

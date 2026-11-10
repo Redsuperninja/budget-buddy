@@ -12,16 +12,15 @@ from dataclasses import dataclass
 
 from pydantic import ValidationError
 
-from app.errors import ApiError
 from app.schemas.imports.activity_import import ActivityColumns
 from app.schemas.imports.stock_import import Kind
 from app.schemas.investing.stocks import LotCreate, SaleCreate
-from app.services.imports.csv_columns import detect_date_format
-from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
+from app.services.imports.csv_headers import date_format_below, find_header, pick_columns
 from app.services.imports.csv_parsing import (
     RowProblem,
     cell,
     clean_description,
+    optional_cell,
     parse_amount,
     parse_date,
 )
@@ -67,18 +66,14 @@ class ActivityRow:
 
 
 def find_columns(rows: list[list[str]]) -> tuple[int, ActivityColumns]:
-    for index, row in enumerate(rows[:HEADER_SEARCH_ROWS]):
-        picked = pick_columns(
-            [header_name(c) for c in row], _WORDS, _AVOID, required={"date", "action", "amount"}
-        )
-        if picked:
-            dates = [r[picked["date"]] for r in rows[index + 1 :] if picked["date"] < len(r)]
-            return index, ActivityColumns(**picked, date_format=detect_date_format(dates))
-    raise ApiError(422, "columns_not_found", NO_COLUMNS)
-
-
-def _optional(row: list[str], column: int | None) -> str:
-    return row[column].strip() if column is not None and column < len(row) else ""
+    index, picked = find_header(
+        rows,
+        lambda names: pick_columns(names, _WORDS, _AVOID, required={"date", "action", "amount"}),
+        NO_COLUMNS,
+    )
+    return index, ActivityColumns(
+        **picked, date_format=date_format_below(rows, index, picked["date"])
+    )
 
 
 def _wording(action: str, symbol: str, name: str) -> str:
@@ -92,12 +87,12 @@ def _wording(action: str, symbol: str, name: str) -> str:
 
 def _trade(row: list[str], cols: ActivityColumns, action: str, date, cents: int, account_id: int):
     """The stock trade a buy or sell row also is, or (None, None) when it isn't a plain one."""
-    symbol = _optional(row, cols.symbol).rstrip("*")
-    shares_text = _optional(row, cols.shares)
+    symbol = optional_cell(row, cols.symbol).rstrip("*")
+    shares_text = optional_cell(row, cols.shares)
     if not symbol or not shares_text:
         return None, None
     if _MONEY_MARKET_SYMBOL.fullmatch(symbol.upper()) or _MONEY_MARKET_WORDS.search(
-        " ".join([action, _optional(row, cols.description)])
+        " ".join([action, optional_cell(row, cols.description)])
     ):
         return None, None  # the cash sweep: a transaction only
     try:
@@ -130,8 +125,8 @@ def parse_row(row: list[str], number: int, cols: ActivityColumns, account_id: in
         raise RowProblem("The amount isn't a dollar amount we can read.") from None
     if not cents:
         raise SharesOnly("No money moved (shares moved in or out, or a split): nothing to add.")
-    symbol = _optional(row, cols.symbol).rstrip("*")
-    description = _wording(action, symbol, _optional(row, cols.description))
+    symbol = optional_cell(row, cols.symbol).rstrip("*")
+    description = _wording(action, symbol, optional_cell(row, cols.description))
     if not description:
         raise RowProblem("The action is empty.")
     kind, trade = _trade(row, cols, action, date, cents, account_id)
