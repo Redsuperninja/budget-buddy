@@ -8,9 +8,8 @@ import datetime as dt
 
 import pytest
 
-from app import tax_data
+from app import clock, tax_data
 from app.models import DonationKind
-from app.schemas.tax import donations as donation_schemas
 from app.services.tax.donation_proof import donation_proof, year_proof
 
 URL = "/api/local/donations"
@@ -22,7 +21,7 @@ FROZEN_TODAY = dt.date(2030, 1, 1)
 @pytest.fixture(autouse=True)
 def frozen_today(monkeypatch):
     """Freeze the Home Base's date so example gifts in 2026-2028 are never "in the future"."""
-    monkeypatch.setattr(donation_schemas, "_today", lambda: FROZEN_TODAY)
+    monkeypatch.setattr(clock, "today", lambda: FROZEN_TODAY)
 
 
 @pytest.fixture

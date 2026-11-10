@@ -103,13 +103,12 @@ def test_a_plain_file_under_a_key_says_it_is_not_encrypted_yet(tmp_path):
     assert database_path(tmp_path).read_bytes() == before  # untouched
 
 
-def test_an_app_start_on_a_plain_database_with_the_setting_on_is_not_a_wrong_key(
-    data_dir, monkeypatch
-):
+def test_an_app_start_on_a_plain_database_with_the_setting_on_moves_it(data_dir, monkeypatch):
     create_app().state.engine.dispose()  # a plain database, as before this version
     monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
-    with pytest.raises(UnencryptedDatabaseError):
-        create_app()
+    app = create_app()  # moved at start (roadmap 25l-3); see test_db_encrypt.py
+    app.state.engine.dispose()
+    assert not database_path(data_dir).read_bytes().startswith(SQLITE_HEADER)
 
 
 def test_the_openssl_check_runs_before_the_database_is_read(tmp_path, monkeypatch):

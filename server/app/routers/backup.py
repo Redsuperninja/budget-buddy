@@ -2,13 +2,13 @@
 finishes at the next start. This computer only: not on the other-computers allow-list."""
 
 import asyncio
-import datetime as dt
 from typing import Annotated
 
 from fastapi import APIRouter, Header, Request, Response, status
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 
+from app import clock
 from app.backup import pending, uploads
 from app.crypto import get_key_store, load_master_key, master_key_to_phrase
 from app.crypto.keys import matches_fingerprint, read_fingerprint
@@ -40,7 +40,7 @@ def download_backup(
         raise ApiError(403, "cross_site", "Download backups from the Budget Buddy dashboard.")
     state = request.app.state
     path = uploads.make_download(state.settings.data_dir, state.engine, state.keys)
-    name = uploads.download_name(dt.date.today())  # noqa: DTZ011 (this computer's own date)
+    name = uploads.download_name(clock.today())  # noqa: DTZ011 (this computer's own date)
     return StreamingResponse(
         uploads.send_and_delete(path, engine=state.engine),
         media_type="application/octet-stream",

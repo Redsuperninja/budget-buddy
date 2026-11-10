@@ -15,7 +15,7 @@ and [ADR-0004](../../adr/0004-sync-contract-v1.md) (on the network). Checklist f
   `paychecks.employer`, `donations.organization`, `receipts.merchant`; migration 0028), device sync keys, pairing secret keys, the Finnhub key) use the encrypted column
   types in `app/crypto/fields.py`. Never add plaintext copies.
 - **Whole-database encryption** ([ADR-0014](../../adr/0014-whole-database-encryption.md), roadmap 25l, in steps;
-  behind `BUDGET_BUDDY_DATABASE_ENCRYPTION`, off until the migration step lands): SQLCipher through `sqlcipher3`,
+  behind `BUDGET_BUDDY_DATABASE_ENCRYPTION`, off until 25l-6 switches it on; 25l-3 moves an existing database at start, see `app/db_encrypt.py`; it can't wipe the old plain file's disk blocks or OneDrive/File History versions, so keep the data folder out of synced folders (`warn_if_risky_data_dir`)): SQLCipher through `sqlcipher3`,
   keyed with the HKDF subkey `db-file` as a raw 256-bit key (no PBKDF2). `app/crypto/sqlcipher.py` sets it with
   `PRAGMA key` on the raw DB-API connection, from the engine's `do_connect` hook so it is the first statement
   (SQLAlchemy's own set-up SQL runs before any `connect` listener). The key is never in the URL, in SQL run

@@ -38,7 +38,7 @@ class CipherProviderError(EncryptionError):
 
 
 class UnencryptedDatabaseError(EncryptionError):
-    """The database file is plain SQLite but encryption is on (until it is moved, 25l-3)."""
+    """The database file is plain SQLite but encryption is on ."""
 
 
 BUSY_MESSAGE = (
@@ -57,3 +57,14 @@ class DatabaseBusyError(EncryptionError):
 
 class DatabaseCorruptError(EncryptionError):
     """The encrypted database opened with the right key but is damaged (not a wrong key)."""
+
+
+MOVE_FAILED_MESSAGE = (
+    "Budget Buddy couldn't move its database into the encrypted form, so it stopped before "
+    "changing your data. Your data is safe and unchanged. Close any other copy of Budget Buddy "
+    "and start it again, or ask for help."
+)
+
+
+class DatabaseMoveError(EncryptionError):
+    """An existing plain database couldn't be moved into an encrypted file (it is untouched)."""

@@ -3,6 +3,7 @@ from typing import Annotated
 
 from pydantic import Field, model_validator
 
+from app import clock
 from app.models import AccountKind, RetirementType
 from app.schemas.common import (
     Cents,
@@ -82,7 +83,7 @@ class BalanceSet(Schema):
         cents = pick_cents(self.balance_cents, self.balance, "balance")
         if cents is None:
             raise ValueError("Enter the balance: send balance_cents or balance.")
-        if self.date > dt.date.today() + dt.timedelta(days=1):
+        if self.date > clock.today() + dt.timedelta(days=1):
             raise ValueError(
                 "Use today or an earlier day: Budget Buddy can't know a future balance."
             )

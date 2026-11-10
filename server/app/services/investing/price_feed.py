@@ -25,6 +25,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app import clock
 from app.models import PriceFeed, StockLot, StockPrice, StockSale
 from app.schemas.investing.price_feed import PriceFeedIn, PriceFeedOut, RefreshResult
 
@@ -166,7 +167,7 @@ def refresh(session: Session, now: dt.datetime | None = None) -> RefreshResult:
     transaction, so the database is never locked while waiting on the internet. One refresh at a
     time: a second one meanwhile just says so.
     """
-    now = now or dt.datetime.now(dt.UTC).replace(tzinfo=None)
+    now = now or clock.utcnow_naive()
     feed = _feed(session)
     if not feed.enabled:
         return RefreshResult(enabled=False, updated=[], not_found=[], message=OFF)

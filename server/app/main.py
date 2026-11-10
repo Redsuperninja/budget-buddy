@@ -16,7 +16,8 @@ from app.config import Settings
 from app.crypto import EncryptedFileStore, FieldCipher, get_key_store, load_keys
 from app.dashboard_files import default_dashboard_dir, load_dashboard
 from app.data_folder import warn_if_risky_data_dir
-from app.db import create_db_engine, run_migrations
+from app.db import create_db_engine, database_path, run_migrations
+from app.db_encrypt import encrypt_existing_database
 from app.errors import install_error_handlers
 from app.lan import LanAddress, detect_lan_ip, host_header
 from app.listeners import LanListener
@@ -70,6 +71,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     restored_from = pending.finish(settings.data_dir, get_key_store(settings.key_store))
     keys = load_keys(settings)
     database_key = keys.db_file if settings.database_encryption else None
+    if database_key is not None:  # a database from before encryption moves over once (25l-3)
+        encrypt_existing_database(database_path(settings.data_dir), database_key)
     engine = create_db_engine(
         settings.data_dir, field_cipher=FieldCipher(keys.db_fields), database_key=database_key
     )
