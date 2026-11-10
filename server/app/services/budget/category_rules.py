@@ -22,6 +22,7 @@ from app.db_commit import commit_or
 from app.errors import ApiError, not_found
 from app.models import Category, CategoryRule, CategorySource, Transaction, TransactionKind
 from app.schemas.budget.category_rules import ApplyResult, RuleCreate, RuleUpdate
+from app.services.ledger.transaction_roles import none_of, splits
 
 
 class RuleMatch(NamedTuple):
@@ -133,7 +134,9 @@ def apply_to_uncategorized(session: Session) -> ApplyResult:
     count = 0
     for transaction in session.scalars(
         select(Transaction).where(
-            Transaction.category_id.is_(None), Transaction.kind == TransactionKind.NORMAL
+            Transaction.category_id.is_(None),
+            Transaction.kind == TransactionKind.NORMAL,
+            *none_of(splits()),  # a split's parts are its categories
         )
     ):
         found = match(transaction.description)

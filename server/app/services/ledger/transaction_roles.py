@@ -12,6 +12,7 @@ sweep, so every linked sweep belongs to one that's shown.
 
 from sqlalchemy import select
 
+from app.errors import ApiError
 from app.models import (
     Account,
     BankTrade,
@@ -22,6 +23,7 @@ from app.models import (
     StockSaleOrder,
     Transaction,
     TransactionKind,
+    TransactionSplit,
 )
 from app.services.ledger.accounts import TAX_FREE_KINDS
 
@@ -35,6 +37,24 @@ def paycheck_deposits():
     return select(Paycheck.deposit_transaction_id).where(
         Paycheck.deposit_transaction_id.is_not(None)
     )
+
+
+def splits():
+    """Split into several categories (ADR-0017): the parts are its categories, so nothing outside
+    the split route may categorize it, turn it into a transfer or link it to anything else."""
+    return select(TransactionSplit.transaction_id).distinct()
+
+
+def refuse_if_split(transaction: Transaction, action: str) -> None:
+    """409 if the transaction is split: ``action`` (e.g. "link it to a paycheck") needs the split
+    undone first."""
+    if transaction.splits:
+        raise ApiError(
+            409,
+            "split_transaction",
+            f"This transaction is split into several categories, so you can't {action}. "
+            "Undo the split first.",
+        )
 
 
 def donations():
@@ -97,10 +117,12 @@ def dividends_kept_inside() -> list:
 def free_to_move() -> list:
     """Conditions: a regular transaction that could be one side of a transfer or card payment: not
     linked yet, not unlinked by you before (``auto_transfer_off``), and not a paycheck's deposit, a
-    donation, a dividend's sweep or cash moving inside an account."""
+    donation, a split, a dividend's sweep or cash moving inside an account."""
     return [
         Transaction.kind == TransactionKind.NORMAL,
         Transaction.transfer_pair_id.is_(None),
         Transaction.auto_transfer_off.is_(False),
-        *none_of(paycheck_deposits(), donations(), dividend_sweeps(), *cash_inside_account()),
+        *none_of(
+            paycheck_deposits(), donations(), splits(), dividend_sweeps(), *cash_inside_account()
+        ),
     ]

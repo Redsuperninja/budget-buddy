@@ -19,6 +19,7 @@ from app.models import (
     TransactionKind,
 )
 from app.services.budget.named_categories import find_or_make
+from app.services.ledger.transaction_roles import refuse_if_split
 from app.services.ledger.transactions import get_transaction
 
 CHARITY = "Charitable giving"
@@ -42,6 +43,7 @@ def file_under(session: Session, payment: Transaction, name: str, by_you: bool =
 def mark_personal_gift(session: Session, transaction_id: int) -> Transaction:
     """File a payment under "Gifts": a present for someone, not a gift to charity."""
     payment = get_transaction(session, transaction_id)
+    refuse_if_split(payment, "mark it as a gift")
     if payment.kind != TransactionKind.NORMAL or payment.amount_cents >= 0:
         raise ApiError(422, "invalid_payment", "Only money you paid out can be marked as a gift.")
     if session.scalar(select(Donation.id).where(Donation.transaction_id == payment.id)):

@@ -90,7 +90,12 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   `category_source` and `sorted_by_rule_id` are cleared, and its JSON lists the parts as `splits`. While split,
   setting a category, or changing the amount or kind, is a 409 `split_transaction` (re-sending the current values
   is fine). A category a part uses can't be deleted, and deleting the transaction deletes its parts. The budget
-  summary and rules don't use the parts yet (roadmap 10f-2 to 10f-4).
+  summary reads the parts (`category_lines`, 10f-2).
+  **Left alone elsewhere (10f-3):** the `transaction_roles.splits()` role keeps a split out of auto-sort rules
+  (`apply_to_uncategorized`), the "no category yet" filter, transfer and card-payment matching (`free_to_move`),
+  dividend and bank-trade matching and sweeps (`sweeps.regular`), repeat gifts and the pay-deposit list. Linking
+  one to a transfer, paycheck, donation, personal gift or stock trade is a 409 `split_transaction`
+  (`refuse_if_split`). The phone snapshot still shows `category_id: null` until contract v2.
 
 ## Transfers and lock rules
 

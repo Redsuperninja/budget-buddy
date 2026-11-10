@@ -22,6 +22,7 @@ from app.models import (
 )
 from app.services.investing import stock_gains as gains
 from app.services.ledger.accounts import INVESTMENT_KINDS, TAX_FREE_KINDS, get_account
+from app.services.ledger.transaction_roles import refuse_if_split
 
 
 def to_gains_lot(row: StockLot) -> gains.Lot:
@@ -76,6 +77,7 @@ def check_trade_transaction(session: Session, values: dict, is_buy: bool) -> Non
     transaction = session.get(Transaction, transaction_id)
     if transaction is None:
         raise not_found("transaction")
+    refuse_if_split(transaction, "record it as a stock trade")
     account = get_account(session, transaction.account_id)
     if transaction.kind != TransactionKind.NORMAL or transaction.transfer_pair_id is not None:
         raise ApiError(422, "not_a_trade", "Only a regular transaction can be a stock trade.")
