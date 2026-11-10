@@ -9,6 +9,7 @@ import { pickOptions } from "../../fields.js";
 import { formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { advanced, card, empty, note, select, table } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 const money = (cents) => (cents === null ? "" : formatCents(cents));
 
@@ -38,7 +39,7 @@ function accountTable(group, year) {
   return h("div", {},
     h("h3", {}, `${group.account_name}, as of ${group.as_of}`),
     group.bank_trades_waiting
-      ? note(`${group.bank_trades_waiting} trade(s) from your bank file in this account still need their shares. ` +
+      ? note(`${plural(group.bank_trades_waiting, "trade")} from your bank file in this account still ${group.bank_trades_waiting === 1 ? "needs its" : "need their"} shares. ` +
           "Add them under Stock trades from your bank file below; the check updates as you do.")
       : null,
     table(["Symbol", "Broker says", "Cost", "Value", "Your records"], group.positions.map((p) => [
@@ -70,9 +71,9 @@ function importCard(accounts, year) {
         button.disabled = false;
         showError(result, err);
       }
-    } }, `Save ${p.positions} position(s)`);
+    } }, `Save ${plural(p.positions, "position")}`);
     fill(result,
-      h("p", {}, `${p.positions} position(s) found; ${p.skipped} line(s) skipped.`),
+      h("p", {}, `${plural(p.positions, "position")} found; ${plural(p.skipped, "line")} skipped.`),
       ok.length ? table(["Symbol", "Shares", "Cost", "Value", "Price"], ok.map((r) =>
         [r.symbol, r.shares, money(r.cost_basis_cents), money(r.value_cents), money(r.price_cents)]), [2, 3, 4]) : null,
       skipped.length ? h("div", {}, h("h3", {}, "Skipped lines"),

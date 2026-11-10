@@ -16,6 +16,7 @@ import { centsOrThrow, formatCents, inAndOut } from "../../money.js";
 import { categoryPicker } from "./category-picker.js";
 import { charityCell } from "./give-to-charity.js";
 import { stockTradeCell, tradeLabels } from "./stock-trade-cell.js";
+import { plural } from "../../plural.js";
 
 // Under a list that fits on the page: how many, and what came in and went out (balance adjustments too, when shown).
 function totalsLine(items) {
@@ -100,7 +101,7 @@ export async function render(root, options = {}) {
   const findTransfers = h("button", { class: "plain", type: "button", onclick: async () => {
     try {
       const { matched } = await matchTransfers();
-      matchNote.textContent = matched ? ` Linked ${matched} transfer(s).` : " No new transfers found.";
+      matchNote.textContent = matched ? ` Linked ${plural(matched, "transfer")}.` : " No new transfers found.";
       await refresh(true);
     } catch (err) {
       matchNote.textContent = ` ${err.message}`;
@@ -116,8 +117,8 @@ export async function render(root, options = {}) {
       const r = await matchAgain();
       const found = r.dividends_found + r.trades_found + r.sweeps_linked + r.transfers_linked;
       againNote.textContent = found
-        ? ` Done: ${r.dividends_found} new dividend(s), ${r.trades_found} new stock trade(s), ` +
-          `${r.sweeps_linked} deposit sweep(s) newly linked, ${r.transfers_linked} new transfer(s).`
+        ? ` Done: ${plural(r.dividends_found, "new dividend")}, ${plural(r.trades_found, "new stock trade")}, ` +
+          `${plural(r.sweeps_linked, "deposit sweep")} newly linked, ${plural(r.transfers_linked, "new transfer")}.`
         : " Nothing new to match.";
       await refresh(true);
     } catch (err) {

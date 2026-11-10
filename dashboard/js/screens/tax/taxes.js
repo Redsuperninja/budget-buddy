@@ -11,6 +11,7 @@ import { centsOrThrow, formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, note, table } from "../../widgets.js";
 import { filingStatusControl } from "./filing-status.js";
+import { plural, washSales } from "../../plural.js";
 
 const lineTable = (lines) => table(["", "Amount"], lines.map((l) => [l.label, formatCents(l.amount_cents)]), [1]);
 
@@ -47,11 +48,11 @@ export async function render(root, options) {
     card(`Tax summary for ${s.tax_year}`,
       taxYearHeader(year, s.disclaimer),
       actions(year),
-      h("h3", {}, `Pay (${s.paycheck_count} paycheck(s))`), lineTable(s.pay),
-      h("h3", {}, `Donations (${s.donation_count} gift(s))`), lineTable(s.donations),
+      h("h3", {}, `Pay (${plural(s.paycheck_count, "paycheck")})`), lineTable(s.pay),
+      h("h3", {}, `Donations (${plural(s.donation_count, "gift")})`), lineTable(s.donations),
       h("h3", {}, `Stock sales (${s.stock_sale_count})`), lineTable(s.stocks),
       s.possible_wash_sale_count
-        ? note(`${s.possible_wash_sale_count} sale(s) may be wash sales, so their loss may not count yet. See the Stocks page.`)
+        ? note(`${washSales(s.possible_wash_sale_count)} ${s.possible_wash_sale_count === 1 ? "Its" : "Their"} loss may not count yet. See the Stocks page.`)
         : null,
       h("h3", {}, "Other deductions"),
       s.deductions.length

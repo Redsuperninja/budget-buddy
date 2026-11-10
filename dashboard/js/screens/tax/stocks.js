@@ -12,6 +12,7 @@ import { reload } from "../../router.js";
 import { dividendsCard } from "./dividends-card.js";
 import { stockImportCard } from "./stock-import.js";
 import { tradeRecordCards } from "./trade-records.js";
+import { plural, washSales } from "../../plural.js";
 
 const termRow = (label, t) =>
   [label, formatCents(t.proceeds_cents), formatCents(t.cost_basis_cents), formatCents(t.gain_cents)];
@@ -49,7 +50,7 @@ export async function render(root, options) {
         termRow("More than a year (long term)", gains.long_term),
         ["Total", "", "", formatCents(gains.total_gain_cents)]], [1, 2, 3]),
       gains.possible_wash_sale_count
-        ? note(`${gains.possible_wash_sale_count} sale(s) may be wash sales. See the note above.`) : null,
+        ? note(`${washSales(gains.possible_wash_sale_count)} See the note above.`) : null,
       h("h3", {}, `Sales in ${year}`),
       gains.sales.length
         ? table(["Date", "Symbol", "Shares", "Sold for", "Gain or loss", "Flag"], gains.sales.map((s) =>

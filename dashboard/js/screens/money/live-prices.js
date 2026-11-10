@@ -7,6 +7,7 @@ import { form } from "../../form.js";
 import { formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 // The settings live on the Budget Buddy computer only (ADR-0009, ADR-0010).
 export const onThisComputer = () => ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname);
@@ -19,7 +20,7 @@ export async function refreshIfOn() {
     if (!r.enabled) return { enabled: false, note: null };
     const missing = r.not_found.length ? ` No price found for ${r.not_found.join(", ")}: Finnhub's free plan ` +
       "leaves out some funds and stocks outside the US, so type their price yourself." : "";
-    const updated = r.updated.length ? `Updated ${r.updated.length} price(s).` : "";
+    const updated = r.updated.length ? `Updated ${plural(r.updated.length, "price")}.` : "";
     return { enabled: true, note: r.message || `${updated}${missing}`.trim() || null };
   } catch (err) {
     return { enabled: true, note: `Prices weren't refreshed: ${err.message}` };

@@ -16,6 +16,7 @@ export async function saveWithNote(noteEl, action) {
 }
 
 let formCount = 0;
+const INLINE_BUTTON_MAX = 3; // fields; more than this and the button gets its own row
 
 // A form from field descriptions: { name, label, type, value, options, required, ... }. A field with
 // advanced: true is shown only in the All tools view, so it needs a sensible default value.
@@ -60,5 +61,8 @@ export function form(fields, submitLabel, onSubmit) {
         button.disabled = false;
       }
     },
-  }, labels, h("div", { class: "wide" }, button), h("div", { class: "wide" }, message));
+  // A short form keeps its button on the same row as the fields (Tax year [____] Show year); a long one gives it
+  // its own row below them. Either way the message about a problem comes last, on a row of its own.
+  }, labels, h("div", { class: fields.length > INLINE_BUTTON_MAX ? "wide" : null }, button),
+  h("div", { class: "wide" }, message));
 }

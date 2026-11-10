@@ -9,6 +9,7 @@ import { reload } from "../../router.js";
 import { formatCents } from "../../money.js";
 import { card, empty, formCard, table } from "../../widgets.js";
 import { categoryPicker } from "./category-picker.js";
+import { plural } from "../../plural.js";
 
 const SHOWN = 100;
 
@@ -28,7 +29,7 @@ function sortNowButton() {
     button.disabled = true;
     try {
       const r = await applyRules();
-      note.textContent = ` ${r.categorized} transaction(s) sorted.`;
+      note.textContent = ` ${plural(r.categorized, "transaction")} sorted.`;
     } catch (err) {
       note.textContent = ` ${err.message}`;
     } finally {

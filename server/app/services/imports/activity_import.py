@@ -244,8 +244,12 @@ def commit(
         raise ApiError(
             422,
             "invalid_rows",
-            f"{len(invalid)} row(s) couldn't be read (row {listed}). Fix them in the file, or "
-            "choose to skip those rows.",
+            (
+                f"1 row couldn't be read (row {listed}). Fix it in the file, or choose to skip it."
+                if len(invalid) == 1
+                else f"{len(invalid)} rows couldn't be read (rows {listed}). Fix them in the file, "
+                "or choose to skip those rows."
+            ),
         )
     new = [(r, fp) for out, r, fp in p.rows if out.status == "new"]
     if not new:

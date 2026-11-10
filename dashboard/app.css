@@ -186,9 +186,14 @@ ol.steps .step-mark { flex: none; min-width: 3.5rem; text-align: center; font-si
 ol.steps li.done { color: var(--muted); }
 ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px solid var(--good); }
 /* Home: charts two to a row on wide screens (js/screens/home/home.js), and a plain sentence leading a chart card. */
-.duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem;
+.duo { display: grid; /* the two cards in a row are the same height; js/duo.js folds them together */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem;
   margin-bottom: 1rem; }
 .duo > .card { margin: 0; min-width: 0; }
+/* A card inside a card (Setup's recovery phrase) is a plainer, tinted panel with an accent edge, so it reads as
+   part of the card around it and not as a second page. */
+.card .card { background: var(--raised); border-color: transparent; border-left: 3px solid var(--accent);
+  border-radius: 6px; margin: 0.75rem 0; }
 /* Investments, "Deposit sweeps to check": the match picker never pushes the table wider than the card. */
 select.sweep-pick { width: 20rem; max-width: 100%; }
 p.lead { margin: 0 0 0.5rem; font-size: 1.02rem; }

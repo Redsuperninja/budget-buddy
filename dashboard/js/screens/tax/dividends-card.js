@@ -6,6 +6,7 @@ import { h, showError } from "../../dom.js";
 import { formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, note, table } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 export async function dividendsCard(year, accountName) {
   const data = await listDividends(year);
@@ -13,7 +14,7 @@ export async function dividendsCard(year, accountName) {
   const find = h("button", { class: "plain", type: "button", onclick: async () => {
     try {
       const r = await findDividends();
-      await reload({ year, imported: `Found ${r.found} new dividend(s) and linked ${r.sweeps_linked} deposit sweep(s).` });
+      await reload({ year, imported: `Found ${plural(r.found, "new dividend")} and linked ${plural(r.sweeps_linked, "deposit sweep")}.` });
     } catch (err) { showError(status, err); }
   } }, "Find dividends");
   const notDividend = (d) => h("button", { class: "plain", type: "button", onclick: async () => {
