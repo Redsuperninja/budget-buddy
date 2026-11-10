@@ -148,7 +148,11 @@ def _key_for(settings: Settings, file: Path, output: Output, ask_secret: Input) 
         output("That recovery phrase is valid, but it isn't the one this backup was made with.")
         return None
     folder_key = read_fingerprint(settings.data_dir) or (current and fingerprint(current))
-    if folder_key and folder_key != made_by and has_own_data(settings.data_dir):
+    if (
+        folder_key
+        and folder_key != made_by
+        and has_own_data(settings.data_dir, database_key_for(current, settings.database_encryption))
+    ):
         output(
             f"{settings.data_dir} already holds data under a different key, and restoring would "
             "make it unreadable. Restore into an empty folder instead (set BUDGET_BUDDY_DATA_DIR)."
@@ -182,7 +186,13 @@ def restore_backup(
     keep_staging = False  # only when a failed swap couldn't be undone: files are still in it
     try:
         output(f"The backup is fine: {describe(manifest)}.")
-        if has_own_data(data_dir):
+        if has_own_data(
+            data_dir,
+            database_key_for(
+                load_master_key(get_key_store(settings.key_store), data_dir),
+                settings.database_encryption,
+            ),
+        ):
             answer = ask(
                 "Your current data will be moved to a 'before-restore' folder inside the data "
                 "folder (not deleted). Type RESTORE to continue, or press Enter to cancel: "

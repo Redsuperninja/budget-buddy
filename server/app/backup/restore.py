@@ -120,13 +120,20 @@ def home_base_running(data_dir: Path) -> bool:
 _STARTER_TABLES = frozenset({"categories", "setup_progress", "tax_preferences"})
 
 
-def has_own_data(data_dir: Path) -> bool:
+def has_own_data(data_dir: Path, database_key: bytes | None = None) -> bool:
     """True if the folder holds anything a key change would make unreadable: rows of the
     person's own, receipt files, an earlier restore's set-aside data or an update's ``.bak``
-    copy. A newly started Budget Buddy (default categories only) has none."""
+    copy. A newly started Budget Buddy (default categories only) has none.
+
+    ``database_key`` is this folder's own database key (None for a plain database). If an
+    encrypted database won't open with it, the answer is "yes, it has data": never "empty"."""
     receipts = data_dir / RECEIPTS_DIRNAME
+    try:
+        has_rows = database_has_rows(data_dir, ignore=_STARTER_TABLES, database_key=database_key)
+    except EncryptionError:
+        has_rows = True
     return (
-        database_has_rows(data_dir, ignore=_STARTER_TABLES)
+        has_rows
         or (receipts.is_dir() and any(receipts.iterdir()))
         or any(data_dir.glob(f"{BEFORE_PREFIX}*"))
         or any(data_dir.glob(f"{DB_FILENAME}.bak-*"))
