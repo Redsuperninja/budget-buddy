@@ -7,10 +7,9 @@ stars are dropped. Error messages never repeat a cell's contents.
 
 from dataclasses import dataclass
 
-from app.errors import ApiError
 from app.schemas.investing.stocks import clean_symbol
-from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
-from app.services.imports.csv_parsing import THOUSANDS, parse_amount
+from app.services.imports.csv_headers import find_header, pick_columns
+from app.services.imports.csv_parsing import THOUSANDS, abs_amount, optional_cell
 from app.shares import shares_to_micro
 
 NO_COLUMNS = (
@@ -47,34 +46,27 @@ class Skip(Exception):
 
 
 def find_columns(rows: list[list[str]]) -> tuple[int, dict[str, int]]:
-    for index, row in enumerate(rows[:HEADER_SEARCH_ROWS]):
-        picked = pick_columns(
-            [header_name(c) for c in row], _WORDS, _AVOID, required={"symbol", "shares"}
-        )
-        if picked:
-            return index, picked
-    raise ApiError(422, "columns_not_found", NO_COLUMNS)
-
-
-def _cell(row: list[str], column: int | None) -> str:
-    return row[column].strip() if column is not None and column < len(row) else ""
+    return find_header(
+        rows,
+        lambda names: pick_columns(names, _WORDS, _AVOID, required={"symbol", "shares"}),
+        NO_COLUMNS,
+    )
 
 
 def _money(text: str) -> int | None:
     """A dollar cell, or None when empty or not a number ("--", "n/a")."""
     try:
-        cents = parse_amount(text)
+        return abs_amount(text)
     except ValueError:
         return None
-    return None if cents is None else abs(cents)
 
 
 def parse_position(row: list[str], number: int, cols: dict[str, int]) -> ParsedPosition:
     try:
-        symbol = clean_symbol(_cell(row, cols["symbol"]).rstrip("*"))
+        symbol = clean_symbol(optional_cell(row, cols["symbol"]).rstrip("*"))
     except ValueError:
         raise Skip("Not a stock or fund row.") from None
-    shares = _cell(row, cols["shares"]).replace("$", "")
+    shares = optional_cell(row, cols["shares"]).replace("$", "")
     shares = shares.replace(",", "") if THOUSANDS.fullmatch(shares) else shares
     try:
         shares_micro = shares_to_micro(shares)
@@ -86,7 +78,7 @@ def parse_position(row: list[str], number: int, cols: dict[str, int]) -> ParsedP
         number,
         symbol,
         shares_micro,
-        _money(_cell(row, cols.get("cost"))),
-        _money(_cell(row, cols.get("value"))),
-        _money(_cell(row, cols.get("price"))),
+        _money(optional_cell(row, cols.get("cost"))),
+        _money(optional_cell(row, cols.get("value"))),
+        _money(optional_cell(row, cols.get("price"))),
     )

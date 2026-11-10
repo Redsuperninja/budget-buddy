@@ -11,12 +11,16 @@ from dataclasses import dataclass
 
 from pydantic import ValidationError
 
-from app.errors import ApiError
 from app.schemas.imports.stock_import import Kind, StockColumns
 from app.schemas.investing.stocks import LotCreate, SaleCreate
-from app.services.imports.csv_columns import detect_date_format
-from app.services.imports.csv_headers import HEADER_SEARCH_ROWS, header_name, pick_columns
-from app.services.imports.csv_parsing import THOUSANDS, RowProblem, cell, parse_amount, parse_date
+from app.services.imports.csv_headers import date_format_below, find_header, pick_columns
+from app.services.imports.csv_parsing import (
+    THOUSANDS,
+    RowProblem,
+    abs_amount,
+    cell,
+    parse_date,
+)
 
 NO_COLUMNS = (
     "We couldn't find the columns. The first row of the file needs column names: Symbol, Date, "
@@ -77,12 +81,8 @@ def _pick(names: list[str]) -> dict | None:
 
 def find_columns(rows: list[list[str]]) -> tuple[int, StockColumns]:
     """The header row's position (0-based) and the columns it names."""
-    for index, row in enumerate(rows[:HEADER_SEARCH_ROWS]):
-        picked = _pick([header_name(c) for c in row])
-        if picked:
-            dates = [r[picked["date"]] for r in rows[index + 1 :] if picked["date"] < len(r)]
-            return index, StockColumns(**picked, date_format=detect_date_format(dates))
-    raise ApiError(422, "columns_not_found", NO_COLUMNS)
+    index, picked = find_header(rows, _pick, NO_COLUMNS)
+    return index, StockColumns(**picked, date_format=date_format_below(rows, index, picked["date"]))
 
 
 def trade_kind(text: str) -> Kind:
@@ -123,12 +123,12 @@ def _check_sign(kind: Kind, negative: bool, has_type: bool) -> None:
 def _money(text: str) -> int:
     """Total cost or money received, as positive cents. Brokers often show purchases as negative."""
     try:
-        cents = parse_amount(text)
+        cents = abs_amount(text)
     except ValueError:
         raise RowProblem("The cost or amount isn't a dollar amount we can read.") from None
     if cents is None:
         raise RowProblem("The cost or amount is empty.")
-    return abs(cents)
+    return cents
 
 
 def _problem(exc: ValidationError) -> RowProblem:
