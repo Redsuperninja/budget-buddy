@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Dashboard forms are easier to use with a screen reader or keyboard: after a failed save the cursor moves to the first blank required field and the field is marked, each category's Save button says which category it saves, "Saved" and error notes are announced, and the shares boxes stop at 20 characters.
 - For developers (roadmap 25l-2, whole-database encryption): the code that opened the database file without the main engine (revision check, "does it hold data" check, key check, update copy) now takes the database key. A wrong key, a file in use by another copy and a damaged file are reported separately instead of as "no data" or "no revision". Nothing changes in the app yet; the setting is still off.
 - Receipt photos: location and camera details are now also removed from **HEIC** photos (iPhone format), and a sideways JPEG photo keeps its rotation instead of showing rotated (issue #34). A HEIC file that can't be read well enough to clean is refused. For developers: `receipt_images.py` blanks the Exif/XMP items in place, no image library.
 - Paychecks can now carry extra pay-stub lines (local tax, state disability, paid family leave, health and dependent-care FSA, reimbursements, employer HSA and imputed income), a pay period, and the stub's year-to-date figures (issue #13, first part). Lines count in the "does it add up" check; the tax summary doesn't use them yet. For developers: migration 0031 (`paycheck_lines`, `period_*`, `ytd_*`), `lines` on the paycheck API. The dashboard form doesn't show them yet.
