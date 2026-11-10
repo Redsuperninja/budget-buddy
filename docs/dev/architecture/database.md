@@ -7,8 +7,12 @@
   plain message to update this copy (for example an older built desktop app).
 - `create_db_engine(..., database_key=...)` opens the file with SQLCipher instead of plain SQLite
   ([security.md](security.md), ADR-0014). Off by default (`BUDGET_BUDDY_DATABASE_ENCRYPTION`); while it is
-  rolled out in steps, code that opens the file with plain `sqlite3` (`open_read_only`, `copy_database`,
-  backup and restore, key checks) still only works on a plain file.
+  rolled out in steps, backup and restore still only work on a plain file (25l-4).
+- With that setting on, `app/db_encrypt.py` moves an existing plain `budget.db` into a SQLCipher file at start,
+  before the engine opens it: `encrypt-pending` marker, checkpoint, `sqlcipher_export` to `budget.db.encrypting`
+  (the key is a bound `ATTACH ... KEY ?` value), verify it opens with the key with matching table row counts,
+  `user_version` and `integrity_check`, delete the plain `-wal`/`-shm`, atomic swap, clear the marker. It runs under
+  the same lock file as migrations and is resumable; it never falls back to a plain file.
 - Before upgrading an existing database, a copy `budget.db.bak-<revision>` is saved next to it. Users may delete
   old copies once Budget Buddy works (the ones from before migration 0003 are not encrypted;
   [security.md](security.md)).
