@@ -24,7 +24,7 @@ export function tradeLabels(lots, sales) {
 function tradeForm(cell, t, onSaved) {
   const isBuy = t.amount_cents < 0;
   const symbol = h("input", { maxlength: 16, placeholder: "VTI", size: 6, "aria-label": "Symbol" });
-  const shares = h("input", { inputmode: "decimal", placeholder: "2.5", size: 6, "aria-label": "Shares" });
+  const shares = h("input", { inputmode: "decimal", maxlength: 20, placeholder: "2.5", size: 6, "aria-label": "Shares" });
   const total = h("input", { value: centsToInput(Math.abs(t.amount_cents)), inputmode: "decimal", size: 8 });
   const message = h("span", { class: "error", role: "alert" });
   const save = h("button", { type: "button", class: "primary" }, "Save");

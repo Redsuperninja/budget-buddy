@@ -20,7 +20,7 @@ export function sharesText(micro) {
 function recordForm(t) {
   const symbol = h("input", { maxlength: 16, size: 6, value: t.suggested_symbol || "", placeholder: "FKCO",
     "aria-label": `Ticker for ${t.security}` });
-  const shares = h("input", { inputmode: "decimal", size: 6, placeholder: "10", "aria-label": "Shares" });
+  const shares = h("input", { inputmode: "decimal", size: 6, maxlength: 20, placeholder: "10", "aria-label": "Shares" });
   const message = h("span", { class: "error", role: "alert" });
   const save = h("button", { type: "button", class: "primary" }, "Save");
   save.addEventListener("click", async () => {

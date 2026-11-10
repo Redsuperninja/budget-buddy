@@ -36,7 +36,7 @@ function editableRow(c) {
     ? h("span", { class: "muted" }, "No budget: measured against")
     : h("input", { value: budgetText(c), "aria-label": "Monthly budget", inputmode: "decimal" });
   const note = h("span", { class: "muted" });
-  const save = h("button", { class: "plain", type: "button", onclick: () => saveWithNote(note, async () => {
+  const save = h("button", { class: "plain", type: "button", "aria-label": `Save ${c.name}`, onclick: () => saveWithNote(note, async () => {
     await updateCategory(c.id, { name: name.value, ...(isIncome ? {} : budgetBody(budget.value)) });
   }) }, "Save");
   return [name, budget, h("span", {}, save, note)];

@@ -5,6 +5,8 @@ import { select } from "./widgets.js";
 
 // Run an action and say how it went in a small note next to the control.
 export async function saveWithNote(noteEl, action) {
+  noteEl.setAttribute("role", "status"); // so a screen reader announces "Saved" or the problem
+  noteEl.setAttribute("aria-live", "polite");
   try {
     await action();
     noteEl.textContent = " Saved";
@@ -13,11 +15,13 @@ export async function saveWithNote(noteEl, action) {
   }
 }
 
+let formCount = 0;
+
 // A form from field descriptions: { name, label, type, value, options, required, ... }. A field with
 // advanced: true is shown only in the All tools view, so it needs a sensible default value.
 // onSubmit gets the typed-in text by field name. If it throws, the message shows under the form.
 export function form(fields, submitLabel, onSubmit) {
-  const message = h("p", { class: "error", role: "alert", hidden: true });
+  const message = h("p", { class: "error", role: "alert", hidden: true, id: `form-error-${++formCount}` });
   const inputs = {};
   const labels = fields.map((f) => {
     inputs[f.name] = f.options
@@ -34,6 +38,10 @@ export function form(fields, submitLabel, onSubmit) {
     onsubmit: async (event) => {
       event.preventDefault();
       message.hidden = true;
+      for (const input of Object.values(inputs)) {
+        input.removeAttribute("aria-invalid");
+        input.removeAttribute("aria-describedby");
+      }
       const values = Object.fromEntries(Object.entries(inputs).map(([name, input]) => [name, input.value]));
       button.disabled = true;
       try {
@@ -41,6 +49,13 @@ export function form(fields, submitLabel, onSubmit) {
       } catch (err) {
         message.textContent = err.message;
         message.hidden = false;
+        // Point at the blank required fields (or the first field) so the problem is easy to find.
+        const blank = fields.filter((f) => f.required && !values[f.name].trim()).map((f) => inputs[f.name]);
+        for (const input of blank) {
+          input.setAttribute("aria-invalid", "true");
+          input.setAttribute("aria-describedby", message.id);
+        }
+        (blank[0] || Object.values(inputs)[0])?.focus?.();
       } finally {
         button.disabled = false;
       }
