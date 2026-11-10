@@ -198,7 +198,7 @@ done.
     database; `backup/restore.py` (`_check_database`, `carry_over_removals`) opens this computer's database with this
     computer's key and the backup's with the backup's key, and stops if either fails; a test checks a backup's staged copy has no SQLite header. 25l-1 makes `cli_backup` and
     the dashboard backup refuse up front while the setting is on; remove that refusal here
-  - [ ] 25l-5. Old plain backups: a backup made before SQLCipher is detected on restore, exported to an encrypted file,
+  - [x] 25l-5. Old plain backups: a backup made before SQLCipher is detected on restore, exported to an encrypted file,
     and its plain staging copy deleted
   - [ ] 25l-6. Switch on and clean up: the setting becomes the only mode, a Windows build check with PyInstaller,
     BSD and OpenSSL notices in `packaging/windows/THIRD-PARTY-NOTICES.txt` (L7), Python 3.12/3.13 and macOS/Linux

@@ -29,6 +29,7 @@ from app.crypto.keys import (
 )
 from app.crypto.stream import read_header
 from app.db import DB_FILENAME, _exclusive_lock, database_revision, open_read_only
+from app.db_encrypt import convert_plain_file
 from app.db_migrate import NEWER_DATABASE_MESSAGE, known_revisions
 from app.instance_proof import FILE_NAME as RUNNING_FILE
 from app.parent_watch import process_alive
@@ -49,10 +50,6 @@ REPLACED = (
 ENCRYPTED_BACKUP_MESSAGE = (
     "That backup's database is encrypted, but database encryption is turned off here "
     "(BUDGET_BUDDY_DATABASE_ENCRYPTION). Turn it on to restore this backup."
-)
-PLAIN_BACKUP_MESSAGE = (
-    "That backup was made before database encryption existed, and this version can't restore "
-    "it while database encryption is turned on yet."
 )
 WRONG_BACKUP_KEY_MESSAGE = "The key for that backup can't open the database inside it."
 CARRY_OVER_FAILED_MESSAGE = (
@@ -153,13 +150,29 @@ def _is_plain_file(path: Path) -> bool:
         return handle.read(len(_SQLITE_HEADER)) == _SQLITE_HEADER
 
 
+def _encrypt_old_backup(db_path: Path, database_key: bytes) -> None:
+    """A backup made before database encryption holds a plain database: check it is sound, then
+    turn the staged copy into an encrypted file and delete the plain one (ADR-0014, req. 4)."""
+    try:
+        with open_read_only(db_path) as connection:
+            ok = connection.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    except sqlite3.DatabaseError:
+        ok = False
+    if not ok:
+        raise RestoreError("The database inside that backup is damaged.")
+    try:
+        convert_plain_file(db_path, database_key)
+    except EncryptionError as exc:
+        raise RestoreError(str(exc)) from exc
+
+
 def _check_database(db_path: Path, database_key: bytes | None) -> None:
     """The backup's database opens with ``database_key`` (None: plain) and is a sound, known one."""
     encrypted = not _is_plain_file(db_path)
     if encrypted and database_key is None:
         raise RestoreError(ENCRYPTED_BACKUP_MESSAGE)
     if not encrypted and database_key is not None:
-        raise RestoreError(PLAIN_BACKUP_MESSAGE)
+        _encrypt_old_backup(db_path, database_key)
     try:
         with open_read_only(db_path, database_key) as connection:
             ok = connection.execute("PRAGMA integrity_check").fetchone()[0] == "ok"

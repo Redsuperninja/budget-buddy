@@ -119,15 +119,60 @@ def test_a_wrong_key_for_either_database_stops_the_carry_over(tmp_path, which):
         carry_over_removals(old, new, old_key, new_key)
 
 
-def test_a_plain_backup_is_refused_under_the_setting_until_it_can_be_converted(
-    data_dir, tmp_path, monkeypatch, make_client
-):
+@pytest.fixture
+def plain_backup(data_dir, tmp_path, monkeypatch, make_client):
+    """A backup made before database encryption: its database is plain SQLite."""
     monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "0")
     client = make_client()
+    client.post("/api/local/accounts", json={"name": "Old account", "kind": "checking"})
     client.app.state.engine.dispose()
     out = tmp_path / "plain"
     out.mkdir()
     assert run(["backup", "make", "--to", str(out)])[0] == 0
     [backup] = out.glob("*.bbbackup")
-    with pytest.raises(RestoreError, match="before database encryption existed"):
-        check_backup(backup, data_dir, BackupKey.from_master(_master(data_dir), True))
+    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
+    return backup
+
+
+def test_a_plain_backup_is_encrypted_in_staging_and_no_plain_copy_stays(plain_backup, data_dir):
+    import shutil
+
+    staging, _manifest = check_backup(
+        plain_backup, data_dir, BackupKey.from_master(_master(data_dir), True)
+    )
+    try:
+        leftovers = sorted(p.name for p in staging.iterdir())
+        data = (staging / "budget.db").read_bytes()
+        assert not data.startswith(HEADER) and b"Old account" not in data
+        assert not [n for n in leftovers if n.startswith("budget.db") and n != "budget.db"]
+    finally:
+        shutil.rmtree(staging)
+
+
+def test_a_plain_backup_restores_into_an_encrypted_database(plain_backup, data_dir, make_client):
+    make_client().app.state.engine.dispose()  # a start with the setting on moves this computer's data
+    code, text = run(["backup", "restore", str(plain_backup)], ["RESTORE"])
+    assert code == 0, text
+    client = make_client()
+    assert account_names(client) == ["Old account"]
+    client.app.state.engine.dispose()
+    assert not (data_dir / "budget.db").read_bytes().startswith(HEADER)
+    assert not list(data_dir.glob(".restore-*"))
+
+
+def test_a_damaged_plain_backup_is_refused_before_it_is_converted(
+    plain_backup, data_dir, monkeypatch
+):
+    import app.backup.restore as restore
+
+    def fail(*_args):
+        raise AssertionError("must not convert a database that failed its check")
+
+    monkeypatch.setattr(restore, "convert_plain_file", fail)
+    monkeypatch.setattr(
+        restore,
+        "open_read_only",
+        lambda *_a: (_ for _ in ()).throw(restore.sqlite3.DatabaseError()),
+    )
+    with pytest.raises(RestoreError, match="damaged"):
+        check_backup(plain_backup, data_dir, BackupKey.from_master(_master(data_dir), True))
