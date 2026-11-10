@@ -12,7 +12,7 @@ to a cloud drive, or stolen.
 - **Receipt images** and **encrypted backups** use Fernet (AES-128-CBC + HMAC) with keys derived from the master key.
 - **Sensitive DB columns** (account numbers, free-text notes) are encrypted with the same scheme.
 - The data folder lives outside the repo and outside synced cloud folders by default.
-- Whole-database encryption (SQLCipher) will be re-evaluated once its Python wheels are reliable on Windows.
+- Whole-database encryption (SQLCipher): decided and built, see the amendment below and [ADR-0014](0014-whole-database-encryption.md).
 
 ## Consequences
 - Copying the data folder alone doesn't expose receipts or sensitive fields.
@@ -63,5 +63,7 @@ How this was built, where it differs from or adds to the decision above:
 ## Update (#28, 2026-10-20)
 The re-evaluation promised above is done: SQLCipher now has Windows, macOS and Linux wheels (`sqlcipher3` 0.6.2
 and later) and works with SQLAlchemy and Alembic. [ADR-0014](0014-whole-database-encryption.md) proposes
-encrypting the whole database with it and keeping the field encryption above. Until it is accepted and built,
-the plain-text list above still applies.
+encrypting the whole database with it and keeping the field encryption above. It was accepted and built (roadmap
+25l, 2026-11): the whole `budget.db`, its backups and the copy saved before an upgrade are SQLCipher files, so the
+plain-text list above no longer applies to a database that has been moved. Older `budget.db.bak-*` copies stay as
+they were and are listed when the move happens.

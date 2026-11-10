@@ -53,7 +53,9 @@ class Settings(BaseSettings):
     # Encrypt the whole database file with SQLCipher (ADR-0014, roadmap 25l). Off, and not for real
     # data yet: until the migration step (25l-3) it only works on a new, empty data folder, and
     # backup, restore and key checks still read the file as plain SQLite.
-    database_encryption: bool = False
+    # The whole database is encrypted with SQLCipher (ADR-0014). On by default; set to 0 only to
+    # go back to a plain database. An existing plain database is moved over at start (db_encrypt.py).
+    database_encryption: bool = True
 
     @field_validator("lan_ip", mode="before")
     @classmethod

@@ -134,7 +134,11 @@ def finish(data_dir: Path, store: KeyStore, database_encryption: bool = False) -
     new_master = old_master
     if made_by != read_fingerprint(data_dir):
         new_key = store.get(_pending_key_name(data_dir))
-        if new_key is None or fingerprint(new_key) != made_by or has_own_data(data_dir):
+        if (
+            new_key is None
+            or fingerprint(new_key) != made_by
+            or has_own_data(data_dir, database_key_for(old_master, database_encryption))
+        ):
             logger.warning(
                 "Budget Buddy couldn't finish the restore you started: the backup was made with "
                 "a different key, and this data folder now has data of its own (or the key is "

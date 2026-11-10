@@ -122,7 +122,7 @@ def _key_for(
             "recovery_phrase_mismatch",
             "That recovery phrase is valid, but it isn't the one this backup was made with.",
         )
-    if has_own_data(data_dir):
+    if has_own_data(data_dir, keys.db_file if database_encryption else None):
         raise ApiError(
             409,
             "different_key_data",

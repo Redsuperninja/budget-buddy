@@ -176,3 +176,31 @@ def test_a_damaged_plain_backup_is_refused_before_it_is_converted(
     )
     with pytest.raises(RestoreError, match="damaged"):
         check_backup(plain_backup, data_dir, BackupKey.from_master(_master(data_dir), True))
+
+
+def test_a_new_encrypted_folder_has_no_data_of_its_own(data_dir, make_client):
+    from app.backup.restore import database_key_for, has_own_data
+
+    make_client().app.state.engine.dispose()  # a fresh start: default categories only
+    key = database_key_for(_master(data_dir), True)
+    assert has_own_data(data_dir, key) is False
+    assert has_own_data(data_dir, bytes(32)) is True  # a key that won't open it is never "empty"
+
+
+def test_a_new_computer_can_restore_after_a_fresh_encrypted_start(
+    saved, data_dir, make_client, monkeypatch
+):
+    from app.crypto import MemoryKeyStore, master_key_to_phrase
+
+    phrase = master_key_to_phrase(_master(data_dir))
+    fresh = MemoryKeyStore()  # another computer: no key for this folder yet
+    monkeypatch.setattr(keystore_module, "_MEMORY_STORE", fresh)
+    import shutil
+
+    shutil.rmtree(data_dir)
+    make_client().app.state.engine.dispose()  # its own, empty, encrypted start
+    code, text = run(["backup", "restore", str(saved)], [phrase])
+    assert code == 0, text
+    client = make_client()
+    assert account_names(client) == ["Everyday"]
+    client.app.state.engine.dispose()
