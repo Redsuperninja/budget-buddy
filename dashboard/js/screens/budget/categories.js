@@ -67,7 +67,7 @@ function plannedIncomeCard(plan) {
       "Leave it empty to use what actually came in each month instead."),
     empty(planned === null ? "Not set: percentages follow each month's actual income." : `Now: ${formatCents(planned)} a month.`),
     form([
-      { name: "income", label: "Take-home pay per month (empty to clear)", value: planned === null ? "" : centsToInput(planned),
+      { name: "income", label: "Take-home pay per month", value: planned === null ? "" : centsToInput(planned),
         inputmode: "decimal" },
     ], "Save income", async (v) => {
       const text = v.income.trim();
@@ -93,7 +93,7 @@ export async function render(root) {
     formCard("Add a category", form([
       { name: "name", label: "Name", required: true, maxlength: 100 },
       { name: "group", label: "Group", options: GROUPS },
-      { name: "budget", label: "Monthly budget ($ or %; not for income)", value: "0", inputmode: "decimal" },
+      { name: "budget", label: "Monthly budget ($ or %)", value: "0", inputmode: "decimal" },
     ], "Add category", async (v) => {
       await createCategory({ name: v.name, group: v.group, ...(v.group === "income" ? {} : budgetBody(v.budget)) });
       await reload();

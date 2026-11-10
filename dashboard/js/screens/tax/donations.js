@@ -57,7 +57,7 @@ export async function render(root, options) {
       { name: "organization", label: "Charity", required: true, maxlength: 200 },
       { name: "kind", label: "Type",
         options: [["cash", "Cash, check or card"], ["goods", "Goods (clothes, furniture...)"]] },
-      { name: "amount", label: "Amount (or fair value of goods) in dollars", required: true, inputmode: "decimal" },
+      { name: "amount", label: "Amount in dollars", placeholder: "fair value for goods", required: true, inputmode: "decimal" },
     ], "Add donation", async (v) => {
       await createDonation({
         date: v.date, organization: v.organization, kind: v.kind, amount_cents: centsOrThrow(v.amount),

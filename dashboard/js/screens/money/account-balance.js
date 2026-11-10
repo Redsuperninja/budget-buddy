@@ -27,17 +27,18 @@ export function balanceCard(accounts, done) {
   const kinds = new Map(accounts.map((a) => [String(a.id), a.kind]));
   return card("Match your bank's balance",
     empty("Type the balance your bank shows. Budget Buddy adds one \"balance adjustment\" for any difference, so " +
-      "the balance here matches. Adjustments aren't counted as income or spending."),
+      "the balance here matches. Adjustments aren't counted as income or spending. For a card or loan, type what " +
+      "you owe (with a minus sign if it owes you)."),
     form([
       accountField(accounts),
       { name: "when", label: "Balance on", options: [
-        ["today", "Today (from your bank's website or app)"],
+        ["today", "Today (as your bank shows)"],
         ["start", "The start of this year (your balance at the end of December 31)"],
         ["date", "Another day (pick below)"],
       ] },
       { name: "date", label: "The day, if another day", type: "date" },
       { name: "balance", required: true, inputmode: "decimal",
-        label: "Balance in dollars (card or loan: what you owe; a minus sign if it owes you)" },
+        label: "Balance in dollars" },
     ], "Set balance", async (v) => {
       const kind = kinds.get(v.account_id);
       const saved = await setAccountBalance(Number(v.account_id), {

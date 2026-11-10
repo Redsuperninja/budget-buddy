@@ -78,7 +78,14 @@ try {
     if (shown.characters < 20) problems.push(`${page}: the page drew almost nothing (${shown.characters} characters)`);
     for (const error of shown.errors) problems.push(`${page}: error shown on the page: ${error}`);
     if (shots) {
-      const { data } = await send("Page.captureScreenshot", { format: "png" });
+      let capture = { format: "png" };
+      if (process.env.BB_SHOTS_FULL) { // the whole page with every card opened (to review layout and styling)
+        await evaluate(`document.querySelectorAll("#view details").forEach((d) => { d.open = true; })`);
+        await sleep(400);
+        const height = await evaluate("document.documentElement.scrollHeight");
+        capture = { format: "png", captureBeyondViewport: true, clip: { x: 0, y: 0, width: 1280, height, scale: 1 } };
+      }
+      const { data } = await send("Page.captureScreenshot", capture);
       writeFileSync(join(shots, `${page}.png`), Buffer.from(data, "base64"));
     }
     console.log(`${page.padEnd(16)} ${shown.errors.length || shown.characters < 20 ? "PROBLEM" : "ok"}`);

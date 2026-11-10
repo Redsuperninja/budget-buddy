@@ -67,5 +67,6 @@ export function attentionCard(items) {
   const todo = items.filter((i) => i.count > 0);
   if (!todo.length) return card(null, h("p", { class: "ok" }, "All caught up: nothing needs you right now."));
   return card("Needs your attention", h("ul", { class: "todo" }, todo.map((i) =>
-    h("li", {}, h("span", { class: "count" }, i.badge || String(i.count)), " ", h("a", { href: i.href }, i.text)))));
+    h("li", {}, h("a", { class: "todo-row", href: i.href },
+      h("span", { class: "count" }, i.badge || String(i.count)), h("span", {}, i.text))))));
 }
