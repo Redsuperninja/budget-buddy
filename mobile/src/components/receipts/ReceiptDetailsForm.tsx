@@ -55,7 +55,7 @@ export function ReceiptDetailsForm({
       />
       <BodyText muted>Fill in what you know; you can leave any of it empty.</BodyText>
       <TextField label="Store" value={f.merchant} onChangeText={(merchant) => set({ merchant })} maxLength={MERCHANT_MAX} />
-      <TextField label="Total" value={f.total} onChangeText={(total) => set({ total })} keyboardType="decimal-pad" placeholder="23.99" />
+      <TextField label="Total" value={f.total} onChangeText={(total) => set({ total })} keyboardType="decimal-pad" placeholder="23.99" hint="Numbers only, like 23.99" />
       {categories.length > 0 ? (
         <View style={{ gap: t.spacing.xs }}>
           <Text style={{ fontSize: t.fontSizes.body, color: t.colors.text }}>Category</Text>

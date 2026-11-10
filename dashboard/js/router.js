@@ -43,6 +43,16 @@ function showTabs(section, page) {
   markCurrent(subnav, page.id);
 }
 
+let shownBefore = false;
+
+// Move the keyboard/screen-reader position to the page's first heading, without scrolling.
+function focusHeading(root) {
+  const heading = root.querySelector("h2, h3");
+  if (!heading) return;
+  heading.setAttribute("tabindex", "-1");
+  heading.focus({ preventScroll: true });
+}
+
 async function show(id, options = {}) {
   for (const fn of leaveHandlers) fn();
   leaveHandlers = [];
@@ -50,15 +60,18 @@ async function show(id, options = {}) {
   const section = sections.find((s) => s.pages.includes(page));
   markCurrent(nav, section.id);
   showTabs(section, page);
-  const root = h("div", {}, h("p", { class: "muted" }, "Loading..."));
+  const root = h("div", {}, h("p", { class: "muted", role: "status" }, "Loading..."));
   fill(view, root);
   try {
     const screen = page.render ? page : await page.load(); // load() imports the page's module on first use
     await screen.render(root, options);
     const bar = foldAllBar(root);
     if (bar && root.isConnected) view.prepend(bar);
+    if (shownBefore) focusHeading(root); // so a screen reader starts at the new page's title
+    shownBefore = true;
   } catch (err) {
-    showError(root, err);
+    showError(root, err, () => show(id, options));
+    shownBefore = true;
   }
 }
 

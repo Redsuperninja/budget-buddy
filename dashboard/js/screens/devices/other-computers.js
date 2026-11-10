@@ -82,7 +82,7 @@ export async function render(root) {
       h("p", {}, "A laptop, tablet or phone on your home Wi-Fi can open Budget Buddy in its web browser, with no app " +
         "to install. It needs a one-time code from this computer. It can do everything except connect phones or " +
         "other devices."),
-      note("Only do this on a home network you trust. Pages travel over your Wi-Fi without extra encryption."),
+      note("Only do this on a home network you trust. Pages travel over your Wi-Fi without being scrambled."),
       button, area),
     card("Connected computers and phones", box));
   await show();

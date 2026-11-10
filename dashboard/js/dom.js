@@ -31,7 +31,10 @@ export function fill(el, ...children) {
   append(el, children);
 }
 
-export const showError = (el, err) => fill(el, h("p", { class: "error", role: "alert" }, err.message));
+// A problem in plain words. With ``retry``, a "Try again" button runs it once more.
+export const showError = (el, err, retry) => fill(el,
+  h("p", { class: "error", role: "alert" }, err.message),
+  retry ? h("button", { type: "button", class: "plain", onclick: retry }, "Try again") : null);
 
 // This browser's storage for remembered choices, or null when the browser blocks it.
 export function browserStorage() {

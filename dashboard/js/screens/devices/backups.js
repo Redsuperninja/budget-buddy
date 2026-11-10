@@ -82,7 +82,7 @@ export async function render(root) {
         ? h("p", { class: "ok", role: "status" }, `Restore finished. Your earlier data was kept in ${status.restored_from}.`)
         : null,
       card("Make a backup",
-        h("p", {}, "Download one file with all your data and receipt photos, encrypted. Keep it somewhere " +
+        h("p", {}, "Download one file with all your data and receipt photos, scrambled so only you can read it. Keep it somewhere " +
           "safe, like a USB drive. It can only be opened by this computer or with your recovery phrase."),
         h("a", { class: "button", href: backupFileUrl(), download: "" }, "Download a backup"),
         empty("Making the file can take a minute if you have many receipt photos.")),
