@@ -111,7 +111,8 @@ def _notes(months_with_data: int, income: int, needs: int, saved: int) -> list[s
     notes = []
     if months_with_data < LOOKBACK_MONTHS:
         notes.append(
-            f"This is based on only {months_with_data} month(s) of history, so treat it as a "
+            f"This is based on only {months_with_data} "
+            f"{'month' if months_with_data == 1 else 'months'} of history, so treat it as a "
             "rough start."
         )
     if income <= 0:

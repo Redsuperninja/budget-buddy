@@ -30,8 +30,16 @@ function markCurrent(container, id) {
   }
 }
 
+// The tabs a person can see: advanced pages only in the All tools view (or while they are the open page).
+export const visiblePages = (section, page, allTools) =>
+  section.pages.filter((p) => !p.advanced || allTools || p.id === page.id);
+
+let shownTabs = null; // { section, page } of the tabs on screen, so a change of view can redraw them
+
 function showTabs(section, page) {
-  if (section.pages.length < 2) {
+  shownTabs = { section, page };
+  const allTools = document.documentElement.dataset.view === "all";
+  if (visiblePages(section, page, allTools).length < 2) { // Home alone is not worth a row of one tab
     fill(subnav);
     subnav.hidden = true;
     return;
@@ -87,5 +95,8 @@ export function start(table) {
     nav.append(h("button", { type: "button", "data-id": id, onclick: () => go(first.id) }, label));
   }
   window.addEventListener("hashchange", () => show(currentId(), hashOptions()));
+  // Switching between Simple and All tools adds or removes tabs (and Home's lone tab) without a page change.
+  new MutationObserver(() => shownTabs && showTabs(shownTabs.section, shownTabs.page))
+    .observe(document.documentElement, { attributes: true, attributeFilter: ["data-view"] });
   show(currentId(), hashOptions());
 }

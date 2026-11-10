@@ -10,6 +10,7 @@ import { card, empty, formCard, table } from "../../widgets.js";
 import { centsToInput, formatCents, parseDollars } from "../../money.js";
 import { reload } from "../../router.js";
 import { payDepositsCard } from "./pay-deposits.js";
+import { plural } from "../../plural.js";
 
 const PAY_FIELDS = [
   ["gross_cents", "Gross pay"], ["federal_tax_cents", "Federal tax"], ["state_tax_cents", "State tax"],
@@ -44,7 +45,7 @@ export async function render(root, options) {
   fill(root,
     card("Paychecks",
       taxYearHeader(year, "Totals for your own records."),
-      h("p", {}, `${summary.paycheck_count} paycheck(s) in ${summary.year}. Gross ${formatCents(gross)}; ` +
+      h("p", {}, `${plural(summary.paycheck_count, "paycheck")} in ${summary.year}. Gross ${formatCents(gross)}; ` +
         `take-home ${formatCents(net)}; taxes withheld ${formatCents(summary.taxes_withheld_cents)}; ` +
         `before-tax deductions ${formatCents(summary.pre_tax_deductions_cents)}; ` +
         `after-tax deductions ${formatCents(summary.after_tax_deductions_cents)}.`),

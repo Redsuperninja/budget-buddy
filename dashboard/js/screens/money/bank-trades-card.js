@@ -9,6 +9,7 @@ import { formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, table } from "../../widgets.js";
 import { removeButton } from "../../remove-button.js";
+import { plural } from "../../plural.js";
 
 // Millionths of a share -> "10" or "2.5" (string logic, no float maths).
 export function sharesText(micro) {
@@ -57,7 +58,7 @@ export async function bankTradesCard() {
   const find = h("button", { type: "button", class: "plain", onclick: async () => {
     try {
       const r = await findBankTrades();
-      note.textContent = ` Found ${r.found} trade(s), ${r.sweeps_linked} sweep(s) linked.`;
+      note.textContent = ` Found ${plural(r.found, "trade")}, ${plural(r.sweeps_linked, "sweep")} linked.`;
       if (r.found || r.sweeps_linked) await reload();
     } catch (err) {
       note.textContent = ` ${err.message}`;

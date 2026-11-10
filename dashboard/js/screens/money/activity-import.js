@@ -6,6 +6,7 @@ import { fill, h, showError } from "../../dom.js";
 import { pickOptions } from "../../fields.js";
 import { formatCents } from "../../money.js";
 import { card, empty, select, table } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 const INVESTMENT_KINDS = new Set(["brokerage", "retirement", "hsa"]);
 
@@ -29,17 +30,17 @@ export function activityImportCard(accounts) {
         const query = new URLSearchParams({ skip_invalid_rows: skip.value, file_name: fileInput.files[0].name });
         const r = await importActivity(accountSelect.value, query.toString(), bytes);
         fill(result, h("p", { class: "ok", role: "status" },
-          `Done. ${r.imported} transaction(s) added: ${r.trades} stock trade(s) (${r.trades_linked} already on the Stocks page, now ` +
-          `linked), ${r.dividends_found} dividend(s), ` +
+          `Done. ${plural(r.imported, "transaction")} added: ${plural(r.trades, "stock trade")} (${r.trades_linked} already on the Stocks page, now ` +
+          `linked), ${plural(r.dividends_found, "dividend")}, ` +
           `${r.categorized} sorted by your rules, ${r.transfers_matched} matched as transfers; ` +
           `${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.`));
       } catch (err) {
         button.disabled = false;
         showError(result, err);
       }
-    } }, `Import ${p.new_rows} new row(s)`);
+    } }, `Import ${plural(p.new_rows, "new row")}`);
     fill(result,
-      h("p", {}, `${p.total_rows} row(s): ${p.new_rows} new (${p.new_trades} stock trade(s)), ` +
+      h("p", {}, `${plural(p.total_rows, "row")}: ${p.new_rows} new (${plural(p.new_trades, "stock trade")}), ` +
         `${p.duplicate_rows} already imported, ${p.skipped_rows} with no money moved (skipped), ` +
         `${p.invalid_rows} with problems.`),
       newRows.length ? table(["Row", "Date", "What", "Amount", "Stock trade"], newRows.map((r) =>

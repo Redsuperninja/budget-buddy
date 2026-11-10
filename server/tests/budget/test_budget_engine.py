@@ -126,7 +126,7 @@ def test_short_history_and_no_history(client, make_account, add_txn):
     s = suggestion(client)
     assert s["months_with_data"] == 1
     assert s["average_income_cents"] == 300_000  # not diluted by the empty months
-    assert "only 1 month(s)" in s["notes"][0]
+    assert "only 1 month of history" in s["notes"][0]
     assert any("more than half" in n for n in s["notes"])
     assert any("less than 20%" in n for n in s["notes"])
 

@@ -6,6 +6,7 @@ import { pickOptions } from "../../fields.js";
 import { formatCents } from "../../money.js";
 import { reload } from "../../router.js";
 import { card, empty, select, table } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 const KIND = { buy: "Bought", sell: "Sold" };
 
@@ -25,13 +26,13 @@ export function stockImportCard(accounts, year) {
       button.disabled = true;
       try {
         const r = await importStockCsv(query({ skip_invalid_rows: skip.value, file_name: fileInput.files[0].name }), bytes);
-        await reload({ year, imported: `Done. ${r.purchases_added} purchase(s) and ${r.sales_added} sale(s) ` +
+        await reload({ year, imported: `Done. ${plural(r.purchases_added, "purchase")} and ${plural(r.sales_added, "sale")} ` +
           `added; ${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.` });
       } catch (err) {
         button.disabled = false;
         showError(result, err);
       }
-    } }, `Import ${count} new row(s)`);
+    } }, `Import ${plural(count, "new row")}`);
     return h("div", { class: "toolbar" }, h("label", {}, "Rows with problems", skip), button);
   }
 
@@ -39,7 +40,7 @@ export function stockImportCard(accounts, year) {
     const newRows = p.rows.filter((r) => r.status === "new").slice(0, 10);
     const problems = p.rows.filter((r) => r.status !== "new").slice(0, 20);
     fill(result,
-      h("p", {}, `${p.total_rows} row(s) in the file: ${p.new_buys} new purchase(s), ${p.new_sells} new sale(s), ` +
+      h("p", {}, `${plural(p.total_rows, "row")} in the file: ${plural(p.new_buys, "new purchase")}, ${plural(p.new_sells, "new sale")}, ` +
         `${p.duplicate_rows} already added, ${p.invalid_rows} with problems.`),
       newRows.length ? h("div", {}, h("h3", {}, "What will be added (first rows)"),
         table(["Row", "Type", "Symbol", "Date", "Shares", "Cost or amount"], newRows.map((r) =>

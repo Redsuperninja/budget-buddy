@@ -8,6 +8,7 @@ import { formatCents } from "../../money.js";
 import { formatBp } from "../../percent.js";
 import { reload } from "../../router.js";
 import { card, empty, note, table } from "../../widgets.js";
+import { plural } from "../../plural.js";
 
 const share = (bp) => (bp === null ? "" : formatBp(bp));
 
@@ -35,7 +36,7 @@ export async function render(root, options) {
   fill(root,
     card(`Suggested budget for ${s.month}`,
       empty(`Built from ${s.looked_at[0]} to ${s.looked_at[s.looked_at.length - 1]} ` +
-        `(${s.months_with_data} month(s) with activity). ${incomeText}`),
+        `(${plural(s.months_with_data, "month")} with activity). ${incomeText}`),
       empty("It follows the 50/30/20 guide: about half for needs, 30% for wants and 20% for savings. Needs keep " +
         "what you really spend; wants get what's left, up to 30%; the rest goes to savings."),
       s.notes.map((text) => note(text)),

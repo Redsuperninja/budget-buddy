@@ -17,14 +17,13 @@ import { formatBp, percentUsed } from "../../percent.js";
 import { reload } from "../../router.js";
 import { categoriesChart, changesChart, groupsChart, trendChart } from "./home-charts.js";
 import { balancesCard, incomeSplitCard } from "./home-overview.js";
+import { duo } from "../../duo.js";
 import { paceCard } from "./home-pace.js";
 import { onThisComputer } from "../../features.js";
 import { backupReminder } from "./home-backup.js";
 import { startCard } from "./home-start.js";
 import { attentionCard, monthTiles } from "./home-tiles.js";
 import { leftOverChart, netWorthChart } from "./home-trends.js";
-
-const duo = (...cards) => h("div", { class: "duo" }, cards);
 
 const used = (c) => {
   const pct = percentUsed(c.actual_cents, c.budget_cents);

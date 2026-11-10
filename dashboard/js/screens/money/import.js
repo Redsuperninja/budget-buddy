@@ -9,6 +9,7 @@ import { formatCents } from "../../money.js";
 import { card, empty, note, select, table } from "../../widgets.js";
 import { activityImportCard } from "./activity-import.js";
 import { mappingForm } from "./import-mapping.js";
+import { plural } from "../../plural.js";
 
 const YES_NO = [["false", "No"], ["true", "Yes"]];
 
@@ -41,14 +42,14 @@ export async function render(root) {
       try {
         const r = await importCsv(accountSelect.value,
           query({ save_mapping: remember.value, skip_invalid_rows: skip.value, file_name: fileInput.files[0].name }), bytes);
-        fill(result, h("p", { class: "ok", role: "status" }, `Done. ${r.imported} new transaction(s) added (${r.categorized} sorted by your rules, ` +
-          `${r.transfers_matched} matched as transfers between your accounts, ${r.dividends_found} dividend(s) found, ${r.donations_added} repeat gift(s) to charity recorded); ` +
+        fill(result, h("p", { class: "ok", role: "status" }, `Done. ${plural(r.imported, "new transaction")} added (${r.categorized} sorted by your rules, ` +
+          `${r.transfers_matched} matched as transfers between your accounts, ${plural(r.dividends_found, "dividend")} found, ${plural(r.donations_added, "repeat gift")} to charity recorded); ` +
           `${r.skipped_duplicates} already there; ${r.skipped_invalid} skipped because of problems.`));
       } catch (err) {
         showError(result, err);
         button.disabled = false;
       }
-    } }, `Import ${p.new_rows} new row(s)`);
+    } }, `Import ${plural(p.new_rows, "new row")}`);
     return h("div", { class: "toolbar" },
       h("label", {}, "Remember these column choices for this account?", remember),
       h("label", {}, "Rows with problems", skip), button);
@@ -60,7 +61,7 @@ export async function render(root) {
     fill(result,
       p.message ? note(p.message) : null,
       p.used_saved_mapping ? empty("Using the column choices you saved for this account.") : null,
-      h("p", {}, `${p.total_rows} row(s) in the file: ${p.new_rows} new, ${p.duplicate_rows} already imported, ` +
+      h("p", {}, `${plural(p.total_rows, "row")} in the file: ${p.new_rows} new, ${p.duplicate_rows} already imported, ` +
         `${p.invalid_rows} with problems.`),
       p.sample.length ? h("div", {}, h("h3", {}, "First rows of your file"),
         table(p.columns.map((c) => c || "(blank)"), p.sample)) : null,
