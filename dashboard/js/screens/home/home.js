@@ -55,9 +55,12 @@ function budgetTable(summary) {
 function freshness(imports) {
   if (!imports.length) return null;
   const last = imports.map((i) => localDate(i.created_at)).sort().at(-1);
-  return h("p", { class: "muted fresh" },
-    `Last file imported ${monthName(last)} ${Number(last.slice(8))} (${agoText(daysBetween(last, today()))}).`, " ",
-    h("a", { href: "#import" }, "Import a newer one"));
+  const days = daysBetween(last, today());
+  // A small status pill beside the month: the date and how long ago, a gentle warning colour after a month,
+  // and a button to bring in a newer file.
+  return h("div", { class: `fresh${days >= 30 ? " stale" : ""}` },
+    h("span", {}, `Last import ${monthName(last)} ${Number(last.slice(8))} · ${agoText(days)}`),
+    h("a", { class: "fresh-action", href: "#import" }, "Import a file"));
 }
 
 export async function render(root, options) {
@@ -94,7 +97,7 @@ export async function render(root, options) {
       budgets: summary.categories.some((c) => c.group !== "income" && c.budget_cents > 0) },
       { onThisComputer: onThisComputer() }, setup),
     backupReminder(setup, hasTransactions || accounts.length > 0),
-    h("div", { class: "toolbar" }, h("h2", {}, "Your month"), picker, freshness(imports)),
+    h("div", { class: "toolbar centered" }, h("h2", {}, "Your month"), picker, freshness(imports)),
     // While the month is going, its own point would dip (a part month): the tiles' lines show the months before it.
     monthTiles(summary, days.through ? months.slice(0, -1) : months, provisional),
     hasTransactions && attentionCard([

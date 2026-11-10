@@ -38,8 +38,9 @@ The **Home** page shows your month at a glance:
   "+17% Dining Out is $34.50 over budget"). A budget set as a percentage of income is only checked once the month is
   over, unless you've set a planned monthly income on the Categories page: until then, its share of the pay that's
   come in so far isn't the month's budget yet. Click one to go there. "All caught up" means nothing's waiting.
-- **Last file imported:** next to the month, when you last imported a file from your bank or broker, so you know
-  how up to date the numbers are.
+- **Last import:** a small pill next to the month that says when you last imported a file from your bank or
+  broker and how long ago, so you know how up to date the numbers are. It turns yellow after a month, and its
+  **Import a file** button takes you to the import page.
 - **Where your income went:** one bar the length of your income, split into needs, wants and savings, with what's
   left over in gray. If you spent and saved more than came in, a line marks where your income ran out.
 - **What you have and owe:** your net worth today (a bill you entered for a later date doesn't count yet), and a
