@@ -10,6 +10,8 @@ Rules (docs/dev/architecture/ledger.md, "Transaction kinds"; budget-summary.md):
 - Normal/refund transactions with no category (or a refund filed under an income or transfer
   category) can't be placed, so they go in ``unassigned`` (money in and money out
   separately, both positive) instead of being guessed at.
+- A split transaction counts once per part, each part by its own category (``category_lines``,
+  ADR-0017); its own category is NULL and ignored.
 - A month runs from its first day through its last day, by the transaction's own date.
 - Linked transfers into your own savings-type accounts count as saved, minus transfers back out
   (``savings_transfers``). They add to the savings group but to no category.
@@ -31,6 +33,7 @@ from app.models import Category, CategoryGroup, Transaction, TransactionKind
 from app.percent import percent_bp
 from app.schemas.budget.summary import CategoryTotal, GroupTotal, MonthlySummary
 from app.services.budget.budget_plan import budget_for, budget_income
+from app.services.budget.category_lines import category_lines
 from app.services.ledger.savings_transfers import saved_by_transfer
 from app.services.ledger.transaction_roles import (
     cash_inside_account,
@@ -59,6 +62,25 @@ def counted() -> list:
     ]
 
 
+def _unassigned_count(session: Session, lines, by_id: dict) -> int:
+    """How many transactions have a line that can't be placed. A split counts once, even when
+    several of its parts can't be placed, so this counts transactions, not lines."""
+    candidates = session.execute(
+        select(lines.c.transaction_id, lines.c.category_id, lines.c.kind).where(
+            (lines.c.category_id.is_(None)) | (lines.c.kind == TransactionKind.REFUND)
+        )
+    )
+    unplaced = set()
+    for transaction_id, category_id, kind in candidates:
+        category = by_id.get(category_id)
+        if category is None or (
+            kind == TransactionKind.REFUND
+            and (category.group not in _REPORTED or category.group == CategoryGroup.INCOME)
+        ):
+            unplaced.add(transaction_id)
+    return len(unplaced)
+
+
 def monthly_summary(
     session: Session, year: int, month: int, *, through: dt.date | None = None
 ) -> MonthlySummary:
@@ -66,27 +88,25 @@ def monthly_summary(
     start, end = month_range(year, month)
     if through is not None:
         end = min(end, through + dt.timedelta(days=1))
+    lines = category_lines(
+        Transaction.date >= start,
+        Transaction.date < end,
+        *counted(),
+    )
     rows = session.execute(
         select(
-            Transaction.category_id,
-            Transaction.kind,
-            func.sum(case((Transaction.amount_cents > 0, Transaction.amount_cents), else_=0)),
-            func.sum(case((Transaction.amount_cents < 0, Transaction.amount_cents), else_=0)),
-            func.count(Transaction.id),
-        )
-        .where(
-            Transaction.date >= start,
-            Transaction.date < end,
-            *counted(),
-        )
-        .group_by(Transaction.category_id, Transaction.kind)
+            lines.c.category_id,
+            lines.c.kind,
+            func.sum(case((lines.c.amount_cents > 0, lines.c.amount_cents), else_=0)),
+            func.sum(case((lines.c.amount_cents < 0, lines.c.amount_cents), else_=0)),
+        ).group_by(lines.c.category_id, lines.c.kind)
     ).all()
     categories = list(session.scalars(select(Category).order_by(Category.group, Category.name)))
     by_id = {c.id: c for c in categories}
 
     sums = {c.id: 0 for c in categories}  # signed sum of amounts per placed category
-    unassigned_in, unassigned_out, unassigned_count = 0, 0, 0
-    for category_id, kind, money_in, money_out, count in rows:
+    unassigned_in, unassigned_out = 0, 0
+    for category_id, kind, money_in, money_out in rows:
         category = by_id.get(category_id)
         is_refund = kind == TransactionKind.REFUND
         placeable = category is not None and category.group in _REPORTED
@@ -97,7 +117,6 @@ def monthly_summary(
         elif category is None or is_refund:
             unassigned_in += money_in
             unassigned_out -= money_out
-            unassigned_count += count
         # else: a normal transaction in a transfer-group category: ignored on purpose.
 
     def actual(category: Category) -> int:
@@ -149,5 +168,5 @@ def monthly_summary(
         categories=totals,
         unassigned_in_cents=unassigned_in,
         unassigned_out_cents=unassigned_out,
-        unassigned_count=unassigned_count,
+        unassigned_count=_unassigned_count(session, lines, by_id),
     )

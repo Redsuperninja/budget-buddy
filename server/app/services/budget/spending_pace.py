@@ -15,23 +15,20 @@ from sqlalchemy.orm import Session
 from app import clock
 from app.models import Category, Transaction
 from app.schemas.budget.summary import PaceDay, SpendingPace
+from app.services.budget.category_lines import category_lines
 from app.services.budget.summary import SPENDING, counted, month_range, monthly_summary
 
 
 def _net_by_day(session: Session, start: dt.date, end: dt.date) -> dict[dt.date, int]:
     """Signed sum of needs + wants amounts on each day in [start, end): the same rows the summary
     places in a spending category."""
+    lines = category_lines(Transaction.date >= start, Transaction.date < end, *counted())
     return dict(
         session.execute(
-            select(Transaction.date, func.sum(Transaction.amount_cents))
-            .join(Category, Category.id == Transaction.category_id)
-            .where(
-                Transaction.date >= start,
-                Transaction.date < end,
-                Category.group.in_(SPENDING),
-                *counted(),
-            )
-            .group_by(Transaction.date)
+            select(lines.c.date, func.sum(lines.c.amount_cents))
+            .join(Category, Category.id == lines.c.category_id)
+            .where(Category.group.in_(SPENDING))
+            .group_by(lines.c.date)
         ).all()
     )
 

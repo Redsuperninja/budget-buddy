@@ -20,6 +20,7 @@ from app.models import (
 )
 from app.schemas.ledger.transactions import TransactionCreate, TransactionPage, TransactionUpdate
 from app.services.budget.category_learning import picked_by_hand
+from app.services.budget.category_lines import category_lines
 from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.investing.combined_sweeps import free_sweeps_of
 from app.services.ledger.accounts import get_account
@@ -145,7 +146,12 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
     if filters.account_id is not None:
         query = query.where(Transaction.account_id == filters.account_id)
     if filters.category_id is not None:
-        query = query.where(Transaction.category_id == filters.category_id)
+        lines = category_lines()
+        query = query.where(
+            Transaction.id.in_(
+                select(lines.c.transaction_id).where(lines.c.category_id == filters.category_id)
+            )
+        )
     if filters.date_from is not None:
         query = query.where(Transaction.date >= filters.date_from)
     if filters.date_to is not None:

@@ -56,6 +56,11 @@ Code: `services/budget/categories.py`, `services/budget/summary.py` and their ro
   `spending_cents`; `savings` is `saved_cents`. Spending and savings are shown as money out, positive.
   **Refunds lower spending** (or savings) in their category and are never income. Spending can go
   negative if refunds are bigger than spending.
+- **Splits (ADR-0017):** totals by category read `services/budget/category_lines.py`, never
+  `Transaction.category_id` directly. It gives one line per unsplit transaction and one per part of a split one
+  (a split's own category is NULL and ignored), so a split counts once per part and the grand total is unchanged.
+  Each line follows the rules above by its own category. The summary, spending pace and the Transactions category
+  filter use it; any new reader of categories must too.
 - Transactions with no category, and refunds filed under an income or transfer category, can't be placed.
   They are not guessed at: they show up as `unassigned_in_cents`, `unassigned_out_cents` (both positive)
   and `unassigned_count`, and are left out of the totals.
