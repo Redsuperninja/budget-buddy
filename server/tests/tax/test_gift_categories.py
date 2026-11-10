@@ -4,7 +4,7 @@ import datetime as dt
 
 import pytest
 
-from app.schemas.tax import donations as donation_schemas
+from app import clock
 
 DONATIONS = "/api/local/donations"
 TXN = "/api/local/transactions"
@@ -13,7 +13,7 @@ CATEGORIES = "/api/local/categories"
 
 @pytest.fixture(autouse=True)
 def frozen_today(monkeypatch):
-    monkeypatch.setattr(donation_schemas, "_today", lambda: dt.date(2030, 1, 1))
+    monkeypatch.setattr(clock, "today", lambda: dt.date(2030, 1, 1))
 
 
 @pytest.fixture
