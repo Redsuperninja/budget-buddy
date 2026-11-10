@@ -104,6 +104,7 @@ done.
     - Built on branch `feat/transaction-splits-storage`, review pending (security-reviewer, finance-tax-expert).
   - [ ] 10f-2. Budget math: `services/budget/category_lines.py` used by the monthly summary, spending pace and the
     Transactions category filter; equivalence tests — *backend-engineer* + *finance-tax-expert*
+    - Built on branch `feat/transaction-splits-budget-math`, review pending (finance-tax-expert).
   - [ ] 10f-3. Leave split transactions alone: auto-sort rules, learning, "no category yet", transfer, card-payment
     and dividend matching, pay deposits; charity, stock trades and dividends refused on them — *backend-engineer* +
     *finance-tax-expert*
