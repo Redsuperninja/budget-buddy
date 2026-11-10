@@ -177,6 +177,7 @@ done.
 - [ ] 25k. Version 0.1.0 everywhere (the mobile app says 1.0.0, `desktop/pyproject.toml` says 0), version info in the
   `.exe`, `CHANGELOG.md`'s long Unreleased list condensed for 0.1.0, and a dry run on a clean Windows user —
   *release-manager* + *backend-engineer*
+  - Done 2026-11-10: versions say 0.1.0 everywhere, the `.exe` files carry version info, and `CHANGELOG.md` is condensed into a 0.1.0 section. Still to do by hand: the dry run on a clean Windows user.
 - [ ] 25l. Whole-database encryption with SQLCipher ([ADR-0014](adr/0014-whole-database-encryption.md)), built
   to the ADR's requirements list, in PR-sized steps (each under about 400 changed lines) — *backend-engineer* +
   *security-reviewer*. M = must, L = low in the ADR's security review (requirements 1 to 7 there).
