@@ -61,13 +61,18 @@ Windows may say it protected your PC, because this early version isn't signed ye
 continue, and only do this for a copy from the Releases page above.
 
 Write down the recovery phrase Budget Buddy shows you, and keep it somewhere safe. Without it, a lost computer
-means lost data. See [keep your data safe](docs/guide/keep-your-data-safe.md).
+means lost data, because the whole database now needs your key. If you are updating from an earlier version, save
+the phrase first: your existing data is moved into the encrypted file the first time you start. See
+[keep your data safe](docs/guide/keep-your-data-safe.md).
 
 ## Privacy and security
 
-- Your records are stored on your computer, encrypted. Nothing is sent to us or to a cloud service.
+- Your records are stored on your computer, and the whole database file is encrypted (SQLCipher). The most private
+  details and your receipt photos are scrambled a second time. Nothing is sent to us or to a cloud service.
 - Read [docs/PRIVACY.md](docs/PRIVACY.md) for what is kept, where, and how to delete everything.
 - Read [SECURITY.md](SECURITY.md) for how to report a problem privately.
+- Budget Buddy is built with open-source libraries, including SQLCipher and OpenSSL. Their licences are in
+  `THIRD-PARTY-NOTICES.txt` in the download.
 
 ## Status
 

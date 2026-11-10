@@ -18,6 +18,8 @@
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
+/* Keep the page where it is whether or not a scroll bar shows, so short pages don't sit a few pixels to the side. */
+html { scrollbar-gutter: stable; }
 body { margin: 0; background: var(--bg); color: var(--text); }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem;
   background: var(--header); border-bottom: 1px solid var(--line); }
@@ -67,6 +69,9 @@ details.fold.group table { table-layout: fixed; } /* the groups' columns line up
 .muted { color: var(--muted); font-size: 0.9rem; }
 .good { color: var(--good); } .bad { color: var(--bad); }
 .note { background: var(--warn-bg); border-radius: 8px; padding: 0.5rem 0.75rem; margin: 0.5rem 0; }
+.note > :first-child { margin-top: 0; } .note > :last-child { margin-bottom: 0; }
+.note button { margin-top: 0.35rem; }
+li > button, .note button { padding: 0.2rem 0.65rem; font-size: 0.9rem; }
 .error { color: var(--bad); font-weight: 600; margin: 0.5rem 0; }
 .ok { color: var(--good); font-weight: 600; margin: 0.5rem 0; }
 table { width: 100%; border-collapse: collapse; }
@@ -96,6 +101,14 @@ details.settings summary::-webkit-details-marker { display: none; }
 :root[data-view="all"] .simple-only { display: none !important; }
 input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--text); min-width: 0; }
+/* Every button looks like the quiet one unless it says otherwise (primary, danger, link, nav), so a button
+   made without a class never shows the browser's own grey one. */
+button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; background: none;
+  color: var(--text); border: 1px solid var(--line); }
+input[type="file"]::file-selector-button { font: inherit; padding: 0.3rem 0.7rem; margin-right: 0.6rem; border-radius: 6px;
+  cursor: pointer; background: none; color: var(--text); border: 1px solid var(--line); }
+/* A checkbox and its words sit side by side. */
+label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--text); }
 button.primary, button.danger, button.plain, a.button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; }
 button.primary, a.button { background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent); }
 a.button { display: inline-block; text-decoration: none; }
