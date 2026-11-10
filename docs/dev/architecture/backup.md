@@ -40,7 +40,8 @@ Never inside: the key or its fingerprint file, lock files, `home-base-running.js
 2. **Check everything** into `<data folder>/.restore-<random>/`: decrypt every chunk, accept only the names above
    (plain files only, each once, manifest first, size limits for the manifest, `server-id` and receipts), then
    SQLite's `integrity_check` and a recorded database revision this version knows. With database encryption
-   on, the staged `budget.db` is a SQLCipher file opened with the backup's `db-file` key (never a plain copy). Any failure (or Ctrl+C) deletes
+   on, the staged `budget.db` is a SQLCipher file opened with the backup's `db-file` key (never a plain copy). A plain `budget.db` from a backup made before database encryption is
+   integrity-checked, converted with `convert_plain_file` and replaced in the staging folder. Any failure (or Ctrl+C) deletes
    the staging folder; nothing else has changed. Staging folders and temporary copies an hour old or more are swept
    at start-up, in case one was cut short. "Data of its own" also counts earlier `before-restore-*` folders and
    `budget.db.bak-*` copies, since they need the folder's current key.

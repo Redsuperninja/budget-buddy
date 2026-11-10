@@ -100,6 +100,30 @@ def plain_backups(db_path: Path) -> list[Path]:
     return [b for b in sorted(db_path.parent.glob(f"{db_path.name}.bak-*")) if _is_plain(b)]
 
 
+def convert_plain_file(path: Path, key: bytes) -> None:
+    """Replace the plain SQLite file at ``path`` with an encrypted copy of it, in place.
+
+    Exports, proves the copy opens with ``key`` and holds the same rows, deletes the plain
+    ``-wal``/``-shm``/``-journal``, then swaps. On any failure the plain file is left as it was.
+    The caller holds whatever lock and marker it needs (the start-up move, or a restore).
+    """
+    new = path.with_name(path.name + NEW_SUFFIX)
+    _remove_new(new)
+    try:
+        _export(path, new, key)
+        _verify(path, new, key)
+        for suffix in SIDECARS:
+            path.with_name(path.name + suffix).unlink(missing_ok=True)
+        new.replace(path)  # atomic: the plain file is gone from the name in one step
+    except EncryptionError:
+        _remove_new(new)
+        raise
+    except Exception as exc:
+        _remove_new(new)
+        logger.warning("Moving the database into the encrypted form failed.", exc_info=True)
+        raise DatabaseMoveError(MOVE_FAILED_MESSAGE) from exc
+
+
 def encrypt_existing_database(db_path: Path, key: bytes) -> bool:
     """Move a plain database to SQLCipher. True if it moved (or finished a half-done move).
 
@@ -114,20 +138,7 @@ def encrypt_existing_database(db_path: Path, key: bytes) -> bool:
             marker.unlink(missing_ok=True)  # the swap had happened; only the marker was left
             return leftover
         write_private_bytes(marker, b"")
-        _remove_new(new)
-        try:
-            _export(db_path, new, key)
-            _verify(db_path, new, key)
-            for suffix in SIDECARS:
-                db_path.with_name(db_path.name + suffix).unlink(missing_ok=True)
-            new.replace(db_path)  # atomic: the plain file is gone from the name in one step
-        except EncryptionError:
-            _remove_new(new)
-            raise
-        except Exception as exc:
-            _remove_new(new)
-            logger.warning("Moving the database into the encrypted form failed.", exc_info=True)
-            raise DatabaseMoveError(MOVE_FAILED_MESSAGE) from exc
+        convert_plain_file(db_path, key)
         marker.unlink(missing_ok=True)
     old = plain_backups(db_path)
     if old:
