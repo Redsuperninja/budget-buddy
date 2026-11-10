@@ -4,11 +4,12 @@ import type { TextInputProps } from 'react-native';
 import { useTheme } from '@/theme';
 
 /** A labelled text box, big enough to tap (shared by forms). */
-export function TextField({ label, ...input }: { label: string } & TextInputProps) {
+export function TextField({ label, hint, ...input }: { label: string; hint?: string } & TextInputProps) {
   const t = useTheme();
   return (
     <View style={{ gap: t.spacing.xs }}>
       <Text style={{ fontSize: t.fontSizes.body, color: t.colors.text }}>{label}</Text>
+      {hint ? <Text style={{ fontSize: t.fontSizes.small, color: t.colors.textMuted }}>{hint}</Text> : null}
       <TextInput
         accessibilityLabel={label}
         placeholderTextColor={t.colors.textMuted}
@@ -65,7 +66,7 @@ export function ChoiceChips<T extends string | number>({
               borderColor: on ? t.colors.primary : t.colors.border,
               backgroundColor: on ? t.colors.primary : t.colors.surface,
             }}>
-            <Text style={{ fontSize: t.fontSizes.body, color: on ? t.colors.onPrimary : t.colors.text }}>{label}</Text>
+            <Text style={{ fontSize: t.fontSizes.body, color: on ? t.colors.onPrimary : t.colors.text }}>{on ? `✓ ${label}` : label}</Text>
           </Pressable>
         );
       })}

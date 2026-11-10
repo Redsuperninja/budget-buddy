@@ -148,7 +148,7 @@ export default function PairScreen() {
       {step.name === 'typing' ? (
         <>
           <BodyText>
-            On your computer, under the code, choose Show code as text. Then type or paste that text here.
+            On your computer, under the code, choose Show code as text. Then paste that text here. It is long, so paste all of it rather than typing it.
           </BodyText>
           <TextInput
             accessibilityLabel="Pairing code text"
