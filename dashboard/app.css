@@ -126,6 +126,8 @@ input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var
 button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; background: none;
   color: var(--text); border: 1px solid var(--line); }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+/* A field standing directly in a card (not in a form) keeps some room before what follows it. */
+.card > label, details.fold > label { margin-bottom: 0.6rem; }
 /* A group of tick boxes (Setup's starter budget): a rounded box with its title as a pill, the boxes in columns. */
 fieldset { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.4rem 1rem; margin: 0 0 0.75rem;
   padding: 0.6rem 0.9rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; }

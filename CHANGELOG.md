@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The user guide pictures (all 17) and the README picture were retaken to match the new look. A field standing directly in a card (the restore box on Backups) now has a little room before its button. For developers: `check_pages.py` can also photograph the Devices pages (`BB_SHOTS_EXTRA`), set the window height (`BB_SHOTS_HEIGHT`) and show chosen cards folded (`BB_SHOTS_FOLD`).
 - Dashboard polish: Home's **Get started** is a numbered checklist with a progress bar (a tick in a green circle when a step is done, its links as small pills), and **Needs your attention** is a list of rows you can click anywhere on. Form fields now line up even when one label is longer than the others (Import files, Add a donation, Match your bank's balance and the rest), every box and form button is the same height, dates never split over two lines, the Setup tick-box groups are rounded boxes in columns, "Optional" and "Done" are small tags, and tick boxes use the app's green. A few long field labels were shortened (the explanation moved into the text above the form).
 - Home: "Your month" and its month box now sit on the same middle line, and the "Last file imported ... Import a newer one" sentence is a small pill (date and how long ago, yellow after a month) with an **Import a file** button.
 - Home: the extra "Month" label above the month box is gone. "Fold all" and "Open all" are now one small rounded two-part control with a chevron on each side, instead of two underlined links.

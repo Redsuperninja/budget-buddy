@@ -13,6 +13,8 @@ import { join } from "node:path";
 const [browserPath, base, profile, shots] = process.argv.slice(2);
 const MAIN = new URL("../../dashboard/js/main.js", import.meta.url);
 const PAGES = [...readFileSync(MAIN, "utf8").matchAll(/\{ id: "([\w-]+)", label: "[^"]+", load:/g)].map((m) => m[1]);
+// Pages the list above can't see (the Devices pages are built by devicePages()): BB_SHOTS_EXTRA="phone,computers,backups".
+const EXTRA = (process.env.BB_SHOTS_EXTRA || "").split(",").filter(Boolean);
 const PORT = 9333;
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
@@ -62,12 +64,12 @@ const evaluate = async (expression) =>
 try {
   for (const domain of ["Runtime", "Log", "Page"]) await send(`${domain}.enable`);
   if (shots) {
-    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: Number(process.env.BB_SHOTS_HEIGHT) || 900, deviceScaleFactor: 1, mobile: false });
     await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "light" }] });
   }
   await send("Page.navigate", { url: `${base}/#${PAGES[0]}` });
   await sleep(3000);
-  for (const page of PAGES) {
+  for (const page of [...PAGES, ...EXTRA]) {
     current = page;
     await evaluate(`location.hash = ${JSON.stringify(page)}`);
     await sleep(1500);
@@ -78,6 +80,12 @@ try {
     if (shown.characters < 20) problems.push(`${page}: the page drew almost nothing (${shown.characters} characters)`);
     for (const error of shown.errors) problems.push(`${page}: error shown on the page: ${error}`);
     if (shots) {
+      if (process.env.BB_SHOTS_FOLD) { // cards to show folded, by title: BB_SHOTS_FOLD="Get started,Needs your attention"
+        const titles = JSON.stringify(process.env.BB_SHOTS_FOLD.split(","));
+        await evaluate(`${titles}.forEach((t) => document.querySelectorAll("#view details.fold.card > summary h2")
+          .forEach((h) => { if (h.textContent === t) h.closest("details").open = false; }))`);
+        await sleep(300);
+      }
       let capture = { format: "png" };
       if (process.env.BB_SHOTS_FULL) { // the whole page with every card opened (to review layout and styling)
         await evaluate(`document.querySelectorAll("#view details").forEach((d) => { d.open = true; })`);
