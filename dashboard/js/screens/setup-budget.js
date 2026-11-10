@@ -58,7 +58,7 @@ export async function starterBudgetCard(title) {
     }
   } }, "Save starter budget");
 
-  return card(title, h("p", { class: "muted" }, "Optional"),
+  return card(title, h("p", { class: "tag-line" }, h("span", { class: "tag" }, "Optional")),
     h("p", {}, "Budget Buddy starts you off with these categories. Untick the ones you won't use, and ",
       "Save starter budget removes them. ",
       "A category already used by transactions, receipts or transfers is always kept. ",

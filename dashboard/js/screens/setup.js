@@ -10,7 +10,7 @@ import { card, note } from "../widgets.js";
 import { phraseCard } from "./devices/recovery-phrase.js";
 import { starterBudgetCard } from "./setup-budget.js";
 
-const mark = (done) => h("p", { class: done ? "ok" : "muted" }, done ? "Done" : "Optional");
+const mark = (done) => h("p", { class: "tag-line" }, h("span", { class: done ? "tag done" : "tag" }, done ? "Done" : "Optional"));
 const links = (pairs) => pairs.map(([href, text], i) => [i ? " or " : "", h("a", { href }, text)]);
 
 function phraseStep(progress) {

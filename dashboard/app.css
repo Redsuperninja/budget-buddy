@@ -87,10 +87,19 @@ li > button, .note button { padding: 0.2rem 0.65rem; font-size: 0.9rem; }
 .ok { color: var(--good); font-weight: 600; margin: 0.5rem 0; }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+td.nowrap { white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .scroll { overflow-x: auto; }
 form { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.75rem; align-items: end; }
 form .wide { grid-column: 1 / -1; }
+/* Every field is two rows (its label, then its control), shared with the other fields in its row, so the
+   controls line up even when one label wraps onto a second line. A short form's button sits on the control row. */
+form > label { display: grid; grid-template-rows: subgrid; grid-row: span 2; gap: 0.2rem; align-self: stretch; }
+form > label:has(> input[type="checkbox"]) { display: flex; grid-row: auto; align-self: end; }
+form > div:not(.wide) { grid-row: span 2; align-self: end; }
+/* Same height for every box and form button, so rows of mixed controls sit level. */
+input:not([type="checkbox"], [type="radio"]), select { min-height: 2.4rem; }
+form button, button.primary, button.plain, button.danger, a.button { min-height: 2.4rem; }
 label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; color: var(--text); }
 label.check { flex-direction: row; align-items: center; gap: 0.5rem; }
 /* Settings menu in the header (js/settings-menu.js): Colors and View. */
@@ -116,7 +125,18 @@ input, select, textarea { font: inherit; padding: 0.45rem; border: 1px solid var
    made without a class never shows the browser's own grey one. */
 button { font: inherit; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; background: none;
   color: var(--text); border: 1px solid var(--line); }
-input[type="file"]::file-selector-button { font: inherit; padding: 0.3rem 0.7rem; margin-right: 0.6rem; border-radius: 6px;
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+/* A group of tick boxes (Setup's starter budget): a rounded box with its title as a pill, the boxes in columns. */
+fieldset { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.4rem 1rem; margin: 0 0 0.75rem;
+  padding: 0.6rem 0.9rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; }
+legend { padding: 0.1rem 0.7rem; border-radius: 999px; background: var(--accent-soft); font-weight: 600; font-size: 0.9rem; }
+/* A small status word beside a card's title ("Optional", "Done"). */
+p.tag-line { margin: 0 0 0.6rem; }
+.tag { display: inline-block; padding: 0.1rem 0.65rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.8rem;
+  color: var(--muted); }
+.tag.done { border-color: var(--good); color: var(--good); font-weight: 600; }
+input[type="file"] { padding: 0.15rem 0.45rem; }
+input[type="file"]::file-selector-button { font: inherit; padding: 0.25rem 0.7rem; margin-right: 0.6rem; border-radius: 6px;
   cursor: pointer; background: none; color: var(--text); border: 1px solid var(--line); }
 /* A checkbox and its words sit side by side. */
 label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--text); }
@@ -127,6 +147,7 @@ button.danger { background: none; color: var(--bad); border: 1px solid var(--bad
 button.plain { background: none; color: var(--text); border: 1px solid var(--line); }
 button:disabled { opacity: 0.5; cursor: default; }
 .inline-form { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: end; }
+p.inline-form { align-items: center; } /* a sentence with its picker (Your filing status): on one middle line */
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem; }
 /* A row of heading, picker and status with nothing labelled above it: everything on the middle line (Home). */
 .toolbar.centered { align-items: center; }
@@ -194,16 +215,39 @@ ul.progress-rows li { display: grid; gap: 0.35rem; }
 .meter .meter-track { fill: var(--accent-soft); }
 .meter .meter-fill { fill: var(--accent); }
 .meter.over .meter-fill { fill: var(--bad); }
-ul.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
-ul.todo .count { display: inline-block; min-width: 1.8rem; padding: 0.1rem 0.45rem; border-radius: 999px;
-  background: var(--warn-bg); text-align: center; font-weight: 600; }
+/* Home "Needs your attention": one row per thing to do, the whole row a link. */
+ul.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+ul.todo a.todo-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--line);
+  border-radius: 8px; color: var(--text); text-decoration: none; }
+ul.todo a.todo-row:hover { background: var(--accent-soft); border-color: transparent; }
+ul.todo a.todo-row::after { content: ""; margin-left: auto; width: 0.45rem; height: 0.45rem; flex: none;
+  border-right: 2px solid var(--muted); border-top: 2px solid var(--muted); transform: rotate(45deg); }
+ul.todo .count { flex: none; min-width: 2rem; padding: 0.1rem 0.5rem; border-radius: 999px; background: var(--warn-bg);
+  text-align: center; font-weight: 700; }
 /* Home: the "Get started" checklist (js/screens/home/home-start.js). */
-ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
-ol.steps li { display: flex; gap: 0.75rem; align-items: baseline; }
-ol.steps .step-mark { flex: none; min-width: 3.5rem; text-align: center; font-size: 0.8rem; font-weight: 600;
-  padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--warn-bg); }
-ol.steps li.done { color: var(--muted); }
-ol.steps li.done .step-mark { background: none; color: var(--good); border: 1px solid var(--good); }
+/* Get started: a progress line, then a numbered list; each step is a circle (a tick when done), what to do, and
+   the links that do it as small pills. */
+.start-progress { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 0.9rem; font-size: 0.9rem; color: var(--muted); }
+.start-progress .meter { flex: 1; max-width: 16rem; height: 8px; }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; }
+ol.steps li { counter-increment: step; display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.65rem 0;
+  border-top: 1px solid var(--line); }
+ol.steps li:first-child { border-top: 0; padding-top: 0.2rem; }
+ol.steps .step-mark { flex: none; width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 2px solid var(--line);
+  display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+ol.steps .step-mark::before { content: counter(step); }
+ol.steps li.done .step-mark { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+ol.steps li.done .step-mark::before { content: ""; width: 0.35rem; height: 0.65rem; margin-top: -0.12rem;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+ol.steps .step-body { display: grid; gap: 0.35rem; min-width: 0; }
+ol.steps li.done strong { color: var(--muted); font-weight: 600; }
+ol.steps .step-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
+ol.steps .step-actions a { padding: 0.15rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none;
+  font-size: 0.9rem; }
+ol.steps .step-actions a:hover { background: var(--accent-soft); border-color: transparent; }
+ol.steps .step-actions button { padding: 0.15rem 0.8rem; border-radius: 999px; font-size: 0.9rem; border-color: var(--accent); }
+ol.steps .step-actions .or { color: var(--muted); font-size: 0.85rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* Home: charts two to a row on wide screens (js/screens/home/home.js), and a plain sentence leading a chart card. */
 .duo { display: grid; /* the two cards in a row are the same height; js/duo.js folds them together */
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem;
