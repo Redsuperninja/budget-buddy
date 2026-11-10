@@ -17,6 +17,7 @@ from app.backup.restore import (
     apply_restore,
     backup_fingerprint,
     check_backup,
+    database_key_for,
     has_own_data,
     home_base_running,
 )
@@ -94,7 +95,13 @@ def make_backup(settings: Settings, folder: Path | None, output: Output = print)
         )
         with os.fdopen(fd, "wb") as out:
             manifest = write_backup(
-                out, data_dir, engine, keys.backup, fingerprint(key), __version__
+                out,
+                data_dir,
+                engine,
+                keys.backup,
+                fingerprint(key),
+                __version__,
+                keys.db_file if settings.database_encryption else None,
             )
             out.flush()
             os.fsync(out.fileno())
@@ -166,7 +173,9 @@ def restore_backup(
 
         ensure_data_dir(data_dir)
         output("Checking the whole backup first...")
-        staging, manifest = check_backup(file, data_dir, BackupKey.from_master(key))
+        staging, manifest = check_backup(
+            file, data_dir, BackupKey.from_master(key, settings.database_encryption)
+        )
     except RestoreError as exc:
         output(f"{exc} Nothing was changed.")
         return 1
@@ -182,7 +191,14 @@ def restore_backup(
                 output("Cancelled. Nothing was changed.")
                 return 1
         try:
-            before = apply_restore(data_dir, staging, fingerprint(key))
+            store = get_key_store(settings.key_store)
+            before = apply_restore(
+                data_dir,
+                staging,
+                fingerprint(key),
+                database_key_for(store.get(key_name_for(data_dir)), settings.database_encryption),
+                database_key_for(key, settings.database_encryption),
+            )
         except RestoreStuckError as exc:
             keep_staging = True
             output(str(exc))

@@ -39,7 +39,9 @@ def download_backup(
     if sec_fetch_site not in (None, "same-origin", "none"):
         raise ApiError(403, "cross_site", "Download backups from the Budget Buddy dashboard.")
     state = request.app.state
-    path = uploads.make_download(state.settings.data_dir, state.engine, state.keys)
+    path = uploads.make_download(
+        state.settings.data_dir, state.engine, state.keys, state.settings.database_encryption
+    )
     name = uploads.download_name(clock.today())  # noqa: DTZ011 (this computer's own date)
     return StreamingResponse(
         uploads.send_and_delete(path, engine=state.engine),
@@ -61,7 +63,13 @@ async def start_restore(
         upload = await uploads.receive_upload(request, data_dir)
         store = get_key_store(state.settings.key_store)
         info = await run_in_threadpool(
-            uploads.check_upload, upload, data_dir, state.keys, store, x_recovery_phrase
+            uploads.check_upload,
+            upload,
+            data_dir,
+            state.keys,
+            store,
+            x_recovery_phrase,
+            state.settings.database_encryption,
         )
     return PendingRestore(**info)
 

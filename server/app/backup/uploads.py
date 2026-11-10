@@ -37,14 +37,24 @@ def download_name(today: dt.date) -> str:
     return f"budget-buddy-backup-{today:%Y-%m-%d}.bbbackup"
 
 
-def make_download(data_dir: Path, engine: Engine, keys: DerivedKeys) -> Path:
+def make_download(
+    data_dir: Path, engine: Engine, keys: DerivedKeys, database_encryption: bool = False
+) -> Path:
     """Write a backup into the data folder for the browser to download. The caller deletes it."""
     made_by = read_fingerprint(data_dir)
     path = data_dir / f"{DOWNLOAD_PREFIX}{uuid.uuid4().hex}.bbbackup"
     make_private_file(path)
     try:
         with open(path, "r+b") as out:
-            write_backup(out, data_dir, engine, keys.backup, made_by, __version__)
+            write_backup(
+                out,
+                data_dir,
+                engine,
+                keys.backup,
+                made_by,
+                __version__,
+                keys.db_file if database_encryption else None,
+            )
     except BackupError as exc:
         path.unlink(missing_ok=True)
         raise ApiError(409, "backup_not_ready", str(exc)) from exc
@@ -88,11 +98,13 @@ async def receive_upload(request: Request, data_dir: Path) -> Path:
     return path
 
 
-def _key_for(upload: Path, data_dir: Path, keys: DerivedKeys, phrase: str | None) -> tuple:
+def _key_for(
+    upload: Path, data_dir: Path, keys: DerivedKeys, phrase: str | None, database_encryption: bool
+) -> tuple:
     """(BackupKey, the master key to keep for the next start or None) for the uploaded file."""
     made_by = backup_fingerprint(upload)
     if made_by == read_fingerprint(data_dir):
-        return BackupKey(made_by, keys.backup), None
+        return BackupKey(made_by, keys.backup, keys.db_file if database_encryption else None), None
     if not phrase:
         raise ApiError(
             409,
@@ -117,15 +129,20 @@ def _key_for(upload: Path, data_dir: Path, keys: DerivedKeys, phrase: str | None
             "Budget Buddy on this computer already has data of its own under a different key, "
             "and restoring this backup would make that data unreadable. Nothing was changed.",
         )
-    return BackupKey.from_master(master_key), master_key
+    return BackupKey.from_master(master_key, database_encryption), master_key
 
 
 def check_upload(
-    upload: Path, data_dir: Path, keys: DerivedKeys, store: KeyStore, phrase: str | None
+    upload: Path,
+    data_dir: Path,
+    keys: DerivedKeys,
+    store: KeyStore,
+    phrase: str | None,
+    database_encryption: bool = False,
 ) -> dict:
     """Check all of an uploaded backup and keep it for the next start. Deletes the upload."""
     try:
-        key, master_key = _key_for(upload, data_dir, keys, phrase)
+        key, master_key = _key_for(upload, data_dir, keys, phrase, database_encryption)
         staging, manifest = check_backup(upload, data_dir, key)
         return pending.stage(data_dir, staging, manifest, key, store, master_key)
     except (RestoreError, DecryptionError) as exc:

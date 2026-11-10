@@ -194,7 +194,7 @@ done.
     `budget.db`, `-wal` and `-shm`, clear the marker; every step resumable after a crash; no plain fallback; flag
     every older `budget.db.bak-*` as unencrypted; the `.bak` copy made before an upgrade is written encrypted; a test checks that a `.bak` copy has no SQLite header and
     no plain text. Until then `plain` databases under the setting raise a plain-English "not encrypted yet" error
-  - [ ] 25l-4. Backups and restore with two keys (M3/M4): `VACUUM INTO` stays encrypted so staging holds no plain
+  - [x] 25l-4. Backups and restore with two keys (M3/M4): `VACUUM INTO` stays encrypted so staging holds no plain
     database; `backup/restore.py` (`_check_database`, `carry_over_removals`) opens this computer's database with this
     computer's key and the backup's with the backup's key, and stops if either fails; a test checks a backup's staged copy has no SQLite header. 25l-1 makes `cli_backup` and
     the dashboard backup refuse up front while the setting is on; remove that refusal here

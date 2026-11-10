@@ -269,35 +269,3 @@ def test_a_new_data_folder_is_fully_encrypted_when_the_setting_is_on(data_dir, m
     assert not data.startswith(SQLITE_HEADER)
     assert b"CREATE TABLE" not in data
     assert b"transactions" not in data
-
-
-def test_a_backup_is_refused_up_front_while_encryption_is_on(data_dir, monkeypatch, capsys):
-    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
-    app = create_app()
-    app.state.engine.dispose()
-    folder = data_dir.parent / "backups"
-    folder.mkdir()
-    from app.cli_backup import make_backup
-
-    lines = []
-    assert make_backup(Settings(), folder, output=lines.append) == 1
-    assert "database encryption is turned on" in lines[0]
-    assert not list(folder.iterdir()) and not list(data_dir.glob(".backup-*"))
-
-
-def test_the_dashboard_backup_is_refused_with_a_clear_message(data_dir, monkeypatch):
-    from fastapi.testclient import TestClient
-
-    monkeypatch.setenv("BUDGET_BUDDY_DATABASE_ENCRYPTION", "1")
-    app = create_app()
-    client = TestClient(
-        app,
-        base_url="http://127.0.0.1:8765",
-        client=("127.0.0.1", 50000),
-        headers={"Origin": "http://127.0.0.1:8765", "X-CSRF-Token": app.state.csrf_token},
-    )
-    response = client.get("/api/local/backup/file")
-    app.state.engine.dispose()
-    assert response.status_code == 409
-    assert "database encryption is turned on" in response.text
-    assert not list(data_dir.glob(".backup-*"))
