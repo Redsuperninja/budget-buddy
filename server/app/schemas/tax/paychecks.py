@@ -153,3 +153,6 @@ class PaycheckSummary(Schema):
     social_security_by_employer: dict[str, int]
     social_security_check: SocialSecurityCheck | None
     message: str | None = None
+    # Extra-line totals already inside gross (qualified_tips, qualified_overtime): never add them
+    # to gross or take-home.
+    line_totals: dict[str, int] = {}

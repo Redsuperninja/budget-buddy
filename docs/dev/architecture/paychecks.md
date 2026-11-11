@@ -42,13 +42,22 @@ replaces them all (so send `net_cents` too if take-home changes); leaving it out
 | `health_fsa` (Section 125), `dependent_care_fsa` (Section 129) | subtracts | yes | yes |
 | `reimbursement` | adds | no | no |
 | `employer_hsa`, `imputed_income` | none (shown only) | no | no |
+| `qualified_tips`, `qualified_overtime` | none (already in gross) | no | no |
 
 The adds-up rule becomes `gross - (the columns above) - subtracting lines + reimbursements = net`; with no
 lines it is exactly the rule above. The two "before tax" flags follow from the kind (the caller can't set
 them) and are stored for the tax summary to use later: **the tax summary, year totals and retirement/HSA limit
 checks do not read lines yet.** Deductions that already have a column (traditional and Roth retirement, HSA,
-health insurance, other after-tax) stay in that column; don't also enter them as a line. Qualified tips and
-overtime are not modelled yet.
+health insurance, other after-tax) stay in that column; don't also enter them as a line.
+
+`qualified_tips` and `qualified_overtime` (migration 0033) record the pay behind the 2025-2028 deductions for
+qualified tips and qualified overtime premium (the 2025 budget reconciliation law). They are part of `gross_cents`
+already, not extra money, so they never change take-home or the adds-up rule, and they are not added to gross again
+anywhere. They stay taxed for FICA and federal withholding (the deduction is claimed on the return, not on the
+stub), so both flags are off. `qualified_overtime` is the **premium part only** (the extra half of
+time-and-a-half that federal overtime law requires), not the whole overtime pay. The year summary totals them
+(below); nothing works out the deduction itself: no caps, income phase-outs or eligible jobs, because no tax-year
+file holds those figures yet.
 
 Optional `period_start` / `period_end` (must be in order and not after `pay_date`; `pay_date` still decides the
 tax year) and `ytd_gross_cents`, `ytd_federal_tax_cents`, `ytd_social_security_cents`, `ytd_medicare_cents`
@@ -90,7 +99,9 @@ entered or imported. Paychecks feed the tax side (wages and withholding by tax y
 ## Year-to-date summary
 
 Adds up every paycheck paid in that year: gross, each tax, each deduction and net, plus totals for taxes,
-before-tax deductions and after-tax deductions.
+before-tax deductions and after-tax deductions. `line_totals` gives the year's `qualified_tips` and
+`qualified_overtime` lines (0 when none; `paycheck_lines.year_totals`). They are already inside gross: never add
+them to it. The tax summary's Pay section lists each one that isn't zero, labelled "(already in gross pay)".
 
 It also checks **Social Security** against that year's wage cap from the tax-year file (`fica`;
 [../tax-data.md](../tax-data.md)):

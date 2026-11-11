@@ -34,6 +34,7 @@ from app.schemas.tax.paychecks import (
 from app.services.ledger.accounts import get_account
 from app.services.ledger.transaction_roles import refuse_if_split
 from app.services.ledger.transactions import get_transaction
+from app.services.tax import paycheck_lines
 from app.services.tax.paycheck_lines import LINE_RULES, net_effect_cents
 from app.tax_data import UnsupportedTaxYearError, load_tax_year
 
@@ -292,6 +293,7 @@ def year_summary(session: Session, year: int) -> PaycheckSummary:
         social_security_by_employer=ss_by_employer,
         social_security_check=check,
         message=message,
+        line_totals=paycheck_lines.year_totals(session, year),
     )
 
 

@@ -46,7 +46,8 @@ Roadmap item 13. An estimate to gather records, not tax advice.
   money put in yourself, not through payroll; IRA: traditional only, may be limited with a workplace plan).
   The mapping and plain-English text (`hint()`) live in
   `services/tax/deductions.py`; the phone snapshot's deduction labels come from the same place.
-- Pay totals reuse the paychecks year summary; stock gains reuse `stock_sales.gains_summary`; donations are
+- Pay totals reuse the paychecks year summary (plus qualified tips and overtime premium from paycheck lines, each
+  only when not zero, labelled as already in gross pay); stock gains reuse `stock_sales.gains_summary`; donations are
   totaled by date in the calendar year (the same rule as the donations page).
 
 ## CSV export
