@@ -23,15 +23,16 @@ Set up Budget Buddy on your Windows computer, then use the dashboard (web page) 
 Add and track your accounts, spending, and income in the Budget Buddy dashboard.
 
 1. [Accounts and transactions](accounts-and-transactions.md) — Add a bank account; record spending and income; starting balances.
-2. [Import a bank file](import-a-bank-file.md) — Download a CSV from your bank; let Budget Buddy read it in.
+2. [Split a transaction](split-a-transaction.md) — Put one payment in several categories, like a store trip or a mortgage payment; undo a split.
+3. [Import a bank file](import-a-bank-file.md) — Download a CSV from your bank; let Budget Buddy read it in.
    - [Import your brokerage activity](import-brokerage-activity.md) — Your broker's history file in one go: trades and dividends sorted for you.
    - [Import history](import-history.md) — See every file you imported; remove an outdated one.
    - [Your receipts](receipts.md) — See receipt photos from your phone; delete outdated ones.
-3. [Budget categories and monthly summary](budget-categories.md) — Set up budget categories; see where your money goes each month.
-4. [Budget by percentage of income](budget-by-percentage.md) — Budgets like "15% of income"; your planned monthly income; shares of income.
-5. [Get a suggested budget](suggested-budget.md) — A 50/30/20 plan from your last three months; use it with one click.
-6. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
-7. [Transfers between your accounts](transfers.md) — Card payments and money into savings or retirement, linked for you; what's counted as saved.
+4. [Budget categories and monthly summary](budget-categories.md) — Set up budget categories; see where your money goes each month.
+5. [Budget by percentage of income](budget-by-percentage.md) — Budgets like "15% of income"; your planned monthly income; shares of income.
+6. [Get a suggested budget](suggested-budget.md) — A 50/30/20 plan from your last three months; use it with one click.
+7. [Sort transactions automatically](auto-sort-transactions.md) — Rules that put transactions in the right category for you.
+8. [Transfers between your accounts](transfers.md) — Card payments and money into savings or retirement, linked for you; what's counted as saved.
 
 ## Your phone and other computers
 

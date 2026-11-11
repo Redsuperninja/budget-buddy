@@ -44,6 +44,8 @@ export const createTransaction = (json) => api("POST", `${LOCAL}/transactions`, 
 export const updateTransaction = (id, json) => api("PATCH", `${LOCAL}/transactions/${id}`, { json });
 export const matchTransfers = () => api("POST", `${LOCAL}/transactions/match-transfers`);
 export const matchAgain = () => api("POST", `${LOCAL}/transactions/match-again`);
+// Replace a transaction's split parts (an empty list undoes the split)
+export const setSplits = (id, splits) => api("PUT", `${LOCAL}/transactions/${id}/splits`, { json: { splits } });
 export const markPersonalGift = (id) => api("POST", `${LOCAL}/transactions/${id}/personal-gift`);
 
 // Bank file import (query: already-encoded text; bytes: the CSV file)

@@ -1,5 +1,5 @@
 // Transactions: search descriptions, filter by account, month, category and how they were sorted (or show the ones with no category yet), hide
-// dividends and their sweeps and (by default) balance adjustments, change a category, mark a gift or a stock trade, add one by hand.
+// dividends and their sweeps and (by default) balance adjustments, change a category, mark a gift or a stock trade, split one across categories (split-editor.js), add one by hand.
 // options.sorted ("none" from Home's "needs a category" link) opens that filter across all months; options.category
 // options.q (a search) and options.month open with those filters, like #transactions?category=3&month=2026-10. Finding transfers,
 // hiding dividends, the "Mark as" column and the transaction type are power-user tools (All tools view).
@@ -15,6 +15,7 @@ import { advanced, card, empty, formCard, select, table } from "../../widgets.js
 import { centsOrThrow, formatCents, inAndOut } from "../../money.js";
 import { categoryPicker } from "./category-picker.js";
 import { charityCell } from "./give-to-charity.js";
+import { splitCell } from "./split-editor.js";
 import { stockTradeCell, tradeLabels } from "./stock-trade-cell.js";
 import { plural } from "../../plural.js";
 
@@ -75,7 +76,7 @@ export async function render(root, options = {}) {
         page.items.length
           ? table(["Date", "What", "Account", "Amount", "Category", "Mark as"], page.items.map((t) =>
               [t.date, t.description, accountNames.get(t.account_id) || "", formatCents(t.amount_cents),
-                categoryPicker(t, categories), h("span", {}, charityCell(t, afterEdit),
+                splitCell(t, categories, categoryPicker(t, categories), afterEdit), h("span", {}, charityCell(t, afterEdit),
                   stockTradeCell(t, accountKinds.get(t.account_id), trades, afterEdit))]), [3], [5])
           : empty(sortedFilter.value === "none" ? "Everything here has a category." : "No transactions for this choice."),
         page.total > page.items.length

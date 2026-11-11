@@ -91,6 +91,10 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   setting a category, or changing the amount or kind, is a 409 `split_transaction` (re-sending the current values
   is fine). A category a part uses can't be deleted, and deleting the transaction deletes its parts. The budget
   summary reads the parts (`category_lines`, 10f-2).
+  **Dashboard (10f-5):** the Transactions page's category cell (`screens/money/split-editor.js`, rules in
+  `js/splits.js`) offers **Split** on `normal`/`refund` rows with no transfer link or donation, edits in place, and shows
+  "Split (n parts)" for a split; the server's 409/422 messages show inline. Amounts are typed as positive dollars and
+  signed like the transaction; Save stays off until the parts add up.
   **Left alone elsewhere (10f-3):** the `transaction_roles.splits()` role keeps a split out of auto-sort rules
   (`apply_to_uncategorized`), the "no category yet" filter, transfer and card-payment matching (`free_to_move`),
   dividend and bank-trade matching and sweeps (`sweeps.regular`), repeat gifts and the pay-deposit list. Linking
