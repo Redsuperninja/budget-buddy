@@ -96,6 +96,14 @@ Checking = **170000** ($1,700.00). Card = **-5000** ($50.00 owed). Sum of all ba
   dividend and bank-trade matching and sweeps (`sweeps.regular`), repeat gifts and the pay-deposit list. Linking
   one to a transfer, paycheck, donation, personal gift or stock trade is a 409 `split_transaction`
   (`refuse_if_split`). The phone snapshot still shows `category_id: null` until contract v2.
+  **Loan payments (10f-4, `services/ledger/split_loans.py`):** the one exception to the transfer refusal. 
+  `POST .../{id}/transfer` with a split on one side and a positive deposit on a `loan` account on the other links them
+  when the split is money out of an everyday account (not savings, brokerage, retirement or HSA, which would overstate
+  "saved") and has exactly one Transfer-group part equal to the deposit (else 422
+  `invalid_transfer`). Both get `transfer_pair_id`; the loan side becomes a `transfer` (type `loan_payment`), the split
+  stays `normal` so its other parts count as spending, and the principal isn't saved. While linked, replacing or
+  undoing the split, changing its category, amount or kind, or deleting either side is a 409 `part_of_transfer`;
+  `DELETE .../transfer` unlinks and frees it. Matching never links a split.
 
 ## Transfers and lock rules
 

@@ -158,7 +158,8 @@ class Transaction(TimestampMixin, Base):
     def transfer_type(self) -> str | None:
         """A linked transfer's kind (app/transfer_types.py), the same on both sides."""
         partner = self.transfer_partner
-        if self.kind != TransactionKind.TRANSFER or partner is None:
+        # A split loan payment stays "normal" but is linked to the loan's deposit (10f-4).
+        if partner is None or not (self.kind == TransactionKind.TRANSFER or self.splits):
             return None
         out, into = (self, partner) if self.amount_cents < 0 else (partner, self)
         return classify(out.account.kind, into.account.kind).value
