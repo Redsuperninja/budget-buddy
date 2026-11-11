@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.errors import ApiError, not_found
 from app.models import Category, Transaction, TransactionKind, TransactionSplit
 from app.schemas.ledger.transactions import SplitPart
+from app.services.ledger.split_loans import LINKED_SPLIT_MESSAGE
 from app.services.ledger.transaction_roles import (
     bank_trade_sweeps,
     bank_trades,
@@ -94,6 +95,8 @@ def replace_splits(
     transaction = get_transaction(session, transaction_id)
     if not parts and not transaction.splits:
         return transaction  # nothing to undo: leave its category and kind alone
+    if transaction.splits and transaction.transfer_pair_id is not None:
+        raise ApiError(409, "part_of_transfer", LINKED_SPLIT_MESSAGE)  # loan payment (10f-4)
     if parts:
         _check_can_split(session, transaction)
         _check_parts(session, transaction, parts)

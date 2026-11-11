@@ -24,6 +24,7 @@ from app.services.budget.category_lines import category_lines
 from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.investing.combined_sweeps import free_sweeps_of
 from app.services.ledger.accounts import get_account
+from app.services.ledger.split_loans import LINKED_SPLIT_MESSAGE
 from app.services.ledger.transaction_roles import (
     bank_trade_sweeps,
     bank_trades,
@@ -72,6 +73,8 @@ def _check_not_split(transaction: Transaction, changes: dict) -> None:
         or changes.get("amount_cents", transaction.amount_cents) != transaction.amount_cents
         or changes.get("kind", transaction.kind) != transaction.kind
     ):
+        if transaction.transfer_pair_id is not None:
+            raise ApiError(409, "part_of_transfer", LINKED_SPLIT_MESSAGE)
         raise ApiError(409, "split_transaction", _SPLIT_LOCKED_MESSAGE)
 
 

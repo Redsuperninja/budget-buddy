@@ -112,6 +112,8 @@ done.
       "No category" for a split until contract v2.
   - [ ] 10f-4. Loan payments (#30): link a split's Transfer part to the loan's deposit, unlink, transfer type, locks —
     *backend-engineer* + *finance-tax-expert*
+    - Built on branch `feat/transaction-splits-loans`, review pending (finance-tax-expert). Same manual link route;
+      no automatic matching for splits.
   - [ ] 10f-5. Dashboard: Split button and editor on the Transactions page, "Split" shown in lists; guide page,
     `ledger.md`, `budget-summary.md`, `data-model.md` — *backend-engineer* + *docs-writer*
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
