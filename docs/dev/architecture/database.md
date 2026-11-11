@@ -52,6 +52,7 @@
 | 0030 | `tax_preferences`: one row with the `filing_status` that narrows the tax summary (null = show all; not encrypted; roadmap 25j) |
 | 0031 | `paycheck_lines` (extra pay-stub lines: kind, amount, pre-tax flags; deleted with the paycheck) and optional `period_start`/`period_end` and `ytd_*` columns on `paychecks` (issue #13) |
 | 0032 | `transaction_splits` (the parts of a split transaction: category, `amount_cents`, `note` encrypted; deleted with the transaction; ADR-0017, roadmap 10f-1) |
+| 0033 | `paycheck_lines.kind` also allows `qualified_tips` and `qualified_overtime` (table rebuilt for the new CHECK; downgrade deletes those lines; issue #13) |
 
 ## Adding a migration
 

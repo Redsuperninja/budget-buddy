@@ -82,3 +82,6 @@ class PaycheckLineKind(StrEnum):
     EMPLOYER_HSA = "employer_hsa"
     IMPUTED_INCOME = "imputed_income"
     REIMBURSEMENT = "reimbursement"
+    # Pay already inside gross, for the 2025-2028 tips and overtime deductions (migration 0033).
+    QUALIFIED_TIPS = "qualified_tips"
+    QUALIFIED_OVERTIME = "qualified_overtime"

@@ -37,6 +37,11 @@ PAY_LABELS = {
     "other_deductions_cents": "Other after-tax deductions",
     "net_cents": "Take-home pay",
 }
+# Shown only when a paycheck has such a line. Already counted in gross pay; no limits applied.
+PAY_LINE_LABELS = {
+    "qualified_tips": "Qualified tips (already in gross pay)",
+    "qualified_overtime": "Qualified overtime premium (already in gross pay)",
+}
 
 
 def _deduction_totals(session: Session, year: int) -> list[DeductionTotal]:
@@ -90,7 +95,12 @@ def build(session: Session, year: int) -> TaxSummary:
         generated_on=clock.today(),
         disclaimer=DISCLAIMER,
         paycheck_count=pay.paycheck_count,
-        pay=[Line(label=text, amount_cents=pay.totals.get(f, 0)) for f, text in PAY_LABELS.items()],
+        pay=[Line(label=text, amount_cents=pay.totals.get(f, 0)) for f, text in PAY_LABELS.items()]
+        + [
+            Line(label=text, amount_cents=pay.line_totals[kind])
+            for kind, text in PAY_LINE_LABELS.items()
+            if pay.line_totals.get(kind)
+        ],
         donation_count=gift_count,
         donations=[
             Line(label="Cash gifts", amount_cents=cash),
