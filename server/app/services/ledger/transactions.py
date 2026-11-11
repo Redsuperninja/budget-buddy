@@ -31,6 +31,7 @@ from app.services.ledger.transaction_roles import (
     dividend_sweeps,
     dividends,
     none_of,
+    splits,
 )
 
 # Changing these on one side of a transfer (or on a paycheck's deposit) would break the link,
@@ -169,7 +170,7 @@ def list_transactions(session: Session, filters: TransactionFilters) -> Transact
             Transaction.category_id.is_(None),
             Transaction.kind.in_([TransactionKind.NORMAL, TransactionKind.REFUND]),
             # A dividend's sweep only parks the cash: nothing to sort.
-            *none_of(*cash_inside_account(), dividend_sweeps()),
+            *none_of(*cash_inside_account(), dividend_sweeps(), splits()),
         )
 
     if filters.hide_adjustments:

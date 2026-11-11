@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import ApiError
 from app.models import Transaction, TransactionKind
+from app.services.ledger.transaction_roles import refuse_if_split
 from app.services.ledger.transactions import (
     _DEPOSIT_LOCKED_MESSAGE,
     _DONATION_LOCKED_MESSAGE,
@@ -61,6 +62,8 @@ def link_transfer(session: Session, transaction_id: int, other_id: int) -> Trans
             "One of these transactions is already part of another transfer. "
             "Remove that link first.",
         )
+    for side in (first, second):
+        refuse_if_split(side, "make it part of a transfer")
     if is_paycheck_deposit(session, first) or is_paycheck_deposit(session, second):
         raise ApiError(409, "linked_to_paycheck", _DEPOSIT_LOCKED_MESSAGE)
     if first.donation is not None or second.donation is not None:

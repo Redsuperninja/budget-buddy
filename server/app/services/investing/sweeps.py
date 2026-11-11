@@ -23,6 +23,7 @@ from app.services.ledger.transaction_roles import (
     donations,
     none_of,
     paycheck_deposits,
+    splits,
     stock_trades,
 )
 
@@ -32,11 +33,11 @@ SWEEP_WORDS = re.compile(r"(?<![a-z])sweep(?![a-z])", re.I | re.A)
 
 
 def regular(query):
-    """Regular transactions not already a transfer, a paycheck's deposit or a donation."""
+    """Regular transactions not already a transfer, a paycheck's deposit, a donation or split."""
     return query.where(
         Transaction.kind == TransactionKind.NORMAL,
         Transaction.transfer_pair_id.is_(None),
-        *none_of(paycheck_deposits(), donations()),
+        *none_of(paycheck_deposits(), donations(), splits()),
     )
 
 

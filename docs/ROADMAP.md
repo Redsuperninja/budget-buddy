@@ -108,6 +108,8 @@ done.
   - [ ] 10f-3. Leave split transactions alone: auto-sort rules, learning, "no category yet", transfer, card-payment
     and dividend matching, pay deposits; charity, stock trades and dividends refused on them — *backend-engineer* +
     *finance-tax-expert*
+    - Built on branch `feat/transaction-splits-leave-alone`, review pending (finance-tax-expert). The phone still shows
+      "No category" for a split until contract v2.
   - [ ] 10f-4. Loan payments (#30): link a split's Transfer part to the loan's deposit, unlink, transfer type, locks —
     *backend-engineer* + *finance-tax-expert*
   - [ ] 10f-5. Dashboard: Split button and editor on the Transactions page, "Split" shown in lists; guide page,

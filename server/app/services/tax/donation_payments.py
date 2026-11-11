@@ -19,6 +19,7 @@ from app.errors import ApiError
 from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.money import cents_to_display
 from app.schemas.tax.donations import ProofItem
+from app.services.ledger.transaction_roles import refuse_if_split
 from app.services.ledger.transactions import get_transaction
 from app.services.tax.gift_categories import CHARITY, file_under
 
@@ -36,6 +37,7 @@ def check_payment(
     if transaction_id is None:
         return
     payment = get_transaction(session, transaction_id)
+    refuse_if_split(payment, "record it as a donation")
     other = session.scalar(select(Donation.id).where(Donation.transaction_id == payment.id))
     if other is not None and other != donation_id:
         raise ApiError(409, "already_linked", _ALREADY_LINKED)

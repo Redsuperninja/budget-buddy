@@ -32,6 +32,7 @@ from app.schemas.tax.paychecks import (
     SocialSecurityCheck,
 )
 from app.services.ledger.accounts import get_account
+from app.services.ledger.transaction_roles import refuse_if_split
 from app.services.ledger.transactions import get_transaction
 from app.services.tax.paycheck_lines import LINE_RULES, net_effect_cents
 from app.tax_data import UnsupportedTaxYearError, load_tax_year
@@ -76,9 +77,7 @@ def check_stub_details(values: dict) -> None:
     """The pay period must end by the pay date, and year-to-date can't be below this check."""
     start, end, paid = values.get("period_start"), values.get("period_end"), values["pay_date"]
     if start and end and start > end:
-        raise ApiError(
-            422, "bad_pay_period", "The pay period can't start after it ends."
-        )
+        raise ApiError(422, "bad_pay_period", "The pay period can't start after it ends.")
     if (end or start) and (end or start) > paid:
         raise ApiError(
             422, "bad_pay_period", "The pay period can't end after the date you were paid."
@@ -217,6 +216,7 @@ def _attach_deposit(session: Session, paycheck: Paycheck, deposit: Transaction) 
     other = session.scalar(select(Paycheck.id).where(Paycheck.deposit_transaction_id == deposit.id))
     if other is not None:
         raise ApiError(409, "already_linked", "That deposit is already linked to another paycheck.")
+    refuse_if_split(deposit, "link it to a paycheck")
     if deposit.kind != TransactionKind.NORMAL:
         raise ApiError(
             422, "invalid_deposit", "Only a regular deposit can be linked to a paycheck."

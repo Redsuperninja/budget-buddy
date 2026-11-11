@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Donation, DonationKind, Transaction, TransactionKind
 from app.services.budget.category_learning import shop_key
-from app.services.ledger.transaction_roles import donations, none_of, stock_trades
+from app.services.ledger.transaction_roles import donations, none_of, splits, stock_trades
 from app.services.tax.gift_categories import CHARITY, file_under
 
 # First words of a description that say how you paid, not who you paid.
@@ -95,7 +95,7 @@ def _new_payments(session: Session, ids: set[int]) -> list[Transaction]:
                 Transaction.kind == TransactionKind.NORMAL,
                 Transaction.amount_cents < 0,
                 Transaction.transfer_pair_id.is_(None),
-                *none_of(donations(), stock_trades()),
+                *none_of(donations(), stock_trades(), splits()),
             )
         )
     )

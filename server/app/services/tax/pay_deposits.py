@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Account, Category, CategoryGroup, Transaction, TransactionKind
 from app.schemas.tax.paychecks import PayDeposit
-from app.services.ledger.transaction_roles import none_of, paycheck_deposits
+from app.services.ledger.transaction_roles import none_of, paycheck_deposits, splits
 from app.services.tax.paychecks import DEPOSIT_ACCOUNT_KINDS
 
 _PAY = "payroll|direct dep|dir dep|salary|paycheck|pay check|wages"
@@ -52,7 +52,7 @@ def waiting_deposits(session: Session, year: int) -> list[PayDeposit]:
             Transaction.transfer_pair_id.is_(None),
             Transaction.amount_cents > 0,
             Transaction.date.between(dt.date(year, 1, 1), dt.date(year, 12, 31)),
-            *none_of(paycheck_deposits()),
+            *none_of(paycheck_deposits(), splits()),
         )
         .order_by(Transaction.date.desc(), Transaction.id.desc())
     )
