@@ -12,7 +12,7 @@ messages name only numbers.
 
 import datetime as dt
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from app.services.imports.csv_parsing import clean_description
 
@@ -49,6 +49,8 @@ class OfxTransaction:
     posted: dt.date
     cents: int  # money in is positive, money out is negative, as the bank states it
     description: str
+    position: int = 0  # 1, 2, ... among this account's transactions as listed in the file
+    trntype: str = ""  # the bank's word: DEBIT, CREDIT, CHECK, ... (may be empty)
 
 
 @dataclass
@@ -58,12 +60,14 @@ class OfxStatement:
     transactions: list[OfxTransaction] = field(default_factory=list)
     balance_cents: int | None = None
     balance_date: dt.date | None = None
+    problems: list[str] = field(default_factory=list)  # notes on this account's left-out lines
+    listed: int = 0  # how many transactions this account lists in the file, usable or not
 
 
 @dataclass
 class OfxFile:
     statements: list[OfxStatement]
-    problems: list[str]  # plain-English notes on transactions that were left out
+    problems: list[str]  # every account's notes together (each account also keeps its own)
 
 
 def decode_ofx(data: bytes) -> str:
@@ -99,7 +103,9 @@ def parse_date(text: str) -> dt.date:
     match = _DATE.fullmatch(text.strip())
     if not match:
         raise ValueError(text)
-    return dt.date(*(int(part) for part in match.groups()))  # the time and zone are ignored
+    # The date the bank states is kept as written; the time and zone are ignored (see
+    # architecture/imports.md for why a UTC timestamp near midnight is a known risk).
+    return dt.date(*(int(part) for part in match.groups()))
 
 
 def _unescape(text: str) -> str:
@@ -125,7 +131,8 @@ def _transaction(leaves: dict[str, str]) -> OfxTransaction:
         posted = parse_date(leaves.get("DTPOSTED", ""))
     except ValueError:
         raise ValueError("the date isn't one we can read") from None
-    return OfxTransaction(fitid, posted, cents, _description(leaves))
+    kind = leaves.get("TRNTYPE", "").upper()[:20]
+    return OfxTransaction(fitid, posted, cents, _description(leaves), trntype=kind)
 
 
 def parse_ofx(data: bytes) -> OfxFile:
@@ -134,7 +141,6 @@ def parse_ofx(data: bytes) -> OfxFile:
     if start < 0:
         raise OfxError("This doesn't look like a bank download (an OFX or QFX file).")
     statements: list[OfxStatement] = []
-    problems: list[str] = []
     seen: set[tuple[int, str]] = set()
     current: str | None = None
     leaves: dict[str, str] = {}
@@ -156,7 +162,7 @@ def parse_ofx(data: bytes) -> OfxFile:
             current, leaves = tag, {}
         elif tag in _COLLECT and closing and current == tag and statements:
             count += tag == "STMTTRN"
-            _finish(statements[-1], tag, leaves, problems, seen, (len(statements), count))
+            _finish(statements[-1], tag, leaves, seen, len(statements))
             if count > MAX_TRANSACTIONS:
                 raise OfxError(
                     "This file has more than 10,000 transactions. Download a shorter date range."
@@ -166,11 +172,11 @@ def parse_ofx(data: bytes) -> OfxFile:
             leaves[tag] = _unescape(value)
     if not any(s.last4 for s in statements):
         raise OfxError("This file has no bank or card statement in it.")
-    return OfxFile(statements, problems)
+    return OfxFile(statements, [p for s in statements for p in s.problems])
 
 
-def _finish(statement, tag, leaves, problems, seen, where: tuple[int, int]) -> None:
-    number, index = where  # which statement, and which transaction in the file
+def _finish(statement, tag, leaves, seen, number: int) -> None:
+    problems = statement.problems
     if tag in ("BANKACCTFROM", "CCACCTFROM"):
         statement.last4 = re.sub(r"[^0-9A-Za-z]", "", leaves.get("ACCTID", ""))[-4:]
         kind = leaves.get("ACCTTYPE", "").upper()
@@ -182,6 +188,8 @@ def _finish(statement, tag, leaves, problems, seen, where: tuple[int, int]) -> N
         except ValueError:
             _note(problems, "The statement balance couldn't be read, so it was left out.")
     else:
+        statement.listed += 1
+        index = statement.listed
         try:
             item = _transaction(leaves)
             if (number, item.fitid) in seen:
@@ -190,7 +198,7 @@ def _finish(statement, tag, leaves, problems, seen, where: tuple[int, int]) -> N
             _note(problems, f"Transaction {index} was left out: {error}.")
             return
         seen.add((number, item.fitid))
-        statement.transactions.append(item)
+        statement.transactions.append(replace(item, position=index))
 
 
 def _note(problems: list[str], text: str) -> None:

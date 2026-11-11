@@ -1,7 +1,7 @@
 # Import history and undo (roadmap 6b)
 
 Code: `models/imports.py`, `services/imports/history.py`, `schemas/imports/history.py`, `routers/imports/history.py`; recorded by
-`csv_import.commit` (kind `bank`), `stock_import.commit` (`stocks`), `positions.commit` (`positions`) and the
+`csv_import.commit` and `ofx_import.commit` (kind `bank`), `stock_import.commit` (`stocks`), `positions.commit` (`positions`) and the
 brokerage activity import (`activity`). Dashboard: **Money**, **Import history** (`screens/money/import-history.js`). User
 guide: [docs/guide/import-history.md](../../guide/import-history.md).
 
@@ -13,6 +13,8 @@ guide: [docs/guide/import-history.md](../../guide/import-history.md).
 - The imports' commit routes take an optional `file_name` (up to 200 characters, as the browser gives it).
 
 ## Rules
+
+- **OFX dates and time zones**: see [csv-import.md](csv-import.md#bank-ofxqfx-import-roadmap-26-2-adr-0016).
 
 - **Table** (migration 0022): `imports` (kind, account_id `SET NULL`, file_name, rows_added). `transactions`,
   `stock_lots`, `stock_sale_orders` and `positions` get `import_id` (indexed, no foreign keys: no table rebuilds).

@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.deps import PathId, SessionDep
 from app.errors import ApiError
+from app.routers.imports.upload import read_upload
 from app.schemas.imports.csv_import import (
     CommitChoices,
     ImportPreview,
@@ -39,18 +40,13 @@ def _too_big() -> ApiError:
 
 async def csv_upload(request: Request) -> bytes:
     """The request body, refused if it isn't labelled as a CSV or is over the size limit."""
-    content_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
-    if content_type not in CSV_TYPES:
-        raise ApiError(415, "not_a_csv", "Please choose a CSV file (its name usually ends .csv).")
-    declared = request.headers.get("content-length", "")
-    if declared.isdigit() and int(declared) > service.MAX_UPLOAD_BYTES:
-        raise _too_big()
-    body = bytearray()
-    async for chunk in request.stream():
-        body += chunk
-        if len(body) > service.MAX_UPLOAD_BYTES:
-            raise _too_big()
-    return bytes(body)
+    return await read_upload(
+        request,
+        CSV_TYPES,
+        service.MAX_UPLOAD_BYTES,
+        ApiError(415, "not_a_csv", "Please choose a CSV file (its name usually ends .csv)."),
+        _too_big(),
+    )
 
 
 CsvBody = Annotated[bytes, Depends(csv_upload)]
