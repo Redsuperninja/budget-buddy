@@ -96,26 +96,29 @@ done.
 - [x] 10b. Count transfers into your own savings accounts as saved (summary + budget engine) — *finance-tax-expert*
 - [x] 10c. Match transfers between accounts automatically and say what kind they are — *backend-engineer* + *finance-tax-expert*
 - [x] 10e. Credit card payments in a "Payments" category on both sides, linked or not — *backend-engineer* + *finance-tax-expert*
-- [ ] 10f. Transaction splits: one transaction in several categories, parts adding up to it (#16), and loan
+- [x] 10f. Transaction splits: one transaction in several categories, parts adding up to it (#16), and loan
   payments as principal plus interest (#30). Plan: [ADR-0017](adr/0017-transaction-splits.md), in PR-sized steps:
-  - [ ] 10f-1. Storage and rules: `transaction_splits` table and migration, encrypted note, `services/ledger/splits.py`
+  - [x] 10f-1. Storage and rules: `transaction_splits` table and migration, encrypted note, `services/ledger/splits.py`
     (sum, sign, kinds, 2 to 20 parts), `PUT /api/local/transactions/{id}/splits`, 409s for category or amount
     changes and for deleting a category a part uses — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
     - Built on branch `feat/transaction-splits-storage`, review pending (security-reviewer, finance-tax-expert).
-  - [ ] 10f-2. Budget math: `services/budget/category_lines.py` used by the monthly summary, spending pace and the
+  - [x] 10f-2. Budget math: `services/budget/category_lines.py` used by the monthly summary, spending pace and the
     Transactions category filter; equivalence tests — *backend-engineer* + *finance-tax-expert*
     - Built on branch `feat/transaction-splits-budget-math`, review pending (finance-tax-expert).
-  - [ ] 10f-3. Leave split transactions alone: auto-sort rules, learning, "no category yet", transfer, card-payment
+  - [x] 10f-3. Leave split transactions alone: auto-sort rules, learning, "no category yet", transfer, card-payment
     and dividend matching, pay deposits; charity, stock trades and dividends refused on them — *backend-engineer* +
     *finance-tax-expert*
     - Built on branch `feat/transaction-splits-leave-alone`, review pending (finance-tax-expert). The phone still shows
       "No category" for a split until contract v2.
-  - [ ] 10f-4. Loan payments (#30): link a split's Transfer part to the loan's deposit, unlink, transfer type, locks —
+  - [x] 10f-4. Loan payments (#30): link a split's Transfer part to the loan's deposit, unlink, transfer type, locks —
     *backend-engineer* + *finance-tax-expert*
     - Built on branch `feat/transaction-splits-loans`, review pending (finance-tax-expert). Same manual link route;
       no automatic matching for splits.
-  - [ ] 10f-5. Dashboard: Split button and editor on the Transactions page, "Split" shown in lists; guide page,
+  - [x] 10f-5. Dashboard: Split button and editor on the Transactions page, "Split" shown in lists; guide page,
     `ledger.md`, `budget-summary.md`, `data-model.md` — *backend-engineer* + *docs-writer*
+    - Built on branch `feat/transaction-splits-dashboard` (Split button, editor, "Split (n parts)" in the category
+      column, tests in `splits.test.js`); the guide page is still to write (docs-writer). The loan-deposit link has no
+      dashboard button yet (the dashboard has no manual transfer link).
 - [x] 11. Charitable donations tracking — *finance-tax-expert*
 - [x] 11b. Sort a payment into charity: a donation linked to its transaction — *finance-tax-expert* + *backend-engineer*
 - [x] 11c. Gift categories: charity gifts filed under "Charitable giving", personal gifts under "Gifts" — *finance-tax-expert*

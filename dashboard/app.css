@@ -298,3 +298,9 @@ p.lead { margin: 0 0 0.5rem; font-size: 1.02rem; }
   details.fold::details-content, details.about::details-content { content-visibility: visible; display: block; }
   details.fold > summary::before { display: none; }
 }
+
+/* Transaction splits (Transactions page) */
+.split-tag { font-weight: 600; }
+.split-rows { display: grid; gap: 0.4rem; margin: 0.5rem 0; }
+.split-ok { color: var(--good); }
+.split-left { color: var(--bad); }

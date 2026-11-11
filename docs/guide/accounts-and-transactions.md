@@ -88,6 +88,8 @@ name to open its transactions for that month.
 2. Click the "Category" dropdown and pick one
 3. It saves automatically — you'll see "Saved"
 
+To put one payment in several categories (like a store trip), see [Split a transaction](split-a-transaction.md).
+
 ### Balance adjustments are hidden
 
 Opening balances and "match the bank" fixes are balance adjustments. They aren't spending or income, so the

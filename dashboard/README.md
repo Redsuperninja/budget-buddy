@@ -21,7 +21,7 @@ Needs Node 22 or newer. The tests read the files with plain `fs` (no browser, no
 `tests/static-rules.test.js` enforces the safety rules (no `innerHTML`, no `replaceChildren(`, no inline script or
 style, no internet addresses, no route strings or `fetch` outside `js/api/`, every module's imports resolve), and
 `money.test.js`, `dates.test.js`, `percent.test.js`, `theme.test.js`, `view.test.js`, `folds.test.js`, `category-groups.test.js`,
-`labels.test.js`, `charts.test.js`, `months.test.js`, `shares.test.js`, `pace-words.test.js` and `sweep-words.test.js`
+`labels.test.js`, `splits.test.js`, `charts.test.js`, `months.test.js`, `shares.test.js`, `pace-words.test.js` and `sweep-words.test.js`
 cover the logic.
 
 ## What the server expects
@@ -61,7 +61,7 @@ All under `js/` (each file starts with a one-line purpose):
 | `view.js` | Simple view (default) or All tools (`data-view="all"`). `app.css` hides `.advanced` pieces in the simple view |
 | `settings-menu.js` | The header's **Settings** menu with the View and Colors pickers |
 | `remove-button.js` | A **Delete** (or **Remove**, **Undo**) button that asks first, then runs the removal; used on Money and Taxes screens |
-| `screens/<section>/*.js` | One folder per navigation section (`home`, `money`, `budget`, `tax`, `devices`, as in `main.js`), one file per screen, each exporting `render(root, options)`, with that screen's parts beside it; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens; `category-picker.js` is the category dropdown shared by Transactions and Auto-sort; `account-balance.js` is the Accounts screen's "Match your bank's balance"; `live-prices.js` is the Investments screen's live prices (ADR-0010); `bank-trades-card.js` is its list of stock trades from a bank file, with ticker, shares and price per share; `sweep-check-card.js` is its "Deposit sweeps to check" (free sweep lines with possible matches and Link, counts per account; words in `sweep-words.js`) |
+| `screens/<section>/*.js` | One folder per navigation section (`home`, `money`, `budget`, `tax`, `devices`, as in `main.js`), one file per screen, each exporting `render(root, options)`, with that screen's parts beside it; `import-mapping.js`, `phone-list.js` and `give-to-charity.js` are parts of the Import, Connect phone and Transactions screens; `category-picker.js` is the category dropdown shared by Transactions and Auto-sort; `split-editor.js` is Transactions' Split button and editor (rules in `js/splits.js`, pure and tested); `account-balance.js` is the Accounts screen's "Match your bank's balance"; `live-prices.js` is the Investments screen's live prices (ADR-0010); `bank-trades-card.js` is its list of stock trades from a bank file, with ticker, shares and price per share; `sweep-check-card.js` is its "Deposit sweeps to check" (free sweep lines with possible matches and Link, counts per account; words in `sweep-words.js`) |
 
 To add a screen: create `screens/<section>/<name>.js` with a `render` function and add one line to its section in
 `main.js`. A part used by screens in more than one section goes in `js/` (like `remove-button.js`).
