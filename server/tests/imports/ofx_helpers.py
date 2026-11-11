@@ -50,3 +50,47 @@ def card_xml(amount="-30.00"):
 
 def sgml(body: str) -> bytes:
     return (SGML_HEADER + body).encode("cp1252")
+
+
+def card_many(lines, acct="4111000011112222"):
+    """A card file. ``lines``: (fitid, trntype, amount, name) tuples."""
+    items = "".join(
+        f"<STMTTRN><TRNTYPE>{kind}</TRNTYPE><DTPOSTED>20260105</DTPOSTED>"
+        f"<TRNAMT>{amount}</TRNAMT><FITID>{fitid}</FITID><NAME>{name}</NAME></STMTTRN>"
+        for fitid, kind, amount, name in lines
+    )
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?><OFX><CREDITCARDMSGSRSV1><CCSTMTTRNRS><CCSTMTRS>'
+        f"<CURDEF>USD</CURDEF><CCACCTFROM><ACCTID>{acct}</ACCTID></CCACCTFROM>"
+        f"<BANKTRANLIST>{items}</BANKTRANLIST></CCSTMTRS></CCSTMTTRNRS></CREDITCARDMSGSRSV1></OFX>"
+    )
+
+
+def join_statements(*files: str) -> bytes:
+    """Several ``checking`` files' accounts in one file (the first file's wrapper is kept)."""
+    first, *rest = files
+    inner = "".join(f[f.index("<BANKMSGSRSV1>") + 14 : f.index("</BANKMSGSRSV1>")] for f in rest)
+    return sgml(first.replace("</BANKMSGSRSV1>", inner + "</BANKMSGSRSV1>"))
+
+
+def url(account_id, action=""):
+    base = f"/api/local/accounts/{account_id}/ofx-import"
+    return base if action == "commit" else f"{base}/{action}"
+
+
+def send(client, account_id, body, action="preview", content_type="application/x-ofx", **params):
+    if isinstance(body, str):
+        body = body.encode()
+    return client.post(
+        url(account_id, action), content=body, params=params, headers={"Content-Type": content_type}
+    )
+
+
+def ok(response) -> dict:
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def txns(client, account_id) -> list[dict]:
+    items = client.get("/api/local/transactions", params={"account_id": account_id}).json()
+    return sorted(items["items"], key=lambda t: t["id"])

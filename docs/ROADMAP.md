@@ -234,10 +234,10 @@ done.
 - [ ] 26. Bank-file import (OFX/QFX): balances, bank transaction IDs, brokerage holdings — *backend-engineer* + *security-reviewer* + *finance-tax-expert*
   Plan: [ADR-0016](adr/0016-ofx-import.md), in PR-sized steps:
   - [x] 26-1. The reader: `ofx_parsing.py` for OFX 1.x and 2.x, exact cents, dates, limits, made-up sample files, no routes yet — *backend-engineer* + *security-reviewer*
-  - [ ] 26-2. Bank and card transactions: preview and save routes, `FITID` duplicates, account match by last 4, import history — *backend-engineer* + *security-reviewer*
+  - [ ] 26-2. (built, awaiting review) Bank and card transactions: preview and save routes, `FITID` duplicates, account match by last 4, import history — *backend-engineer* + *security-reviewer*
   - [ ] 26-3. Statement balance offered in Match your bank's balance — *backend-engineer* + *finance-tax-expert*
   - [ ] 26-4. Brokerage files: holdings beside your own lots, buys, sells and income through the activity rules — *backend-engineer* + *finance-tax-expert*
-  - [ ] 26-5. Dashboard: Import files takes `.ofx` and `.qfx`; guide page and docs
+  - [ ] 26-5. Dashboard: Import files takes `.ofx` and `.qfx`; guide page (must mention year-end dates: the bank's stated date is kept) and docs
 - [ ] 27. Auto-import folder for new bank files — *backend-engineer* + *security-reviewer*
 - [ ] 28. Optional live connection with your own free developer key (Teller, then Plaid) — *backend-engineer* + *security-reviewer*
 

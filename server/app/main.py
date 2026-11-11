@@ -28,7 +28,7 @@ from app.remote_access import RemoteAccess
 from app.routers import about, backup, dashboard, health, instance, setup
 from app.routers.budget import budget_plan, categories, category_rules, summary
 from app.routers.devices import pair, pairing, receipts, remote_computers, sync
-from app.routers.imports import activity_import, csv_import, history, stock_import
+from app.routers.imports import activity_import, csv_import, history, ofx_import, stock_import
 from app.routers.investing import (
     bank_trades,
     dividends,
@@ -141,6 +141,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(category_rules.router)
     app.include_router(summary.router)
     app.include_router(csv_import.router)
+    app.include_router(ofx_import.router)
     app.include_router(activity_import.router)
     app.include_router(history.router)
     app.include_router(paychecks.router)
