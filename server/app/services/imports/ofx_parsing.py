@@ -5,7 +5,8 @@ This is a small tag reader, not an XML parser: it only splits text into tags and
 are no entities, DTDs or external files to expand. Only the five plain XML escapes are undone.
 
 Banking and credit card statements are read here (transactions with the bank's own ``FITID``, and
-the statement balance). Brokerage statements arrive in 26-4. Nothing here logs or keeps file
+the statement balance). Brokerage statements (``INVSTMTRS``) are read by ``ofx_investments.py``
+(26-4a); this module only steps over their contents. Nothing here logs or keeps file
 contents: the full account number is never stored, only its last four characters, and error
 messages name only numbers.
 """
@@ -68,6 +69,7 @@ class OfxStatement:
 class OfxFile:
     statements: list[OfxStatement]
     problems: list[str]  # every account's notes together (each account also keeps its own)
+    brokerages: list = field(default_factory=list)  # ofx_investments.OfxBrokerage, if any
 
 
 def decode_ofx(data: bytes) -> str:
@@ -87,16 +89,24 @@ def decode_ofx(data: bytes) -> str:
 
 def parse_amount(text: str) -> int:
     """Dollars as exact text ('-12.5', '1000', '.5') to cents. Anything else raises ValueError."""
+    return parse_scaled(text, 2)
+
+
+def parse_scaled(text: str, decimals: int) -> int:
+    """Exact decimal text to an integer of 10**-decimals (2 = cents, 6 = micro-units).
+
+    A non-zero digit past ``decimals`` would be rounded, so it raises ValueError instead.
+    """
     match = _AMOUNT.fullmatch(text.strip())
     if not match or not (match.group(2) or match.group(3)):
         raise ValueError(text)
     sign, whole, frac = match.group(1), match.group(2) or "0", match.group(3) or ""
-    if frac[2:].strip("0"):
+    if frac[decimals:].strip("0"):
         raise ValueError(text)  # a third decimal that isn't zero would be rounded: never guess
-    if len(whole) > MAX_DOLLAR_DIGITS:
+    if len(whole) > MAX_DOLLAR_DIGITS + 2 - decimals:  # keeps the integer under SQLite's limit
         raise ValueError(text)
-    cents = int(whole) * 100 + int((frac + "00")[:2])
-    return -cents if sign == "-" else cents
+    scaled = int(whole) * 10**decimals + int((frac + "0" * decimals)[:decimals])
+    return -scaled if sign == "-" else scaled
 
 
 def parse_date(text: str) -> dt.date:
@@ -145,6 +155,7 @@ def parse_ofx(data: bytes) -> OfxFile:
     current: str | None = None
     leaves: dict[str, str] = {}
     count = 0
+    in_brokerage = False  # brokerage lines are read by ofx_investments, not here
     for number_of_tags, found in enumerate(_TAG.finditer(text, start), 1):
         if number_of_tags > MAX_TAGS:
             raise OfxError("This file is too complicated to be a bank download.")
@@ -152,7 +163,11 @@ def parse_ofx(data: bytes) -> OfxFile:
         tag = tag.upper()
         if tag == "CURDEF" and value.strip().upper() not in ("USD", ""):
             raise OfxError("Budget Buddy reads US dollar accounts only.")
-        if tag in _STATEMENTS and not closing:
+        if tag == "INVSTMTRS":
+            in_brokerage = not closing
+        elif in_brokerage:
+            continue
+        elif tag in _STATEMENTS and not closing:
             if len(statements) >= MAX_STATEMENTS:
                 raise OfxError("This file has more than 50 accounts in it.")
             statements.append(
@@ -170,9 +185,17 @@ def parse_ofx(data: bytes) -> OfxFile:
             current = None
         elif current and not closing:
             leaves[tag] = _unescape(value)
-    if not any(s.last4 for s in statements):
-        raise OfxError("This file has no bank or card statement in it.")
-    return OfxFile(statements, [p for s in statements for p in s.problems])
+    from app.services.imports.ofx_investments import read_brokerages  # it imports this module
+
+    brokerages = read_brokerages(text, start)
+    if not any(s.last4 for s in statements) and not brokerages:
+        raise OfxError("This file has no bank, card or brokerage statement in it.")
+    if len(statements) + len(brokerages) > MAX_STATEMENTS:
+        raise OfxError("This file has more than 50 accounts in it.")
+    notes = [p for s in statements for p in s.problems] + [
+        p for b in brokerages for p in b.problems
+    ]
+    return OfxFile(statements, notes, brokerages)
 
 
 def _finish(statement, tag, leaves, seen, number: int) -> None:
