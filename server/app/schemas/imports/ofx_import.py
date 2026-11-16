@@ -1,3 +1,5 @@
+import datetime as dt
+
 from pydantic import Field
 
 from app.schemas.common import Schema
@@ -27,8 +29,19 @@ class OfxStatementInfo(Schema):
     transactions: int
 
 
+class OfxStatementBalance(Schema):
+    """What the bank says the balance was. Same signs as ``POST /accounts/{id}/balance``: a card's
+    owed amount is negative (OFX already writes it that way; flipped with ``flip_sign``)."""
+
+    balance_cents: int
+    date: dt.date
+
+
 class OfxPreview(Schema):
     statements: list[OfxStatementInfo]
+    # Offered for Match your bank's balance; null when the file has none, or a card file is still
+    # waiting for the flip_sign choice. Nothing is changed by importing.
+    statement_balance: OfxStatementBalance | None = None
     chosen: int | None  # the statement number used, or None when you still have to pick one
     needs_confirmation: bool  # this account has no saved last 4 yet
     message: str | None
