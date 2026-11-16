@@ -24,5 +24,13 @@ Code: `services/imports/ofx_parsing.py`. Tests: `tests/imports/test_ofx_parsing.
   known OFX types.
 - Text is decoded as UTF-8 (BOM allowed) or Windows-1252 (when the header says `CHARSET:1252`, or as a fallback).
 
+## Statement balance (26-3)
+The preview has `statement_balance: {balance_cents, date}` (the chosen statement's `LEDGERBAL`), or `null` when the file
+has none. It is an offer only: importing never sets a balance; the user's click on **Match your bank's balance** posts it to the
+existing `POST /accounts/{id}/balance` (`set_balance`), which stays the only writer. Code: `services/imports/ofx_balance.py`.
+Signs: `set_balance` takes a card's owed amount as negative, and OFX writes it that way, so the number is offered as is.
+With `flip_sign=true` the file is backwards throughout, so the balance flips too and matches the imported rows. While a
+backwards-looking card file waits for the flip choice, the offer is `null`.
+
 ## Next
-26-2 routes and `FITID` duplicates; 26-3 balance; 26-4 brokerage `INVSTMTRS`; 26-5 dashboard and guide.
+26-2 routes and `FITID` duplicates (done); 26-4 brokerage `INVSTMTRS`; 26-5 dashboard and guide.

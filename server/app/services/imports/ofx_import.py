@@ -31,6 +31,7 @@ from app.services.budget.category_rules import load_matcher, rule_fields
 from app.services.imports import ofx_parsing as parsing
 from app.services.imports.csv_import import import_conflict
 from app.services.imports.history import record
+from app.services.imports.ofx_balance import offered_balance
 from app.services.imports.ofx_rows import OVERLAP_NOTE, RowSet, build_rows
 from app.services.imports.ofx_signs import FLIPPED, file_looks_flipped
 from app.services.investing.bank_trades import find_trades
@@ -144,7 +145,11 @@ def preview(session: Session, account_id: int, data: bytes, choices: OfxChoices)
             f"{n} new transaction{'s look' if n != 1 else ' looks'} like "
             "something already in this account (same date and amount). They will still be added."
         )
+    balance = (
+        offered_balance(p.statements[p.chosen - 1], p.flip, p.looks_flipped) if p.chosen else None
+    )
     return OfxPreview(
+        statement_balance=balance,
         statements=[
             OfxStatementInfo(number=i, last4=s.last4, kind=s.kind, transactions=len(s.transactions))
             for i, s in enumerate(p.statements, 1)
