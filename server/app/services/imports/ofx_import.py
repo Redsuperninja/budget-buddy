@@ -96,6 +96,13 @@ def _prepare(session: Session, account_id: int, data: bytes, choices: OfxChoices
     except parsing.OfxError as error:
         raise ApiError(400, "unreadable_file", str(error)) from None
     statements = [s for s in file.statements if s.last4]
+    if not statements:  # brokerage-only files are read (26-4a) but can't be imported yet
+        raise ApiError(
+            422,
+            "brokerage_not_supported",
+            "This file only has a brokerage account in it. Importing brokerage files isn't "
+            "available yet; use your broker's activity CSV instead.",
+        )
     chosen = _choose(account, statements, choices.statement)
     if chosen is None:
         return _Prepared(statements, None, [], [], False)
